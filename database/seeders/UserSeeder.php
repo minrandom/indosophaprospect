@@ -17,19 +17,19 @@ class UserSeeder extends Seeder
     {
         DB::table('users')->insert([
             [
-                'name'      => 'Rahmat Hidayatullah',
+                'name'      => 'Jojo',
                 'email'     => 'admin@gmail.com',
                 'password'  => Hash::make('password'),
                 'role'      => 'admin',
             ],
             [
-                'name'      => 'Ayane',
-                'email'     => 'ayane@gmail.com',
+                'name'      => 'Yolanda',
+                'email'     => 'test@gmail.com',
                 'password'  => Hash::make('password'),
                 'role'      => 'admin',
             ],
             [
-                'name'      => 'Chika Fujiwara',
+                'name'      => 'usertest',
                 'email'     => 'chika@gmail.com',
                 'password'  => Hash::make('password'),
                 'role'      => 'user',
@@ -39,6 +39,30 @@ class UserSeeder extends Seeder
                 'email'     => 'kotone@gmail.com',
                 'password'  => Hash::make('password'),
                 'role'      => 'user',
+            ],
+            [
+                'name'      => 'fstest',
+                'email'     => 'fstest@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'fs',
+            ],
+            [
+                'name'      => 'nsmtest',
+                'email'     => 'nsmtest@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'nsm',
+            ],
+            [
+                'name'      => 'butest',
+                'email'     => 'butest@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'fs',
+            ],
+            [
+                'name'      => 'dbatest',
+                'email'     => 'dbatest@gmail.com',
+                'password'  => Hash::make('password'),
+                'role'      => 'dba',
             ],
         ]);
     }
