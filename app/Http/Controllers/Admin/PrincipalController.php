@@ -1,9 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Models\Principal;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use DataTables;
+
 
 class PrincipalController extends Controller
 {
@@ -12,9 +16,35 @@ class PrincipalController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if ($request->ajax()) {
+            $data = Principal::with('brands');
+            return DataTables::of($data)
+                    ->addIndexColumn()
+                    ->addColumn('action', function($row){
+                           $btn = '<div class="row"><a href="javascript:void(0)" id="'.$row->id.'" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a>';
+                           $btn .= '<a href="javascript:void(0)" id="'.$row->id.'" class="btn btn-danger btn-sm ml-2 btn-delete">Delete</a></div>';
+
+                            return $btn;
+                    })
+                    ->addColumn('brand', function($row){
+                      return $row->brands[0]->name;
+                    })
+
+                    ->addColumn('brandid', function($row){
+                        return $row->brands[0]->id;
+                      })
+                      ->addColumn('country', function($row){
+                        return $row->brands[0]->country;
+                      })
+
+                    ->only(['id','name','address','contact','pic','action','brand','brandid','country'])
+                    ->rawColumns(['action'])
+                    ->make(true);
+        }
+        
+        return view('admin.principle.index');
     }
 
     /**

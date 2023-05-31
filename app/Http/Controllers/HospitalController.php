@@ -14,7 +14,7 @@ class HospitalController extends Controller
      */
     public function index()
     {
-        //
+        return view('admin.hospital');
     }
 
     /**

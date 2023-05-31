@@ -1,9 +1,9 @@
 <?php
-
-namespace App\Http\Controllers;
-
-use App\Models\Province;
+namespace App\Http\Controllers\Admin;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use DataTables;
+use App\Models\Province;
 
 class ProvinceController extends Controller
 {
@@ -12,9 +12,25 @@ class ProvinceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        
+        if ($request->ajax()) {
+            $data = Province::select('*');
+            return DataTables::of($data)
+                    ->addIndexColumn()
+                    ->addColumn('action', function($row){
+                           $btn = '<div class="row"><a href="javascript:void(0)" id="'.$row->id.'" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a>';
+                           $btn .= '<a href="javascript:void(0)" id="'.$row->id.'" class="btn btn-danger btn-sm ml-2 btn-delete">Delete</a></div>';
+
+                            return $btn;
+                    })
+                    ->rawColumns(['action'])
+                    ->make(true);
+        }
+        
+        return view('admin.province.index');
+
     }
 
     /**
@@ -36,6 +52,8 @@ class ProvinceController extends Controller
     public function store(Request $request)
     {
         //
+
+        Province::create($request->all());
     }
 
     /**
@@ -57,7 +75,7 @@ class ProvinceController extends Controller
      */
     public function edit(Province $province)
     {
-        //
+        return response()->json($province);
     }
 
     /**
@@ -69,7 +87,8 @@ class ProvinceController extends Controller
      */
     public function update(Request $request, Province $province)
     {
-        //
+        $province->update($request->all());
+
     }
 
     /**
@@ -80,6 +99,6 @@ class ProvinceController extends Controller
      */
     public function destroy(Province $province)
     {
-        //
+        $province->delete();
     }
 }

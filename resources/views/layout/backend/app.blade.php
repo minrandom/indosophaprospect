@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CHIKADMIN | {{ $title ?? 'Dashboard' }}</title>
+    <title>Indosopha | {{ $title ?? 'Dashboard' }}</title>
 
     <!-- Custom fonts for this template-->
     <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">

@@ -1,5 +1,5 @@
 @extends('layout.auth.app',[
-    'title' => 'Login'
+    'title' => 'Indosopha Web App'
 ])
 @section('content')
 <div class="row justify-content-center">
@@ -13,7 +13,9 @@
                     <div class="col-lg">
                         <div class="p-5">
                             <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                            <img src="{{ asset('images/backend/isslogo.png') }}" class="img-fluid" height="80" width="150" alt="">
+                            <h1 class="h5 text-gray-900 mb-4">Indosopha Web Application</h1>
+                                <h1 class="h4 text-gray-600 mb-4">Login Form</h1>
                                 @include('layout.component.alert-dismissible')
                             </div>
                             <form class="user" method="POST" action="{{ route('login.post') }}">

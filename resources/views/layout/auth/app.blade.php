@@ -8,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-
+    
+    <link rel="icon" href="{{ asset('images/backend/issico.ico') }}">
     <title>{{ $title ?? 'Auth' }}</title>
 
     <!-- Custom fonts for this template-->
@@ -22,7 +23,9 @@
 
 </head>
 
-<body class="bg-gradient-primary">
+<body style="background-color: rgb(118,116,149);
+  background-image: linear-gradient(185deg, rgba(118,116,149,1) 0%, rgba(40,40,180,1) 25%, rgba(91,108,164,1) 52%, rgba(28,184,215,1) 100%);
+  background-size: cover;">
 
     <div class="container">
         @yield('content')

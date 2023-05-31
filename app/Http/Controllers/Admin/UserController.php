@@ -53,6 +53,12 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function editrole(User $user)
+    {
+        return response()->json($user);
+    }
+
+
     public function update(Request $request, User $user)
     {
         $user->update($request->all());

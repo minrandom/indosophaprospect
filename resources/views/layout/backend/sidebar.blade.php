@@ -3,9 +3,9 @@
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="">
         <div class="sidebar-brand-icon">
-            <i class="fab fa-laravel"></i>
+            <i class="fab"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">CHIKADMIN</div>
+        <div class="sidebar-brand-text mx-3">Indosopha</div>
     </a>
 
     <!-- Divider -->
@@ -56,7 +56,7 @@
         </div>
     </li>
     @endcan
-
+@can('admin')
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
@@ -72,7 +72,7 @@
             </div>
         </div>
     </li>
-
+    @endcan
     <!-- Nav Item - Utilities Collapse Menu -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
