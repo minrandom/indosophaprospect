@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\ConfigController;
+use App\Http\Controllers\ProspectController;
 
 //Namespace User
 use App\Http\Controllers\User\UserController;
@@ -37,6 +38,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/',[AdminController::class,'index'])->name('admin')->middleware(['can:admin']);
 	Route::get('/hospital',[HospitalController::class,'index'])->name('admin.hospital')->middleware(['can:admin']);
 	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['can:admin']);
+	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect')->middleware(['can:admin']);
 	//Route::get('/province',[ProvinceController::class,'index'])->name('province')->middleware(['can:admin']);
 	//Route Rescource
 	Route::resource('/user','UserController')->middleware(['can:admin']);
@@ -44,7 +46,8 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 		Route::resource('/principle','PrincipalController')->middleware(['can:admin']);
 	Route::get('data1','DataCompileController@getData')->name('data.compile');
 	Route::get('data2','DataCompileController@HospitalData')->name('data.hospital');
-	Route::get('data2','DataCompileController@ConfigData')->name('data.config');
+	Route::get('data3','DataCompileController@ConfigData')->name('data.config');
+	Route::get('data3','DataCompileController@ProspectData')->name('data.prospect');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');
 	Route::get('/dataa',[PrincipalBrandController::class,'index'])->name('dataa')->middleware(['can:admin']);
 	//Route View

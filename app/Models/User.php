@@ -16,9 +16,26 @@ class User extends Authenticatable
      *
      * @var array
      */
+
+     public function employee(){
+        return $this->belongsTo(Employee::class);
+    }
+
+    public function creator(){
+        return $this->hasMany(Prospect::class,"user_creator");
+    }
+
+    public function personInCharge(){
+        return $this->hasMany(Prospect::class,"user_creator");
+    }
+
+
+
     protected $fillable = [
         'name', 'email', 'password','role'
     ];
+
+
 
     /**
      * The attributes that should be hidden for arrays.

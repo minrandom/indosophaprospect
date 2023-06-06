@@ -15,8 +15,14 @@ class Employee extends Model
 
     ];
 
+    // Area : 0 -> HO ; 100-> 
+
     public function user(){
         return $this->hasOne(User::class);
+    }
+
+    public function area(){
+        return $this->belongsTo(area::class);
     }
 
 

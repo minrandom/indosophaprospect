@@ -9,8 +9,10 @@ class Province extends Model
 {
     use HasFactory;
     protected $fillable=[
-        "name","prov_order_no","prov_region_code"
+        "name","prov_order_no","prov_region_code","area_code"
     ];
+
+
 
 
     public function hospitals(){
@@ -19,5 +21,9 @@ class Province extends Model
 
     public function prospects(){
         return $this->hasMany(Prospect::class);
+    }
+
+    public function area(){
+        return $this->belongsTo(area::class);
     }
 }

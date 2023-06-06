@@ -1,6 +1,6 @@
 @extends('layout.backend.app',[
-    'title' => 'Province',
-    'pageTitle' =>'Province',
+    'title' => 'Config',
+    'pageTitle' =>'Config',
 ])
 
 @push('css')
@@ -17,17 +17,38 @@
           Tambah Data
         </button>
     </div>
-    <div class="col-lg-6 mb-4">
+    
         <div class="card-body">
             <div class="table-responsive">    
                 <table class="table table-bordered data-table">
                     <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Name</th>
-                            <th>Prov Order No</th>
-                           
-                            <th>Action</th>
+                            <th>Tanggal Submit</th>
+                            <th>User Creator</th>
+                            <th>Prospect No</th>
+                            <th>Province + OrderNo</th>
+                            <th>City </th>
+                            <th>Sumber Info</th>
+                            <th>PIC + AM</th>
+                            <th>Rumah Sakit</th>
+                            <th>Departement </th>
+                            <th>Bussiness Unit</th>
+                            <th>Kategori Produk</th>
+                            <th>Nama Produk</th>
+                            <th>Kode Config</th>
+                            <th>Harga + PPn(IDR)</th>
+                            <th>Qty</th>
+                            <th>Value (IDR)</th>
+                            <th>Tahap Promosi</th>
+                            <th>Review</th>
+                            <th>Eta PO Date</th>
+                            <th>Temperature</th>
+                            <th>Next Action</th>
+                            <th>Table Action</th>
+                            
+                            
+                         
+                         
                         </tr>
                     </thead>
                     <tbody>
@@ -35,7 +56,7 @@
                 </table>
             </div>
         </div>
-    </div>
+    
 </div>
 
 <!-- Modal Create -->
@@ -135,16 +156,35 @@
 
 <script type="text/javascript">
 
+
+                         
+
   $(function () {
     
     var table = $('.data-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: "{{ route('province.index') }}",
+        ajax: "{{ route('data.prospect') }}",
         columns: [
-          {data: 'DT_RowIndex' , name: 'id'},
-            {data: 'name', name: 'name'},
-            {data: 'prov_order_no', name: 'prov_order_no'},
+            {data: 'id' , name: 'id'},
+            {data: 'creator' , name: 'creator'},
+            {data: 'prospect_no' , name: 'prospect_no'},
+            {data: 'province' , name: 'province'},
+            
+            {data: 'city' , name: 'city'},
+            {data: 'prospect_source' , name: 'prospect_source'},
+            {data: 'personInCharge' , name: 'personInCharge'},
+            {data: 'hospital' , name: 'hospital'},
+            {data: 'department' , name: 'department'},
+            {data: 'unit' , name: 'unit'},
+            {data: 'category' , name: 'category'},
+            {data: 'namaprod' , name: 'namaprod'},
+            {data: 'configno' , name: 'configno'},
+            {data: 'price' , name: 'price'},
+            {data: 'qty' , name: 'qty'},
+            {data: 'value' , name: 'value'},
+   
+           
             {data: 'action', name: 'action', orderable: false, searchable: true},
         ]
     });

@@ -14,11 +14,11 @@ class Prospect extends Model
     ];
 
     public function creator(){
-        return $this->belongsTo(Prospect::class,'user_creator');
+        return $this->belongsTo(User::class,'user_creator');
     }
 
     public function personInCharge(){
-        return $this->belongsTo(Prospect::class,'pic_user_id');
+        return $this->belongsTo(User::class,'pic_user_id');
     }
 
     public function hospital(){
@@ -26,6 +26,9 @@ class Prospect extends Model
     }
     public function department(){
         return $this->belongsTo(Department::class);
+    }
+    public function province(){
+        return $this->belongsTo(Province::class);
     }
     public function unit(){
         return $this->belongsTo(Unit::class);
