@@ -31,30 +31,38 @@ use App\Http\Controllers\Admin\DataCompileController;
 */
 
 Route::view('/','auth.login')->name('login');
-
-
+Route::post('/check-in', 'JojoController@store')->name('check-in.store');
+Route::get('/check-in', 'JojoController@index')->name('check-in');
 Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin'],function(){
 	
 	Route::get('/',[AdminController::class,'index'])->name('admin')->middleware(['can:admin']);
 	Route::get('/hospital',[HospitalController::class,'index'])->name('admin.hospital')->middleware(['can:admin']);
 	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['can:admin']);
 	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect')->middleware(['can:admin']);
+	Route::get('/prospectvalidation',[ProspectController::class,'validationprospect'])->name('admin.prospectvalidation')->middleware(['can:admin']);
+	Route::get('/prospectvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['can:admin']);
+	Route::PATCH('/prospectvalidation/{prospect}',[ProspectController::class,'validationupdate'])->name('admin.prospectvalidationupdate')->middleware(['can:admin']);
+	Route::get('/prospect/{prospect}',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['can:admin']);
 	//Route::get('/province',[ProvinceController::class,'index'])->name('province')->middleware(['can:admin']);
 	//Route Rescource
+	//Route::resource('/prospect',ProspectController::class)->middleware(['can:admin']);
 	Route::resource('/user','UserController')->middleware(['can:admin']);
 	Route::resource('/province','ProvinceController')->middleware(['can:admin']);
-		Route::resource('/principle','PrincipalController')->middleware(['can:admin']);
+	Route::resource('/principle','PrincipalController')->middleware(['can:admin']);
 	Route::get('data1','DataCompileController@getData')->name('data.compile');
 	Route::get('data2','DataCompileController@HospitalData')->name('data.hospital');
 	Route::get('data3','DataCompileController@ConfigData')->name('data.config');
-	Route::get('data3','DataCompileController@ProspectData')->name('data.prospect');
+	Route::post('data3','DataCompileController@ProspectData')->name('data.prospect');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');
 	Route::get('/dataa',[PrincipalBrandController::class,'index'])->name('dataa')->middleware(['can:admin']);
+	
 	//Route View
 	
+	Route::get('/load-tab-content', 'TabController@loadTabContent')->name('load-tab-content');
 	Route::view('/404-page','admin.404-page')->name('404-page');
 	Route::view('/blank-page','admin.blank-page')->name('blank-page');
 	Route::view('/buttons','admin.buttons')->name('buttons');
+	Route::view('/prospectDetail','admin.prospectdetail')->name('prp.detail');
 	Route::view('/cards','admin.cards')->name('cards');
 	Route::view('/utilities-colors','admin.utilities-color')->name('utilities-colors');
 	Route::view('/utilities-borders','admin.utilities-border')->name('utilities-borders');

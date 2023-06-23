@@ -1,6 +1,6 @@
 @extends('layout.backend.app',[
-    'title' => 'Config',
-    'pageTitle' =>'Config',
+    'title' => 'Prospect',
+    'pageTitle' =>'Prospect',
 ])
 
 @push('css')
@@ -164,10 +164,17 @@
     var table = $('.data-table').DataTable({
         processing: true,
         serverSide: true,
-        ajax: "{{ route('data.prospect') }}",
+        ajax: {
+          url:"{{ route('data.prospect') }}",
+      
+          data: function (d) {
+                delete d.status;
+            }
+      },
+        
         columns: [
-            {data: 'id' , name: 'id'},
-            {data: 'creator' , name: 'creator'},
+            {data: 'submitdate' , name: 'submitdate'},
+       
             {data: 'prospect_no' , name: 'prospect_no'},
             {data: 'province' , name: 'province'},
             
@@ -183,8 +190,13 @@
             {data: 'price' , name: 'price'},
             {data: 'qty' , name: 'qty'},
             {data: 'value' , name: 'value'},
+            {data: 'promotion' , name: 'promotion'},
+            {data: 'review' , name: 'review'},
+            {data: 'etadate' , name: 'etadate'},
+            {data: 'temperature' , name: 'temperature'},
+            {data: 'naction' , name: 'naction'},
    
-           
+                                
             {data: 'action', name: 'action', orderable: false, searchable: true},
         ]
     });

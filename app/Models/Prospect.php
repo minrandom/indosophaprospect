@@ -9,7 +9,7 @@ class Prospect extends Model
 {
     use HasFactory;
     protected $fillable=[
-        "user_creator","prospect_no","province_id","prospect_source","pic_user_id","hospital_id","department_id","unit_id","config_id","qty","submitted_price","review_id","eta_po_date","comment","next_action"//can be change to quetioner_id later
+        "user_creator","prospect_no","province_id","prospect_source","pic_user_id","hospital_id","department_id","unit_id","config_id","qty","submitted_price","review_id","eta_po_date","comment","next_action","status"//can be change to quetioner_id later
 
     ];
 
@@ -33,9 +33,13 @@ class Prospect extends Model
     public function unit(){
         return $this->belongsTo(Unit::class);
     }
+    //public function configall(){
+      //  return $this->belongsToMany(Config::class);
+   // }
     public function config(){
-        return $this->belongsTo(Config::class);
+        return $this->belongsTo(Config::class);;
     }
+    
 
     public function mappings(){
         return $this->hasMany(Mapping::class);

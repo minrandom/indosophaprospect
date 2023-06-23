@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\jojo;
 use Illuminate\Http\Request;
+use App\Models\Attendance;
 
 class JojoController extends Controller
 {
@@ -14,7 +15,7 @@ class JojoController extends Controller
      */
     public function index()
     {
-        //
+        return view('check-in');
     }
 
     /**
@@ -36,6 +37,15 @@ class JojoController extends Controller
     public function store(Request $request)
     {
         //
+        //$attendance = new Attendance();
+        //$attendance->place_name = $request->input('place_name');
+        //$attendance->address = $request->input('address');
+        //$attendance->check_in_at = now();
+       // $attendance->save();
+
+        Attendance::create($request->all());
+
+        return response()->json(['success' => true]);
     }
 
     /**
