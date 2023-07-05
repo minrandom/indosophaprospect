@@ -13,7 +13,7 @@
 <div class="card">
     <div class="card-header">
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-modal">
+        <button type="button" class="btn btn-primary btn-create" data-toggle="modal" data-target="#create-modal">
           Tambah Data
         </button>
     </div>

@@ -39,10 +39,13 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/hospital',[HospitalController::class,'index'])->name('admin.hospital')->middleware(['can:admin']);
 	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['can:admin']);
 	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect')->middleware(['can:admin']);
+	Route::get('/prospectcreate',[ProspectController::class,'create'])->name('admin.prospectcreate')->middleware(['can:admin']);
 	Route::get('/prospectvalidation',[ProspectController::class,'validationprospect'])->name('admin.prospectvalidation')->middleware(['can:admin']);
 	Route::get('/prospectvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['can:admin']);
+	Route::get('/hospital/{provinceId}/hospital',[HospitalController::class,'getHospitalsByProvince'])->name('admin.getHospitalsByProvince')->middleware(['can:admin']);
 	Route::PATCH('/prospectvalidation/{prospect}',[ProspectController::class,'validationupdate'])->name('admin.prospectvalidationupdate')->middleware(['can:admin']);
-	Route::get('/prospect/{prospect}',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['can:admin']);
+	Route::PATCH('/prospectupdate/{prospect}',[ProspectController::class,'update'])->name('admin.prospectupdate')->middleware(['can:admin']);
+	Route::get('/prospect/{prospect}/edit',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['can:admin']);
 	//Route::get('/province',[ProvinceController::class,'index'])->name('province')->middleware(['can:admin']);
 	//Route Rescource
 	//Route::resource('/prospect',ProspectController::class)->middleware(['can:admin']);
@@ -53,6 +56,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('data2','DataCompileController@HospitalData')->name('data.hospital');
 	Route::get('data3','DataCompileController@ConfigData')->name('data.config');
 	Route::post('data3','DataCompileController@ProspectData')->name('data.prospect');
+	Route::post('/get-product-details','DataCompileController@getProductDetail')->name('data.proddetail');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');
 	Route::get('/dataa',[PrincipalBrandController::class,'index'])->name('dataa')->middleware(['can:admin']);
 	

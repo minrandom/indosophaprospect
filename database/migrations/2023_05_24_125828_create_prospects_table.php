@@ -27,6 +27,10 @@ class CreateProspectsTable extends Migration
             $table->integer('qty');
             $table->integer('submitted_price');
             $table->date('eta_po_date');
+            $table->integer('status');
+            $table->dateTime('validation_time');
+            $table->integer('validation_by');
+            
             $table->timestamps();
 
           /*  $table->foreign('user_creator')->references('id')->on('user');

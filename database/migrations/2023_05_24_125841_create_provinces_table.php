@@ -18,6 +18,8 @@ class CreateProvincesTable extends Migration
             $table->string('name');
             $table->integer('prov_order_no');//prov order no can get from mr giro
             $table->integer('prov_region_code')->nullable();//region code from kemendagri
+            $table->string('iss_area_code')->nullable();//region code from kemendagri
+            $table->string('wilayah')->nullable();//region code from kemendagri
             $table->timestamps();
         });
     }

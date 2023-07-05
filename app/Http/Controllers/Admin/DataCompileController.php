@@ -55,6 +55,15 @@ public function getData()
  }
 
 
+public function getProductDetail(Request $request)
+{
+    
+    $detailselected=Config::where('name',$request->product);
+    return response()->json($detailselected);
+}
+
+
+
  public function HospitalData()
  {
 
@@ -116,6 +125,23 @@ public function getData()
 
  }
 
+
+ public function optiondata()
+ {
+    $dataoption=[];
+    $dataoption['source'] = array(
+        "name" => [
+            "Request By Customer",
+            "Visit",
+            "Promotion Plan By BU",
+            "Promotion Plan By Sales Team",
+            "Event",]
+        );
+
+        return response()->json($dataoption);
+ }
+
+
  public function ProspectData(Request $request)
  {
      function reviewcolor($isi)
@@ -137,14 +163,22 @@ public function getData()
     }
 
 
-    function getareaman($isi)
+    function getareaman($isi,$isi2)
     {
-        $am=Employee::with('user')->where('area',$isi)->get();
+        $am=Employee::with('user')->where([['area',$isi],['position','AM']])->get();
+        $nsm=Employee::with('user')->where([['area',$isi2],['position','NSM']])->get();
+        if($am->count()>0){
        //$dataam= DataTables::of($am)->toJson();
      $useram=$am->pluck('user.name');
      $array = json_decode($useram);
-       return $array[0];
-    }
+       return $array[0];}
+       else
+       {
+        $usernsm=$nsm->pluck('user.name');
+     $array = json_decode($usernsm);
+       return $array[0];}
+    };
+
 
     $status= $request->input('status');
     if($status==1){
@@ -171,7 +205,7 @@ public function getData()
     ->addColumn('province', function ($prp) {
 
     $newprov=$prp->province->name."(".$prp->province->prov_order_no.")";
-    $AM= getareaman($prp->province->iss_area_code);
+    $AM= getareaman($prp->province->iss_area_code,$prp->province->wilayah);
     
 
     $newdata=$newprov."</br>".$AM;
@@ -258,7 +292,7 @@ public function getData()
         
         
       return $data;
-    })
+     })
 
 
     ->addColumn('promotion', function ($prp) {
@@ -280,7 +314,7 @@ public function getData()
            $data.="<span class='badge bg-info text-light'>Last Offer </br>$last</span>";
         }
         return $data;
-    })
+        })
     ->addColumn('review', function ($prp) {
         $user= $prp->review->user_status;
         $userc=reviewcolor($user);
@@ -296,7 +330,7 @@ public function getData()
         $data.= "<span class='badge $purcashingc text-light'>Purchasing Status</br>$purcashing</span>"; 
         
         return $data;
-    })
+        })
 
     ->addColumn('anggaran', function ($prp) {
         $anggaranstats = $prp->review->anggaran_status;
@@ -310,26 +344,26 @@ public function getData()
 
         
         $data= "<span class='badge bg-info text-light'>Anggaran Status</br>$anggaranstats</span>"; 
-        $data.= "<span class='badge bg-info text-light'>Jenis Anggarn</br>$jenisanggaran</span>"; 
+        $data.= "<span class='badge bg-info text-light'>Jenis Anggaran</br>$jenisanggaran</span>"; 
          
         return $data;
-    })
+     })
 
 
 
 
-  ->addColumn('submitdate', function ($prp) {
-      $dt=$prp->created_at->format('d-M-Y');
-      $creator=$prp->creator->name;
-      $comdata="(".$creator.")</br>".$dt;
-      return $comdata;
-    })
-  ->addColumn('naction', function ($prp) {
-     return $prp->review->next_action;
-    })
-  ->addColumn('personInCharge', function ($prp) {
-      return $prp->personInCharge->name;
- })
+        ->addColumn('submitdate', function ($prp) {
+            $dt=$prp->created_at->format('d-M-Y');
+            $creator=$prp->creator->name;
+            $comdata="(".$creator.")</br>".$dt;
+            return $comdata;
+            })
+        ->addColumn('naction', function ($prp) {
+            return $prp->review->next_action;
+            })
+        ->addColumn('personInCharge', function ($prp) {
+            return $prp->personInCharge ? $prp->personInCharge->name : "Pilih PIC saat validasi";
+        })
 
  
 
@@ -342,8 +376,8 @@ public function getData()
     })
     ->addColumn('city', function ($prp) {
     return $prp->hospital->city;
-})
- ->addColumn('statsname', function ($prp) {
+        })
+    ->addColumn('statsname', function ($prp) {
      switch ($prp->status){
         
          
@@ -367,7 +401,7 @@ public function getData()
             
         }
 
-    })
+        })
     ->addColumn('action', function($prp){
         
         $editform=route('admin.prospectedit',$prp);
@@ -381,14 +415,16 @@ public function getData()
         break;
         default:
         
-        $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-primary btn-sm ml-2 btn-validasi">Validasi Data</a>';
+        $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-warning btn-sm ml-2 btn-validasi">Validasi</a>';
+        $btn .= '<a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a></div>';
+        
         return $btn;
 
         }
          
-      })
+        })
     //->only(['id','creator','personInCharge',"prospect_no"])
-    ->rawColumns(['action','promotion',"review",'temperature','statsname',"submitdate","province","anggaran",'hospital'])  
+        ->rawColumns(['action','promotion',"review",'temperature','statsname',"submitdate","province","anggaran",'hospital'])  
         ->toJson();
 
  }

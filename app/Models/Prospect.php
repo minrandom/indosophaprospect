@@ -9,8 +9,21 @@ class Prospect extends Model
 {
     use HasFactory;
     protected $fillable=[
-        "user_creator","prospect_no","province_id","prospect_source","pic_user_id","hospital_id","department_id","unit_id","config_id","qty","submitted_price","review_id","eta_po_date","comment","next_action","status"//can be change to quetioner_id later
-
+        "user_creator",
+        "pic_user_id",
+        "prospect_no",
+        "prospect_source",
+        "province_id",
+        "hospital_id",
+        "department_id",
+        "unit_id",
+        "config_id",
+        "qty",
+        "submitted_price",
+        "eta_po_date",
+        "status",//can be change to quetioner_id later
+        "validation_time",
+        "validation_by",
     ];
 
     public function creator(){
@@ -38,6 +51,10 @@ class Prospect extends Model
    // }
     public function config(){
         return $this->belongsTo(Config::class);;
+    }
+
+    public function rejection(){
+        return $this->hasOne(rejectLog::class);;
     }
     
 
