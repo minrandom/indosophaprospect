@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## CHIKADMIN
 <p><b>
 CHIKADMIN adalah simpel starter untuk laravel dengan template sb-admin-2 , keuntungan CHIKADMIN adalah kita tidak perlu memulai integrasi,sistem login autorisasi dari awal.
@@ -71,3 +72,6 @@ Lalu ketik command dibawah ini :
 
 ## Author
 - Rahmat Hidayatullah
+=======
+# indosophaprospect
+>>>>>>> 78268c3e084d89a0b90340ce1300ae94e12621bc
