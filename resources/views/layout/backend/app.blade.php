@@ -12,15 +12,87 @@
 
     <title>Indosopha | {{ $title ?? 'Dashboard' }}</title>
 
+    <style>
+    .fixed-card {
+  /* Set a fixed height for the card container on smaller screens */
+   /* Adjust this value as needed */
+ 
+  /* Add overflow-y property to hide vertical scrollbar on smaller screens */
+  overflow: hidden;
+
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+}
+.angg{
+    min-width: 104.2px;
+}
+.stts{
+    min-width: 90.75px;
+}
+
+.aksi{
+    min-width: 67.3px;
+}
+.prpno{
+    min-width: 175.8px;
+}
+.rvw{
+    min-width: 110.8px;
+}
+.prmo{
+    min-width: 80.8px;
+}
+.tmpe{
+    min-width: 153px;
+}
+
+
+/* Media query for screens with a minimum width of 1040px */
+@media (min-width: 1040px) {
+  /* CSS for larger screens */
+  .fixed-card {
+    /* Set a fixed height for the card container on larger screens */
+    max-height: 300px; /* Adjust this value as needed */
+  }
+
+  .outer-container {
+    /* Set a fixed height for the outer container to enable scrolling on larger screens */
+    height: 600px; /* Adjust this value as needed */
+
+    /* Add overflow property to enable scrolling on larger screens */
+    overflow: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* CSS for larger screens */
+  .fixed-card {
+    /* Set a fixed height for the card container on larger screens */
+    max-height: 500px; /* Adjust this value as needed */
+  }
+
+  .outer-container {
+    /* Set a fixed height for the outer container to enable scrolling on larger screens */
+    height: 600px; /* Adjust this value as needed */
+
+    /* Add overflow property to enable scrolling on larger screens */
+    overflow: auto;
+  }
+}
+
+
+        
+    </style>
     <!-- Custom fonts for this template-->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+   
     <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
     href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
     rel="stylesheet">
     <!-- Custom styles for this template-->
     <link href="{{ asset('template/backend/sb-admin-2') }}/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     @stack('css')
 </head>
 
@@ -106,6 +178,8 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('template/backend/sb-admin-2') }}/js/sb-admin-2.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Page level plugins -->
     <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/chart.js/Chart.min.js"></script>

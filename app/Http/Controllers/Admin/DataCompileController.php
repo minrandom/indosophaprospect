@@ -11,7 +11,9 @@ use Illuminate\Support\HtmlString;
 use App\Models\Hospital;
 use App\Models\Config;
 use App\Models\Prospect;
-
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 
 use DateTime;
 use Yajra\DataTables\Contracts\DataTable;
@@ -126,20 +128,7 @@ public function getProductDetail(Request $request)
  }
 
 
- public function optiondata()
- {
-    $dataoption=[];
-    $dataoption['source'] = array(
-        "name" => [
-            "Request By Customer",
-            "Visit",
-            "Promotion Plan By BU",
-            "Promotion Plan By Sales Team",
-            "Event",]
-        );
 
-        return response()->json($dataoption);
- }
 
 
  public function ProspectData(Request $request)
@@ -169,26 +158,34 @@ public function getProductDetail(Request $request)
         $nsm=Employee::with('user')->where([['area',$isi2],['position','NSM']])->get();
         if($am->count()>0){
        //$dataam= DataTables::of($am)->toJson();
-     $useram=$am->pluck('user.name');
-     $array = json_decode($useram);
+        $useram=$am->pluck('user.name');
+        $array = json_decode($useram);
        return $array[0];}
-       else
+       else if($nsm->count()>0)
        {
         $usernsm=$nsm->pluck('user.name');
-     $array = json_decode($usernsm);
-       return $array[0];}
+         $array = json_decode($usernsm);
+       return $array[0];}else return "Tidak ada AM/NSM";
     };
 
 
     $status= $request->input('status');
+
+    $url=$request->input('url');
     if($status==1){
-    $prv = Prospect::with("creator","hospital","review","province","department","unit","config")
-     ->where("status",$status)->orderBy("id",'DESC') 
-    ->get();}
+    $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+     ->where("status",$status)->orderBy('status','ASC')->orderBy("id",'DESC') 
+    ->get()
+   
+    ;}
     else{
-    $prv = Prospect::with("creator","hospital","review","province","department","unit","config")
+    $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+    ->where("status",'!=',1)->orderBy('status','ASC')
     ->orderBy("id",'DESC')
-     ->get();}
+     ->get()
+   
+    ;}
+     
   
     //->whereHas('config', function ($query) {
       //  $query->wherePivot('main', 1);
@@ -196,24 +193,15 @@ public function getProductDetail(Request $request)
    
 
     return DataTables::of($prv)
-        
-        
-    
-    
-    
-    
+    ->addIndexColumn()   
     ->addColumn('province', function ($prp) {
 
     $newprov=$prp->province->name."(".$prp->province->prov_order_no.")";
     $AM= getareaman($prp->province->iss_area_code,$prp->province->wilayah);
-    
-
+  
     $newdata=$newprov."</br>".$AM;
     
-    
     return $newdata;
-
-
 
     })
     
@@ -266,6 +254,7 @@ public function getProductDetail(Request $request)
 
     ->addColumn('temperature', function ($prp) {
         $ch= $prp->review->chance;
+        $chs=number_format($ch * 100, 0);
         $anggaran = $prp->anggaran_status;
         $podate=$prp->eta_po_date;
         $qty=strtotime($podate);
@@ -275,23 +264,28 @@ public function getProductDetail(Request $request)
         $diff=floor($diffsec/86400);
 
         if($ch==0){
-            return "<h4><span class='badge bg-dark text-light'>DROP</span></h4>";
+            return "<h4><span class='badge tmpe bg-dark text-light'>DROP</span></h4>
+            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         }else
         if($anggaran == "BELUM ADA"||$anggaran=="USULAN"){
-            return "<h4><span class='badge bg-secondary text-light'>PROSPECT</span></h4>";
+            return "<h4><span class='badge tmpe bg-secondary text-light'>PROSPECT</span></h4>
+            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         }else
         if($ch<0.5){
-            return "<h4><span class='badge bg-warning text-light'>FUNNEL</span></h4>";
+            return "<h4><span class='badge tmpe bg-warning text-light'>FUNNEL</span></h4>
+            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         }else 
         if ($diff<150){
-            return "<h4><span class='badge bg-danger text-light'>HOT PROSPECT</span></h4>";
+            return "<h4><span class='badge tmpe bg-danger text-light'>HOT PROSPECT</span></h4>
+            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         }
-        else return "<h4><span class='badge bg-warning text-light'>FUNNEL</span></h4>";
+        else return "<h4><span class='badge tmpe bg-warning text-light'>FUNNEL</span></h4>
+        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         
 
         
         
-      return $data;
+      //return $data;
      })
 
 
@@ -302,16 +296,16 @@ public function getProductDetail(Request $request)
         $presentation= $prp->review->presentation_date;
        $data ="";
        if(isset($first)){
-        $data.= "<span class='badge bg-info text-light'>First Offer </br>$first</span>"; 
+        $data.= "<span class='badge prmo bg-info text-light'>First Offer </br>$first</span>"; 
        }
        if(isset($demo)){
-        $data.="<span class='badge bg-info text-light'>Demo </br>$demo</span>";
+        $data.="<span class='badge prmo bg-info text-light'>Demo </br>$demo</span>";
        }
        if(isset($presentation)){
-        $data.="<span class='badge bg-info text-light'>Presentation </br>$presentation</span>";
+        $data.="<span class='badge prmo bg-info text-light'>Presentation </br>$presentation</span>";
        }
        if(isset($last)){
-           $data.="<span class='badge bg-info text-light'>Last Offer </br>$last</span>";
+           $data.="<span class='badge prmo bg-info text-light'>Last Offer </br>$last</span>";
         }
         return $data;
         })
@@ -325,9 +319,9 @@ public function getProductDetail(Request $request)
 
 
         
-        $data= "<span class='badge $userc text-light'>User Status </br>$user</span>"; 
-        $data.= "<span class='badge $direksic text-light'>Direksi Status</br>$direksi</span>"; 
-        $data.= "<span class='badge $purcashingc text-light'>Purchasing Status</br>$purcashing</span>"; 
+        $data= "<span class='badge rvw $userc text-light'>User Status </br>$user</span>"; 
+        $data.= "<span class='badge rvw $direksic text-light'>Direksi Status</br>$direksi</span>"; 
+        $data.= "<span class='badge  rvw $purcashingc text-light'>Purchasing Status</br>$purcashing</span>"; 
         
         return $data;
         })
@@ -335,17 +329,18 @@ public function getProductDetail(Request $request)
     ->addColumn('anggaran', function ($prp) {
         $anggaranstats = $prp->review->anggaran_status;
         $jenisanggaran = $prp->review->jenis_anggaran;
-       
-        
-      
-        
-        
-
 
         
-        $data= "<span class='badge bg-info text-light'>Anggaran Status</br>$anggaranstats</span>"; 
-        $data.= "<span class='badge bg-info text-light'>Jenis Anggaran</br>$jenisanggaran</span>"; 
+        $data= "<span class='badge angg bg-info text-light'>Anggaran Status</br>$anggaranstats</span>"; 
+        $data.= "<span class='badge angg bg-info text-light'>Jenis Anggaran</br>$jenisanggaran</span>"; 
          
+        return $data;
+     })
+
+     ->addColumn('propdetail', function ($prp) {
+       $no=$prp->prospect_no;
+       $theroutes=route('admin.prospecteditdata',['prospect'=>$prp->id]);
+       $data= "<a href='$theroutes' ><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a>";  
         return $data;
      })
 
@@ -361,6 +356,7 @@ public function getProductDetail(Request $request)
         ->addColumn('naction', function ($prp) {
             return $prp->review->next_action;
             })
+      
         ->addColumn('personInCharge', function ($prp) {
             return $prp->personInCharge ? $prp->personInCharge->name : "Pilih PIC saat validasi";
         })
@@ -382,49 +378,74 @@ public function getProductDetail(Request $request)
         
          
         case(1):
-            $tampil = "<H4><span class='badge bg-success text-light'>VALID</span></H4>";
+            $tampil = "<H4><span class='badge stts bg-success text-light'>VALID</span></H4>";
             return $tampil;
             break;
             case(404):
-                $tampil = "<H4><span class='badge bg-danger text-light'>REJECT</span></H4>";
+                $tampil = "<H4><span class='badge stts bg-danger text-light'>REJECT</span></H4>";
                 return $tampil;
             break;
             case(99):
-                $tampil = "<H4><span class='badge bg-dark text-light'>EXPIRED</span></H4>";
+                $tampil = "<H4><span class='badge stts bg-dark text-light'>EXPIRED</span></H4>";
             return $tampil;
             break;
 
             case(0):
-            $tampil = "<H4><span class='badge bg-info text-light'>NEW</span></H4>";
+            $tampil = "<H4><span class='badge stts bg-info text-light'>NEW</span></H4>";
             return $tampil;
 
             
         }
 
         })
-    ->addColumn('action', function($prp){
+    ->addColumn('action', function($prp) use ($url){
         
         $editform=route('admin.prospectedit',$prp);
         $validasi=route('admin.prospectvalidation',$prp);
+        
+        $test=$url;
+        
         switch($prp->status){
             case(1):
-       
-        $btn = '<div class="row"><a href="'.$editform.'" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a>';
-        $btn .= '<a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-danger btn-sm ml-2 btn-delete">Delete</a></div>';
+       if($url=="prospect"){
+        $theroutes=route('admin.prospecteditdata',(['prospect'=>$prp->id]));
+        $btn="<a href='$theroutes' ><h5><span class='badge bg-primary text-light'>Detail Data</span></h5></a>";
+       }else{
+        $btn = '<div class="row"><a href="'.$editform.'" class="btn aksi btn-primary btn-sm ml-2 btn-edit">Edit</a> ';
+        //$btn .= '<a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-danger btn-sm ml-2 btn-delete">Delete</a></div>';
+       }
         return $btn;
         break;
-        default:
+                
+            case(99):
+            $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
+            return $btn;
+            break;
+        case(404):
+            $btn = "Reject Karena ".$prp->rejection->reason;
+            return $btn;
+            break;
+            default:
         
-        $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-warning btn-sm ml-2 btn-validasi">Validasi</a>';
-        $btn .= '<a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a></div>';
+        $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn aksi btn-warning btn-sm ml-2 btn-validasi">Validasi</a></div>';
+        $btn .= '<div class="row mt-1"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn aksi btn-primary btn-sm ml-2  btn-edit">Edit</a></div>';
         
         return $btn;
 
         }
          
         })
+        
+        ->addColumn('validasi',function($prp){
+            $validname=User::where('id',$prp->validation_by)->first();
+                       
+            return $validname?$validname->name:"Belum di Validasi";
+          
+        })
+
     //->only(['id','creator','personInCharge',"prospect_no"])
-        ->rawColumns(['action','promotion',"review",'temperature','statsname',"submitdate","province","anggaran",'hospital'])  
+        ->rawColumns(['propdetail','action','promotion',"review",'temperature','statsname',"submitdate","province","anggaran",'hospital','validasi'])
+        
         ->toJson();
 
  }

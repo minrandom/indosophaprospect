@@ -39,12 +39,12 @@
                                 <button type="submit" class="btn btn-primary btn-user btn-block">Login</button>
                             </form>
                             <hr>
-                            <div class="text-center">
+                           <!-- <div class="text-center">
                                 <a class="small" href="{{ route('forgot-password') }}">Forgot Password?</a>
                             </div>
                             <div class="text-center">
                                 <a class="small" href="{{ route('register') }}">Create an Account!</a>
-                            </div>
+                            </div>-->
                         </div>
                     </div>
                 </div>

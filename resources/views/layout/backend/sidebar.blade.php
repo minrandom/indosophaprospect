@@ -12,25 +12,25 @@
     <hr class="sidebar-divider my-0">
 
     <!-- Nav Item - Dashboard -->
-    @can('admin')
+    <!--@can('admin')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('admin') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span></a>
     </li>
     @endcan
-
+-->
     @can('user')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('user') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
+            <span>Welcome Dashboard</span></a>
     </li>  
     @elseCan('admin')
     <li class="nav-item">
         <a class="nav-link" href="{{ route('user') }}">
             <i class="fas fa-fw fa-user"></i>
-            <span>User Dashboard</span></a>
+            <span>Welcome Dashboard</span></a>
     </li>
     @endCan
 
@@ -39,15 +39,17 @@
 
     <!-- Heading -->
     <div class="sidebar-heading">
-        Interface
+        Prospect
     </div>
 
     @can('admin')
+
+    <!--
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOne"
             aria-expanded="true" aria-controls="collapseOne">
             <i class="fas fa-fw fa-table"></i>
-            <span>Master Data</span>
+            <span>Prospect Validation</span>
         </a>
         <div id="collapseOne" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
@@ -55,9 +57,38 @@
             </div>
         </div>
     </li>
+
+-->
+            <li class="nav-item">
+        <a class="nav-link" href="{{ route('admin.prospectcreation') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Create New Prospect</span></a>
+            </li>
+            <li class="nav-item">
+        <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Prospect Validation</span></a>
+            </li>
+            <li class="nav-item">
+        <a class="nav-link" href="{{ route('admin.prospect.index') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Prospect Review</span></a>
+            </li>
+            <li class="nav-item">
+        <a class="nav-link" href="{{ route('admin.prospect.index') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Prospect Drop Request</span></a>
+            </li>
+            <li class="nav-item">
+        <a class="nav-link" href="{{ route('admin.prospect.index') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Prospect Update Request</span></a>
+            </li>
     @endcan
-@can('admin')
-    <!-- Nav Item - Pages Collapse Menu -->
+
+    <!--
+    @can('admin')
+   
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
             aria-expanded="true" aria-controls="collapseTwo">
@@ -73,7 +104,7 @@
         </div>
     </li>
     @endcan
-    <!-- Nav Item - Utilities Collapse Menu -->
+    
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
             aria-expanded="true" aria-controls="collapseUtilities">
@@ -91,16 +122,16 @@
             </div>
         </div>
     </li>
-
+-->
     <!-- Divider -->
     <hr class="sidebar-divider">
 
     <!-- Heading -->
     <div class="sidebar-heading">
-        Addons
+        Installbase Management
     </div>
 
-    <!-- Nav Item - Pages Collapse Menu -->
+    <!-- 
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
             aria-expanded="true" aria-controls="collapsePages">
@@ -120,12 +151,13 @@
             </div>
         </div>
     </li>
+Nav Item - Pages Collapse Menu -->
 
     <!-- Nav Item - Charts -->
     <li class="nav-item">
-        <a class="nav-link" href="{{ route('chart') }}">
+        <a class="nav-link" href="">
             <i class="fas fa-fw fa-chart-area"></i>
-            <span>Charts</span></a>
+            <span>Install Base Data (Coming SOON)</span></a>
     </li>
 
     <!-- Nav Item - Tables -->

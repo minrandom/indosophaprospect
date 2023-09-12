@@ -25,5 +25,11 @@ class Config extends Model
         return $this->hasMany(Prospect::class);
     }
 
+    
+    public function category(){
+        return $this->belongsTo(Category::class);
+    }
+
+
 
 }

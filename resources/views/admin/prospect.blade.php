@@ -1,10 +1,11 @@
 @extends('layout.backend.app',[
-    'title' => 'Prospect',
-    'pageTitle' =>'Prospect',
+    'title' => 'Prospect Review',
+    'pageTitle' =>'Prospect Review',
 ])
 
 @push('css')
 <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
 @endpush
 
 @section('content')
@@ -13,9 +14,7 @@
 <div class="card">
     <div class="card-header">
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary btn-create" data-toggle="modal" data-target="#create-modal">
-          Tambah Data
-        </button>
+
     </div>
     
         <div class="card-body">
@@ -23,24 +22,16 @@
                 <table class="table table-bordered data-table">
                     <thead>
                         <tr>
-                            <th>Tanggal Submit</th>
-                            <th>User Creator</th>
+                        <th>Validasi</th>
+                            <th>PIC</th>
                             <th>Prospect No</th>
-                            <th>Province + OrderNo</th>
-                            <th>City </th>
-                            <th>Sumber Info</th>
-                            <th>PIC + AM</th>
-                            <th>Rumah Sakit</th>
-                            <th>Departement </th>
-                            <th>Bussiness Unit</th>
-                            <th>Kategori Produk</th>
-                            <th>Nama Produk</th>
-                            <th>Kode Config</th>
-                            <th>Harga + PPn(IDR)</th>
-                            <th>Qty</th>
+                            <th>Province</th>
+                            <th>Rumah Sakit + Department</th>
+                            <th>Nama Produk + Qty</th>
                             <th>Value (IDR)</th>
                             <th>Tahap Promosi</th>
                             <th>Review</th>
+                            <th>Anggaran</th>
                             <th>Eta PO Date</th>
                             <th>Temperature</th>
                             <th>Next Action</th>
@@ -59,64 +50,82 @@
     
 </div>
 
-<!-- Modal Create -->
-<div class="modal fade" id="create-modal" tabindex="-1" role="dialog" aria-labelledby="create-modalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="create-modalLabel">Create Data</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="createForm">
-        <div class="form-group">
-            <label for="n">Name</label>
-            <input type="" required="" id="n" name="name" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="pon">Prov Order No</label>
-            <input type="" required="" id="pon" name="prov_order_no" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="prc">Prov Region Code</label>
-            <input type="" required="" id="prc" name="prov_region_code" class="form-control">
-        </div>
-        
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary btn-store">Simpan</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Modal Create -->
+@include('modal._createprospect_modal')
 
-<!-- Modal Edit -->
-<div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="edit-modalLabel" aria-hidden="true">
+<div id="productData" data-url="{{ route('product.getProducts') }}"></div>
+
+
+<!-- Modal Validation -->
+<div class="modal fade" id="validasi-modal" tabindex="-1" role="dialog" aria-labelledby="validasi-modalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="edit-modalLabel">Edit Data</h5>
+        <h5 class="modal-title" id="validasi-modalLabel">Validasi Prospect</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <form id="editForm">
+        <form id="validationForm">
+          <div class="form-group">
+              <label for="submitdate">Tanggal Input</label>
+              <input readonly type="" required="" id="submitdate" name="submitdate" class="form-control">
+          </div>
+          <div class="form-group">
+              <label for="creator">Created By</label>
+              <input readonly type="" required="" id="creator" name="creator" class="form-control">
+          </div>
         <div class="form-group">
-            <label for="name">Name</label>
+            <label for="provinces">Provinsi</label>
             <input type="hidden" required="" id="id" name="id" class="form-control">
-            <input type="" required="" id="name" name="name" class="form-control">
+            <input type="hidden" required="" id="validator" name="validator" class="" value="{{ Auth::user()->id}}" >
+            <input type="hidden" required="" id="provcode" name="provcode" class="" >
+            <input readonly type="" required="" id="provinces" name="provinces" class="form-control">
         </div>
         <div class="form-group">
-            <label for="prov_order_no">Province Order No</label>
-            <input type="" required="" id="prov_order_no" name="prov_order_no" class="form-control">
+            <label for="hospital">Rumah Sakit</label>
+            <input readonly type="" required="" id="hospital" name="hospital" class="form-control">
         </div>
-       
+        <div class="form-group">
+            <label for="department">Departemen</label>
+            <input readonly type="" required="" id="department" name="department" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="product">Produk</label>
+            <input readonly type="" required="" id="product" name="product" class="form-control">
+        </div>
+
+     
+        <div class="form-group" style="display: none;" id="PIC">
+            <label for="personincharge">PIC</label>
+            <select required="" id="personincharge" name="personincharge" class="form-control">
+
+            </select>
+        </div>
+     
+        <div class="form-group">
+            <label for="quan">Quantity</label>
+            <input readonly type="" required="false" id="quan" name="quan" class="form-control">
+        </div>
+
+
+
+        <div class="form-group">
+            <label for="validation">Prospect Validation Status</label>
+         
+            <select required=""name="validation" id="validation" class="form-control">
+            <option value="">-Pilih Status Validasi-</option> 
+              <option value="1">VALID</option> 
+              <option value="99">EXPIRED</option> 
+              <option value="404">REJECT</option> 
+              <option value="0">NEW</option> 
+          </select>
+      
+          <div id="infoinput" style="display: none;" class="label label-warning"><b>Silahkan Input PIC</b></div>
+
+        </div>
+</br>
+</br>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -126,7 +135,7 @@
     </div>
   </div>
 </div>
-<!-- Modal Edit -->
+<!-- Modal Validation -->
 
 <!-- Destroy Modal -->
 <div class="modal fade" id="destroy-modal" tabindex="-1" role="dialog" aria-labelledby="destroy-modalLabel" aria-hidden="true">
@@ -153,7 +162,7 @@
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
-
+<script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
 <script type="text/javascript">
 
 
@@ -166,50 +175,169 @@
         serverSide: true,
         ajax: {
           url:"{{ route('data.prospect') }}",
-      
+          type:"POST",
           data: function (d) {
-                delete d.status;
-            }
+              d.status=1 ;d.url="prospect";
+           }
       },
         
         columns: [
-            {data: 'submitdate' , name: 'submitdate'},
-       
-            {data: 'prospect_no' , name: 'prospect_no'},
-            {data: 'province' , name: 'province'},
-            
-            {data: 'city' , name: 'city'},
-            {data: 'prospect_source' , name: 'prospect_source'},
-            {data: 'personInCharge' , name: 'personInCharge'},
-            {data: 'hospital' , name: 'hospital'},
-            {data: 'department' , name: 'department'},
-            {data: 'unit' , name: 'unit'},
-            {data: 'category' , name: 'category'},
-            {data: 'namaprod' , name: 'namaprod'},
-            {data: 'configno' , name: 'configno'},
-            {data: 'price' , name: 'price'},
-            {data: 'qty' , name: 'qty'},
-            {data: 'value' , name: 'value'},
-            {data: 'promotion' , name: 'promotion'},
-            {data: 'review' , name: 'review'},
-            {data: 'etadate' , name: 'etadate'},
-            {data: 'temperature' , name: 'temperature'},
-            {data: 'naction' , name: 'naction'},
+          {
+      data: 'validation_time',
+      name: 'validasi',
+      render: function (data, type, full, meta) {
+        // Extract just the date from validation_time
+        var date = new Date(data);
+        var formattedDate = date.toISOString().split('T')[0];
+
+        // Concatenate formattedDate with validation_by
+        return formattedDate + '</br>' + full.validasi ;
+      }
+    },
+          
+    {data: 'personInCharge', name: 'personInCharge'},
+    {data: 'propdetail', name: 'prospect_no'},
+    {data: 'province', name: 'province'},
+    {data: 'hospital', name: 'hospital'},
+    {data: 'namaprod', name: 'product',render: function (data, type, full, meta) {
+        // Compile the 'namaprod' and 'qty' columns
+        return data + '</br>' + full.qty+" "+ full.config.uom;
+      }},
    
-                                
-            {data: 'action', name: 'action', orderable: false, searchable: true},
+    {data: 'value', name: 'value'},
+    {data: 'promotion', name: 'promotion'},
+    {data: 'review', name: 'review'},
+    {data: 'anggaran', name: 'anggaran'},
+    {data: 'eta_po_date', name: 'eta_po_date'},
+    {data: 'temperature', name: 'temperature'},
+    {data: 'naction', name: 'naction'},
+    {data: 'action', name: 'action', orderable: false, searchable: true},
+            
+            
+           
         ]
     });
   });
 
 
-    // Reset Form
-        function resetForm(){
-            $("[name='name']").val("")
-            $("[name='prov_order_no']").val("")
-            $("[name='prov_region_code']").val("")
-        }
-    //
+  $('body').on("click",".btn-cr8",function(){
+        var id = $(this).attr("id")
+        
+        $.ajax({
+            url: "{{ route('admin.prospectcreate') }}",
+            method: "GET",
+            success:function(response){
+               
+              $("#create-modal").modal("show")
+                //$("#thecreators").val(id)
+                $("#cr8hospital").val("");
+                $("#cr8product").val("");
+                $("#eventname").val("");
+                $("#qtyinput").val("0");
+                
+
+                var today = new Date();
+
+              // Calculate the date after 30 days from today
+              var thirtyDaysFromToday = new Date(today);
+              thirtyDaysFromToday.setDate(today.getDate() + 30);
+
+              var todayFormatted = today.toISOString().split('T')[0];
+              var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+
+
+              $('#etapodatecr8').attr('min', thirtyDaysFromTodayFormatted);
+
+
+              populateSelectFromDatalist('cr8source', response.source.source,"Pilih Sumber Informasi");
+
+                var provinceSelect = $("#cr8province");
+               populateSelectFromDatalist('cr8province', response.province,"Pilih Provinsi");
+
+               var hosinput=$("#cr8hospital");
+                
+                        
+                function fetchHospitals2(provinceId) {
+                  // Make an AJAX call to retrieve hospitals based on provinceId
+                  $.ajax({
+                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
+                    method: "GET",
+                    success: function (response) {
+                   
+                        populateSelectFromDatalist('cr8hospital', response.hosopt,"Pilih Rumah Sakit");
+                      
+                    }
+                  });
+                }
+               
+                provinceSelect.on("change", function () {
+                  var selectedProvinceId = $(this).val();
+                  fetchHospitals2(selectedProvinceId);
+                });
+
+                var deptSelect = $("#cr8department");
+                populateSelectFromDatalist('cr8department', response.dept,"Pilih Departemen");
+             
+                var unitSelect = $("#cr8bunit");
+                populateSelectFromDatalist('cr8bunit', response.bunit,"Pilih Business Unit");
+              
+                var catSelect=$("#cr8category");
+                function fetchcat(unitId) {
+                  // Make an AJAX call to retrieve hospitals based on provinceId
+                  $.ajax({
+                    url: "{{ route('admin.getCategoriesByUnit', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
+                    method: "GET",
+                    success: function (response) {
+                      populateSelectFromDatalist('cr8category', response.catopt,"Pilih Kategori Produk");
+                    }
+                  });
+                }
+             
+                unitSelect.on("change", function () {
+                  var selectedunitId = $(this).val();
+                  fetchcat(selectedunitId);
+                });
+
+                $("#cr8bunit, #cr8category").on("change", function () {
+                  var selectedBusinessUnitId = $("#cr8bunit").val();
+                  var selectedCategoryId = $("#cr8category").val();
+
+                  if (selectedBusinessUnitId && selectedCategoryId) {
+                    populateProductSelect(selectedBusinessUnitId, selectedCategoryId);
+                  } else {
+                
+                    var productSelect = $("#cr8product");
+                    productSelect.empty();
+                    productSelect.append('<option value="">- Pilih Produk -</option>');
+                  }
+                });
+/*
+*/              var anggaranSelect = $("#anggarancr8");
+                populateSelectFromDatalist('anggarancr8', response.source.anggaran.review,"Review Anggaran");
+
+
+
+                var anggartpSelect = $("#jenisanggarancr8");
+                populateSelectFromDatalist('jenisanggarancr8', response.source.anggaran.Jenis,"Pilih Jenis Anggaran");
+                
+
+        $("#cr8source").change(function() {
+         var selectedOption = $(this).val();
+          if (selectedOption === "4") {
+           $("#eventname").show();
+           
+          } else {
+            $("#eventname").hide();
+            }
+          });
+
+
+              
+            }
+        })
+    });
+
+ 
 
     // Create 
 
@@ -217,82 +345,20 @@
         e.preventDefault()
 
         $.ajax({
-            url: "/admin/province",
+            url: "/admin/prospect",
             method: "POST",
             data: $(this).serialize(),
             success:function(){
                 $("#create-modal").modal("hide")
                 $('.data-table').DataTable().ajax.reload();
                 flash("success","Data berhasil ditambah")
-                resetForm()
+               
             }
         })
     })
 
     // Create
 
-    // Edit & Update
-    $('body').on("click",".btn-edit",function(){
-        var id = $(this).attr("id")
-        
-        $.ajax({
-            url: "/admin/province/"+id+"/edit",
-            method: "GET",
-            success:function(response){
-                $("#edit-modal").modal("show")
-                $("#id").val(response.id)
-                $("#name").val(response.name)
-                $("#prov_order_no").val(response.prov_order_no)
-                
-            }
-        })
-    });
-
-    $("#editForm").on("submit",function(e){
-        e.preventDefault()
-        var id = $("#id").val()
-
-        $.ajax({
-            url: "/admin/province/"+id,
-            method: "PATCH",
-            data: $(this).serialize(),
-            success:function(){
-                $('.data-table').DataTable().ajax.reload();
-                $("#edit-modal").modal("hide")
-                flash("success","Data berhasil diupdate")
-            }
-        })
-    })
-    //Edit & Update
-
-    $('body').on("click",".btn-delete",function(){
-        var id = $(this).attr("id")
-        $(".btn-destroy").attr("id",id)
-        $("#destroy-modal").modal("show")
-    });
-
-    $(".btn-destroy").on("click",function(){
-        var id = $(this).attr("id")
-
-        $.ajax({
-            url: "/admin/province/"+id,
-            method: "DELETE",
-            success:function(){
-                $("#destroy-modal").modal("hide")
-                $('.data-table').DataTable().ajax.reload();
-                flash('success','Data berhasil dihapus')
-            }
-        });
-    })
-
-    function flash(type,message){
-        $(".notify").html(`<div class="alert alert-`+type+` alert-dismissible fade show" role="alert">
-                              `+message+`
-                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                              </button>
-                            </div>`)
-    }
 
 </script>
 @endpush

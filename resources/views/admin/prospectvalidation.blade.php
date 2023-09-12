@@ -5,6 +5,7 @@
 
 @push('css')
 <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
 @endpush
 
 @section('content')
@@ -21,6 +22,7 @@
                 <table class="table table-bordered data-table">
                     <thead>
                         <tr>
+                          <th>No</th>
                             <th>Creator/ Submit Date</th>
                           
                             
@@ -55,93 +57,9 @@
     
 </div>
 
-<!-- Modal Create -->
-<div class="modal fade" id="create-modal" tabindex="-1" role="dialog" aria-labelledby="create-modalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="create-modalLabel">Create Data</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="createForm">
-    
-        <div class="form-group">
-            <label for="submitdate">Tanggal Input</label>
-           <input readonly type="" required="" id="createddate" name="createddate" class="form-control" value="{{ date('M/d/Y') }}" >
-          </div>
+@include('modal._createprospect_modal')
 
-          <div class="form-group">
-            <label for="Creator">Created By</label>
-            <input type="hidden" required="" id="creatorid" name="creatorid" class="form-control" value="{{Auth::user()->id}}">
-            <input readonly type="" required="" id="thecreators" name="thecreators" value="{{ Auth::user()->name }}" class="form-control">
-          </div>
-          
-          <div class="form-group">
-          <label for="Sumber Info">Sumber Info</label>
-          <input type="" placeholder="Input Nama Event Disini" style="display: none;" required="false" id="eventname" name="eventname" class="form-control">
-            <!--<input readonly type="" required="" id="provinceedit" name="provinceedit" class="form-control">-->
-            <select id="cr8source" name="cr8source" class="form-control" required="" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
-            <option value="">-Pilih Sumber Info-</option> 
-              <option value="Request From Customer">Request From Customer</option> 
-              <option value="Promotion Plan By Bu">Promotion Plan By Bu</option> 
-              <option value="Promotion Plan By Sales Team">Promotion Plan By Sales Team</option> 
-              <option value="Event">Event</option>   
-          </select>
-
-          </div>
-          <div class="form-group">
-            <label for="province">Provinsi</label>
-            <!--<input readonly type="" required="" id="provinceedit" name="provinceedit" class="form-control">-->
-            <select id="cr8province" name="cr8province" class="form-control" required="" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1"; >
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="hospital">Rumah Sakit</label>
-            <input list="listhospital" autocomplete="off" type="" required="" id="cr8hospital" name="cr8hospital" class="form-control">
-            <datalist id="listhospital" name="listhospital" >
-
-            </datalist>
-          </div>
-        <div class="form-group">
-            <label for="department">Departement</label>
-            <select required="" id="cr8department" name="cr8department" class="form-control">
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="product">Produk</label>
-            <input list="listproduct" autocomplete="off" type="" required="" id="cr8product" name="cr8product" class="form-control">
-            <datalist id="listproduct" name="listproduct" >
-            </datalist>
-        </div>
-
-        <!--
-        <div class="form-group">
-            <label for="detail">Detail Produk</label>
-            <input readonly type="" required="" id="Category" name="Category" class="form-control">
-            <input readonly type="" required="" id="Brand" name="Brand" class="form-control">
-            <input readonly type="" required="" id="Harga" name="Harga" class="form-control">
-            <input readonly type="" required="" id="KodeConfig" name="KodeConfig" class="form-control">
-            <input readonly type="" required="" id="Bussiness Unit" name="Bussiness Unit" class="form-control">
-        </div>
--->
-        <div class="form-group">
-            <label for="quantity">Quantity</label>
-            <input type="number" required="" id="qtyinput" name="qtyinput" class="form-control">
-        </div>
-        
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary btn-store">Simpan</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="productData" data-url="{{ route('product.getProducts') }}"></div>
 <!-- Modal Create -->
 
 <!-- Modal Validation -->
@@ -165,7 +83,7 @@
               <input readonly type="" required="" id="creator" name="creator" class="form-control">
           </div>
         <div class="form-group">
-            <label for="province">Provinsi</label>
+            <label for="provinces">Provinsi</label>
             <input type="hidden" required="" id="id" name="id" class="form-control">
             <input type="hidden" required="" id="validator" name="validator" class="" value="{{ Auth::user()->id}}" >
             <input type="hidden" required="" id="provcode" name="provcode" class="" >
@@ -179,18 +97,22 @@
             <label for="department">Departemen</label>
             <input readonly type="" required="" id="department" name="department" class="form-control">
         </div>
+        
+        <div class="form-group">
+            <label for="bunit">Business Unit</label>
+            <input readonly type="" required="" id="bunit" name="bunit" class="form-control">
+        </div>
+     
         <div class="form-group">
             <label for="product">Produk</label>
             <input readonly type="" required="" id="product" name="product" class="form-control">
         </div>
-
-     
-        <div class="form-group" style="display: none;" id="PIC">
-            <label for="personincharge">PIC</label>
-            <select required="" id="personincharge" name="personincharge" class="form-control">
-
-            </select>
+        <div class="form-group">
+            <label for="etapodate">ETA PO DATE</label>
+            <input readonly type="" required="" id="etapodate" name="etapodate" class="form-control">
         </div>
+     
+        
      
         <div class="form-group">
             <label for="quan">Quantity</label>
@@ -209,10 +131,19 @@
               <option value="404">REJECT</option> 
               <option value="0">NEW</option> 
           </select>
-      
-          <label for="infoinput" id="infoinput" style="display: none;" class="label label-warning"><b>Silahkan Input PIC</b></label>
+          </div>
 
+
+          <div class="form-group" style="display: none;" id="PIC">
+            <label for="personincharge">PIC</label>
+            <select required="" id="personincharge" name="personincharge" class="form-control">
+
+            </select>
         </div>
+      
+          <div id="infoinput" style="display: none;" class="label label-warning"><b>Silahkan Input PIC</b></div>
+
+        
 </br>
 </br>
       </div>
@@ -246,58 +177,77 @@
           </div>
           
           <div class="form-group">
-            <label for="Creator">Created By</label>
+            <label for="creatorname">Created By</label>
             <input readonly type="" required="" id="creatorname" name="creatorname" class="form-control">
           </div>
 
           <div class="form-group">
-          <label for="Sumber Info">Sumber Info</label>
-          <input type="" placeholder="Input Nama Event Disini" style="display: none;" required="false" id="namaevent" name="namaevent" class="form-control">
+          <label for="sourceedit">Sumber Info</label>
+       
             <!--<input readonly type="" required="" id="provinceedit" name="provinceedit" class="form-control">-->
             <select id="sourceedit" name="sourceedit" class="form-control" required="" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
             
           </select>
+         
           </div>
+
           <div class="form-group">
-          <label for="province">Provinsi</label>
-            
-            <!--<input readonly type="" required="" id="provinceedit" name="provinceedit" class="form-control">-->
+          <label for="provinceedit">Provinsi</label>
+          <!--<input readonly type="" required="" id="provinceedit" name="provinceedit" class="form-control">-->
             <select id="provinceedit" name="provinceedit" class="form-control" required="" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1"; >
 
             </select>
         </div>
         <div class="form-group">
-            <label for="hospital">Rumah Sakit</label>
-            <input list="hospitallist" autocomplete="off" type="" required="" id="hospitalname" name="hospitalname" class="form-control">
-            <datalist id="hospitallist" name="hospitallist" >
-
-            </datalist>
+            <label for="hospitallist">Rumah Sakit</label>
+            <select id="hospitallist" name="hospitallist" class="form-control" required="">
+            </select>
           </div>
+
         <div class="form-group">
-            <label for="department">Departement</label>
+            <label for="departmentname">Departemen</label>
             <select required="" id="departmentname" name="departmentname" class="form-control">
             </select>
         </div>
-        <div class="form-group">
-            <label for="product">Produk</label>
-            <input list="productlist" autocomplete="off" type="" required="" id="productname" name="productname" class="form-control">
-            <datalist id="productlist" name="productlist" >
 
-            </datalist>
+        <div class="form-group">
+            <label for="editunit">Business Unit</label>
+            <select required="" id="editunit" name="editunit" class="form-control">
+            </select>
         </div>
         <div class="form-group">
-            <label for="qty">Quantity</label>
-            <input type="number" required="" id="qtyitem" name="qtyitem" class="form-control">
+            <label for="editcategory">Category</label>
+            <select required="" id="editcategory" name="editcategory" class="form-control">
+            </select>
+        </div>
+         <div class="form-group">
+            <label for="productlist">Produk</label>
+            <select id="productlist" name="productlist" class="form-control" required="">
+
+            </select>
         </div>
         <div class="form-group">
-            <label for="anggaran">Anggaran</label>
+            <label for="qtyitem">Quantity</label>
+            <input type="number" required="" id="qtyitem" name="qtyitem" class="form-control" min='1'oninput="validateQuantity()">
+            <p id="quantityWarning" style="color: red; display: none;">Quantity Minimal angka 1</p>
+ 
+          </div>
+
+        <div class="form-group">
+            <label for="anggaranedit">Anggaran</label>
             <select type="" required="" id="anggaranedit" name="anggaranedit" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
             </select>
           </div>
+          
         <div class="form-group">
-            <label for="Jenis Anggaran">JenisAnggaran</label>
+            <label for="jenisanggaranedit">JenisAnggaran</label>
             <select  required="" id="jenisanggaranedit" name="jenisanggaranedit" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
             </select>
+          </div>
+        <div class="form-group">
+            <label for="etapodateedit">ETA PO DATE</label>
+            <input type="date" required="" id="etapodateedit" name="etapodateedit" class="form-control" >
+            
           </div>
         
        
@@ -338,6 +288,7 @@
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
+<script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
 
 <script type="text/javascript">
 
@@ -353,11 +304,12 @@
           url:"{{ route('data.prospect') }}",
           type:"POST",
           data: function (d) {
-              d.status=0 ;
+              d.status=0 ;d.url="prospectvalidation"
            }
       },
-        
+            
         columns: [
+          {data: 'DT_RowIndex' , name: 'rowindex'},
           {data: 'submitdate' , name: 'submitdate'},
           {data: 'province' , name: 'province'},
           {data: 'prospect_source' , name: 'prospect_source'},
@@ -386,100 +338,211 @@
   });
 
 
+
+
+
   $('body').on("click",".btn-cr8",function(){
         var id = $(this).attr("id")
-        
+       
         $.ajax({
-            url: "/admin/prospectcreate/",
+            url: "{{ route('admin.prospectcreate') }}",
             method: "GET",
             success:function(response){
+              
                 $("#create-modal").modal("show")
                 //$("#thecreators").val(id)
-                var provinceSelect = $("#cr8province");
-                provinceSelect.empty(); // Clear existing options
-                // Populate dropdown options
-                response.province.forEach(function (province) {
-                  var option = $("<option>").val(province.id).text(province.name);
-                  provinceSelect.append(option);
+                $("#cr8product").val("");
+                //$("#eventname").val("");
+                $("#qtyinput").val("1");
+                
+
+                var today = new Date();
+
+              // Calculate the date after 30 days from today
+              var thirtyDaysFromToday = new Date(today);
+              thirtyDaysFromToday.setDate(today.getDate() + 30);
+
+              var todayFormatted = today.toISOString().split('T')[0];
+              var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+
+
+              $('#etapodatecr8').attr('min', thirtyDaysFromTodayFormatted);
+
+              //populate from array
+              var eventSelect = $("#cr8source");
+              populateSelectFromDatalist('cr8source', response.source.source,"Pilih Sumber Informasi");
+              //populate from event database
+              response.event.forEach(function (event) {
+                  var option = $("<option>").val(event.id).text(event.name);
+                  eventSelect.append(option);
                 });
 
-                //$("#cr8hospital").val(response.prospect.hospital.name);
-                var hosinput=$("#cr8hospital");
-                var hospitalSelect = $("#listhospital");
-                  //provinceSelect.empty(); // Clear existing options
-                          
+                var provinceSelect = $("#cr8province");
+               populateSelectFromDatalist('cr8province', response.province,"Pilih Provinsi");
+
+               var hosinput=$("#cr8hospital");
+                        
                 function fetchHospitals2(provinceId) {
                   // Make an AJAX call to retrieve hospitals based on provinceId
                   $.ajax({
-                    url: "/admin/hospital/" + provinceId+"/hospital",
+                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
                     method: "GET",
                     success: function (response) {
-                      hospitalSelect.empty(); // Clear existing options
-
-                      // Populate the hospital dropdown options
-                      response.hosopt.forEach(function (hosop) {
-                        var option = $("<option>").text(hosop.name);
-                        option.data('value', hosop.id);
-                        hospitalSelect.append(option);
-                      });
+                   
+                        populateSelectFromDatalist('cr8hospital', response.hosopt,"Pilih Rumah Sakit");
+                      
                     }
                   });
                 }
-                //var initialProvinceId = response.prospect.province_id;
-                ///fetchHospitals(initialProvinceId);
+               
                 provinceSelect.on("change", function () {
                   var selectedProvinceId = $(this).val();
                   fetchHospitals2(selectedProvinceId);
                 });
-                
+
                 var deptSelect = $("#cr8department");
-                response.dept.forEach(function (dept) {
-                  var deptOption = $("<option>").val(dept.id).text(dept.name);
-                  deptSelect.append(deptOption);
-                });
+                populateSelectFromDatalist('cr8department', response.dept,"Pilih Departemen");
 
-
-              
-                var prodSelect = $("#listproduct");
-                prodSelect.empty();
-                //provinceSelect.empty(); // Clear existing options
-                 // Populate dropdown options
-                response.produk.forEach(function (produk) {
-
-                  var conflist = $("<option>").val(produk.name);
-                  prodSelect.append(conflist);
-                });
-/*
-                $('#cr8product').on('change', function() {
-                  var selectedProduct = $(this).val();
+             
+                var unitSelect = $("#cr8bunit");
+                populateSelectFromDatalist('cr8bunit', response.bunit,"Pilih Business Unit");
+                var catSelect=$("#cr8category");
+                
+                function fetchcat(unitId) {
+                  // Make an AJAX call to retrieve hospitals based on provinceId
                   $.ajax({
-                    url: "{{ route('data.proddetail')}}",
-                    method: 'POST',
-                    data: {
-                      product: selectedProduct
-                    },
-                    success: function(response) {
-                      // Update the input fields with the retrieved details
-                      $('#Category').val(response.category);
-                      $('#Brand').val(response.brand.name);
-                      $('#Harga').val(response.price_include_ppn);
-                      $('#KodeConfig').val(response.config_code);
-                      $('#Bussiness Unit').val(response.unit.name);
+                    url: "{{ route('admin.getCategoriesByUnit', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
+                    method: "GET",
+                    success: function (response) {
+                      populateSelectFromDatalist('cr8category', response.catopt,"Pilih Kategori Produk");
                     }
                   });
+                }
+             
+                unitSelect.on("change", function () {
+                  var selectedunitId = $(this).val();
+                  fetchcat(selectedunitId);
                 });
-*/
+                
+                $("#cr8bunit, #cr8category").on("change", function () {
+                  var selectedBusinessUnitId = $("#cr8bunit").val();
+                  var selectedCategoryId = $("#cr8category").val();
+                  var selectformId="cr8product";
 
-        $("#cr8source").change(function() {
-         var selectedOption = $(this).val();
-          if (selectedOption === "Event") {
-           $("#eventname").show();
-           
-          } else {
-            $("#eventname").hide();
-            }
-          });
+                  if (selectedBusinessUnitId && selectedCategoryId) {
+                    populateProductSelect(selectedBusinessUnitId, selectedCategoryId,selectformId);
+                  } else {
+                
+                    var productSelect = $("#cr8product");
+                    productSelect.empty();
+                    
+                    productSelect.append('<option value="">- Pilih Produk -</option>');
+                    var draftconfig=$("<option>").val(response.configdraft.id).text(response.configdraft.name);
+                  draftconfig.attr("selected",true);
+                  productSelect.append(draftconfig).select2();
+                  }
+                });
+/*
+*/              var anggaranSelect = $("#anggarancr8");
+                populateSelectFromDatalist('anggarancr8', response.source.anggaran.review,"Review Anggaran");
 
+               var anggartpSelect = $("#jenisanggarancr8");
+                populateSelectFromDatalist('jenisanggarancr8', response.source.anggaran.Jenis,"Pilih Jenis Anggaran");
+             
+                anggaranSelect.on("change", function () {
+                  var anggarselecte = $(this).val();
+                  if (anggarselecte === "0") {
+                    var option = $("<option>").val("9").text("Belum Tahu").attr('selected',true);
+                    anggartpSelect.append(option); // Set the value of anggartpSelect to 9 (or any desired value) when anggaranSelect is 0
+                    anggartpSelect.prop("disabled", true); // Disable the anggartpSelect element
+                  } else {
+                    anggartpSelect.prop("disabled", false);
+                    populateSelectFromDatalist('jenisanggarancr8', response.source.anggaran.Jenis,"Pilih Jenis Anggaran");
+                  }
+                });
+
+
+                // Draft Item Populate
+                if (response.draft) {
+                  
+                  response.source.source.forEach(function (draftd) {
+                    
+                    var draftsource=$("<option>").val(draftd.id).text(draftd.name);
+                    if(draftd.id === response.draft.source){
+                      draftsource.attr("selected",true);
+                     eventSelect.prepend(draftsource);
+                    }
+                  });
+  
+                  response.province.forEach(function (draftp) {
+                    
+                    var draftprov=$("<option>").val(draftp.id).text(draftp.name);
+                    if(draftp.id === response.draft.province_id){
+                      draftprov.attr("selected",true);
+                     provinceSelect.prepend(draftprov);
+                    }
+                  });
+  
+                  response.dept.forEach(function (draftdpt) {
+                  var draftdept=$("<option>").val(draftdpt.id).text(draftdpt.name);
+                    if(draftdpt.id === response.draft.department_id){
+                      draftdept.attr("selected",true);
+                     deptSelect.prepend(draftdept);
+                    }
+                  });
+  
+                  response.bunit.forEach(function (draftbu) {
+                  var draftbunit=$("<option>").val(draftbu.id).text(draftbu.name);
+                    if(draftbu.id === response.draft.unit_id){
+                      draftbunit.attr("selected",true);
+                     unitSelect.prepend(draftbunit);
+                    }
+                  });
+  
+                  response.source.anggaran.review.forEach(function (draftangg) {
+                  var draftanggaran=$("<option>").val(draftangg.id).text(draftangg.name);
+                    if(draftangg.id === response.draft.review_anggaran){
+                      draftanggaran.attr("selected",true);
+                     anggaranSelect.prepend(draftanggaran);
+                    }
+                  });
+  
+                  response.source.anggaran.Jenis.forEach(function (draftanggj) {
+                  var draftanggaranj=$("<option>").val(draftanggj.id).text(draftanggj.name);
+                    if(draftanggj.id === response.draft.jenis_anggaran){
+                      draftanggaranj.attr("selected",true);
+                     anggartpSelect.prepend(draftanggaranj);
+                    }
+                  });
+  
+                }
+  
+                if (response.hodraft) {
+                    var drafthos=$("<option>").val(response.hodraft.id).text(response.hodraft.name);
+                    drafthos.attr("selected",true);
+                    hosinput.append(drafthos).select2({width: '100%'});
+                 }
+  
+                
+                if (response.catdraft) {
+                  var draftcat=$("<option>").val(response.catdraft.id).text(response.catdraft.name);
+                    draftcat.attr("selected",true);
+                    catSelect.append(draftcat).select2({width: '100%'});
+                }
+  
+                if(response.configdraft){
+                  confSelect=$("#cr8product");
+                  var draftconfig=$("<option>").val(response.configdraft.id).text(response.configdraft.name);
+                    draftconfig.attr("selected",true);
+                    confSelect.append(draftconfig).select2({width: '100%'});
+                  }
+  
+
+
+
+                                
+
+     
 
                 
               
@@ -487,31 +550,37 @@
         })
     });
 
-    // Reset Form
-        function resetForm(){
-            $("[name='name']").val("")
-            $("[name='prov_order_no']").val("")
-            $("[name='prov_region_code']").val("")
-        }
-    //
+ 
 
     // Create 
 
-    $("#createForm").on("submit",function(e){
-        e.preventDefault()
+
+    $("#createForm").on("submit", function(e) {
+        e.preventDefault();
+        var clickedButton = $(document.activeElement);
+
+        if (clickedButton.is('#btn-store')) {
+            submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
+        } else if (clickedButton.is('#btn-draft')) {
+            submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
+        }
+    });
+
+    function submitForm(url, successMessage) {
+        var formData = $("#createForm").serialize();
 
         $.ajax({
-            url: "/admin/prospect",
+            url: url,
             method: "POST",
-            data: $(this).serialize(),
-            success:function(){
-                $("#create-modal").modal("hide")
+            data: formData,
+            success: function() {
+                $("#create-modal").modal("hide");
                 $('.data-table').DataTable().ajax.reload();
-                flash("success","Data berhasil ditambah")
-                resetForm()
+                flash("success", successMessage);
             }
-        })
-    })
+        });
+    };
+
 
     // Create
 
@@ -529,11 +598,11 @@
           $("#infoinput").hide();
             }
           });
-
+          
 
 
         $.ajax({
-            url: "/admin/prospectvalidation/"+id+"/validation",
+            url: "{{ route('admin.prospectvalidation', ['prospect' => ':id']) }}".replace(':id', id),
             method: "GET",
             success:function(response){
               $("#PIC").hide();
@@ -548,6 +617,9 @@
                 $("#hospital").val(response.hospital.name);
                 $("#department").val(response.department.name);
                 $("#product").val(response.config.name);
+                $("#bunit").val(response.unit.name);
+                
+                $("#etapodate").val(response.eta_po_date);
                 $("#quan").val(response.qty);
                 var picSelect = $("#personincharge");
                    // Populate dropdown options
@@ -601,7 +673,7 @@
     $("#validationForm").append('<input type="hidden" name="reason" value="' + reason + '">');
   }
         $.ajax({
-            url: "/admin/prospectvalidation/"+id,
+            url: "{{ route('admin.prospectvalidationupdate', ['prospect' => ':id']) }}".replace(':id', id),
             method: "PATCH",
             data: $("#validationForm").serialize(),
             success:function(response){
@@ -612,142 +684,183 @@
         })
       }
 
-
+      
 // Edit & Update
 $('body').on("click",".btn-edit",function(){
         var id = $(this).attr("id")
         
         $.ajax({
-            url: "/admin/prospect/"+id+"/edit",
+            url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
             method: "GET",
             success:function(response){
+              
                 $("#edit-modal").modal("show");
                 $("#data").val(response.prospect.id);
                 $("#creatorname").val(response.prospect.creator.name);
                 //$("#provinceedit").val(response.prospect.province.name);
                 var sourceSelect = $("#sourceedit");
-                sourceSelect.empty(); 
-                
-                var firstOptionsource = $("<option>").val(response.prospect.prospect_source).text(response.prospect.prospect_source);
-                sourceSelect.append(firstOptionsource);
-
-                response.sourceoption.source[0].forEach(function (source) {
-                  var option = $("<option>").val(source.name).text(source.name);
+                populateSelectFromDatalist('sourceedit', response.sourceoption.source,"Pilih Sumber Informasi");
+                response.event.forEach(function (event) {
+                  var option = $("<option>").val(event.id).text(event.name);
                   sourceSelect.append(option);
                 });
-                
-                // Clear existing options
-               
-                var provinceSelect = $("#provinceedit");
-               
-                provinceSelect.empty(); // Clear existing options
-                var firstOption = $("<option>").val(response.province_id).text(response.prospect.province.name);
-                provinceSelect.append(firstOption);
-                // Populate dropdown options
-                response.provopt.forEach(function (provopt) {
-                  var option = $("<option>").val(provopt.id).text(provopt.name);
-                  provinceSelect.append(option);
-                });
 
-                provinceSelect.select2();
+
+                var firstOptionsource = $("<option>").val(response.prospect.prospect_source).text(response.prospect.prospect_source).attr("selected", true);
+                sourceSelect.prepend(firstOptionsource);
+                             
+                var provinceSelect = $("#provinceedit");
+               populateSelectFromDatalist('provinceedit', response.provopt,"Pilih Provinsi");
+                var firstOption = $("<option>").val(response.prospect.province_id).text(response.prospect.province.name).attr("selected", true);
+                provinceSelect.prepend(firstOption);
+                
                 
                 var submit= response.prospect.created_at.substr(0,10);
                 $("#submiteddate").val(submit);
                 $("#hospitalname").val(response.prospect.hospital.name);
-                var hosinput=$("#hospitalname");
+                //var hosinput=$("#hospitalname");
                 var hospitalSelect = $("#hospitallist");
                   //provinceSelect.empty(); // Clear existing options
                       
 
-                var firstHospital = $("<option>").text(response.prospect.hospital.name);
-                firstHospital.data('value',response.prospect.hospital_id)
-                hospitalSelect.append(firstHospital);
+               
+                populateSelectFromDatalist('hospitallist', response.hosopt,"Pilih Rumah Sakit");
+                var firstHospital = $("<option>").val(response.prospect.hospital_id).text(response.prospect.hospital.name).attr('selected',true);
+                hospitalSelect.prepend(firstHospital);
                 // Populate dropdown options
-              
-                
-
-                function fetchHospitals(provinceId) {
+                  function fetchHospitals(provinceId) {
                   // Make an AJAX call to retrieve hospitals based on provinceId
                   $.ajax({
-                    url: "/admin/hospital/" + provinceId+"/hospital",
+                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
                     method: "GET",
                     success: function (response) {
-                      hospitalSelect.empty(); // Clear existing options
 
-                      // Populate the hospital dropdown options
-                      response.hosopt.forEach(function (hosop) {
-                        var option = $("<option>").text(hosop.name);
-                        option.data('value', hosop.id);
-                        hospitalSelect.append(option);
-                      });
+                      populateSelectFromDatalist('hospitallist', response.hosopt,"Pilih Rumah Sakit");
+
                     }
                   });
                 }
 
-                var initialProvinceId = response.prospect.province_id;
-                fetchHospitals(initialProvinceId);
+                
 
-                provinceSelect.on("change", function () {
+
+               provinceSelect.on("change", function () {
                   var selectedProvinceId = $(this).val();
                   fetchHospitals(selectedProvinceId);
-                });
+                 });
 
 
 
                 //$("#departmentname").val(response.prospect.department.name);
                 var deptSelect = $("#departmentname");
-                //provinceSelect.empty(); // Clear existing options
-                var firstdept = $("<option>").val(response.department_id).text(response.prospect.department.name);
-                deptSelect.append(firstdept);
-                // Populate dropdown options
-                response.depopt.forEach(function (depopt) {
-                  var deptOption = $("<option>").val(depopt.id).text(depopt.name);
-                  deptSelect.append(deptOption);
+               populateSelectFromDatalist('departmentname', response.depopt,"Pilih Departemen");
+               var firstdept = $("<option>").val(response.prospect.department_id).text(response.prospect.department.name).attr("selected", true);
+                deptSelect.prepend(firstdept);
+
+
+                var unitselect = $("#editunit");
+               populateSelectFromDatalist('editunit', response.bunit,"Pilih Business Unit");
+               var firstunit = $("<option>").val(response.prospect.unit_id).text(response.prospect.unit.name).attr("selected", true);
+                unitselect.prepend(firstunit);
+                
+                 var catSelect=$("#editcategory");
+                 var idcat=response.prospect.config.category_id;
+                 populateSelectFromDatalist('editcategory', response.catopt,"Pilih Kategori Produk");
+
+                 function catdata(unitId) {
+                    // Make an AJAX call to retrieve the category name based on unitId
+                    $.ajax({
+                      url: "{{ route('admin.getCatname', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
+                      method: "GET",
+                      success: function (response) {
+                        var catname = response.catdat.name;
+                        var catid = response.catdat.id;
+
+                       // console.log(catname);
+                        // Call the callback function with the retrieved category name
+                        var ncatSelect=$("#editcategory");
+                    // For example, update an input field with the category name
+                         var firstCategory = $("<option>").val(catid).text(catname).attr('selected',true);
+                         ncatSelect.append(firstCategory);
+                      
+                      },
+                     
+                    });
+                  }
+                                  
+                  catdata(idcat);
+                           
+                function fetchcat2(unitId) {
+                  // Make an AJAX call to retrieve hospitals based on provinceId
+                  $.ajax({
+                    url: "{{ route('admin.getCategoriesByUnit', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
+                    method: "GET",
+                    success: function (response) {
+                      populateSelectFromDatalist('editcategory', response.catopt,"Pilih Kategori Produk");
+                    }
+                  });
+                }
+
+                unitselect.on("change", function () {
+                  var selectedunitId = $(this).val();
+                  fetchcat2(selectedunitId);
                 });
 
-
-                $("#productname").val(response.prospect.config.name);
                 var prodSelect = $("#productlist");
                 prodSelect.empty();
-                //provinceSelect.empty(); // Clear existing options
-                var firstconf = $("<option>").val(response.config_id).text(response.prospect.config.name);
-                prodSelect.append(firstconf);
-                // Populate dropdown options
-                response.configlist.forEach(function (configlist) {
+                populateSelectFromDatalist('productlist', response.configlist,"Pilih Produk");
+                var firstconf = $("<option>").val(response.prospect.config_id).text(response.prospect.config.name).attr('selected',true);
+                prodSelect.prepend(firstconf);
 
-                  var conflist = $("<option>").val(configlist.name);
-                  prodSelect.append(conflist);
+                $("#editunit, #editcategory").on("change", function () {
+                  var selectedBusinessUnitId = $("#editunit").val();
+                  var selectedCategoryId = $("#editcategory").val();
+                  var selectformId="productlist";
+
+                  if (selectedBusinessUnitId && selectedCategoryId) {
+                    populateProductSelect(selectedBusinessUnitId, selectedCategoryId,selectformId);
+                  } else {
+                
+                    var productSelect = $("#productlist");
+                    productSelect.empty();
+                    productSelect.append('<option value="">- Pilih Produk -</option>');
+                  }
                 });
+
+
+              
 
 
 
 
                 $("#qtyitem").val(response.prospect.qty);
                 
+                
                 var anggaranSelect = $("#anggaranedit");
                 anggaranSelect.empty(); 
-                
-                var firstOptionanggaran = $("<option>").val(response.prospect.review.anggaran_status).text(response.prospect.review.anggaran_status);
-                anggaranSelect.append(firstOptionanggaran);
-
-                response.sourceoption.anggaran.review.forEach(function (anggaransts) {
-                  var option = $("<option>").val(anggaransts.name).text(anggaransts.name);
-                  anggaranSelect.append(option);
-                });
+                populateSelectFromDatalist('anggaranedit', response.sourceoption.anggaran.review,"Pilih Review Anggaran");
+                var firstOptionanggaran = $("<option>").val(response.prospect.review.anggaran_status).text(response.prospect.review.anggaran_status).attr('selected',true);
+                anggaranSelect.prepend(firstOptionanggaran);
 
                 var anggartpSelect = $("#jenisanggaranedit");
                 anggartpSelect.empty(); 
-                
-                var firstOptionanggarantp = $("<option>").val(response.prospect.review.jenis_anggaran).text(response.prospect.review.jenis_anggaran);
-                anggartpSelect.append(firstOptionanggarantp);
+                populateSelectFromDatalist('jenisanggaranedit', response.sourceoption.anggaran.Jenis,"Pilih JenisAnggaran");
+                var firstOptionanggarantp = $("<option>").val(response.prospect.review.jenis_anggaran).text(response.prospect.review.jenis_anggaran).attr('selected',true);
+                anggartpSelect.prepend(firstOptionanggarantp);
 
-                response.sourceoption.anggaran.Jenis.forEach(function (anggarantp) {
-                  var option = $("<option>").val(anggarantp.name).text(anggarantp.name);
-                  anggartpSelect.append(option);
-                });
+                $("#etapodateedit").val(response.prospect.eta_po_date);
+                var today = new Date();
 
+                  // Calculate the date after 30 days from today
+                  var thirtyDaysFromToday = new Date(today);
+                  thirtyDaysFromToday.setDate(today.getDate() + 30);
 
-                
+                  var todayFormatted = today.toISOString().split('T')[0];
+                  var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+                  $("#etapodateedit").attr('min',thirtyDaysFromTodayFormatted)
+
+              
+
             }
         })
     });
@@ -757,7 +870,7 @@ $('body').on("click",".btn-edit",function(){
         var prospect = $("#data").val()
 
         $.ajax({
-            url: "/admin/prospectupdate/"+prospect,
+            url: "{{ route('admin.prospectupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
             method: "PATCH",
             data: $(this).serialize(),
             success:function(){

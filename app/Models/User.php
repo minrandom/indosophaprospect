@@ -29,6 +29,14 @@ class User extends Authenticatable
         return $this->hasMany(Prospect::class,"user_creator");
     }
 
+    public function draftinput(){
+        return $this->hasOne(tmpProspectInput::class);
+    }
+
+    public function updateapprove(){
+        return $this->hasMany(updatelog::class,"approved_by");
+    }
+
 
 
     protected $fillable = [

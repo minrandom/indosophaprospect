@@ -9,7 +9,7 @@ class ReviewLog extends Model
 {
     use HasFactory;
     protected $fillable=[
-        "log_date","review_id","col_update","col_before","col_after","updated_by","update_at_lat","update_at_long"
+        "prospect_id","log_date","review_id","col_update","col_before","col_after","updated_by","update_at_lat","update_at_long","approve_at","approve_by"
     ];
 
     public function review(){
