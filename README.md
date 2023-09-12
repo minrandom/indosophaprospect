@@ -1,12 +1,17 @@
 <<<<<<< HEAD
-## CHIKADMIN
+## CHIKADMIN ->> Indosopha Prospect
 <p><b>
-CHIKADMIN adalah simpel starter untuk laravel dengan template sb-admin-2 , keuntungan CHIKADMIN adalah kita tidak perlu memulai integrasi,sistem login autorisasi dari awal.
+Merupakan perubahan update dari CHIKA ADMIN untuk kebutuhan perusahaan
 </b></p>
 
 ## Instalasi
-- download zip <a href="https://github.com/rahmathidayat9/sb-admin-2-laravel-8/archive/master.zip">disini</a> 
+- download original CHIKAADMIN zip <a href="https://github.com/rahmathidayat9/sb-admin-2-laravel-8/archive/master.zip">disini</a> 
 - atau clone : git clone https://github.com/rahmathidayat9/sb-admin-2-laravel-8.git
+
+Atau lgsg Download 
+https://github.com/minrandom/indosophaprospect.git
+
+
 
 ## Setup
 - buka direktori project di terminal anda.
@@ -35,43 +40,14 @@ Lalu ketik command dibawah ini :
 
 ## Preview
 
-<b>- Home<b>
-
-<a href="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(837).png?raw=true">
-<img src="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(837).png?raw=true">
-</a>
-<br><br>
-
-<b>- Login<b>
-
-<a href="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(803).png?raw=true">
-	<img src="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(803).png?raw=true">
-</a>
-<br><br>
-
-<b>- Dashboard<b>
-
-<a href="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(830).png?raw=true">
-	<img src="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(830).png?raw=true">
-</a>
-<br><br>
-
-<b>- Profile<b>
-
-<a href="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(831).png?raw=true">
-	<img src="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(831).png?raw=true">
-</a>
-<br><br>
-
-<b>- Yajra Crud Datatable<b>
-
-<a href="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(805).png?raw=true">
-	<img src="https://github.com/rahmathidayat9/readme-images/blob/master/laravel-sb-admin-2/Screenshot%20(805).png?raw=true">
-</a>
-<br><br>
 
 ## Author
+Thanks To core Resource to
 - Rahmat Hidayatullah
+
+Update for Work by :
+@minrandom
+
 =======
 # indosophaprospect
 >>>>>>> 78268c3e084d89a0b90340ce1300ae94e12621bc
