@@ -918,8 +918,16 @@ $send=0;
     public function validationupdate(Request $request, Prospect $prospect)
     {
         //
-        $cek=$request->input('validation');
+        $cek=$request->input('validation', 99);
         switch($cek){
+            case 99:
+                $prospect->update([
+                    'validation_time'=>Carbon::now(),
+                    'validation_by'=>1,
+                    'prospect_no'=>"APPROVEEXPIRED",
+                    
+                ]);
+
             case 404:
                 rejectLog::create([
                     "prospect_id"=>$request->id,
@@ -958,7 +966,7 @@ $send=0;
 
         }
         $prospect->update([
-            'status' => $request->input('validation')
+            'status' => $cek
         ]);
         //return $request;
         return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Data']);

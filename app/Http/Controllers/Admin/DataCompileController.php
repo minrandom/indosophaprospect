@@ -411,14 +411,14 @@ public function getProductDetail(Request $request)
         $theroutes=route('admin.prospecteditdata',(['prospect'=>$prp->id]));
         $btn="<a href='$theroutes' ><h5><span class='badge bg-primary text-light'>Detail Data</span></h5></a>";
        }else{
-        $btn = '<div class="row"><a href="'.$editform.'" class="btn aksi btn-primary btn-sm ml-2 btn-edit">Edit</a> ';
+        $btn = '<div class="row"><a href="'.$editform.'" class="btn aksi  btn-primary btn-sm ml-2 btn-edit">Edit</a> ';
         //$btn .= '<a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-danger btn-sm ml-2 btn-delete">Delete</a></div>';
        }
         return $btn;
         break;
                 
             case(99):
-            $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
+            $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn btnaksi btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
             return $btn;
             break;
         case(404):
@@ -427,8 +427,8 @@ public function getProductDetail(Request $request)
             break;
             default:
         
-        $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn aksi btn-warning btn-sm ml-2 btn-validasi">Validasi</a></div>';
-        $btn .= '<div class="row mt-1"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn aksi btn-primary btn-sm ml-2  btn-edit">Edit</a></div>';
+        $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn aksi btnaksi btn-warning btn-sm ml-2 btn-validasi">Approval</a></div>';
+        $btn .= '<div class="row mt-1 mr-1"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn aksi btnaksi btn-primary btn-sm ml-2  btn-edit">Edit</a></div>';
         
         return $btn;
 

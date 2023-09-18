@@ -122,14 +122,14 @@
 
 
         <div class="form-group">
-            <label for="validation">Prospect Validation Status</label>
+            <label for="validation">Prospect Approval Status</label>
          
             <select required=""name="validation" id="validation" class="form-control">
-            <option value="">-Pilih Status Validasi-</option> 
-              <option value="1">VALID</option> 
-              <option value="99">EXPIRED</option> 
+            <option value="0">-APPROVE / REJECT-</option> 
+              <option value="1">APPROVE</option> 
+              <!--<option value="99">EXPIRED</option> -->
               <option value="404">REJECT</option> 
-              <option value="0">NEW</option> 
+              <!--<option value="0">NEW</option> -->
           </select>
           </div>
 
@@ -509,7 +509,7 @@
   
                   response.source.anggaran.Jenis.forEach(function (draftanggj) {
                   var draftanggaranj=$("<option>").val(draftanggj.id).text(draftanggj.name);
-                    if(draftanggj.id === response.draft.jenis_anggaran){
+                    if(draftanggj.id === response.draft.jns_aggr){
                       draftanggaranj.attr("selected",true);
                      anggartpSelect.prepend(draftanggaranj);
                     }
@@ -538,7 +538,7 @@
                   }
   
 
-
+                  $('#etapodatecr8').val(response.draft.eta_po_date);
 
                                 
 

@@ -28,7 +28,7 @@
     min-width: 104.2px;
 }
 .stts{
-    min-width: 90.75px;
+    min-width: 88px;
 }
 
 .aksi{
@@ -42,6 +42,9 @@
 }
 .prmo{
     min-width: 80.8px;
+}
+.btnaksi{
+    min-width: 78px;
 }
 .tmpe{
     min-width: 153px;

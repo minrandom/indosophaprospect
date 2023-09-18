@@ -79,18 +79,19 @@
           </div>
           
         <div class="form-group">
-            <label for="jenisanggarancr8">JenisAnggaran</label>
+            <label for="jenisanggarancr8">Jenis Anggaran</label>
             <select  required="" id="jenisanggarancr8" name="jenisanggarancr8" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
             </select>
           </div>
 
         <div class="form-group">
-            <label for="etapodatecr8">ETA PO DATE</label>
+            <label for="etapodatecr8">Estimasi PO Date</label>
             <input type="date" required="" id="etapodatecr8" name="etapodatecr8" class="form-control" >
            
           </div>
           </br>
           </br>
+
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-info btn-draft" id="btn-draft" >Simpan Draft</button>
