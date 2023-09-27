@@ -1,0 +1,6 @@
+# .cpanel.yml
+
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/jopa1572/public_html/indosopha.jopattinama.com
+    - /bin/cp -r * $DEPLOYPATH
