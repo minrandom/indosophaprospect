@@ -20,19 +20,13 @@
     </li>
     @endcan
 -->
-    @can('user')
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('user') }}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Welcome Dashboard</span></a>
-    </li>  
-    @elseCan('admin')
+   
     <li class="nav-item">
         <a class="nav-link" href="{{ route('user') }}">
             <i class="fas fa-fw fa-user"></i>
             <span>Welcome Dashboard</span></a>
     </li>
-    @endCan
+   
 
     <!-- Divider -->
     <hr class="sidebar-divider">
@@ -41,6 +35,12 @@
     <div class="sidebar-heading">
         Prospect
     </div>
+
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('admin.prospectcreation') }}">
+            <i class="fas fa-fw fa-file-alt"></i>
+            <span>Create New Prospect</span></a>
+    </li>
 
     @can('admin')
 
@@ -59,11 +59,7 @@
     </li>
 
 -->
-            <li class="nav-item">
-        <a class="nav-link" href="{{ route('admin.prospectcreation') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Create New Prospect</span></a>
-            </li>
+        
             <li class="nav-item">
         <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
             <i class="fas fa-fw fa-tasks"></i>
@@ -84,6 +80,42 @@
             <i class="fas fa-fw fa-tasks"></i>
             <span>Prospect Update Request</span></a>
             </li>
+
+    @elseCan('fs')
+           
+            <li class="nav-item">
+             <a class="nav-link" href="{{ route('admin.prospect.index') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>My Prospect</span></a>
+            </li>
+            <li class="nav-item">
+    @elseCan('am')
+           
+            <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Approval Prospect</span></a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.prospect.index') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Prospect Review</span></a>
+            </li>
+            <li class="nav-item">
+
+    @elseCan('nsm')
+            <li class="nav-item">
+             <a class="nav-link" href="{{ route('admin.prospectcreation') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Create New Prospect</span></a>
+            </li>
+            <li class="nav-item">
+             <a class="nav-link" href="{{ route('admin.prospect.index') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Review Prospect In My Region</span></a>
+            </li>
+            <li class="nav-item">
+
     @endcan
 
     <!--
@@ -123,7 +155,54 @@
         </div>
     </li>
 -->
-    <!-- Divider -->
+
+<hr class="sidebar-divider">
+
+<!-- Heading -->
+<div class="sidebar-heading">
+   Mapping
+</div>
+
+<li class="nav-item">
+        <a class="nav-link" href="">
+            <i class="fas fa-fw fa-sitemap"></i>
+            <span>Department </br>(Under Development)</span></a>
+        
+</li>
+
+<li class="nav-item">
+        <a class="nav-link" href="">
+            <i class="fas fa-fw fa-user-md"></i>
+            <span>Doctor </br>(Under Development)</span></a>
+        
+</li>
+
+
+
+
+<hr class="sidebar-divider">
+
+<!-- Heading -->
+<div class="sidebar-heading">
+   Tools
+</div>
+
+<li class="nav-item">
+        <a class="nav-link" href="">
+            <i class="fas fa-fw fa-archive"></i>
+            <span>Market Data and Query (Under Development)</span></a>
+        
+</li>
+<li class="nav-item">
+        <a class="nav-link" href="">
+            <i class="fas fa-fw fa-tools"></i>
+            <span>Marketing Tools (Under Development)</span></a>
+</li>
+
+
+
+
+<!-- Divider -->
     <hr class="sidebar-divider">
 
     <!-- Heading -->
@@ -153,6 +232,8 @@
     </li>
 Nav Item - Pages Collapse Menu -->
 
+
+
     <!-- Nav Item - Charts -->
     <li class="nav-item">
         <a class="nav-link" href="">
@@ -160,7 +241,7 @@ Nav Item - Pages Collapse Menu -->
             <span>Install Base Data (Coming SOON)</span></a>
     </li>
 
-    <!-- Nav Item - Tables -->
+    <!-- Nav Item - Tables
     <li class="nav-item">
         <a class="nav-link" href="{{ route('tables') }}">
             <i class="fas fa-fw fa-table"></i>
@@ -171,7 +252,7 @@ Nav Item - Pages Collapse Menu -->
         <a class="nav-link" href="{{ route('profile') }}">
             <i class="fas fa-fw fa-user"></i>
             <span>Profile</span></a>
-    </li>
+    </li> -->
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

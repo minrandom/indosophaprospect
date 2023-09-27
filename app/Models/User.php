@@ -32,6 +32,9 @@ class User extends Authenticatable
     public function draftinput(){
         return $this->hasOne(tmpProspectInput::class);
     }
+    public function alerts(){
+        return $this->hasMany(Alert::class);
+    }
 
     public function updateapprove(){
         return $this->hasMany(updatelog::class,"approved_by");

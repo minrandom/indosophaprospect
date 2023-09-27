@@ -169,8 +169,9 @@
               <label for="province" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->review->comment }}</label>
             </div>
             <div class="col-sm-12">
+@can('admin')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a>
-               
+@endcan    
           </div>
             
            
@@ -215,9 +216,9 @@
              
               <label for="Harga" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->submitted_price }}</label>
             </div>
-            
+@can('admin')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
-            
+@endcan 
             
            
 
@@ -261,13 +262,14 @@
 @endif</label>
             </div>
             
+@can('admin')
             <div class="col-sm-12">
               
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tgl</a>
               
 
             </div>
-
+@endcan
             
            
 
@@ -309,9 +311,9 @@
               <label for="nextaction" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->review->next_action }}</label>
             </div>
             
+@can('admin')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
-            
-           
+@endcan
 
             </div>
         </div>

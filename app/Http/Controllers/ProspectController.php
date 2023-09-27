@@ -8,6 +8,8 @@ use App\Models\Hospital;
 use App\Models\Prospect;
 use App\Models\Review;
 use App\Models\ReviewLog;
+use App\Models\Alert as AlertData;
+use App\Http\Controllers\AlertController as Alert;
 use App\Models\Category;
 use App\Models\Config;
 use App\Models\Unit;
@@ -57,8 +59,15 @@ class ProspectController extends Controller
         //
         $sourceoption = $this->optiondata()->getData();
         $usid=Auth::user()->id;
-      
+        $user=User::with('employee')->where('id',$usid)->first();
+        $area=$user->employee->area;
+        if($area=="HO"){
         $provincelist=Province::all();
+        }else if(strlen($area)<2){
+        $provincelist=Province::with('area')->where('wilayah',$area)->get();
+        }else
+        $provincelist=Province::with('area')->where('iss_area_code',$area)->get();       
+    
         //$rumahsakit=Hospital::all();
         $dept=Department::all();
         $today = now();
@@ -187,6 +196,11 @@ class ProspectController extends Controller
 
         ]);
 
+        $newProspect = Prospect::with("creator","province")
+            ->where("id",$id)
+            ->get();
+        Alert::generateAlerts($newProspect,"V");
+      
 
         return response()->json($id);
     }
@@ -391,7 +405,7 @@ class ProspectController extends Controller
         $today = now();
         $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
 
-            $employees = Employee::where('area', $prospect->province->iss_area_code)->orWhere('area',$wil)->get();  
+            $employees = Employee::where('area', $prospect->province->iss_area_code)->orWhere('area',$wil)->orWhere('area',"PRJ")->get();  
                     $employees->load("user");
 
                 $piclist = $employees->map(function($employee){
@@ -402,7 +416,7 @@ class ProspectController extends Controller
                 ];
             });
 
-            $piclist->push(['user_id'=>14,'name'=>'Ayane']);
+           // $piclist->push(['user_id'=>14,'name'=>'Ayane']);
                 $prospect->piclist=$piclist;
                 $prospect->lateinfo=$lateinfo;
 
@@ -436,16 +450,18 @@ class ProspectController extends Controller
     {
         //
        $wil=substr($prospect->province->iss_area_code,0,1);
+       //dd($prospect->province);
         $prospect->load("creator","hospital","review","province","department","unit","config");
         $employees = Employee::where('area', $prospect->province->iss_area_code)->orWhere('area',$wil)->get();
+        
         $employees->load("user");
         $piclist = $employees->map(function($employee){
         return[
         'user_id' => $employee ? $employee->user->id : "No User ID",
         'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
         ];
-    });
-
+        });
+        
     $piclist->push(['user_id'=>14,'name'=>'Ayane']);
         $prospect->piclist=$piclist;
      
@@ -920,14 +936,6 @@ $send=0;
         //
         $cek=$request->input('validation', 99);
         switch($cek){
-            case 99:
-                $prospect->update([
-                    'validation_time'=>Carbon::now(),
-                    'validation_by'=>1,
-                    'prospect_no'=>"APPROVEEXPIRED",
-                    
-                ]);
-
             case 404:
                 rejectLog::create([
                     "prospect_id"=>$request->id,
@@ -965,11 +973,32 @@ $send=0;
             break;
 
         }
+        
         $prospect->update([
             'status' => $cek
         ]);
+
+        //update alert
+        $latealert = AlertData::with('user')->where('prospect_id',$request->id)->whereIn('type',['V','V3','V7','V14'])->where('status',0)
+        ->update(['status'=>1]);
+
+        $data=Prospect::with("creator","province")->where('id',$request->id)->get();
+       
+        Alert::generateAlerts($data,"R");
+        AlertData::create([
+            'type'=>"R",
+            'prospect_id'=>$request->id,
+            'user_id'=>$request->personincharge
+        ]);
+
+        
+        
+        
+        
+
+        
         //return $request;
-        return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Data']);
+        return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
     }
 
     /**

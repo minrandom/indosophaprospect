@@ -11,6 +11,7 @@ use Illuminate\Support\HtmlString;
 use App\Models\Hospital;
 use App\Models\Config;
 use App\Models\Prospect;
+use App\Models\Alert;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -150,43 +151,236 @@ public function getProductDetail(Request $request)
         }
 
     }
+    $user = auth()->user();
+    $usid=$user->id;
+    $roles= $user->role;
+    $imnow=User::with('employee')->where('id',$usid)->first();
+    $area=$imnow->employee->area;
 
 
     function getareaman($isi,$isi2)
     {
         $am=Employee::with('user')->where([['area',$isi],['position','AM']])->get();
         $nsm=Employee::with('user')->where([['area',$isi2],['position','NSM']])->get();
-        if($am->count()>0){
-       //$dataam= DataTables::of($am)->toJson();
-        $useram=$am->pluck('user.name');
-        $array = json_decode($useram);
-       return $array[0];}
-       else if($nsm->count()>0)
-       {
-        $usernsm=$nsm->pluck('user.name');
-         $array = json_decode($usernsm);
-       return $array[0];}else return "Tidak ada AM/NSM";
+        $result = [];
+
+        if ($am->count() > 0) {
+            $useram = $am->pluck('user.name');
+            $useramid = $am->pluck('user.id');
+            $arr1=json_decode($useramid);
+            $array = json_decode($useram);
+            $result['amid']=$arr1[0];
+            $result['am'] = $array[0];
+        } else {
+            $result['am'] = "0";
+        }
+    
+        if ($nsm->count() > 0) {
+            $usernsm = $nsm->pluck('user.name');
+            $usernsmid = $nsm->pluck('user.id');
+            $arr1=json_decode($usernsmid);
+            $array = json_decode($usernsm);
+            $result['nsmid']=$arr1[0];
+            $result['nsm'] = $array[0];
+        } else {
+            $result['nsm'] = "0";
+        }
+    
+        return $result;
     };
+
+    function generateAlerts($prospects,$alertType)
+{
+    foreach ($prospects as $prospect) {
+        $userdata = getareaman($prospect->province->iss_area_code, $prospect->province->wilayah);
+        $existingAlert = Alert::where('prospect_id', $prospect->id)->where('type', $alertType)->first();
+
+        // Create alert if an appropriate alert type is generated
+        if (!$existingAlert) {
+            if ($userdata['am'] != "0") {
+                Alert::create([
+                    'type' => $alertType,
+                    'prospect_id' => $prospect->id,
+                    'user_id' => $userdata['amid']
+                ]);
+            }
+            if ($userdata['nsm'] != "0") {
+                Alert::create([
+                    'type' => $alertType,
+                    'prospect_id' => $prospect->id,
+                    'user_id' => $userdata['nsmid']
+                ]);
+            }
+        }
+    }
+}
+
 
 
     $status= $request->input('status');
 
+    if($roles =="admin"){
+        $thirtyDaysAgo = now()->subDays(30);
+        $threeDaysAgo = now()->subDays(3)->toDateString();
+        $sevenDaysAgo = now()->subDays(7)->toDateString();
+        $fourteenDaysAgo = now()->subDays(14)->toDateString();
+       
+
+        //alert validasi
+        $validData3 = Prospect::with("creator","province")
+        ->whereRaw("DATE(created_at) = ?", [$threeDaysAgo])
+            ->where("status",0)
+            ->orderBy("id", 'DESC')
+            ->get();
+
+        $validData7 = Prospect::with("creator","province")
+        ->whereRaw("DATE(created_at) = ?", [$sevenDaysAgo])
+            ->where("status",0)
+            ->orderBy("id", 'DESC')
+            ->get();
+        $validData14 = Prospect::with("creator","province")
+        ->whereRaw("DATE(created_at) = ?", [$fourteenDaysAgo])
+            ->where("status",0)
+            ->orderBy("id", 'DESC')
+            ->get();
+        
+        if($validData3->isNotEmpty()){
+            generateAlerts($validData3,'V3');
+        }
+
+        if($validData7->isNotEmpty()){
+            generateAlerts($validData7,'V7');
+        }
+        if($validData14->isNotEmpty()){
+            generateAlerts($validData14,'V14');
+        }
+
+        //alert review
+        $reviewData7 = Prospect::with("creator","province")
+        ->whereRaw("DATE(updated_at) = ?", [$sevenDaysAgo])
+            ->where("status",1)
+            ->orderBy("id", 'DESC')
+            ->get();
+        if($reviewData7->isNotEmpty()){
+                generateAlerts($reviewData7,'R7');
+        }
+
+        $reviewData14 = Prospect::with("creator","province")
+        ->whereRaw("DATE(updated_at) = ?", [$fourteenDaysAgo])
+            ->where("status",1)
+            ->orderBy("id", 'DESC')
+            ->get();
+        if($reviewData14->isNotEmpty()){
+                generateAlerts($reviewData14,'R14');
+        }
+        $reviewData30 = Prospect::with("creator","province")
+        ->whereRaw("DATE(updated_at) = ?", [$thirtyDaysAgo])
+            ->where("status",1)
+            ->orderBy("id", 'DESC')
+            ->get();
+        if($reviewData30->isNotEmpty()){
+                generateAlerts($reviewData30,'R30');
+        }
+
+        // Get data where 'created_at' is within the last 30 days
+        $adminData = Prospect::with("creator")
+            ->where("created_at", "<", $thirtyDaysAgo)
+            ->where("status",0)
+            ->orderBy("id", 'DESC')
+            ->update(['status'=>99]);
+        //dd($adminData);
+       // die();
+    }
+
+
+
     $url=$request->input('url');
     if($status==1){
-    $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
-     ->where("status",$status)->orderBy('status','ASC')->orderBy("id",'DESC') 
-    ->get()
-   
-    ;}
+        switch ($roles) {
+            case "admin":
+                $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+                ->where("status",$status)->orderBy('status','ASC')->orderBy("id",'DESC') 
+               ->get();
+              
+               break;
+
+            case "fs":
+                $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+                ->where("status",$status)->where('pic_user_id',$usid)->orderBy('status','ASC')->orderBy("id",'DESC') 
+               ->get();
+
+
+                break;
+
+            case "am":
+                $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+                ->where("status",$status)
+                ->whereHas('province', function ($query) use ($area) {
+                        $query->where('iss_area_code', $area);
+                    })
+                ->orderBy('status','ASC')->orderBy("id",'DESC') 
+               ->get();
+               break;
+            
+            case "nsm":
+                $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+                ->where("status",$status)
+                ->whereHas('province', function ($query) use ($area) {
+                        $query->where('wilayah', $area);
+                    })
+                ->orderBy('status','ASC')->orderBy("id",'DESC') 
+               ->get();
+
+
+                break;
+            }
+    }
     else{
-    $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
-    ->where("status",'!=',1)->orderBy('status','ASC')
-    ->orderBy("id",'DESC')
-     ->get()
-   
-    ;}
-     
-  
+    switch ($roles) {
+        case "admin":
+            $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+                ->where("status",'!=',1)->orderBy('status','ASC')
+                ->orderBy("id",'DESC')
+                ->get();
+            
+        
+        break;
+        
+        case "fs":
+            $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+            ->where("status",'!=',1)->where('pic_user_id',$usid)->orderBy('status','ASC')->orderBy("id",'DESC') 
+           ->get();
+
+
+            break;
+
+        case "am":
+            $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+            ->where("status",'!=',1)
+            ->whereHas('province', function ($query) use ($area) {
+                    $query->where('iss_area_code', $area);
+                })
+            ->orderBy('status','ASC')->orderBy("id",'DESC') 
+           ->get();
+        
+           break;
+
+        case "nsm":
+            $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+            ->where("status",'!=',1)
+            ->whereHas('province', function ($query) use ($area) {
+                    $query->where('wilayah', $area);
+                })
+            ->orderBy('status','ASC')->orderBy("id",'DESC') 
+           ->get();
+
+
+            break;
+
+
+
+        }
+    }
     //->whereHas('config', function ($query) {
       //  $query->wherePivot('main', 1);
    // })
@@ -198,9 +392,13 @@ public function getProductDetail(Request $request)
 
     $newprov=$prp->province->name."(".$prp->province->prov_order_no.")";
     $AM= getareaman($prp->province->iss_area_code,$prp->province->wilayah);
-  
-    $newdata=$newprov."</br>".$AM;
     
+    
+    if($AM['am']!="0"){ 
+    $newdata=$newprov."</br>".$AM['am'];} else 
+    if($AM['nsm']!="0"){
+    $newdata=$newprov."</br>".$AM['nsm'];} else
+    $newdata=$newprov."</br>Tidak ada AM/NSM";
     return $newdata;
 
     })
@@ -418,7 +616,7 @@ public function getProductDetail(Request $request)
         break;
                 
             case(99):
-            $btn = '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn btnaksi btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
+            $btn = '<div class="row"><a xid(0)" id="'.$prp->id.'" class="btn btnaksi btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
             return $btn;
             break;
         case(404):

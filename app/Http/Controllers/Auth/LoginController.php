@@ -14,7 +14,7 @@ class LoginController extends Controller
 		$credentials = request()->only(['email','password']);
 
 		if (Auth::attempt($credentials)) {
-			return redirect()->route('user2');
+			return redirect()->route('user');
 		}else{
 			return back()->with('error','Login gagal');
 		}

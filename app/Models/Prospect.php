@@ -70,6 +70,9 @@ class Prospect extends Model
         return $this->hasMany(DropRequest::class);
     }
 
+    public function alerts(){
+        return $this->hasMany(Alert::class);
+    }
 
     
 
