@@ -116,7 +116,7 @@ Route::group(['namespace' => 'Auth','middleware' => 'guest','prefix' => 'Auth'],
 Route::view('/register','auth.register')->name('register');
 Route::view('/forgot-password','auth.forgot-password')->name('forgot-password');
 Route::post('/logout',function(){
-	return redirect()->to('/login')->with(Auth::logout());
+	return redirect()->to('/')->with(Auth::logout());
 })->name('logout');
 
 //Route::get('/location', 'LocationController@index')->name('location.index');
