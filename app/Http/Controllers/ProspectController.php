@@ -1,0 +1,1014 @@
+<?php
+
+namespace App\Http\Controllers;
+use App\Models\Province;
+use App\Models\Department;
+
+use App\Models\Hospital;
+use App\Models\Prospect;
+use App\Models\Review;
+use App\Models\ReviewLog;
+use App\Models\Alert as AlertData;
+use App\Http\Controllers\AlertController as Alert;
+use App\Models\Category;
+use App\Models\Config;
+use App\Models\Unit;
+use App\Models\Event;
+use App\Models\tmpProspectInput;
+use App\Models\User;
+use App\Models\Brand;
+use App\Models\Employee;
+use App\Models\rejectLog;
+use App\Models\updatelog;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+
+class ProspectController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        return view('admin.prospect');
+    }
+
+    public function validationprospect()
+    {
+        return view('admin.prospectvalidation');
+    }
+
+    public function creation()
+    {
+        $username = Auth::check() ? Auth::user()->name : 'Guest';
+
+    return view('admin.prospectcreate', ['username' => $username]);
+     
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create(Prospect $prospect)
+    {
+        //
+        $sourceoption = $this->optiondata()->getData();
+        $usid=Auth::user()->id;
+        $user=User::with('employee')->where('id',$usid)->first();
+        $area=$user->employee->area;
+        if($area=="HO"){
+        $provincelist=Province::all();
+        }else if(strlen($area)<2){
+        $provincelist=Province::with('area')->where('wilayah',$area)->get();
+        }else
+        $provincelist=Province::with('area')->where('iss_area_code',$area)->get();       
+    
+        //$rumahsakit=Hospital::all();
+        $dept=Department::all();
+        $today = now();
+       $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
+       // $produk=Config::all();
+        $bunit=Unit::all();
+        $draft= tmpProspectInput::where("user_id",$usid)->first();
+        
+        if($draft){
+        if($draft->hospital_id){$hodraft=Hospital::where("id",$draft->hospital_id)->first(); $data['hodraft']=$hodraft;}
+        if($draft->hospital_id){ $catdraft=Category::where("id",$draft->category_id)->first(); $data['catdraft']=$catdraft;}
+        if($draft->hospital_id){$configdraft=Config::where("id",$draft->config_id)->first(); $data['configdraft']=$configdraft;}
+       
+        }
+        
+        $data['province'] = $provincelist;
+        $data['draft']=$draft;
+       
+       // $data['rumahsakit'] = $rumahsakit;
+        $data['dept'] = $dept;
+        $data['event'] = $event;
+       // $data['produk'] = $produk;
+        $data['source']=$sourceoption;
+        $data['bunit']=$bunit;
+        return response()->json($data);
+    }
+
+    public function savedraft(Request $request){
+   
+            $data=tmpProspectInput::where("user_id",$request->creatorid)->first();
+            if(empty($data)){
+                $n="oke";
+            }else
+            {
+                $data->delete();
+            }
+            $jenisagg=intval($request->jenisanggarancr8);
+           // var_dump($jenisagg);
+
+            tmpProspectInput::create([
+                'user_id'=>$request->creatorid,
+                'source'=>$request->cr8source,
+                'province_id'=>$request->cr8province,
+                'hospital_id'=>$request->cr8hospital,
+                'department_id'=>$request->cr8department,
+                'unit_id'=>$request->cr8bunit,
+                'category_id'=>$request->cr8category,
+                'config_id'=>$request->cr8product,
+                'qty'=>$request->qtyinput,
+                'review_anggaran'=>$request->anggarancr8,
+                'jns_aggr'=>$jenisagg,
+                'eta_po_date'=>$request->etapodatecr8,
+            ]);
+            
+            return response()->json(['success' => true]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+       $data="done";
+        //$hosid=Hospital::where('name',$request->cr8hospital)->first();
+        $config=Config::with('unit','brand')->where('id',$request->cr8product)->first();
+    
+        $options = $this->optiondata()->getData();
+       //dd($options);
+        foreach ($options->source as $option) {
+            if ($option->id == $request->cr8source) {
+                $sourceoption=$option->name;
+            }
+        }
+
+        foreach ($options->anggaran->review as $anggaransts) {
+            if ($anggaransts->id == $request->anggarancr8) {
+                $anggaranopt=$anggaransts->name;
+            }
+        }
+
+        foreach ($options->anggaran->Jenis as $anggaranjns) {
+            if ($anggaranjns->id == $request->jenisanggarancr8) {
+                $anggaranjnsopt=$anggaranjns->name;
+            }
+        }
+        
+        $request->validate([
+            'qtyinput' => 'required|numeric|min:1',
+            // Add other validation rules for your other form fields if needed
+        ]);
+
+        $draft=tmpProspectInput::where("user_id",$request->creatorid)->first();
+            if(empty($draft)){
+                $z="oke";
+            }else
+            {
+                $draft->delete();
+            }
+
+        if($sourceoption==="Event"){
+        $sourceoption.=" ".$request->eventname;}
+
+        $n=Prospect::create([
+            'user_creator'=>$request->creatorid,
+            'prospect_source'=>$sourceoption,
+            'province_id'=>$request->cr8province,
+            'hospital_id'=>$request->cr8hospital,
+            'department_id'=>$request->cr8department,
+            'config_id'=>$config->id,
+            'unit_id'=>$config->unit->id,
+            'submitted_price'=>$config->price_include_ppn,
+            'qty'=>$request->qtyinput,
+             'eta_po_date'=>$request->etapodatecr8 
+        ]);
+
+        $idbaru=$data." idnya ".$n->id;
+        $id=$n->id;
+
+       Review::create([
+        'prospect_id'=>$id,
+        'anggaran_status'=>$anggaranopt,
+        'jenis_anggaran'=>$anggaranjnsopt
+
+        ]);
+
+        $newProspect = Prospect::with("creator","province")
+            ->where("id",$id)
+            ->get();
+        Alert::generateAlerts($newProspect,"V");
+      
+
+        return response()->json($id);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Prospect  $prospect
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Prospect $prospect)
+    {
+        //\
+        $prospect->load("personInCharge","creator","hospital","review","province","department","unit","config");
+        //$picdata=User::with('employee')->where('id',$prospect->pic_user_id);
+        //$brand=Brand::where('id',$prospect->config->brand_id);
+        $ch=$prospect->review->chance;
+        $anggaran=$prospect->review->anggaran_status;
+        $podate=$prospect->eta_po_date;
+        $qty=strtotime($podate);
+        $now=strtotime(now());
+        
+        $diffsec= $qty-$now;
+        $diff=floor($diffsec/86400);
+
+
+
+        if ($ch == 0) {
+            $tempe= "<h4><span class='badge bg-dark text-light'>DROP</span></h4>";
+        } else if ($anggaran == "BELUM ADA" || $anggaran == "USULAN") {
+            $tempe= "<h4><span class='badge bg-secondary text-light'>PROSPECT</span></h4>";
+        } else if ($ch < 0.5) {
+            $tempe= "<h4><span class='badge bg-warning text-light'>FUNNEL</span></h4>";
+        } else if ($diff < 150) {
+            $tempe= "<h4><span class='badge bg-danger text-light'>HOT PROSPECT</span></h4>";
+        } else {
+            $tempe= "<h4><span class='badge bg-warning text-light'>FUNNEL</span></h4>";
+        }
+        $provOpt= Province::all();
+        return view('admin.prospectedit',compact('prospect','provOpt','tempe'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Prospect  $prospect
+     * @return \Illuminate\Http\Response
+     */
+
+   function optiondata()
+            {
+                $dataoption=[];
+                $dataoption['source'] = array(
+                   ['id'=>0,
+                    "name" => "Request By Customer",],
+                   [ 'id'=>1,
+                    "name" => "Visit",
+                     ],
+                   [ 'id'=>2,
+                    "name" =>  "Promotion Plan By BU",
+                     ],
+                   [ 'id'=>3,
+                    "name" =>   "Promotion Plan By Sales Team",
+                     ],
+                 
+                
+                    );
+                    
+                $dataoption['naction'] = array(
+                   ['id'=>0,
+                    "name" => "Mapping/Profiling",],
+                   [ 'id'=>1,
+                    "name" => "Make First Offer",
+                     ],
+                   [ 'id'=>2,
+                    "name" =>  "Renew Offer",
+                     ],
+                   [ 'id'=>3,
+                    "name" =>   "Courtesy call to Director",
+                     ],
+                   [ 'id'=>4,
+                    "name" =>     "Set up Join Visit",
+                     ],   
+                   [ 'id'=>5,
+                    "name" =>     "Confirm Budget",
+                     ],   
+                   [ 'id'=>6,
+                    "name" =>     "Organize Demo",
+                     ],   
+                   [ 'id'=>7,
+                    "name" =>     "Organize Presentation",
+                     ],   
+                   [ 'id'=>8,
+                    "name" =>     "Provide reference",
+                     ],   
+                   [ 'id'=>9,
+                    "name" =>     "General Follow Up",
+                     ],   
+                   [ 'id'=>10,
+                    "name" =>     "Nego",
+                     ],   
+                 
+                
+                    );
+
+                $dataoption['state'] = array(
+                   ['id'=>0,
+                    "name" => "BELUM TAHU",],
+                   [ 'id'=>1,
+                    "name" => "NEUTRAL",
+                     ],
+                   [ 'id'=>2,
+                    "name" =>  "POSITIF",
+                     ],
+                   [ 'id'=>3,
+                    "name" =>   "MENOLAK",
+                     ],
+                   [ 'id'=>4,
+                    "name" =>     "SETUJU",
+                     ],   
+                
+                    );
+                $dataoption['chance'] = array(
+                   ['id'=>0,
+                    "name" => "0%","data"=>0],
+                   [ 'id'=>1,
+                    "name" => "20%","data"=>0.2
+                     ],
+                   [ 'id'=>2,
+                    "name" =>  "40%","data"=>0.4
+                     ],
+                   [ 'id'=>3,
+                    "name" =>   "60%","data"=>0.6
+                     ],
+                   [ 'id'=>4,
+                    "name" =>     "80%","data"=>0.8
+                     ],   
+                   [ 'id'=>5,
+                    "name" =>     "100%","data"=>1
+                     ],   
+                
+                    );
+                $dataoption['validation'] = array(
+                   ['id'=>1,
+                    "name" => "VALID",],
+                   [ 'id'=>99,
+                    "name" => "EXPIRED",
+                     ],
+                   [ 'id'=>404,
+                    "name" =>  "REJECT",
+                     ],
+                   [ 'id'=>0,
+                    "name" =>   "NEW",
+                     ],
+                   
+                    
+                    );
+                $dataoption['anggaran']=array(
+                    'review'=>[
+                        ['id'=>0,'name'=>'Belum Ada'],
+                        ['id'=>1,'name'=>'Usulan'],
+                        ['id'=>2,'name'=>'Ada Sesuai'],
+                        ['id'=>3,'name'=>'Ada Neutral'],
+                        ['id'=>4,'name'=>'Ada Saingan']
+                        ],
+                    'Jenis'=>[
+                        ['id'=>0,'name'=>'DAK'],
+                        ['id'=>1,'name'=>'BLU / BLUD'],
+                        ['id'=>2,'name'=>'APBN'],
+                        ['id'=>3,'name'=>'APBD'],
+                        ['id'=>4,'name'=>'Ba BUN'],
+                        ['id'=>5,'name'=>'OTSUS'],
+                        ['id'=>6,'name'=>'Ban Prov'],
+                        ['id'=>7,'name'=>'Ban Gub'],
+                        ['id'=>8,'name'=>'Swasta'],
+                        ['id'=>9,'name'=>'Belum Tahu'],
+                    ],
+               );
+
+
+                    return response()->json($dataoption);
+            }
+
+
+    public function edit(Prospect $prospect)
+    {
+        //
+        $wil=substr($prospect->province->iss_area_code,0,1);
+        $prospect->load("creator","hospital","review","province","department","unit","config");
+        $provOpt= Province::all();
+        $bunit=Unit::all();
+        $cat=Category::all();
+        $hospitals = Hospital::where('province_id', $prospect->province_id)->get();
+        $sourceoption = $this->optiondata()->getData();
+        $lateinfo=$prospect->review->comment?$prospect->review->comment:"Silahkan Update info";
+        $validationTime = Carbon::parse($prospect->validation_time);
+        $formattedDate = $validationTime->format('d-m-Y');
+
+        $valdate = $formattedDate;
+
+
+        $today = now();
+        $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
+
+            $employees = Employee::where('area', $prospect->province->iss_area_code)->orWhere('area',$wil)->orWhere('area',"PRJ")->get();  
+                    $employees->load("user");
+
+                $piclist = $employees->map(function($employee){
+                return[
+                'user_id' => $employee ? $employee->user->id : "No User ID",
+
+                'name' => $employee ? $employee->user->name : "Tidak ada AM/ FS bertugas di area ini"
+                ];
+            });
+
+           // $piclist->push(['user_id'=>14,'name'=>'Ayane']);
+                $prospect->piclist=$piclist;
+                $prospect->lateinfo=$lateinfo;
+
+                    $depopt=Department::all();
+                    $configlist=Config::where('unit_id', $prospect->unit->id)
+                    ->where('category_id', $prospect->config->category_id)
+                    ->get();
+                    
+                    //dd($prospect->config->category_id);
+                    //$peric=$prospect->personInCharge->name;
+                    return response()->json([
+                    
+                    'prospect'=>$prospect,
+                        'event'=>$event,
+                        'catopt' => $cat,
+                        'provopt' => $provOpt,
+                        'hosopt' => $hospitals,
+                        'depopt'=>$depopt,
+                        'configlist'=>$configlist,
+                        'sourceoption'=>$sourceoption , 
+                        'valdate'=>$valdate ,
+                        'bunit'=>$bunit     
+                    ]);
+    }
+
+
+
+
+
+    public function validation(Prospect $prospect)
+    {
+        //
+       $wil=substr($prospect->province->iss_area_code,0,1);
+       //dd($prospect->province);
+        $prospect->load("creator","hospital","review","province","department","unit","config");
+        $employees = Employee::where('area', $prospect->province->iss_area_code)->orWhere('area',$wil)->get();
+        
+        $employees->load("user");
+        $piclist = $employees->map(function($employee){
+        return[
+        'user_id' => $employee ? $employee->user->id : "No User ID",
+        'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
+        ];
+        });
+        
+    $piclist->push(['user_id'=>14,'name'=>'Ayane']);
+        $prospect->piclist=$piclist;
+     
+        return response()->json($prospect);
+    }
+
+    
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Prospect  $prospect
+     * @return \Illuminate\Http\Response
+     */
+
+     public function infoupdate(Request $request, Prospect $prospect)
+    {
+        
+        $review=Review::where('prospect_id',$request->data);
+        $review->update([
+            "comment"=>$request->addinfo,
+        ]);
+        $prospect->update([
+            "pic_user_id"=>$request->personincharge,
+            "departmentname"=>$request->department_id,
+        ]);
+        return "done";
+    }
+
+
+     public function promodateupdate(Request $request, Prospect $prospect)
+    {
+        //return response()->json($request->demo);
+        //var_dump($request->data);
+        $user=Auth::id();
+     $review=Review::where('prospect_id',$prospect->id)->first();
+$send=0;
+         
+        $f1=$review->first_offer_date?$review->first_offer_date:"new";
+        $f2=$request->first?$request->first:"new";
+        $l1=$review->last_offer_date?$review->last_offer_date:"new";
+        $l2=$request->last?$request->last:"new";
+        $d1=$review->demo_date?$review->demo_date:"new";
+        $d2=$request->demo?$request->demo:"new";
+        $p1=$review->presentation_date?$review->presentation_date:"new";
+        $p2=$request->presentation?$request->presentation:"new";
+
+        if($f1==$f2){$oke="oke";}else{
+                $review->update([
+            'first_offer_date'=>$request->first,
+            //'last_offer_date'=>$request->last,
+           // 'demo_date'=>$request->demo,
+            //'presentation_date'=>$request->presentation,
+             ]);
+
+            ReviewLog::create([
+                'review_id'=>$review->id,
+                'log_date'=>now(),
+                'col_update'=>"first_offer_date",
+                'col_before'=>$f1,
+                'col_after'=>$request->first,
+                'updated_by'=>$user
+            ]);
+            $send=$send+1;
+        }     
+        
+        if($l1==$l2){$oke="oke";}else{
+            $review->update([
+        //'first_offer_date'=>$request->first,
+        'last_offer_date'=>$request->last,
+       // 'demo_date'=>$request->demo,
+        //'presentation_date'=>$request->presentation,
+         ]);
+
+        ReviewLog::create([
+            'review_id'=>$review->id,
+            'log_date'=>now(),
+            'col_update'=>"last_offer_date",
+            'col_before'=>$l1,
+            'col_after'=>$request->last,
+            'updated_by'=>$user
+        ]);
+        $send=$send+1;
+    }     
+        if($d1==$d2){$oke="oke";}else{
+            $review->update([
+        //'first_offer_date'=>$request->first,
+        'demo_date'=>$request->demo,
+       // 'demo_date'=>$request->demo,
+        //'presentation_date'=>$request->presentation,
+         ]);
+
+        ReviewLog::create([
+            'review_id'=>$review->id,
+            'log_date'=>now(),
+            'col_update'=>"demo_date",
+            'col_before'=>$d1,
+            'col_after'=>$request->demo,
+            'updated_by'=>$user
+        ]);
+        $send=$send+1;
+    }     
+        if($p1==$p2){$oke="oke";}else{
+            $review->update([
+        //'first_offer_date'=>$request->first,
+        'presentation_date'=>$request->presentation,
+       // 'demo_date'=>$request->demo,
+        //'presentation_date'=>$request->presentation,
+         ]);
+
+        ReviewLog::create([
+            'review_id'=>$review->id,
+            'log_date'=>now(),
+            'col_update'=>"presentation_date",
+            'col_before'=>$p1,
+            'col_after'=>$request->presentation,
+            'updated_by'=>$user
+        ]);
+        $send=$send+1;
+    }     
+
+        $data1='<div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Terima Kasih sudah Mengupdate</h4>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+        </div>';
+        $data='<div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Terima Kasih sudah Mengupdate</h4>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+        </div>';
+
+        if($send>0){
+        return response()->json(['success' => true,'message' => $data1]); 
+        } else
+        return "done";
+   
+   
+    }
+     public function reviewupdate(Request $request, Prospect $prospect)
+    {
+        //return response()->json($request->demo);
+        //var_dump($request->data);
+        $user=Auth::id();
+     $review=Review::where('prospect_id',$prospect->id)->first();
+    $send=0;
+         $user2=$request->user_status?$request->user_status:"Belum Tahu";$user1=$review->user_status?$review->user_status:"Belum Tahu";
+        $pur2=$request->purchasing_status?$request->purchasing_status:"Belum Tahu";$pur1=$review->purchasing_status?$review->purchasing_status:"Belum Tahu";
+        $dir2=$request->direksi_status?$request->direksi_status:"Belum Tahu";$dir1=$review->direksi_status?$review->direksi_status:"Belum Tahu";
+        $agr2=$request->anggaran_status?$request->anggaran_status:"Belum Tahu";$agr1=$review->anggaran_status?$review->anggaran_status:"Belum Tahu";
+        $jns2=$request->jenis_anggaran?$request->jenis_anggaran:"Belum Tahu";$jns1=$review->jenis_anggaran?$review->jenis_anggaran:"Belum Tahu";
+        $chc2=$request->chance?$request->chance:0;$chc1=$review->chance?$review->chance:0;
+        $nac2=$request->next_action?$request->next_action:"Mapping";$nac1=$review->next_action?$review->next_action:"Mapping";
+
+        if($user1==$user2){$oke="oke";}else{
+                $review->update([
+                    'user_status'=>$user2,
+             ]);
+
+            ReviewLog::create([
+                'review_id'=>$review->id,
+                'log_date'=>now(),
+                'col_update'=>"user_status",
+                'col_before'=>$user1,
+                'col_after'=>$user2,
+                'updated_by'=>$user
+            ]);
+            $send=$send+1;
+        }     
+
+        if($pur1==$pur2){$oke="oke";}else{
+                $review->update([
+                    'purchasing_status'=>$pur2,
+             ]);
+
+            ReviewLog::create([
+                'review_id'=>$review->id,
+                'log_date'=>now(),
+                'col_update'=>"purchasing_status",
+                'col_before'=>$pur1,
+                'col_after'=>$pur2,
+                'updated_by'=>$user
+            ]);
+            $send=$send+1;
+        } 
+
+        if($dir1==$dir2){$oke="oke";}else{
+                $review->update([
+                    'direksi_status'=>$dir2,
+             ]);
+
+            ReviewLog::create([
+                'review_id'=>$review->id,
+                'log_date'=>now(),
+                'col_update'=>"direksi_status",
+                'col_before'=>$dir1,
+                'col_after'=>$dir2,
+                'updated_by'=>$user
+            ]);
+            $send=$send+1;
+        }     
+        if($agr1==$agr2){$oke="oke";}else{
+                $review->update([
+                    'anggaran_status'=>$agr2,
+             ]);
+
+            ReviewLog::create([
+                'review_id'=>$review->id,
+                'log_date'=>now(),
+                'col_update'=>"anggaran_status",
+                'col_before'=>$agr1,
+                'col_after'=>$agr2,
+                'updated_by'=>$user
+            ]);
+            $send=$send+1;
+        }     
+
+        if($jns1==$jns2){$oke="oke";}else{
+                $review->update([
+                    'jenis_anggaran'=>$jns2,
+             ]);
+
+            ReviewLog::create([
+                'review_id'=>$review->id,
+                'log_date'=>now(),
+                'col_update'=>"jenis_anggaran",
+                'col_before'=>$jns1,
+                'col_after'=>$jns2,
+                'updated_by'=>$user
+            ]);
+            $send=$send+1;
+        }  
+
+        if($chc1==$chc2){$oke="oke";}else{
+                $review->update([
+                    'chance'=>$chc2,
+             ]);
+
+            ReviewLog::create([
+                'review_id'=>$review->id,
+                'log_date'=>now(),
+                'col_update'=>"chance",
+                'col_before'=>$chc1,
+                'col_after'=>$chc2,
+                'updated_by'=>$user
+            ]);
+            $send=$send+1;
+        }     
+        if($nac1==$nac2){$oke="oke";}else{
+                $review->update([
+                    'next_action'=>$nac2,
+             ]);
+
+            ReviewLog::create([
+                'review_id'=>$review->id,
+                'log_date'=>now(),
+                'col_update'=>"chance",
+                'col_before'=>$nac1,
+                'col_after'=>$nac2,
+                'updated_by'=>$user
+            ]);
+            $send=$send+1;
+        }     
+       
+
+        $data1='<div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Terima Kasih sudah Mengupdate</h4>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+        </div>';
+       
+
+        if($send>0){
+        return response()->json(['success' => true,'message' => $data1]); 
+        } else
+        return "done";
+   
+   
+    }
+
+    
+
+
+
+
+   
+
+     public function infoupdaterequest(Request $request, Prospect $prospect)
+    {
+        $user=Auth::id();
+        $prospect->load("creator","hospital","review","province","department","unit","config");
+       $send=0;
+    
+        $c=trim($prospect->review->comment);$d=trim($request->addinfo);
+  
+        $pic1=$prospect->pic_user_id;$pic2=$request->personincharge;
+        $dpt1=$prospect->department_id;$dpt2=$request->departmentname;
+    
+
+        if($pic1==$pic2){$oke="oke";}else{
+            updatelog::create([
+                'prospect_id'=>$prospect->id,
+                'col_update'=>'pic_user_id',
+                'col_before'=>$pic1,
+                'col_after'=>$pic2,
+                'logdate'=>now(),
+                'request_by'=>$user
+            ]);
+            $send=$send+1;
+        }
+        if($dpt1==$dpt2){$oke="oke";}else{
+            updatelog::create([
+                'prospect_id'=>$prospect->id,
+                'col_update'=>'department_id',
+                'col_before'=>$dpt1,
+                'col_after'=>$dpt2,
+                'logdate'=>now(),
+                'request_by'=>$user
+            ]);
+            $send=$send+1;
+        }
+        if($c==$d){$oke="oke";}else{
+            updatelog::create([
+                'prospect_id'=>$prospect->id,
+                'col_update'=>'comment',
+                'col_before'=>$c,
+                'col_after'=>$d,
+                'logdate'=>now(),
+                'request_by'=>$user
+            ]);
+            $send=$send+1;
+        }
+
+                
+        $data='<div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Update Info Berhasil di Request</h4>
+          <p>Silahkan Hubungi NSM anda untuk Proses Lebih Lanjut</p>
+          <hr>
+          <p class="mb-0">Jangan Lupa untuk update review Prospect.</p>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        </div>';
+
+        $data2='<div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Tidak ada Perubahan</h4>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+        </div>';
+
+        
+        
+        if($send>0){
+        return response()->json(['success' => true, 'message' => $data]);}
+        else{
+            return response()->json(['success' => true,'message' => $data2]); 
+        }
+    }
+
+
+     public function produpdaterequest(Request $request, Prospect $prospect)
+    {
+        $user=Auth::id();
+        $prospect->load("creator","hospital","review","province","department","unit","config");
+       $cek=0;
+
+       $prod=Config::where("name",$request->productname);
+    
+       $c=$prospect->config->name;$d=$request->productname;
+  
+        if($c==$d){$oke="oke";}else{
+            updatelog::create([
+                'prospect_id'=>$prospect->id,
+                'col_update'=>'product_id',
+                'col_before'=>$c,
+                'col_after'=>$d,
+                'logdate'=>now(),
+                'request_by'=>$user
+            ]);
+            $cek=$cek+1;
+        }
+
+                
+        $data='<div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Update Info Berhasil di Request</h4>
+          <p>Silahkan Hubungi NSM anda untuk Proses Lebih Lanjut</p>
+          <hr>
+          <p class="mb-0">Jangan Lupa untuk update review Prospect.</p>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        </div>';
+
+        $data2='<div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Tidak ada Perubahan</h4>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+        </div>';
+
+       //return response()->json($data2);
+        
+        if($cek>0){
+        return response()->json(['success' => true, 'message' => $data]);}
+        else{
+            return response()->json(['success' => true,'message' => $data2]); 
+        }
+    }
+        
+        
+
+        
+    
+
+
+    public function update(Request $request, Prospect $prospect)
+    {
+        //
+        $review=Review::where('prospect_id',$request->data);
+        $options = $this->optiondata()->getData();
+       
+        $config=Config::where('id',$request->productlist)->first();
+        
+        $options = $this->optiondata()->getData();
+       //dd($options);
+      
+      
+
+
+        $source = intval($request->sourceedit);
+        $n=$source+0;
+        //var_dump($n);
+        if($n>100){
+            $sourceops= Event::where('id',$source)->first();
+            $sourceoption=$sourceops->name;
+        }else
+        {
+            foreach ($options->source as $option) {
+                if ($option->id == $n) {
+                    $sourceoption=$option->name;
+                }
+            }     
+        }
+      
+        //dd($sourceoption);
+        $price=$config->price_include_ppn;
+        $bunit=$config->unit_id;
+        $review->update([
+            'anggaran_status'=>$request->anggaranedit,
+            'jenis_anggaran'=>$request->jenisanggaranedit
+        ]);
+        $prospect->update([
+            'prospect_source'=>$sourceoption,
+           'province_id'=>$request->provinceedit,
+           'hospital_id'=>$request->hospitallist,
+           'config_id'=>$request->productlist,
+           'unit_id'=>$bunit,
+           'submitted_price'=>$price,
+           'qty'=>$request->qtyitem,
+           'department_id'=>$request->departmentname,
+            'eta_po_date'=>$request->etapodateedit
+        ]);
+    }
+
+    public function validationupdate(Request $request, Prospect $prospect)
+    {
+        //
+        $cek=$request->input('validation', 99);
+        switch($cek){
+            case 404:
+                rejectLog::create([
+                    "prospect_id"=>$request->id,
+                    
+                    "rejected_by"=>$request->validator,
+                    "reason"=>$request->reason
+                ]);
+            break;
+
+            case 1:
+                
+                $date = Carbon::createFromFormat('Y-m-d', $request->submitdate);
+
+                // Extract the year, month, and day
+                $year = $date->format('y');
+                $month = $date->format('m');
+                $day = $date->format('d');
+
+                // Concatenate the year, month, and day parts
+                $codedate = $year . $month . $day;
+                $rand3=rand(100,999);
+
+
+
+                $prospect_no="ISSP-";
+                $prospect_no.=$request->provcode;
+                $prospect_no.="-".$codedate."-".$rand3;
+                
+                $prospect->update([
+                    'validation_time'=>Carbon::now(),
+                    'validation_by'=>$request->validator,
+                    'prospect_no'=>$prospect_no,
+                    'pic_user_id'=>$request->personincharge
+                ]);
+            break;
+
+        }
+        
+        $prospect->update([
+            'status' => $cek
+        ]);
+
+        //update alert
+        $latealert = AlertData::with('user')->where('prospect_id',$request->id)->whereIn('type',['V','V3','V7','V14'])->where('status',0)
+        ->update(['status'=>1]);
+
+        $data=Prospect::with("creator","province")->where('id',$request->id)->get();
+       
+        Alert::generateAlerts($data,"R");
+        AlertData::create([
+            'type'=>"R",
+            'prospect_id'=>$request->id,
+            'user_id'=>$request->personincharge
+        ]);
+
+        
+        
+        
+        
+
+        
+        //return $request;
+        return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Prospect  $prospect
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Prospect $prospect)
+    {
+        //
+    }
+}
