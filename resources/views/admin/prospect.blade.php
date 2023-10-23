@@ -173,6 +173,8 @@
     var table = $('.data-table').DataTable({
         processing: true,
         serverSide: true,
+        pageLength: 5,
+        lengthMenu: [[5, 10, 20], [5, 10, 20]],
         ajax: {
           url:"{{ route('data.prospect') }}",
           type:"POST",

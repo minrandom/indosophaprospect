@@ -107,25 +107,29 @@
 
     <!-- Earnings (Monthly) Card Example -->
     <div class="col-xl-10 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
-          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn-updatereview">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                           Next Action Needed</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@if($prospect->review->next_action)"{{$prospect->review->next_action}}" @else "Silahkan Update Review" @endif</div>
-</br>
-                      
-                    
-                      </div>
-                    <div class="col-auto">
-                        <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+        <div class="alert alert-light">
+    <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn-updatereview">
+        <div class="light-alert-content">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                        Next Action Needed
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                        @if($prospect->review->next_action)
+                            {{$prospect->review->next_action}}
+                        @else
+                            Silahkan Update Review
+                        @endif
                     </div>
                 </div>
+                <div class="col-auto">
+                    <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                </div>
             </div>
-          </a>
         </div>
+    </a>
+</div>
     </div>
 </div>
 </div>
@@ -170,8 +174,11 @@
             </div>
             <div class="col-sm-12">
 @can('admin')
-            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a>
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit Data</a>
 @endcan    
+@can('am')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit Data</a>
+@endcan   
           </div>
             
            
@@ -217,6 +224,9 @@
               <label for="Harga" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->submitted_price }}</label>
             </div>
 @can('admin')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
+@endcan 
+@can('am')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
 @endcan 
             
@@ -265,7 +275,15 @@
 @can('admin')
             <div class="col-sm-12">
               
-            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tgl</a>
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tanggal</a>
+              
+
+            </div>
+@endcan
+@can('am')
+            <div class="col-sm-12">
+              
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tanggal</a>
               
 
             </div>
@@ -312,6 +330,9 @@
             </div>
             
 @can('admin')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
+@endcan
+@can('am')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
 @endcan
 
@@ -605,9 +626,6 @@ $('body').on("click",".btn-edit",function(){
                 $("#creatorname").val(response.prospect.creator.name);
                 $("#sourceedit").val(response.prospect.prospect_source);
                 $("#provinceedit").val(response.prospect.province.name);
-               
-
-
                 $("#hospitalname").val(response.prospect.hospital.name);
 
                 var deptSelect = $("#departmentname");

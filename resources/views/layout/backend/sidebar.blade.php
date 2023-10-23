@@ -104,10 +104,10 @@
             <li class="nav-item">
 
     @elseCan('nsm')
-            <li class="nav-item">
-             <a class="nav-link" href="{{ route('admin.prospectcreation') }}">
+    <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
             <i class="fas fa-fw fa-tasks"></i>
-            <span>Create New Prospect</span></a>
+            <span>Approval Prospect</span></a>
             </li>
             <li class="nav-item">
              <a class="nav-link" href="{{ route('admin.prospect.index') }}">
