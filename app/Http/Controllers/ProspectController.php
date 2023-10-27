@@ -48,6 +48,11 @@ class ProspectController extends Controller
     return view('admin.prospectcreate', ['username' => $username]);
      
     }
+    public function creationcheck()
+    {
+        return view('admin.prospectcreatecheck');
+     
+    }
 
     /**
      * Show the form for creating a new resource.

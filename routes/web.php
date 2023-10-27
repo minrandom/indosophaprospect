@@ -55,6 +55,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	//Route::resource('/prospect',ProspectController::class)->middleware(['can:admin']);
 	Route::get('/prospecteditz/{prospect}',[ProspectController::class,'show'])->name('admin.prospecteditdata')->middleware(['auth', 'role:admin,fs,am,nsm']);
 	Route::get('/prospectvalidation',[ProspectController::class,'validationprospect'])->name('admin.prospectvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm']);
+	Route::get('/prospectcheck',[ProspectController::class,'creationcheck'])->name('admin.prospectcheckview')->middleware(['auth', 'role:admin,fs,am,nsm']);
 	Route::PATCH('/prospectvalidation/{prospect}',[ProspectController::class,'validationupdate'])->name('admin.prospectvalidationupdate')->middleware(['auth', 'role:admin,fs,am,nsm']);
 	Route::get('/prospectvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['auth', 'role:admin,fs,am,nsm']);
 	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect.index')->middleware(['auth', 'role:admin,fs,am,nsm']);
@@ -71,7 +72,8 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::resource('/principle','PrincipalController')->middleware(['can:admin']);
 	Route::get('data1','DataCompileController@getData')->name('data.compile');
 	Route::get('data2','DataCompileController@HospitalData')->name('data.hospital');
-	Route::get('data3','DataCompileController@ConfigData')->name('data.config');
+	Route::get('datacon','DataCompileController@ConfigData')->name('data.config');
+	Route::get('createddata','DataCompileController@CreatedData')->name('data.createdcheck');
 	Route::post('data3','DataCompileController@ProspectData')->name('data.prospect');
 	Route::post('/get-product-details','DataCompileController@getProductDetail')->name('data.proddetail');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');

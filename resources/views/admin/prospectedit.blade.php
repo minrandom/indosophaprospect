@@ -105,7 +105,7 @@
 <div class="notify" id="thealert"></div>
 <div class="row">
 
-    <!-- Earnings (Monthly) Card Example -->
+    <!-- 
     <div class="col-xl-10 col-md-6 mb-4">
         <div class="alert alert-light">
     <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn-updatereview">
@@ -129,8 +129,9 @@
             </div>
         </div>
     </a>
-</div>
     </div>
+    </div>Earnings (Monthly) Card Example -->
+
 </div>
 </div>
 
@@ -434,7 +435,7 @@
     
         <div class="form-group">
             <label for="editunit">Business Unit</label>
-            <select required="" id="editunit" name="editunit" class="form-control">
+            <select required="" id="editunit" name="editunit" class="form-control" readonly>
             </select>
         </div>
         <div class="form-group">
@@ -690,7 +691,6 @@ $('body').on("click",".btn-edit",function(){
 
 
                 var unitselect = $("#editunit");
-               populateSelectFromDatalist('editunit', response.bunit,"Pilih Business Unit");
                var firstunit = $("<option>").val(response.prospect.unit_id).text(response.prospect.unit.name).attr("selected", true);
                 unitselect.prepend(firstunit);
                 
@@ -766,9 +766,6 @@ $('body').on("click",".btn-edit",function(){
                 $("#qtyitem").val(response.prospect.qty);
                 
 
-
-
-                $("#qtyitem").val(response.prospect.qty);
           
             }
         })
@@ -784,7 +781,8 @@ $('body').on("click",".btn-edit",function(){
             data: $(this).serialize(),
             success:function(response){
               $("#produk-modal").modal("hide");
-               $("#thealert").html(response.message);
+               $("#thealert").html(response.message).focus();
+               
             }
         })
     });
@@ -822,6 +820,7 @@ $('body').on("click",".btn-edit",function(){
               localStorage.setItem("alertMessage", response.message);
                 // Reload the page
                 location.reload();
+                $('#thealert').focus();
             }
         })
     });
@@ -936,6 +935,7 @@ $('body').on("click",".btn-edit",function(){
                 // Reload the page
                 location.reload();
               // flash('success', 'Data berhasil diupdate');
+              $('#thealert').focus();
             }
         })
     });

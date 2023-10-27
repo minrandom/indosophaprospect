@@ -34,7 +34,7 @@
                             <th>Anggaran</th>
                             <th>Eta PO Date</th>
                             <th>Temperature</th>
-                            <th>Next Action</th>
+                           
                             <th>Table Action</th>
                             
                             
@@ -212,7 +212,7 @@
     {data: 'anggaran', name: 'anggaran'},
     {data: 'eta_po_date', name: 'eta_po_date'},
     {data: 'temperature', name: 'temperature'},
-    {data: 'naction', name: 'naction'},
+    
     {data: 'action', name: 'action', orderable: false, searchable: true},
             
             
