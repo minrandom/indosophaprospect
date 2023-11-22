@@ -105,28 +105,33 @@
 <div class="notify" id="thealert"></div>
 <div class="row">
 
-    <!-- Earnings (Monthly) Card Example -->
+    <!-- 
     <div class="col-xl-10 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
-          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn-updatereview">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                           Next Action Needed</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@if($prospect->review->next_action)"{{$prospect->review->next_action}}" @else "Silahkan Update Review" @endif</div>
-</br>
-                      
-                    
-                      </div>
-                    <div class="col-auto">
-                        <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+        <div class="alert alert-light">
+    <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn-updatereview">
+        <div class="light-alert-content">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                        Next Action Needed
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                        @if($prospect->review->next_action)
+                            {{$prospect->review->next_action}}
+                        @else
+                            Silahkan Update Review
+                        @endif
                     </div>
                 </div>
+                <div class="col-auto">
+                    <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                </div>
             </div>
-          </a>
         </div>
+    </a>
     </div>
+    </div>Earnings (Monthly) Card Example -->
+
 </div>
 </div>
 
@@ -170,8 +175,11 @@
             </div>
             <div class="col-sm-12">
 @can('admin')
-            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a>
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit Data</a>
 @endcan    
+@can('am')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit Data</a>
+@endcan   
           </div>
             
            
@@ -217,6 +225,9 @@
               <label for="Harga" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->submitted_price }}</label>
             </div>
 @can('admin')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
+@endcan 
+@can('am')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
 @endcan 
             
@@ -265,7 +276,15 @@
 @can('admin')
             <div class="col-sm-12">
               
-            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tgl</a>
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tanggal</a>
+              
+
+            </div>
+@endcan
+@can('am')
+            <div class="col-sm-12">
+              
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tanggal</a>
               
 
             </div>
@@ -312,6 +331,9 @@
             </div>
             
 @can('admin')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
+@endcan
+@can('am')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
 @endcan
 
@@ -413,7 +435,7 @@
     
         <div class="form-group">
             <label for="editunit">Business Unit</label>
-            <select required="" id="editunit" name="editunit" class="form-control">
+            <select required="" id="editunit" name="editunit" class="form-control" readonly>
             </select>
         </div>
         <div class="form-group">
@@ -605,9 +627,6 @@ $('body').on("click",".btn-edit",function(){
                 $("#creatorname").val(response.prospect.creator.name);
                 $("#sourceedit").val(response.prospect.prospect_source);
                 $("#provinceedit").val(response.prospect.province.name);
-               
-
-
                 $("#hospitalname").val(response.prospect.hospital.name);
 
                 var deptSelect = $("#departmentname");
@@ -672,7 +691,6 @@ $('body').on("click",".btn-edit",function(){
 
 
                 var unitselect = $("#editunit");
-               populateSelectFromDatalist('editunit', response.bunit,"Pilih Business Unit");
                var firstunit = $("<option>").val(response.prospect.unit_id).text(response.prospect.unit.name).attr("selected", true);
                 unitselect.prepend(firstunit);
                 
@@ -748,9 +766,6 @@ $('body').on("click",".btn-edit",function(){
                 $("#qtyitem").val(response.prospect.qty);
                 
 
-
-
-                $("#qtyitem").val(response.prospect.qty);
           
             }
         })
@@ -766,7 +781,8 @@ $('body').on("click",".btn-edit",function(){
             data: $(this).serialize(),
             success:function(response){
               $("#produk-modal").modal("hide");
-               $("#thealert").html(response.message);
+               $("#thealert").html(response.message).focus();
+               
             }
         })
     });
@@ -804,6 +820,7 @@ $('body').on("click",".btn-edit",function(){
               localStorage.setItem("alertMessage", response.message);
                 // Reload the page
                 location.reload();
+                $('#thealert').focus();
             }
         })
     });
@@ -879,8 +896,9 @@ $('body').on("click",".btn-edit",function(){
                 //$("#chance").val(response.prospect.review.chance);
                 var chanceSelect = $("#chance");
               chanceSelect.empty(); 
+              var chancenow = response.prospect.review.chance * 100 ;
 
-              var optionchance = $("<option>").val(response.prospect.review.chance).text(response.prospect.review.chance+"%");
+              var optionchance = $("<option>").val(response.prospect.review.chance).text(chancenow+"%");
                   chanceSelect.append(optionchance);
               
                   response.sourceoption.chance.forEach(function (chancests) {
@@ -918,6 +936,7 @@ $('body').on("click",".btn-edit",function(){
                 // Reload the page
                 location.reload();
               // flash('success', 'Data berhasil diupdate');
+              $('#thealert').focus();
             }
         })
     });

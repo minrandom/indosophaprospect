@@ -48,6 +48,11 @@ class ProspectController extends Controller
     return view('admin.prospectcreate', ['username' => $username]);
      
     }
+    public function creationcheck()
+    {
+        return view('admin.prospectcreatecheck');
+     
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -832,17 +837,46 @@ $send=0;
         $user=Auth::id();
         $prospect->load("creator","hospital","review","province","department","unit","config");
        $cek=0;
+       
+      // $prod=Config::where("id",$request->productlist)->first();
+       
 
-       $prod=Config::where("name",$request->productname);
-    
-       $c=$prospect->config->name;$d=$request->productname;
-  
+        $a=$prospect->unit_id; $b=$request->editunit;
+
+        $c=$prospect->config_id;$d=$request->productlist;
+
+        $e=$prospect->qty;$f=$request->qtyitem;
+        
         if($c==$d){$oke="oke";}else{
             updatelog::create([
                 'prospect_id'=>$prospect->id,
-                'col_update'=>'product_id',
+                'col_update'=>'config_id',
                 'col_before'=>$c,
                 'col_after'=>$d,
+                'logdate'=>now(),
+                'request_by'=>$user
+            ]);
+            $cek=$cek+1;
+        }
+
+        if($a==$b){$oke="oke";}else{
+            updatelog::create([
+                'prospect_id'=>$prospect->id,
+                'col_update'=>'unit_id',
+                'col_before'=>$a,
+                'col_after'=>$b,
+                'logdate'=>now(),
+                'request_by'=>$user
+            ]);
+            $cek=$cek+1;
+        }
+
+        if($e==$f){$oke="oke";}else{
+            updatelog::create([
+                'prospect_id'=>$prospect->id,
+                'col_update'=>'qty',
+                'col_before'=>$e,
+                'col_after'=>$f,
                 'logdate'=>now(),
                 'request_by'=>$user
             ]);

@@ -52,37 +52,22 @@
 
 
 /* Media query for screens with a minimum width of 1040px */
-@media (min-width: 1040px) {
+@media (min-width: 1440px) {
   /* CSS for larger screens */
   .fixed-card {
     /* Set a fixed height for the card container on larger screens */
-    max-height: 300px; /* Adjust this value as needed */
+    max-height: 600px; /* Adjust this value as needed */
   }
 
   .outer-container {
     /* Set a fixed height for the outer container to enable scrolling on larger screens */
-    height: 600px; /* Adjust this value as needed */
+    height: 800px; /* Adjust this value as needed */
 
     /* Add overflow property to enable scrolling on larger screens */
     overflow: auto;
   }
 }
 
-@media (min-width: 1024px) {
-  /* CSS for larger screens */
-  .fixed-card {
-    /* Set a fixed height for the card container on larger screens */
-    max-height: 500px; /* Adjust this value as needed */
-  }
-
-  .outer-container {
-    /* Set a fixed height for the outer container to enable scrolling on larger screens */
-    height: 600px; /* Adjust this value as needed */
-
-    /* Add overflow property to enable scrolling on larger screens */
-    overflow: auto;
-  }
-}
 
 
         

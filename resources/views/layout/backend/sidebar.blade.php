@@ -41,6 +41,11 @@
             <i class="fas fa-fw fa-file-alt"></i>
             <span>Create New Prospect</span></a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('admin.prospectcheckview') }}">
+            <i class="fas fa-fw fa-tasks"></i>
+            <span>Prospect Check</span></a>
+            </li>   
 
     @can('admin')
 
@@ -59,7 +64,9 @@
     </li>
 
 -->
-        
+     
+
+
             <li class="nav-item">
         <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
             <i class="fas fa-fw fa-tasks"></i>
@@ -70,6 +77,7 @@
             <i class="fas fa-fw fa-tasks"></i>
             <span>Prospect Review</span></a>
             </li>
+          
             <li class="nav-item">
         <a class="nav-link" href="{{ route('admin.prospect.index') }}">
             <i class="fas fa-fw fa-tasks"></i>
@@ -104,10 +112,10 @@
             <li class="nav-item">
 
     @elseCan('nsm')
-            <li class="nav-item">
-             <a class="nav-link" href="{{ route('admin.prospectcreation') }}">
+    <li class="nav-item">
+            <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
             <i class="fas fa-fw fa-tasks"></i>
-            <span>Create New Prospect</span></a>
+            <span>Approval Prospect</span></a>
             </li>
             <li class="nav-item">
              <a class="nav-link" href="{{ route('admin.prospect.index') }}">

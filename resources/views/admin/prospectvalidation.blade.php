@@ -300,6 +300,8 @@
     var table = $('.data-table').DataTable({
         processing: true,
         serverSide: true,
+        pageLength: 5,
+        lengthMenu: [[5, 10, 20], [5, 10, 20]],
         ajax: {
           url:"{{ route('data.prospect') }}",
           type:"POST",
@@ -678,8 +680,9 @@
             data: $("#validationForm").serialize(),
             success:function(response){
                 $('.data-table').DataTable().ajax.reload();
-                $("#validasi-modal").modal("hide")
-                flash("success",response.message)
+                $("#validasi-modal").modal("hide");
+                flash("success",response.message);
+                $('.notify').focus()
             }
         })
       }
@@ -875,8 +878,10 @@ $('body').on("click",".btn-edit",function(){
             data: $(this).serialize(),
             success:function(){
                 $('.data-table').DataTable().ajax.reload();
-                $("#edit-modal").modal("hide")
-                flash("success","Data berhasil diupdate")
+                $("#edit-modal").modal("hide");
+                flash("success","Data berhasil diupdate");
+                $('.notify').focus()
+                
             }
         })
     })
@@ -900,9 +905,10 @@ $('body').on("click",".btn-edit",function(){
             url: "/admin/province/"+id,
             method: "DELETE",
             success:function(){
-                $("#destroy-modal").modal("hide")
+                $("#destroy-modal").modal("hide");
                 $('.data-table').DataTable().ajax.reload();
-                flash('success','Data berhasil dihapus')
+                flash('success','Data berhasil dihapus');
+                
             }
         });
     })

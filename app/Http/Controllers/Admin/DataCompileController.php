@@ -58,6 +58,104 @@ public function getData()
  }
 
 
+public function CreatedData(){
+
+    $user = auth()->user();
+    
+    $usrole=$user->role;
+  
+    $usid=$user->id;
+    
+    $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+    ->where("status",'!=',1)
+    ->where("user_creator",$usid)
+    ->orderBy('status','ASC')
+    ->orderBy("id",'DESC')
+    ->get();
+
+    return DataTables::of($prv)
+    ->addIndexColumn()  
+    ->addColumn('submitdate', function ($prp) {
+        $dt=$prp->created_at->format('d-M-Y');
+        return $dt;
+        })
+    ->addColumn('hospital', function ($prp) {
+        $dep=$prp->department->name;
+        $host=$prp->hospital->name;
+        $muncul=$host."</br>".$dep;
+        return $muncul;
+    })
+    ->addColumn('price', function ($prp) {
+        
+        $rupiah =number_format($prp->config->price_include_ppn,0,',-','.');
+        return $rupiah ;
+    }) 
+    ->addColumn('statsname', function ($prp) {
+        switch ($prp->status){
+           
+            
+           case(1):
+               $tampil = "<H4><span class='badge stts bg-success text-light'>VALID</span></H4>";
+               return $tampil;
+               break;
+               case(404):
+                   $tampil = "<H4><span class='badge stts bg-danger text-light'>REJECT</span></H4>";
+                   return $tampil;
+               break;
+               case(99):
+                   $tampil = "<H4><span class='badge stts bg-dark text-light'>EXPIRED</span></H4>";
+               return $tampil;
+               break;
+   
+               case(0):
+               $tampil = "<H4><span class='badge stts bg-info text-light'>NEW</span></H4>";
+               return $tampil;
+   
+               
+           }
+   
+           })
+           ->addColumn('action', function($prp){
+        
+            $editform=route('admin.prospectedit',$prp);
+            $validasi=route('admin.prospectvalidation',$prp);
+           
+            switch($prp->status){
+                case(0):
+                    $btn = '<div class="row"><a xid(0)" id="'.$prp->id.'" class="btn btnaksi btn-info aksi btn-sm ml-2 btn-reminder">Reminder</a>';
+                    return $btn;
+                    break; 
+                case(99):
+                $btn = '<div class="row"><a xid(0)" id="'.$prp->id.'" class="btn btnaksi btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
+                return $btn;
+                break;
+            case(404):
+                $btn = "Reject Karena ".$prp->rejection->reason;
+                return $btn;
+                break;
+                default:
+            
+            $btn="";
+            if(auth()->user()->role!='fs'){
+            $btn .= '<div class="row"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn aksi btnaksi btn-warning btn-sm ml-2 btn-validasi">Approval</a></div>';
+            }
+            
+            $btn .= '<div class="row mt-1 mr-1"><a href="javascript:void(0)" id="'.$prp->id.'" class="btn aksi btnaksi btn-primary btn-sm ml-2  btn-edit">Edit</a></div>';
+            
+            return $btn;
+    
+            }
+             
+            })
+    ->rawColumns(['hospital','statsname',"action"])
+        
+    ->toJson();
+
+
+
+}
+
+
 public function getProductDetail(Request $request)
 {
     
@@ -551,9 +649,7 @@ public function getProductDetail(Request $request)
             $comdata="(".$creator.")</br>".$dt;
             return $comdata;
             })
-        ->addColumn('naction', function ($prp) {
-            return $prp->review->next_action;
-            })
+       
       
         ->addColumn('personInCharge', function ($prp) {
             return $prp->personInCharge ? $prp->personInCharge->name : "Pilih PIC saat validasi";
