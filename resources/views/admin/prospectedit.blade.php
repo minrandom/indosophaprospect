@@ -896,8 +896,9 @@ $('body').on("click",".btn-edit",function(){
                 //$("#chance").val(response.prospect.review.chance);
                 var chanceSelect = $("#chance");
               chanceSelect.empty(); 
+              var chancenow = response.prospect.review.chance * 100 ;
 
-              var optionchance = $("<option>").val(response.prospect.review.chance).text(response.prospect.review.chance+"%");
+              var optionchance = $("<option>").val(response.prospect.review.chance).text(chancenow+"%");
                   chanceSelect.append(optionchance);
               
                   response.sourceoption.chance.forEach(function (chancests) {
