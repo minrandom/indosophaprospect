@@ -87,9 +87,22 @@ class ProspectController extends Controller
         if($draft->hospital_id){$configdraft=Config::where("id",$draft->config_id)->first(); $data['configdraft']=$configdraft;}
        
         }
+
+
+        $employees = Employee::Where('area',$area)->get();
+        
+        $employees->load("user");
+        $piclist = $employees->map(function($employee){
+        return[
+        'user_id' => $employee ? $employee->user->id : "No User ID",
+        'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
+        ];
+        });
+
         
         $data['province'] = $provincelist;
         $data['draft']=$draft;
+        $data['pic']=$piclist;
        
        // $data['rumahsakit'] = $rumahsakit;
         $data['dept'] = $dept;

@@ -1,23 +1,87 @@
 @extends('layout.backend.app',[
     'title' => 'Prospect Review',
     'pageTitle' =>'Prospect Review',
-])
-
-@push('css')
-<link href="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-
-@endpush
-
-@section('content')
-<div class="notify"></div>
-
-<div class="card">
-    <div class="card-header">
+    ])
+    
+    @push('css')
+    <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    
+    @endpush
+    
+    @section('content')
+    <div class="notify"></div>
+    
+    <div class="card">
+      <div class="card-header">
         <!-- Button trigger modal -->
+        <h5>FILTER</h5>
+        <div class="row">
+          <div class="col-4">
+          <div class="col col-lg-8">
+            <div class="form-group">
+            <label for="sumberinfofilter">Sumber Prospect :</label>
+             <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required=""  >
+               
+               </select>
+              </div>
+          </div>  
+            <div class="col col-lg-8">
+              <div class="form-group">
+                  <label for="tempefilter">Temperature :</label>
+                   <select id="tempefilter" name="tempefilter" class="form-control dropdown" required=""  >
+                      <option value="1">HOT Prospect</option>
+                      <option value="2">Prospect</option>
+                      <option value="3">Funnel</option>
+                      <option value="4">Drop</option>
+                   </select>
+              </div>
+            </div>
+            </div>
+        
+        <div class="col-4">
+            <div class="col col-lg-8">
+              <div class="form-group">
+                <label for="provincefilter">Province :</label>
+                <select id="provincefilter" name="provincefilter" class="form-control dropdown" required=""  >
+                  
+                  </select>
+                </div>
+              </div>
+              <div class="col col-lg-8">
+                <div class="form-group">
+                <label for="picfilter">PIC :</label>
+                <select id="picfilter" name="picfilter" class="form-control dropdown" required=""  >
+            
+                 </select>
+              </div>
+              </div>
+          </div>
+        
+          <div class="col-4">
+      <div class="col col-lg-8">
+        <div class="form-group">
+            <label for="BUfilter">Business Unit :</label>
+             <select id="BUfilter" name="BUfilter" class="form-control dropdown" required=""  >
+            
+          </select>
+        </div>
+      </div>
+      <div class="col col-lg-8">
+        <div class="form-group">
+            <label for="catfilter">Product Category :</label>
+             <select id="catfilter" name="catfilter" class="form-control dropdown" required=""  >
+            
+          </select>
+        </div>
+      </div>
+
+    </div>
 
     </div>
     
+    
         <div class="card-body">
+                 
             <div class="table-responsive">    
                 <table class="table table-bordered data-table">
                     <thead>
@@ -34,6 +98,7 @@
                             <th>Anggaran</th>
                             <th>Eta PO Date</th>
                             <th>Temperature</th>
+                         
                            
                             <th>Table Action</th>
                             
@@ -170,6 +235,8 @@
 
   $(function () {
     
+
+
     var table = $('.data-table').DataTable({
         processing: true,
         serverSide: true,
@@ -219,6 +286,69 @@
            
         ]
     });
+
+    $.ajax({
+            url: "{{ route('admin.prospectcreate') }}",
+            method: "GET",
+            success:function(response){
+
+              var eventSelect = $("#sumberinfofilter");
+              populateSelectFromDatalist('sumberinfofilter', response.source.source,"Filter Sumber Informasi");
+              //populate from event database
+              response.event.forEach(function (event) {
+                  var option = $("<option>").val(event.id).text(event.name);
+                  eventSelect.append(option);
+                });
+              
+              var tempselect =$("#tempefilter");
+              var keterangantempe = "Filter Temperature"
+              var placeholderTempeOption = new Option(keterangantempe, '', true, true);
+              tempselect.append(placeholderTempeOption);
+              tempselect.select2({
+                placeholder: keterangantempe,
+                width: '100%' // Adjust the width to fit the container
+              });
+              
+              var provfilter = $("#provincefilter");
+              populateSelectFromDatalist('provincefilter', response.province,"Filter Provinsi");
+              
+              var keteranganpic = "Filter PIC"
+              var picfilter = $("#picfilter");
+              picfilter.select2({
+                placeholder: keteranganpic,
+                width: '100%' // Adjust the width to fit the container
+              });
+              response.pic.forEach(function (pic) {
+              var option = new Option(pic.name, pic.user_id);
+              picfilter.append(option);
+              });
+
+              var placeholderPicOption = new Option(keteranganpic, '', true, true);
+              picfilter.append(placeholderPicOption);
+
+              var unitSelect = $("#BUfilter");
+                populateSelectFromDatalist('BUfilter', response.bunit,"Pilih Business Unit");
+                var catSelect=$("#catfilter");
+                
+                function fetchcat(unitId) {
+                  // Make an AJAX call to retrieve hospitals based on provinceId
+                  $.ajax({
+                    url: "{{ route('admin.getCategoriesByUnit', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
+                    method: "GET",
+                    success: function (response) {
+                      populateSelectFromDatalist('catfilter', response.catopt,"Filter Category");
+                    }
+                  });
+                }
+             
+                unitSelect.on("change", function () {
+                  var selectedunitId = $(this).val();
+                  fetchcat(selectedunitId);
+                });
+
+
+            }
+          });
   });
 
 

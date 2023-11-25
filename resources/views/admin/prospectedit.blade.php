@@ -322,6 +322,10 @@
               <label for="jenisanggaran" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->review->jenis_anggaran }}</label>
             </div>
             <div class="col-sm-12">
+              <label for="etapodate" class="col-sm-3 col-form-label font-weight-bold">ETA PO Date:</label>
+              <label for="etapodate" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{date('d-M-Y', strtotime($prospect->eta_po_date))}}</label>
+            </div>
+            <div class="col-sm-12">
               <label for="Chance" class="col-sm-3 col-form-label font-weight-bold">Chance :</label>
               <label for="Chance" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ number_format($prospect->review->chance * 100, 0)}}%</label>
             </div>
@@ -507,6 +511,16 @@
             <select id="jenis_anggaran" name="jenis_anggaran" class="form-control">
             </select>
         </div>
+
+
+        <div class="form-group">
+            <label for="etapodate">ETA PO Date</label>
+            <input type="date"id="etapodate" name="etapodate" class="form-control">
+        </div>
+
+
+
+
         <div class="form-group">
             <label for="chance">Chance</label>
             <select id="chance" name="chance" class="form-control">
@@ -893,6 +907,19 @@ $('body').on("click",".btn-edit",function(){
                   jenisanggaranSelect.append(option);
                 });
           
+
+                var today = new Date();
+
+                // Calculate the date after 30 days from today
+                var thirtyDaysFromToday = new Date(today);
+                thirtyDaysFromToday.setDate(today.getDate() + 30);
+
+                var todayFormatted = today.toISOString().split('T')[0];
+                var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+ 
+                $("#etapodate").val(response.prospect.eta_po_date).attr('min', thirtyDaysFromTodayFormatted);;
+
+
                 //$("#chance").val(response.prospect.review.chance);
                 var chanceSelect = $("#chance");
               chanceSelect.empty(); 
