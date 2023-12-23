@@ -22,5 +22,8 @@ class Hospital extends Model
     public function mappings(){
         return $this->hasMany(Mapping::class);
     }
+    public function schedules(){
+        return $this->hasMany(schedule::class);
+    }
 
 }
