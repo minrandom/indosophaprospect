@@ -11,6 +11,7 @@ use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\ProspectController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ScheduleController;
 
 //Namespace User
 use App\Http\Controllers\User\UserController;
@@ -78,9 +79,12 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::post('/get-product-details','DataCompileController@getProductDetail')->name('data.proddetail');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');
 	Route::get('/dataa',[PrincipalBrandController::class,'index'])->name('dataa')->middleware(['can:admin']);
+	Route::get('/scheduledata','ScheduleController@index')->name('schedule.index');
+	Route::get('/scheduleupdate','ScheduleController@update')->name('events.update');
+	Route::get('/schedulestore','ScheduleController@store')->name('events.store');
 	
 	//Route View
-	
+	Route::view('/jadwal','admin.scheduling')->name('schedule');
 	Route::get('/load-tab-content', 'TabController@loadTabContent')->name('load-tab-content');
 	Route::view('/404-page','admin.404-page')->name('404-page');
 	Route::view('/blank-page','admin.blank-page')->name('blank-page');
