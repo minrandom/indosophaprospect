@@ -79,9 +79,6 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::post('/get-product-details','DataCompileController@getProductDetail')->name('data.proddetail');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');
 	Route::get('/dataa',[PrincipalBrandController::class,'index'])->name('dataa')->middleware(['can:admin']);
-	Route::get('/scheduledata','ScheduleController@index')->name('schedule.index');
-	Route::get('/scheduleupdate','ScheduleController@update')->name('events.update');
-	Route::get('/schedulestore','ScheduleController@store')->name('events.store');
 	
 	//Route View
 	Route::view('/jadwal','admin.scheduling')->name('schedule');
@@ -98,8 +95,11 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::view('/chart','admin.chart')->name('chart');
 	Route::view('/tables','admin.tables')->name('tables');
 	
-
+	
 });
+Route::get('/scheduledata','ScheduleController@index')->name('schedule.index');
+Route::PATCH('/scheduleupdate','ScheduleController@update')->name('events.update');
+Route::POST('/schedulestore','ScheduleController@store')->name('events.store');
 
 Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'fs'],function(){
 	Route::get('/',[UserController::class,'index'])->name('user');

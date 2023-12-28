@@ -20,9 +20,7 @@
 
     <!-- Custom styles for this template-->
     <link href="{{ asset('template/backend/sb-admin-2') }}/css/sb-admin-2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
+   
 <!-- Other head content -->
 
 
@@ -48,6 +46,8 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('template/backend/sb-admin-2') }}/js/sb-admin-2.min.js"></script>
+
+   
 
 </body>
 

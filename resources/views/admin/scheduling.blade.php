@@ -27,12 +27,117 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 
 @section('content')
 <div class="notify"></div>
+<button onclick="showSwal()">Show Swal</button>
 
 <div class="row">
     <div class="col-lg-8">
       <div class="card mb-6">
+        <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Create Schedule and Filter</h6>
+          </div>
+
+        
+                <div class="card-body col-sm-10">
+                   
+                    <a class="btn btn-info" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">Input Schedule Button</a>
+                    <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" aria-expanded="false" aria-controls="multiCollapseExample2">Calendar Filter</button>                
+                </div>
+            
+                
+                <div class="col-sm-12">
+                    <div class="collapse multi-collapse" id="multiCollapseExample1">
+                        <div class="card card-body">
+                            <form id="createEventForm">
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="createTask" class="form-label">Task</label>
+                                            <input type="text" class="form-control" id="createTask" placeholder="Task" style="height: 50px;">
+                                        </div>
+                                        <!--
+                            <div class="mb-3">
+                                <label for="createTitle" class="form-label">Event Title</label>
+                                <input type="text" class="form-control" id="createTitle" placeholder="Event Title">
+                                <span id="createTitleError" class="text-danger"></span>
+                            </div>-->
+                            <div class="mb-3">
+                                <label for="createStartDate" class="form-label">Start Date</label>
+                                <input type="datetime-local" class="form-control" id="createStartDate" placeholder="Start Date">
+                            </div>
+                            <div class="mb-3">
+                                <label for="createEndDate" class="form-label">End Date</label>
+                                <input type="datetime-local" class="form-control" id="createEndDate" placeholder="End Date">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="createProvince" class="form-label">Province</label>
+                                <br>
+                                <select class="form-select" id="createProvince">
+                                    <option value="1">Province 1</option>
+                                    <option value="2">Province 2</option>
+                                    <!-- Add more options as needed -->
+                                </select>
+                            </div>
+                            <br>
+                            <div class="mb-3">
+                                <label for="createDepartment" class="form-label">Department</label>
+                                <br>
+                                <select class="form-select" id="createDepartment">
+                                    <option value="1">Department 1</option>
+                                    <option value="2">Department 2</option>
+                                    <!-- Add more options as needed -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="createRs" class="form-label">RS</label>
+                                <br>
+                                <select class="form-select" id="createRs">
+                                    <option value="1">RS 1</option>
+                                    <option value="2">RS 2</option>
+                                    <!-- Add more options as needed -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 text-center mb-4">
+                            <button type="button" id="createBtn" class="btn btn-primary">Create Event</button>
+                        </div>
+                    </div>
+
+                </form>
+                </div>
+            </div>
+        
+        </div>
+
+        <div class="col-sm-12">
+                            <div class="collapse multi-collapse" id="multiCollapseExample2">
+                    <div class="card card-body">
+                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                    </div>
+                         </div>
+        </div>
+          
+      
+    
+        
+    </div>
+    </div>
+
+    
+</div> 
+
+</br>
+<div class="row">
+    <div class="col-lg-8">
+      <div class="card mb-6">
          <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Calendar Test</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">Schedule Calendar</h6>
           </div>
           <div class="card-body col-sm-12">
             <div id="calendar"></div>
@@ -45,7 +150,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
     <div class="col-lg-4">
       <div class="card mb-6">
          <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Calendar Test</h6>
+                  <h6 class="m-0 font-weight-bold text-primary">Task List</h6>
           </div>
           <div class="card-body col-sm-4">
             
@@ -117,70 +222,11 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 <!-- Existing modal code... -->
 
 <!-- Create Event Form Container -->
-<div class="col-md-11 offset-1 mt-5 mb-5">
-  <div class="row border p-4 mb-4">
-      <div class="col-md-12 text-center mb-4">
-          <h4>Create Event</h4>
-      </div>
-      <div class="col-md-6">
-          <form id="createEventForm">
-              <div class="mb-3">
-                  <label for="createTitle" class="form-label">Event Title</label>
-                  <input type="text" class="form-control" id="createTitle" placeholder="Event Title">
-                  <span id="createTitleError" class="text-danger"></span>
-              </div>
-              <div class="mb-3">
-                  <label for="createStartDate" class="form-label">Start Date</label>
-                  <input type="datetime-local" class="form-control" id="createStartDate" placeholder="Start Date">
-              </div>
-              <div class="mb-3">
-                  <label for="createEndDate" class="form-label">End Date</label>
-                  <input type="datetime-local" class="form-control" id="createEndDate" placeholder="End Date">
-              </div>
-          </div>
-          <div class="col-md-6">
-              <div class="mb-3">
-                  <label for="createProvince" class="form-label">Province</label>
-                  <br>
-                  <select class="form-select" id="createProvince">
-                      <option value="1">Province 1</option>
-                      <option value="2">Province 2</option>
-                      <!-- Add more options as needed -->
-                  </select>
-              </div>
-              <br>
-              <div class="mb-3">
-                  <label for="createRs" class="form-label">RS</label>
-                  <br>
-                  <select class="form-select" id="createRs">
-                      <option value="1">RS 1</option>
-                      <option value="2">RS 2</option>
-                      <!-- Add more options as needed -->
-                  </select>
-              </div>
-              <div class="mb-3">
-                  <label for="createDepartment" class="form-label">Department</label>
-                  <br>
-                  <select class="form-select" id="createDepartment">
-                      <option value="1">Department 1</option>
-                      <option value="2">Department 2</option>
-                      <!-- Add more options as needed -->
-                  </select>
-              </div>
 
-            </div>
-            <div class="col-md-12 text-center mb-4">
-                <label for="createTask" class="form-label">Task</label>
-                <input type="text" class="form-control" id="createTask" placeholder="Task" style="height: 50px;">
-            </div>
-            <div class="col-md-12 text-center mb-4">
-              <button type="button" id="createBtn" class="btn btn-primary">Create Event</button>
-            </div>
-          </form>
-  </div>
+  
   <!-- Calendar Container -->
 
-</div>
+
          
  
           
@@ -197,6 +243,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js"></script>
+ <script src="{{ asset('template/backend/sb-admin-2')}}/vendor/sweetalert/sweetalert.all.js"></script>
 
 <!-- Add jQuery library (required) 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
@@ -224,41 +271,58 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 
 
 <script>
-  $(document).ready(function () {
+ $(document).ready(function () {
+    $.ajax({
+        url: "{{ route('schedule.index') }}",
+        method: "GET",
+        success: function (response) {
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev, next today',
+                    center: 'title',
+                   // right: 'month,agendaWeek',
+                },
+                events: response, // Assuming that the response contains the events directly
+                selectable: true,
+                selectHelper: true,
+                editable: true, // Enable drag and drop
+                eventAfterAllRender: function (view) {
+                    // Check if the current view is month
+                    if (view.name === 'month') {
+                        // Hide the time indicator in month view
+                        $('.fc-time').hide();
+                    } else {
+                        // Show the time indicator in other views
+                        $('.fc-time').show();
+                    }
+                },
+                eventRender: function (event, element) {
+                    // Customize the event HTML here
+                //    element.find('.fc-time').hide(),
+                   element.find('.fc-title').append('<br>' + event.hospital + ' | ' + event.department);
+               },
+               //slotEventOverlap: true,
+                /*
 
-    //  $.ajax({
-      //  url: "{{ route('schedule.index') }}",
-    //  dataType: 'json',
-   
-   
+                eventResize: function (event, delta, revertFunc) {
+                    handleEventResize(event, delta, revertFunc);
+                },
+                eventDrop: function (event) {
+                    handleEventDrop(event);
+                },
+                */
+                eventClick: function (event) {
+                    openEventModal(event);
+                },
+                // Other calendar options...
+            });
+        },
+        error: function (error) {
+            console.error("Error fetching events:", error);
+        }
+    });
+});
 
-      $('#calendar').fullCalendar({
-          header: {
-              left: 'prev, next today',
-              center: 'title',
-              right: 'month, agendaWeek, agendaDay',
-          },
-          //events: response.events,
-          selectable: true,
-          selectHelper: true,
-          editable: true, // Enable drag and drop
-          /*
-          eventResize: function (event, delta, revertFunc) {
-              handleEventResize(event, delta, revertFunc);
-          },
-          eventDrop: function (event) {
-              handleEventDrop(event);
-          },
-          eventClick: function (event) {
-              openEventModal(event);
-          },*/
-          // Other calendar options...
-       });
-
-      
-   // });
-
-  });
       // Function to handle event drop (drag and drop)
   /*
       function handleEventDrop(event) {
@@ -304,7 +368,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
   });
 }
 
-
+*/
       // Function to open event modal for viewing/updating
       function openEventModal(event) {
           $('#eventId').val(event.id);
@@ -317,12 +381,12 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
           $('#endDate').val(moment(event.end).format('YYYY-MM-DD HH:mm:ss'));
 
           $('#eventModal').modal('toggle');
-      }
+      };
 
       // Function to handle modal close and update event
       $('#updateBtn').click(function () {
           var id = $('#eventId').val();
-          var title = $('#title').val();
+          var task = $('#title').val();
           var province = $('#province').val();
           var rs = $('#rs').val();
           var department = $('#department').val();
@@ -331,10 +395,10 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
           var endDate = moment($('#endDate').val()).format('YYYY-MM-DD HH:mm:ss');
 
           var eventData = {
-      title: title,
+      task: task,
       province: province,
-      rs: rs,
-      department: department,
+      hospital_id: rs,
+      department_id: department,
       task: task,
       start_date: startDate,
       end_date: endDate
@@ -359,8 +423,9 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
               },
           });
       });
+
       $('#createBtn').click(function () {
-          var createTitle = $('#createTitle').val();
+          var createTitle = 'Judul-Default';
           var createProvince = $('#createProvince').val();
           var createRs = $('#createRs').val();
           var createDepartment = $('#createDepartment').val();
@@ -374,8 +439,8 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
               rs: createRs,
               department: createDepartment,
               task: createTask,
-              start_date: createStartDate,
-              end_date: createEndDate
+              start_time: createStartDate,
+              end_time: createEndDate
           };
 
           $.ajax({
@@ -393,13 +458,13 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
                       icon: 'success',
                       title: 'Event Created Successfully',
                       text: 'Terimakasih',
-                  }).then((result) => {
-    // Check if the user clicked "OK"
-    if (result.isConfirmed || result.isDismissed) {
-        // Reload the entire page
-        location.reload();
-    }
-});
+                            }).then((result) => {
+                // Check if the user clicked "OK"
+                if (result.isConfirmed || result.isDismissed) {
+                    // Reload the entire page
+                    location.reload();
+                }
+                });
 
 
               },
@@ -410,7 +475,14 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
           });
       });
 
-  });*/
+      function showSwal() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Test Swal',
+                text: 'This is a test Swal notification.',
+            });
+        }
+
 </script>
 
 

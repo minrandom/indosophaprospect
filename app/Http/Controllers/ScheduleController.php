@@ -28,12 +28,13 @@ class ScheduleController extends Controller
 
           $events[] = [
               'id'   => $booking->id,
-              'province' => $booking->province,
-              'rs' => $booking->rs,
-              'department' => $booking->department,
-              'task' => $booking->task,
-              'start' => $booking->start_date,
-              'end' => $booking->end_date,
+              'title' => $booking->task,
+              'hospital' => $booking->hospital_id,
+              'department' => $booking->department_id,
+              'status' => $booking->status,
+              'start' => $booking->start_time,
+              'end' => $booking->end_time,
+              'created_by' => $booking->created_by,
               'color' => $color
           ];
       }
@@ -60,6 +61,49 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         //
+        $request->validate([
+            'title' => 'string',
+            'province' => 'string',
+            'rs' => 'string',
+            'department' => 'string',
+            'task' => 'string',
+            'start_time' => 'date_format:Y-m-d H:i:s',
+            'end_time' => 'date_format:Y-m-d H:i:s|after_or_equal:start_time'
+        ]);
+        
+        $color = null;
+        if ($request->title == 'Test') {
+            $color = '#924ACE';
+        }
+
+        $user=auth()->user();
+        $usid=$user->id;
+
+        $booking = schedule::create([
+           // 'title' => $request->title,
+           // 'province_id' => $request->province,
+            'hospital_id' => $request->rs,
+            'department_id' => $request->department,
+            'task' => $request->task,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'created_by'=>$usid,
+
+        ]);
+        
+        return response()->json([
+            'id' => $booking->id,
+            'start' => $booking->start_date,
+            'end' => $booking->end_date,
+            'task' => $booking->task,
+            'hospital_id' => $booking->hospital_id,
+            'department_id' => $booking->department_id,
+            'color' => $color ?: '',
+        ]);
+
+
+
+
     }
 
     /**
