@@ -16,12 +16,16 @@ class schedule extends Model
         return $this->belongsTo(Hospital::class);
     }
 
-    public function department_id(){
+    public function department(){
         return $this->belongsTo(Department::class);
     }
 
     public function creator(){
         return $this->belongsTo(User::class,'created_by');
+    }
+
+    public function createFor(){
+        return $this->belongsTo(User::class,'create_for');
     }
 
     public function validator(){

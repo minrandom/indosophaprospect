@@ -116,11 +116,18 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
         </div>
 
         <div class="col-sm-12">
-                            <div class="collapse multi-collapse" id="multiCollapseExample2">
-                    <div class="card card-body">
-                        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
-                    </div>
-                         </div>
+            <div class="collapse multi-collapse" id="multiCollapseExample2">
+                <div class="card card-body">
+                            <div class="form-group">
+                                <label for="userFilter">Filter by User:</label>
+                                <select class="form-control" id="userFilter">
+                                    <option value="">All Users</option>
+                                    
+                                </select>
+                            </div> 
+
+                </div>
+            </div>
         </div>
           
       
@@ -133,32 +140,44 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 </div> 
 
 </br>
+
 <div class="row">
+    <!-- Calendar Column -->
     <div class="col-lg-8">
-      <div class="card mb-6">
-         <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Schedule Calendar</h6>
-          </div>
-          <div class="card-body col-sm-12">
-            <div id="calendar"></div>
-           
-          </div>
-      </div>
-    
+        <div class="card mb-6">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Schedule Calendar</h6>
+            </div>
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
     </div>
 
+    <!-- Task List Column -->
     <div class="col-lg-4">
-      <div class="card mb-6">
-         <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Task List</h6>
-          </div>
-          <div class="card-body col-sm-4">
-            
-            <div id="data">test masuk data</div>
-          </div>
-      </div>
+        <div class="card mb-6">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Task List</h6>
+            </div>
+            <div class="card-body">
+
+                <!-- Bootstrap Alert Inside Jumbotron 
+                <div class="jumbotron" id="taskListJumbotron">
+                    <h1 class="display-4">Task List</h1>-->
+
+                    <!-- Bootstrap Alert -->
+                    <ul class="list-group" id="taskList">
+                        <!-- List of calendar events will be dynamically inserted here -->
+                    </ul>
+                    <!-- End Bootstrap Alert -->
+
+               
+                <!-- End Bootstrap Alert Inside Jumbotron -->
+            </div>
+        </div>
     </div>
-  </div>
+</div>
    
 
 <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -271,18 +290,24 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 
 
 <script>
- $(document).ready(function () {
+
+
+$(document).ready(function () {
+    var calendar = $('#calendar');
+    var userFilter = $('#userFilter');
     $.ajax({
         url: "{{ route('schedule.index') }}",
         method: "GET",
         success: function (response) {
+           var eventsdata = response.schedule;
+           var userNames = response.userdata
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev, next today',
                     center: 'title',
-                   // right: 'month,agendaWeek',
+                    // right: 'month,agendaWeek',
                 },
-                events: response, // Assuming that the response contains the events directly
+                events: eventsdata, // Assuming that the response contains the events directly
                 selectable: true,
                 selectHelper: true,
                 editable: true, // Enable drag and drop
@@ -298,30 +323,86 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
                 },
                 eventRender: function (event, element) {
                     // Customize the event HTML here
-                //    element.find('.fc-time').hide(),
-                   element.find('.fc-title').append('<br>' + event.hospital + ' | ' + event.department);
-               },
-               //slotEventOverlap: true,
-                /*
-
-                eventResize: function (event, delta, revertFunc) {
-                    handleEventResize(event, delta, revertFunc);
+                    // element.find('.fc-time').hide(),
+                    element.find('.fc-title').append('<br>' + event.hospital + ' | ' + event.department);
                 },
-                eventDrop: function (event) {
-                    handleEventDrop(event);
-                },
-                */
                 eventClick: function (event) {
                     openEventModal(event);
                 },
+
+                
+
+
                 // Other calendar options...
             });
+
+            $('#taskList').empty();
+                    // Filter and update tasks based on the current month
+                eventsdata.forEach(function (event) {   
+                    if(event.status<2){
+                        var StartDate = moment(event.start).format('DD/MMM/YY HH:mm');
+                     $('#taskList').append('<li class="list-group-item d-flex justify-content-between align-items-center">' +event.hospitalName+"-"+event.departmentName+'</br> '+event.title+'</br>'+StartDate + ' <span class="badge badge-primary badge-pill">14</span></li>');
+                    }
+                        
+                });
+            userFilter.select2({
+                placeholder: 'All Users',
+                width: '40%',
+            });
+            userFilter.empty();
+            userFilter.append('<option value="">All Users</option>');
+            $.each(userNames, function (userId, userName) {
+                userFilter.append('<option value="' + userId + '">' + userName + '</option>');
+            });
+
+           
         },
         error: function (error) {
             console.error("Error fetching events:", error);
         }
     });
+
+    userFilter.on('change', function () {
+        var selectedUserId = $(this).val();
+    
+        // Refetch events based on the selected user ID
+        $.ajax({
+            url: "{{ route('schedule.index') }}",
+            method: "GET",
+            data: { user_id: selectedUserId }, // Pass the selected user ID as a parameter
+            success: function (response) {
+                console.log("Response from server:", response);
+                var eventfilter = response.filterschedule;
+                console.log("Filtered events:", eventfilter);
+
+                $('#taskList').empty();
+
+
+                // Update FullCalendar with filtered events
+                calendar.fullCalendar('removeEvents');
+                calendar.fullCalendar('addEventSource', eventfilter);
+                // Refetch events to display the newly added events
+                calendar.fullCalendar('refetchEvents');
+                
+                eventfilter.forEach(function (event) {
+                    if(event.status<2){
+                        var StartDate = moment(event.start).format('DD/MMM/YY HH:mm');
+                     $('#taskList').append('<li class="list-group-item d-flex justify-content-between align-items-center">' +event.hospitalName+"-"+event.departmentName+'</br> '+event.title+'</br>'+StartDate + ' <span class="badge badge-primary badge-pill">14</span></li>');
+                    }
+            });
+
+                //calendar.fullCalendar('refetchEvents');
+            },
+            error: function (error) {
+                console.error("Error fetching filtered events:", error);
+            }
+        });
+    });
+
+
+
 });
+
 
       // Function to handle event drop (drag and drop)
   /*

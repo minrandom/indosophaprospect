@@ -27,6 +27,11 @@ class User extends Authenticatable
     public function scheduleCreators(){
         return $this->hasMany(schedule::class,"created_by");
     }
+
+    public function scheduleFor(){
+        return $this->hasMany(schedule::class,"create_for");
+    }
+
     public function scheduleValidators(){
         return $this->hasMany(schedule::class,"validation_by");
     }
