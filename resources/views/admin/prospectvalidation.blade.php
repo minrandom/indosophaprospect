@@ -15,10 +15,84 @@
     <div class="card-header">
         <!-- Button trigger modal -->
         <a href="javascript:void(0)" id="{{ Auth::user()->name }}" class="btn btn-primary btn-sm ml-2 btn-cr8">Tambah Data</a>
+  
+        <!-- Button trigger modal 
+        <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+        Filter
+        </button>
+-->
+  
+
+
+        <div class="collapse" id="filterCollapse">
+         <div class="row mt-4">
+          <div class="col-4">
+          <div class="col col-lg-8">
+            <div class="form-group">
+            <label for="sumberinfofilter">Sumber Prospect :</label>
+             <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required=""  >
+               
+               </select>
+              </div>
+          </div>  
+            <div class="col col-lg-8">
+              <div class="form-group">
+                  <label for="tempefilter">Temperature :</label>
+                   <select id="tempefilter" name="tempefilter" class="form-control dropdown" required=""  >
+                      <option value="1">HOT Prospect</option>
+                      <option value="2">Prospect</option>
+                      <option value="3">Funnel</option>
+                      <option value="4">Drop</option>
+                   </select>
+              </div>
+            </div>
+            </div>
+        
+        <div class="col-4">
+            <div class="col col-lg-8">
+              <div class="form-group">
+                <label for="provincefilter">Province :</label>
+                <select id="provincefilter" name="provincefilter" class="form-control dropdown" required=""  >
+                  
+                  </select>
+                </div>
+              </div>
+              <div class="col col-lg-8">
+                <div class="form-group">
+                <label for="picfilter">PIC :</label>
+                <select id="picfilter" name="picfilter" class="form-control dropdown" required=""  >
+            
+                 </select>
+              </div>
+              </div>
+          </div>
+        
+          <div class="col-4">
+      <div class="col col-lg-8">
+        <div class="form-group">
+            <label for="BUfilter">Business Unit :</label>
+             <select id="BUfilter" name="BUfilter" class="form-control dropdown" required=""  >
+            
+          </select>
+        </div>
+      </div>
+      <div class="col col-lg-8">
+        <div class="form-group">
+            <label for="catfilter">Product Category :</label>
+             <select id="catfilter" name="catfilter" class="form-control dropdown" required=""  >
+            
+          </select>
+        </div>
+      </div>
+
     </div>
+
+    </div>
+    </div>
+  </div>
     
         <div class="card-body">
-            <div class="table-responsive">    
+            <div class="table-responsive drag">    
                 <table class="table table-bordered data-table">
                     <thead>
                         <tr>
@@ -308,8 +382,8 @@
           data: function (d) {
               d.status=0 ;d.url="prospectvalidation"
            }
-      },
-            
+
+      },   
         columns: [
           {data: 'DT_RowIndex' , name: 'rowindex'},
           {data: 'submitdate' , name: 'submitdate'},
@@ -320,7 +394,7 @@
             //{data: 'department' , name: 'department'},
             //{data: 'unit' , name: 'unit'},
      
-            {data: 'namaprod' , name: 'namaprod'},
+            {data: 'namaprod' , name: 'namaprod',searchable:true},
         
             {data: 'price' , name: 'price'},
             {data: 'qty' , name: 'qty'},

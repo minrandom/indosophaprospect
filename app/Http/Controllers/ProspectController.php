@@ -65,6 +65,7 @@ class ProspectController extends Controller
         $sourceoption = $this->optiondata()->getData();
         $usid=Auth::user()->id;
         $user=User::with('employee')->where('id',$usid)->first();
+        $role=$user->role;
         $area=$user->employee->area;
         if($area=="HO"){
         $provincelist=Province::all();
@@ -88,17 +89,56 @@ class ProspectController extends Controller
        
         }
 
+        $specialrole = ['admin','direksi'];
 
-        $employees = Employee::Where('area',$area)->get();
+        if($area=="HO")
+        {
+        if(in_array($role, $specialrole)){
+            $employees = Employee::all();
+            $employees->load("user");
+            $piclist = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            
+            ];
+            }); 
+        }
+        else{
+        $usersamerole=User::where('role',$role)->with('employee')->get();
+        $piclist = $usersamerole->map(function($users){
+            return[
+            'user_id' => $users ? $users->id : "No User ID",
+            'name' => $users ? $users->employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            
+            ];
+            });  
+        } 
         
-        $employees->load("user");
-        $piclist = $employees->map(function($employee){
-        return[
-        'user_id' => $employee ? $employee->user->id : "No User ID",
-        'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
-        ];
-        });
-
+        }
+        else 
+         {
+          if(in_array($role, ['am','fs'])){
+            $employees = Employee::Where('area',$area)->get();
+            $employees->load("user");
+            $piclist = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
+            ];
+            });
+          }else{
+            $employees = Employee::where('area', 'LIKE', '%' . $area . '%')->get();
+            $employees->load("user");
+            $piclist = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
+            ];
+            });
+          } 
+         }
+        
         
         $data['province'] = $provincelist;
         $data['draft']=$draft;
@@ -210,8 +250,8 @@ class ProspectController extends Controller
        Review::create([
         'prospect_id'=>$id,
         'anggaran_status'=>$anggaranopt,
-        'jenis_anggaran'=>$anggaranjnsopt
-
+        'jenis_anggaran'=>$anggaranjnsopt,
+        'comment'=>$request->cr8infoextra,
         ]);
 
         $newProspect = Prospect::with("creator","province")
@@ -603,13 +643,13 @@ $send=0;
     }     
 
         $data1='<div class="alert alert-success" role="alert">
-        <h4 class="alert-heading">Terima Kasih sudah Mengupdate</h4>
+        <h4 class="alert-heading">Terima Kasih sudah Update Review</h4>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
         </div>';
         $data='<div class="alert alert-success" role="alert">
-        <h4 class="alert-heading">Terima Kasih sudah Mengupdate</h4>
+        <h4 class="alert-heading">Terima Kasih sudah Update Review</h4>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -628,6 +668,7 @@ $send=0;
         //var_dump($request->data);
         $user=Auth::id();
      $review=Review::where('prospect_id',$prospect->id)->first();
+     $prospect = Prospect::where('id',$prospect->id)->first();
     $send=0;
          $user2=$request->user_status?$request->user_status:"Belum Tahu";$user1=$review->user_status?$review->user_status:"Belum Tahu";
         $pur2=$request->purchasing_status?$request->purchasing_status:"Belum Tahu";$pur1=$review->purchasing_status?$review->purchasing_status:"Belum Tahu";
@@ -636,7 +677,29 @@ $send=0;
         $jns2=$request->jenis_anggaran?$request->jenis_anggaran:"Belum Tahu";$jns1=$review->jenis_anggaran?$review->jenis_anggaran:"Belum Tahu";
         $chc2=$request->chance?$request->chance:0;$chc1=$review->chance?$review->chance:0;
         $nac2=$request->next_action?$request->next_action:"Mapping";$nac1=$review->next_action?$review->next_action:"Mapping";
+        //dd($prospect->eta_po_date);
+        $eta2=$request->etapodate?$request->etapodate:"";$eta1=$review->etapodate?$prospect->eta_po_date:"";
 
+
+        if($eta1==$eta2){$oke="oke";}else{
+                $prospect->update([
+                    'eta_po_date'=>$eta2,
+             ]);
+
+            updatelog::create([
+                'prospect_id'=>$prospect->id,
+                'logdate'=>now(),
+                'approve_date'=>now(),
+                'logdate'=>now(),
+                'col_update'=>"eta_po_date",
+                'col_before'=>$eta1,
+                'col_after'=>$eta2,
+                'request_by'=>$user,
+                'approve_by'=>13,
+                'req_status'=>'approve_by_system',
+            ]);
+            $send=$send+1;
+        }     
         if($user1==$user2){$oke="oke";}else{
                 $review->update([
                     'user_status'=>$user2,
@@ -749,7 +812,7 @@ $send=0;
        
 
         $data1='<div class="alert alert-success" role="alert">
-        <h4 class="alert-heading">Terima Kasih sudah Mengupdate</h4>
+        <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -764,13 +827,7 @@ $send=0;
    
     }
 
-    
-
-
-
-
-   
-
+  
      public function infoupdaterequest(Request $request, Prospect $prospect)
     {
         $user=Auth::id();

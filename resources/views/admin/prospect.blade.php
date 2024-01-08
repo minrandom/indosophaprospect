@@ -5,7 +5,7 @@
     
     @push('css')
     <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-    
+
     @endpush
     
     @section('content')
@@ -14,14 +14,25 @@
     <div class="card">
       <div class="card-header">
         <!-- Button trigger modal -->
-        <h5>FILTER</h5>
-        <div class="row">
+        <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+        Filter
+        </button>
+<!--
+        <button class="btn btn-primary btn-sm ml-2q" type="button" id="downloadDataButton">
+        Download data
+        </button>-->
+
+        <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
+
+
+        <div class="collapse" id="filterCollapse">
+         <div class="row mt-4">
           <div class="col-4">
           <div class="col col-lg-8">
             <div class="form-group">
             <label for="sumberinfofilter">Sumber Prospect :</label>
              <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required=""  >
-               
+             <option value="8888" selected>Show All</option> 
                </select>
               </div>
           </div>  
@@ -29,10 +40,11 @@
               <div class="form-group">
                   <label for="tempefilter">Temperature :</label>
                    <select id="tempefilter" name="tempefilter" class="form-control dropdown" required=""  >
-                      <option value="1">HOT Prospect</option>
-                      <option value="2">Prospect</option>
-                      <option value="3">Funnel</option>
-                      <option value="4">Drop</option>
+                      <option value="8888" selected>Show All</option>
+                      <option value="1">HOT PROSPECT</option>
+                      <option value="2">PROSPECT</option>
+                      <option value="3">FUNNEL</option>
+                      <option value="4">DROP</option>
                    </select>
               </div>
             </div>
@@ -43,7 +55,7 @@
               <div class="form-group">
                 <label for="provincefilter">Province :</label>
                 <select id="provincefilter" name="provincefilter" class="form-control dropdown" required=""  >
-                  
+                <option value="8888" selected>Show All</option>
                   </select>
                 </div>
               </div>
@@ -51,7 +63,7 @@
                 <div class="form-group">
                 <label for="picfilter">PIC :</label>
                 <select id="picfilter" name="picfilter" class="form-control dropdown" required=""  >
-            
+          
                  </select>
               </div>
               </div>
@@ -62,7 +74,7 @@
         <div class="form-group">
             <label for="BUfilter">Business Unit :</label>
              <select id="BUfilter" name="BUfilter" class="form-control dropdown" required=""  >
-            
+             <option value="8888" selected>Show All</option>
           </select>
         </div>
       </div>
@@ -70,7 +82,7 @@
         <div class="form-group">
             <label for="catfilter">Product Category :</label>
              <select id="catfilter" name="catfilter" class="form-control dropdown" required=""  >
-            
+             <option value="8888" selected>Show All</option>
           </select>
         </div>
       </div>
@@ -78,29 +90,30 @@
     </div>
 
     </div>
+    </div>
+  </div>
     
-    
-        <div class="card-body">
+        <div class="card-body ">
                  
-            <div class="table-responsive">    
-                <table class="table table-bordered data-table">
+            <div class="table-responsive ml-2 mr-2 drag table-hover">    
+                <table class="table table-bordered data-table ">
                     <thead>
                         <tr>
                         <th>Validasi</th>
                             <th>PIC</th>
                             <th>Prospect No</th>
                             <th>Province</th>
-                            <th>Rumah Sakit + Department</th>
-                            <th>Nama Produk + Qty</th>
-                            <th>Value (IDR)</th>
+                          <th>Rumah Sakit + Department</th>
+                             <th>Nama Produk + Qty</th>
+                          <th>Value (IDR)</th>
                             <th>Tahap Promosi</th>
                             <th>Review</th>
                             <th>Anggaran</th>
-                            <th>Eta PO Date</th>
+                              <th>Eta PO Date</th>
                             <th>Temperature</th>
                          
                            
-                            <th>Table Action</th>
+                          <th>Table Action</th>
                             
                             
                          
@@ -228,77 +241,44 @@
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+
+<!-- Include JSZip for DataTables Buttons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+
+<!-- Include DataTables Buttons JS and CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
+
+
 <script type="text/javascript">
+
+
 
 
                          
 
-  $(function () {
+  $(document).ready(function () {
     
-
-
-    var table = $('.data-table').DataTable({
-        processing: true,
-        serverSide: true,
-        pageLength: 5,
-        lengthMenu: [[5, 10, 20], [5, 10, 20]],
-        ajax: {
-          url:"{{ route('data.prospect') }}",
-          type:"POST",
-          data: function (d) {
-              d.status=1 ;d.url="prospect";
-           }
-      },
-        
-        columns: [
-          {
-      data: 'validation_time',
-      name: 'validasi',
-      render: function (data, type, full, meta) {
-        // Extract just the date from validation_time
-        var date = new Date(data);
-        var formattedDate = date.toISOString().split('T')[0];
-
-        // Concatenate formattedDate with validation_by
-        return formattedDate + '</br>' + full.validasi ;
-      }
-    },
-          
-    {data: 'personInCharge', name: 'personInCharge'},
-    {data: 'propdetail', name: 'prospect_no'},
-    {data: 'province', name: 'province'},
-    {data: 'hospital', name: 'hospital'},
-    {data: 'namaprod', name: 'product',render: function (data, type, full, meta) {
-        // Compile the 'namaprod' and 'qty' columns
-        return data + '</br>' + full.qty+" "+ full.config.uom;
-      }},
-   
-    {data: 'value', name: 'value'},
-    {data: 'promotion', name: 'promotion'},
-    {data: 'review', name: 'review'},
-    {data: 'anggaran', name: 'anggaran'},
-    {data: 'eta_po_date', name: 'eta_po_date'},
-    {data: 'temperature', name: 'temperature'},
     
-    {data: 'action', name: 'action', orderable: false, searchable: true},
-            
-            
-           
-        ]
-    });
-
     $.ajax({
             url: "{{ route('admin.prospectcreate') }}",
             method: "GET",
             success:function(response){
-
               var eventSelect = $("#sumberinfofilter");
               populateSelectFromDatalist('sumberinfofilter', response.source.source,"Filter Sumber Informasi");
               //populate from event database
               response.event.forEach(function (event) {
-                  var option = $("<option>").val(event.id).text(event.name);
-                  eventSelect.append(option);
-                });
+                var option = $("<option>").val(event.id).text(event.name);
+                eventSelect.append(option);
+              });
+              
+              var showall = $("<option>").val(8888).text("Show All").attr('selected', true);
+              eventSelect.prepend(showall);
+
               
               var tempselect =$("#tempefilter");
               var keterangantempe = "Filter Temperature"
@@ -308,10 +288,14 @@
                 placeholder: keterangantempe,
                 width: '100%' // Adjust the width to fit the container
               });
+          var tempall = $("<option>").val(8888).text("Show All").attr('selected', true);
+           tempselect.prepend(tempall);
               
               var provfilter = $("#provincefilter");
               populateSelectFromDatalist('provincefilter', response.province,"Filter Provinsi");
-              
+              var provall = $("<option>").val(8888).text("Show All").attr('selected', true);
+              provfilter.prepend(provall);
+
               var keteranganpic = "Filter PIC"
               var picfilter = $("#picfilter");
               picfilter.select2({
@@ -325,11 +309,13 @@
 
               var placeholderPicOption = new Option(keteranganpic, '', true, true);
               picfilter.append(placeholderPicOption);
+              var picall = $("<option>").val(8888).text("Show All").attr('selected', true);
+              picfilter.prepend(picall);
 
               var unitSelect = $("#BUfilter");
                 populateSelectFromDatalist('BUfilter', response.bunit,"Pilih Business Unit");
                 var catSelect=$("#catfilter");
-                
+                var catall = $("<option>").val(8888).text("Show All").attr('selected', true);
                 function fetchcat(unitId) {
                   // Make an AJAX call to retrieve hospitals based on provinceId
                   $.ajax({
@@ -337,19 +323,315 @@
                     method: "GET",
                     success: function (response) {
                       populateSelectFromDatalist('catfilter', response.catopt,"Filter Category");
+                      $("#catfilter").prepend(catall);
                     }
                   });
                 }
-             
+                var unitall = $("<option>").val(8888).text("Show All").attr('selected', true);
+                unitSelect.prepend(unitall)
+                
+                catSelect.prepend(catall);
                 unitSelect.on("change", function () {
                   var selectedunitId = $(this).val();
                   fetchcat(selectedunitId);
+                  
                 });
 
 
             }
           });
   });
+
+
+
+
+    var jsonData;
+
+    $.ajax({
+    url: "{{ route('data.prospect') }}",
+    type: "POST",
+    data: { status: 1, url: "prospect" },
+    //async: false, // Make the call synchronous to ensure data is fetched before DataTable initialization
+    success: function (response) {
+        jsonData = response.data; // Store the fetched data in the variable
+        //console.log(jsonData);
+
+    function updateData(SourceFilter1,SourceFilter2,SourceFilter3){
+          var filteredData;
+          var newData;
+          console.log(SourceFilter1);
+          if(SourceFilter1==8888||!SourceFilter1){
+            filteredData=jsonData;
+            newData=jsonData;
+          }else{
+            filteredData=jsonData.filter(function(sfilterdt){
+              return sfilterdt.prospect_source===SourceFilter1;
+            })
+            newData=jsonData.filter(function(sfilterdt){
+              return sfilterdt.prospect_source === SourceFilter1;
+            })
+          }
+      
+        
+      if(SourceFilter2){
+
+        if(SourceFilter2==8888||!SourceFilter2){
+            filteredData=filteredData;
+            newData=filteredData;
+          }else{
+            filteredData=filteredData.filter(function(sfilterdt){
+              return sfilterdt.temperaturedata===SourceFilter2;
+            })
+            newData=filteredData.filter(function(sfilterdt){
+              return sfilterdt.temperaturedata === SourceFilter2;
+            })
+          }
+        } 
+
+      if(SourceFilter3){
+
+        if(SourceFilter3==8888||!SourceFilter3){
+            filteredData=filteredData;
+            newData=filteredData;
+          }else{
+            filteredData=filteredData.filter(function(sfilterdt){
+              return sfilterdt.province.name===SourceFilter3;
+            })
+            newData=filteredData.filter(function(sfilterdt){
+              return sfilterdt.province.name === SourceFilter3;
+            })
+          }
+        } 
+
+       console.log(newData);
+
+        var dataprospect=filteredData.map(function(item){
+          return{
+            pic:item.personInCharge,
+            validasi:item.validasi,
+            //validasi: item.validation_time,
+            propdetail:item.propdetail,
+            province: item.provincedata,
+            hospital: item.hospitaldata,
+            namaprod:item.namaprod,
+            qty:item.qty,
+            uom:item.config.uom,
+            value:item.value,
+            promotion:item.promotion,
+            review:item.reviewStats,
+            anggaran:item.anggaran,
+            etaPoDate:item.eta_po_date,
+            temperature:item.temperature,
+            action:item.action,
+          }
+        });
+
+        //console.log(newData);
+
+        var prospectsheet = newData.map(function(datz){
+          return{
+            TanggalSubmit : datz.validation_time,
+            Creator : datz.creator.name,
+            ProspectNo : datz.prospect_no,
+            Province : datz.provincedata,
+            SumberInfoProspect: datz.prospect_source,
+            PIC : datz.personInCharge,
+            AM : datz.AMNSM,
+            City : datz.city,
+            Hospital : datz.hospital.name,
+            Department :datz.department.name,
+            ProductCategory: datz.category,
+            Brand: datz.brand,
+            ConfigName : datz.config.name,
+            ConfigNumber : datz.configno,
+            UnitPrice : datz.submitted_price,
+            Qty : datz.qty,
+            Value:datz.submitted_price*datz.qty,
+            FirstOffer : datz.review.first_offer_date,
+            Demo : datz.review.demo_date,
+            Presentation :datz.review.presentation_date,
+            Lastoffer : datz.review.last_offer_date,
+            UserStatus: datz.review.user_status,
+            PurchasingStatus : datz.review.purchasing_status,
+            Direksi : datz.review.direksi_status,
+            Anggaran : datz.review.anggaran_status,
+            JenisAnggaran : datz.review.jenis_anggaran,
+            InformasiTambahan : datz.review.comment,
+            Chance: (datz.review.chance * 100).toFixed(0) +' %',
+
+            EtaPoDate: datz.eta_po_date,
+            Temperature : datz.temperaturedata,
+            NextAction : datz.review.next_action
+      
+        
+          }
+
+          console.log(prospectsheet);
+          $('#dlexcel').on('click', function () {
+            downloadExcel(prospectsheet);
+        });
+
+
+        });
+       
+        //console.log(prospectsheet);
+        initialProspectTable(dataprospect);
+        $('#dlexcel').off('click').on('click', function () {
+                    downloadExcel(prospectsheet);
+        });
+      };
+
+      var infoFilter = $('#sumberinfofilter').val();
+        console.log(infoFilter);
+        updateData(infoFilter,$('#tempefilter').val(),$('#provincefilter').val());
+
+        
+       
+
+        $('#sumberinfofilter,#tempefilter,#provincefilter').on('change', function () {
+          
+          var selectedValue = $('#sumberinfofilter').val();
+          var selectedText= $('#sumberinfofilter').find('option:selected').text();
+         // console.log(selectedValue);
+
+          var tempValue = $('#tempefilter').val();
+          var tempText= $('#tempefilter').find('option:selected').text();
+
+          var provValue = $('#provincefilter').val();
+          var provText= $('#provincefilter').find('option:selected').text();
+          
+          if(selectedValue!=8888){
+            selectedValue=selectedText
+          }
+          if(tempValue!=8888){
+            tempValue=tempText
+          }
+          if(provValue!=8888){
+            provValue=provText
+          }
+             // selectedValue=$(this).text();
+           
+            updateData(selectedValue,tempValue,provValue); 
+          //console.log(selectedText)
+        });
+
+        
+
+
+        // Handle the case when the filter dropdown is cleared
+        $('#clearFilterButton').on('click', function () {
+          // Set the dropdown to "All" or an appropriate default value
+          $('#sumberinfofilter').val(8888).trigger('change');
+        });
+
+
+        
+      },
+    error: function (xhr, status, error) {
+        console.error("AJAX Error: " + status, error);
+    }
+  });
+
+  function downloadExcel(data) {
+    // Create a new Excel workbook
+    var workbook = XLSX.utils.book_new();
+
+    // Convert data to worksheet
+    var worksheet = XLSX.utils.json_to_sheet(data);
+
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Prospects');
+
+    // Save the workbook as an Excel file
+    XLSX.writeFile(workbook, 'Prospects.xlsx');
+}
+
+
+  function initialProspectTable(dataprospect){
+    //console.log(dataprospect);
+  
+    if(dataprospect && dataprospect.length >0){
+      var existingTable = $('.data-table').DataTable();
+    if (existingTable) {
+        existingTable.destroy(); // Destroy the existing DataTable
+    }
+
+
+    var table = $('.data-table').DataTable({
+      
+        processing: true,
+        serverSide: false,
+        lengthMenu: [[5, 10, 20], [5, 10, 20]],
+        pageLength: 5,
+        
+       dom: 'filprtip', // Include buttons in the DataTable layout
+        /*buttons: [
+
+        {
+            extend: 'excel',
+            text: 'Dowload Excel Format Web',
+            exportOptions: {
+                modifier: {
+                    page:'all' // Include all data in the Excel export
+                }
+            }
+        },
+        
+       
+    ], */ 
+   // data : dataprospect,
+                
+    columns: [
+     {
+            data: 'validasi',
+            name: 'validasi',
+     }  ,        
+    {data: 'pic', name: 'pic'},
+   {data: 'propdetail', name: 'prospect_no'},
+    {data: 'province', name: 'province'},
+    {data: 'hospital', name: 'hospital'},
+   {data: 'namaprod', name: 'namaprod',render: function (data, type, full, meta) {
+        // Compile the 'namaprod' and 'qty' columns
+        return data + '</br>' + full.qty+" "+ full.uom;
+      },searchable:true},
+   
+    {data: 'value', name: 'value'},
+   {data: 'promotion', name: 'promotion'},
+    {data: 'review', name: 'review'},
+    {data: 'anggaran', name: 'anggaran'},
+   {data: 'etaPoDate', name: 'eta_po_date'},
+    {data: 'temperature', name: 'temperature'},
+    
+  {data: 'action', name: 'action', orderable: false, searchable: true},
+            
+      
+           
+        ],
+
+
+    initComplete: function (settings, json) {
+        $('#downloadDataButton').on('click', function () {
+            // Trigger DataTables Buttons export functionality
+            table.buttons().trigger();
+        });
+    }
+
+    });
+    //console.log(dataprospect);
+    table.clear().rows.add(dataprospect).draw();
+  }
+  else {
+    console.error("Data is null or empty;")
+  }
+
+
+
+  }
+    //$('#downloadDataButton').on('click', function () {
+      // Trigger DataTables Buttons export functionality
+    //  table.buttons('.buttons-excel').trigger();
+   // });
+  
 
 
   $('body').on("click",".btn-cr8",function(){

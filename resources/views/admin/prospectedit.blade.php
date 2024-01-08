@@ -180,6 +180,9 @@
 @can('am')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit Data</a>
 @endcan   
+@can('nsm')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit Data</a>
+@endcan   
           </div>
             
            
@@ -228,6 +231,9 @@
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
 @endcan 
 @can('am')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
+@endcan 
+@can('nsm')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
 @endcan 
             
@@ -289,6 +295,14 @@
 
             </div>
 @endcan
+@can('nsm')
+            <div class="col-sm-12">
+              
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tanggal</a>
+              
+
+            </div>
+@endcan
             
            
 
@@ -336,10 +350,16 @@
             
 @can('admin')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
 @endcan
 @can('am')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
-@endcan
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
+@endcan 
+@can('nsm')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
+@endcan 
 
             </div>
         </div>
@@ -512,15 +532,39 @@
             </select>
         </div>
 
-
         <div class="form-group">
             <label for="etapodate">ETA PO Date</label>
             <input type="date"id="etapodate" name="etapodate" class="form-control">
         </div>
 
+     
+       
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary btn-update">Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Review -->
 
 
-
+<!--Modal Chc-->
+<div class="modal fade" id="chc-modal" tabindex="-1" role="dialog" aria-labelledby="chc-modalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="chc-modalLabel">Edit Review</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="chcForm">
+        
+     
         <div class="form-group">
             <label for="chance">Chance</label>
             <select id="chance" name="chance" class="form-control">
@@ -544,7 +588,8 @@
     </div>
   </div>
 </div>
-<!-- Modal Review -->
+<!-- End modal chc-->
+
 
 
 <!-- Modal Promosi -->
@@ -841,132 +886,258 @@ $('body').on("click",".btn-edit",function(){
    
    
    
-   
-    $('body').on("click",".btn-updatereview",function(){
-        var id = $(this).attr("id")
+    
+     $('body').on("click",".btn-updatereview",function(){
+         var id = $(this).attr("id")
+         
+         $.ajax({
+             url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
+             method: "GET",
+             success:function(response){
+               
+                 $("#review-modal").modal("show");
+                 $("#data").val(response.prospect.id);
+                  var userSelect = $("#user_status");
+               userSelect.empty(); 
+               var optionuser = $("<option>").val(response.prospect.review.user_status).text(response.prospect.review.user_status);
+                   userSelect.append(optionuser);
+ 
+                 response.sourceoption.state.forEach(function (usersts) {
+                   var option = $("<option>").val(usersts.name).text(usersts.name);
+                   userSelect.append(option);
+                 });
+                 
+                  var purchasingSelect = $("#purchasing_status");
+               purchasingSelect.empty(); 
+ 
+               var optionpurchasing = $("<option>").val(response.prospect.review.purchasing_status).text(response.prospect.review.purchasing_status);
+                   purchasingSelect.append(optionpurchasing);
+  
+                 response.sourceoption.state.forEach(function (purchasingsts) {
+                   var option = $("<option>").val(purchasingsts.name).text(purchasingsts.name);
+                   purchasingSelect.append(option);
+                 });
+ 
+                  var direksiSelect = $("#direksi_status");
+               direksiSelect.empty(); 
+  
+               var optiondireksi = $("<option>").val(response.prospect.review.direksi_status).text(response.prospect.review.direksi_status);
+                   direksiSelect.append(optiondireksi);
+ 
+                 response.sourceoption.state.forEach(function (direksists) {
+                   var option = $("<option>").val(direksists.name).text(direksists.name);
+                   direksiSelect.append(option);
+                 });
+ 
+                 
+                  var anggaranSelect = $("#anggaran_status");
+               anggaranSelect.empty(); 
+ 
+               var option1 = $("<option>").val(response.prospect.review.anggaran_status).text(response.prospect.review.anggaran_status);
+                   anggaranSelect.append(option1);
+  
+                 response.sourceoption.anggaran.review.forEach(function (anggaransts) {
+                   var option = $("<option>").val(anggaransts.name).text(anggaransts.name);
+                   anggaranSelect.append(option);
+                 });
+ 
+                  var jenisanggaranSelect = $("#jenis_anggaran");
+               jenisanggaranSelect.empty(); 
+ 
+               var optionjns = $("<option>").val(response.prospect.review.jenis_anggaran).text(response.prospect.review.jenis_anggaran);
+                   jenisanggaranSelect.append(optionjns);
+  
+                 response.sourceoption.anggaran.Jenis.forEach(function (jenisanggaransts) {
+                   var option = $("<option>").val(jenisanggaransts.name).text(jenisanggaransts.name);
+                   jenisanggaranSelect.append(option);
+                 });
+
+                 var today = new Date();
+                 // Calculate the date after 30 days from today
+                 var thirtyDaysFromToday = new Date(today);
+                 thirtyDaysFromToday.setDate(today.getDate() + 30);
+             var todayFormatted = today.toISOString().split('T')[0];
+                 var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+ 
+                 $("#etapodate").val(response.prospect.eta_po_date).attr('min', thirtyDaysFromTodayFormatted);;
+
         
-        $.ajax({
-            url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
-            method: "GET",
-            success:function(response){
-              
-                $("#review-modal").modal("show");
-                $("#data").val(response.prospect.id);
-                 var userSelect = $("#user_status");
-              userSelect.empty(); 
-              var optionuser = $("<option>").val(response.prospect.review.user_status).text(response.prospect.review.user_status);
-                  userSelect.append(optionuser);
-
-                response.sourceoption.state.forEach(function (usersts) {
-                  var option = $("<option>").val(usersts.name).text(usersts.name);
-                  userSelect.append(option);
-                });
-                
-                 var purchasingSelect = $("#purchasing_status");
-              purchasingSelect.empty(); 
-
-              var optionpurchasing = $("<option>").val(response.prospect.review.purchasing_status).text(response.prospect.review.purchasing_status);
-                  purchasingSelect.append(optionpurchasing);
+             }
+         })
+     });
  
-                response.sourceoption.state.forEach(function (purchasingsts) {
-                  var option = $("<option>").val(purchasingsts.name).text(purchasingsts.name);
-                  purchasingSelect.append(option);
-                });
-
-                 var direksiSelect = $("#direksi_status");
-              direksiSelect.empty(); 
  
-              var optiondireksi = $("<option>").val(response.prospect.review.direksi_status).text(response.prospect.review.direksi_status);
-                  direksiSelect.append(optiondireksi);
-
-                response.sourceoption.state.forEach(function (direksists) {
-                  var option = $("<option>").val(direksists.name).text(direksists.name);
-                  direksiSelect.append(option);
-                });
-
-                
-                 var anggaranSelect = $("#anggaran_status");
-              anggaranSelect.empty(); 
-
-              var option1 = $("<option>").val(response.prospect.review.anggaran_status).text(response.prospect.review.anggaran_status);
-                  anggaranSelect.append(option1);
+    
  
-                response.sourceoption.anggaran.review.forEach(function (anggaransts) {
-                  var option = $("<option>").val(anggaransts.name).text(anggaransts.name);
-                  anggaranSelect.append(option);
-                });
-
-                 var jenisanggaranSelect = $("#jenis_anggaran");
-              jenisanggaranSelect.empty(); 
-
-              var optionjns = $("<option>").val(response.prospect.review.jenis_anggaran).text(response.prospect.review.jenis_anggaran);
-                  jenisanggaranSelect.append(optionjns);
  
-                response.sourceoption.anggaran.Jenis.forEach(function (jenisanggaransts) {
-                  var option = $("<option>").val(jenisanggaransts.name).text(jenisanggaransts.name);
-                  jenisanggaranSelect.append(option);
-                });
-          
-
-                var today = new Date();
-
-                // Calculate the date after 30 days from today
-                var thirtyDaysFromToday = new Date(today);
-                thirtyDaysFromToday.setDate(today.getDate() + 30);
-
-                var todayFormatted = today.toISOString().split('T')[0];
-                var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+     $("#reviewForm").on("submit",function(e){
+         e.preventDefault()
+         var prospect = $("#data").val()
  
-                $("#etapodate").val(response.prospect.eta_po_date).attr('min', thirtyDaysFromTodayFormatted);;
+         $.ajax({
+             url: "{{ route('admin.prospect.reviewupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
+             method: "PATCH",
+             data: $(this).serialize(),
+             success:function(response){
+               localStorage.setItem("alertMessage", response.message);
+                 // Reload the page
+                 location.reload();
+               // flash('success', 'Data berhasil diupdate');
+               $('#thealert').focus();
+             }
+         })
+     });
 
 
-                //$("#chance").val(response.prospect.review.chance);
-                var chanceSelect = $("#chance");
-              chanceSelect.empty(); 
-              var chancenow = response.prospect.review.chance * 100 ;
 
-              var optionchance = $("<option>").val(response.prospect.review.chance).text(chancenow+"%");
-                  chanceSelect.append(optionchance);
-              
-                  response.sourceoption.chance.forEach(function (chancests) {
-                  var option = $("<option>").val(chancests.data).text(chancests.name);
-                  chanceSelect.append(option);
-                });
-                var next_actionSelect = $("#next_action");
-              next_actionSelect.empty(); 
-
-              var optionnext_action = $("<option>").val(response.prospect.review.next_action).text(response.prospect.review.next_action);
-                  next_actionSelect.append(optionnext_action);
-              
-                  response.sourceoption.naction.forEach(function (next_actionsts) {
-                  var option = $("<option>").val(next_actionsts.name).text(next_actionsts.name);
-                  next_actionSelect.append(option);
-                });
-
-
-              
-
-            }
-        })
-    });
-
-    $("#reviewForm").on("submit",function(e){
-        e.preventDefault()
-        var prospect = $("#data").val()
-
-        $.ajax({
-            url: "{{ route('admin.prospect.reviewupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
-            method: "PATCH",
-            data: $(this).serialize(),
-            success:function(response){
-              localStorage.setItem("alertMessage", response.message);
-                // Reload the page
-                location.reload();
-              // flash('success', 'Data berhasil diupdate');
-              $('#thealert').focus();
-            }
-        })
-    });
-
+    
+     $('body').on("click",".btn-updatechance",function(){
+         var id = $(this).attr("id")
+         
+         $.ajax({
+             url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
+             method: "GET",
+             success:function(response){
+               
+               $("#chc-modal").modal("show");
+               $("#data").val(response.prospect.id);
+               var userSelect = $("#user_status");
+               userSelect.empty(); 
+               var optionuser = $("<option>").val(response.prospect.review.user_status).text(response.prospect.review.user_status);
+               userSelect.append(optionuser);
+               var anggarancek = response.prospect.review.anggaran_status;
+               var etapodatecek =response.prospect.eta_po_date;
+             
+                 var today = new Date();
+                 // Calculate the date after 30 days from today
+                 var thirtyDaysFromToday = new Date(today);
+                 thirtyDaysFromToday.setDate(today.getDate() + 30);
+             var todayFormatted = today.toISOString().split('T')[0];
+                 var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+ 
+                 //$("#etapodate").val(response.prospect.eta_po_date).attr('min', thirtyDaysFromTodayFormatted);;
+                 //$("#chance").val(response.prospect.review.chance);
+                 var chanceSelect = $("#chance");
+               chanceSelect.empty(); 
+               var chancenow = response.prospect.review.chance * 100 ;
+               
+               var originalOptionsChance = [];
+ 
+               // Store the original chance value
+               var originalChance = response.prospect.review.chance;
+ 
+                 function rolchance(){
+                 var optionchance = $("<option>").val(response.prospect.review.chance).text(chancenow+"%");
+                   chanceSelect.append(optionchance);
+               
+                 response.sourceoption.chance.forEach(function (chancests) {
+                   var option = $("<option>").val(chancests.data).text(chancests.name);
+                   originalOptionsChance.push(option);
+                   chanceSelect.append(option);
+                 });
+ 
+                 //console.log(originalOptionsChance);
+               }
+               rolchance();
+ 
+                 $("#chance").change(function () {
+                   var selectedChance = $("#chance").val();
+                   
+                 
+                   var oneightyDaysFromToday = new Date(today);
+                 oneightyDaysFromToday.setDate(today.getDate() + 180);
+                   var oneightyDaysFromTodayFormatted = oneightyDaysFromToday.toISOString().split('T')[0];
+                   var onefiftyDaysFromToday = new Date(today);
+                 onefiftyDaysFromToday.setDate(today.getDate() + 150);
+                   var onefiftyDaysFromTodayFormatted = onefiftyDaysFromToday.toISOString().split('T')[0];
+                   
+                   //console.log(anggarancek);
+                   console.log(etapodatecek < onefiftyDaysFromTodayFormatted);
+                   
+                    if(['Belum Ada','Belum Tahu','Usulan'].includes(anggarancek)){
+                      
+                   
+                      if (selectedChance > 0.4) {
+                        alert("Warning: Chance Tidak Bisa Lebih dari 40% Saat Anggaran Status masih 'Belum Ada' , 'Usulan' atau 'Belum Tahu'");
+                        chanceSelect.empty();
+                        rolchance();
+                        
+                      }
+                    }else
+                    {                  
+                      
+                      if((['Ada Neutral','Ada Saingan'].includes(anggarancek) ||  etapodatecek > oneightyDaysFromTodayFormatted)){
+                        if (selectedChance > 0.6) {
+                          alert("Warning: Chance Tidak Bisa Lebih dari 60% Saat Estimasi Po Date Lebih Dari 6 Bulan atau anggaran bukan 'Ada Sesuai'");
+                          chanceSelect.empty();
+                          rolchance();
+                          
+                        }
+                      }
+                      else
+                      {
+                        if(anggarancek == 'Ada Sesuai' || etapodatecek < onefiftyDaysFromTodayFormatted){
+                       console.log(etapodatecek < onefiftyDaysFromTodayFormatted);
+                       if (selectedChance > 0.8) {
+                       
+                         alert("Apakah pihak rumah sakit sudah melakukan pembelian ?");
+                           
+                         }
+ 
+                     }
+ 
+ 
+                   }
+   
+                 
+                 
+                 }
+                 });
+ 
+                 if($("#anggaran_status").val =="Usulan" || $("#anggaran_status").val =="Usulan" )
+                 {
+ 
+                 }
+ 
+                 var next_actionSelect = $("#next_action");
+               next_actionSelect.empty(); 
+ 
+               var optionnext_action = $("<option>").val(response.prospect.review.next_action).text(response.prospect.review.next_action);
+                   next_actionSelect.append(optionnext_action);
+               
+                   response.sourceoption.naction.forEach(function (next_actionsts) {
+                   var option = $("<option>").val(next_actionsts.name).text(next_actionsts.name);
+                   next_actionSelect.append(option);
+                 });
+ 
+ 
+               
+ 
+             }
+         })
+     });
+ 
+ 
+    
+ 
+ 
+     $("#chcForm").on("submit",function(e){
+         e.preventDefault()
+         var prospect = $("#data").val()
+ 
+         $.ajax({
+             url: "{{ route('admin.prospect.reviewupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
+             method: "PATCH",
+             data: $(this).serialize(),
+             success:function(response){
+               localStorage.setItem("alertMessage", response.message);
+                 // Reload the page
+                 location.reload();
+               // flash('success', 'Data berhasil diupdate');
+               $('#thealert').focus();
+             }
+         })
+     });
+    
 </script>
 @endpush

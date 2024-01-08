@@ -40,12 +40,16 @@
           <label for="cr8source">Sumber Info</label>
           
           <select id="cr8source" name="cr8source" class="form-control " required="" >
-           
           </select>
           <input type="" placeholder="Input Nama Event Disini" style="display: none;" id="eventname" name="eventname" class="form-control">
 
           </div>
+
           <div class="form-group">
+            <label for="cr8infoextra">Informasi Tambahan</label>
+             <input type='' placeholder='Misal : " Kebutuhan untuk ruang OK baru " , " Kebutuhan Banyak Ventilator ", dsb' id="cr8infoextra" name="cr8infoextra" class="form-control" required=""  >
+          </div>
+           <div class="form-group">
             <label for="cr8province">Provinsi</label>
              <select id="cr8province" name="cr8province" class="form-control" required=""  >
             

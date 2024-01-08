@@ -10,8 +10,10 @@ use DataTables;
 use Illuminate\Support\HtmlString;
 use App\Models\Hospital;
 use App\Models\Config;
+use App\Models\Category;
 use App\Models\Prospect;
 use App\Models\Alert;
+use App\Models\Brand;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -317,6 +319,7 @@ public function getProductDetail(Request $request)
 
     $status= $request->input('status');
 
+
     if($roles =="admin"){
         $thirtyDaysAgo = now()->subDays(30);
         $threeDaysAgo = now()->subDays(3)->toDateString();
@@ -483,12 +486,16 @@ public function getProductDetail(Request $request)
       //  $query->wherePivot('main', 1);
    // })
    
+    
+
+
+
 
     return DataTables::of($prv)
     ->addIndexColumn()   
-    ->addColumn('province', function ($prp) {
+    ->addColumn('provincedata', function ($prp) {
 
-    $newprov=$prp->province->name."(".$prp->province->prov_order_no.")";
+    $newprov=$prp->province->name;
     $AM= getareaman($prp->province->iss_area_code,$prp->province->wilayah);
     
     
@@ -499,6 +506,15 @@ public function getProductDetail(Request $request)
     $newdata=$newprov."</br>Tidak ada AM/NSM";
     return $newdata;
 
+    })
+    ->addColumn('AMNSM',function($prp){
+        $AM= getareaman($prp->province->iss_area_code,$prp->province->wilayah);
+        if($AM['am']!="0"){ 
+            $newdata=$AM['am'];} else 
+            if($AM['nsm']!="0"){
+            $newdata=$AM['nsm'];} else
+            $newdata="Tidak ada AM/NSM";
+            return $newdata;
     })
     
     
@@ -514,6 +530,19 @@ public function getProductDetail(Request $request)
     ->addColumn('configno', function ($prp) {
         return $prp->config->config_code;
     }) 
+    ->addColumn('category', function ($prp) {
+        $cats= $prp->config->category_id;
+        $cekcat = Category::where('id',$cats)->first();
+        return $cekcat->name;
+
+    }) 
+    ->addColumn('brand', function ($prp) {
+        $brand= $prp->config->brand_id;
+        $cekbrand = Brand::where('id',$brand)->first();
+        return $cekbrand->name;
+
+    }) 
+
     ->addColumn('price', function ($prp) {
         
         $rupiah =number_format($prp->config->price_include_ppn,0,',-','.');
@@ -539,15 +568,37 @@ public function getProductDetail(Request $request)
             return "Tanggal PO sudah Lewat";
         }
         else return $podate;
-        
-        
-        
-       
+    
     })
 
     
     
-
+    
+    ->addColumn('temperaturedata', function ($prp) {
+        $ch= $prp->review->chance;
+        $chs=number_format($ch * 100, 0);
+        $anggaran = $prp->anggaran_status;
+        $podate=$prp->eta_po_date;
+        $qty=strtotime($podate);
+        $now=strtotime(now());
+        
+        $diffsec= $qty-$now;
+        $diff=floor($diffsec/86400);
+        if($ch==0){
+            return "DROP";
+        }else
+        {if($anggaran == "BELUM ADA"||$anggaran=="USULAN"){
+            return "PROSPECT";
+        }else
+        {if($ch<0.7 && $ch >0.2){
+            return "FUNNEL";
+        }else 
+        {if ($diff<150 && $ch >0.5){
+            return "HOT PROSPECT";
+        }
+        else {return "PROSPECT" ;}}}};
+        
+    }) 
     ->addColumn('temperature', function ($prp) {
         $ch= $prp->review->chance;
         $chs=number_format($ch * 100, 0);
@@ -563,20 +614,20 @@ public function getProductDetail(Request $request)
             return "<h4><span class='badge tmpe bg-dark text-light'>DROP</span></h4>
             <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         }else
-        if($anggaran == "BELUM ADA"||$anggaran=="USULAN"){
+        {if($anggaran == "BELUM ADA"||$anggaran=="USULAN"){
             return "<h4><span class='badge tmpe bg-secondary text-light'>PROSPECT</span></h4>
             <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         }else
-        if($ch<0.5){
+        {if($ch<0.7 && $ch >0.2){
             return "<h4><span class='badge tmpe bg-warning text-light'>FUNNEL</span></h4>
             <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         }else 
-        if ($diff<150){
+        {if ($diff<150 && $ch >0.5){
             return "<h4><span class='badge tmpe bg-danger text-light'>HOT PROSPECT</span></h4>
             <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
         }
-        else return "<h4><span class='badge tmpe bg-warning text-light'>FUNNEL</span></h4>
-        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+        else {return "<h4><span class='badge tmpe bg-secondary text-light'>PROSPECT</span></h4>
+        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>" ;}}}};
         
 
         
@@ -605,7 +656,7 @@ public function getProductDetail(Request $request)
         }
         return $data;
         })
-    ->addColumn('review', function ($prp) {
+    ->addColumn('reviewStats', function ($prp) {
         $user= $prp->review->user_status;
         $userc=reviewcolor($user);
         $direksi= $prp->review->direksi_status;
@@ -636,7 +687,8 @@ public function getProductDetail(Request $request)
      ->addColumn('propdetail', function ($prp) {
        $no=$prp->prospect_no;
        $theroutes=route('admin.prospecteditdata',['prospect'=>$prp->id]);
-       $data= "<a href='$theroutes' ><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a>";  
+       
+       $data= "<a href='$theroutes' ><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a></br>$prp->prospect_source";  
         return $data;
      })
 
@@ -658,7 +710,7 @@ public function getProductDetail(Request $request)
  
 
 
-  ->addColumn('hospital', function ($prp) {
+  ->addColumn('hospitaldata', function ($prp) {
     $dep=$prp->department->name;
     $host=$prp->hospital->name;
     $muncul=$host."</br>".$dep;
@@ -692,6 +744,7 @@ public function getProductDetail(Request $request)
         }
 
         })
+
     ->addColumn('action', function($prp) use ($url){
         
         $editform=route('admin.prospectedit',$prp);
@@ -731,14 +784,22 @@ public function getProductDetail(Request $request)
         })
         
         ->addColumn('validasi',function($prp){
+            
+            $startdate = new \DateTime($prp->validation_time); // Create a DateTime object
+            $formattedDate = $startdate->format('Y-m-d'); // Format to get only the date part
+        
+            //dd($formattedDate);
+
             $validname=User::where('id',$prp->validation_by)->first();
                        
-            return $validname?$validname->name:"Belum di Validasi";
+            $data=$validname?$validname->name:"Belum di Validasi";
+            $show = $data.'</br>'.$formattedDate;
+            return $show;
           
         })
 
     //->only(['id','creator','personInCharge',"prospect_no"])
-        ->rawColumns(['propdetail','action','promotion',"review",'temperature','statsname',"submitdate","province","anggaran",'hospital','validasi'])
+        ->rawColumns(['propdetail','action','promotion',"reviewStats",'temperature','statsname',"submitdate","provincedata","anggaran",'hospitaldata','validasi'])
         
         ->toJson();
 

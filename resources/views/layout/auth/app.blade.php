@@ -24,7 +24,6 @@
 <!-- Other head content -->
 
 
-
 </head>
 
 <body style="background-color: rgb(118,116,149);

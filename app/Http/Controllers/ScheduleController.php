@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\schedule;
 use App\Models\User;
+use App\Models\Employee;
+use App\Models\Province;
+use App\Models\Department;
+use App\Models\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ScheduleController extends Controller
 {
@@ -20,6 +25,7 @@ class ScheduleController extends Controller
       $bookings = schedule::orderBy('start_time','asc')->with(['hospital', 'department', 'creator', 'createFor', 'validator'])->get();
       $users = User::all();
       $userNamesById = $users->pluck('name', 'id')->all();
+      $data = $this->create();
       
       foreach($bookings as $booking) {
           $color = null;
@@ -57,12 +63,12 @@ class ScheduleController extends Controller
 
         $filteredEvents=array_values($filteredEvents);
 
-        return response()->json(['filterschedule' => $filteredEvents, 'userdata' => $userNamesById]);
+        return response()->json(['filterschedule' => $filteredEvents, 'userdata' => $userNamesById,'data'=>$data->original]);
 
       }
    
 
-      return response()->json(['schedule'=>$events,'userdata'=>$userNamesById]);
+      return response()->json(['schedule'=>$events,'userdata'=>$userNamesById,'data'=>$data->original]);
  
     }
 
@@ -74,6 +80,76 @@ class ScheduleController extends Controller
     public function create()
     {
         //
+        $usid=Auth::user()->id;
+        $user=User::with('employee')->where('id',$usid)->first();
+        $role=$user->role;
+        $area=$user->employee->area;
+        if($area=="HO"){
+        $provincelist=Province::all();
+        }else if(strlen($area)<2){
+        $provincelist=Province::with('area')->where('wilayah',$area)->get();
+        }else
+        $provincelist=Province::with('area')->where('iss_area_code',$area)->get();
+        $dept=Department::all();
+        $today = now();
+        $bunit=Unit::all();
+
+        
+        if(strlen($area)<2)
+             {$provincelist=Province::with('area')->where('wilayah',$area)->get();}
+            else
+            {$provincelist=Province::with('area')->where('iss_area_code',$area)->get();}
+        $specialrole = ['admin','direksi'];
+
+        if($area=="HO")
+        {
+        if(in_array($role, $specialrole)){
+            $employees = Employee::all();
+            $employees->load("user");
+            $piclist = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            
+            ];
+            }); 
+        }
+        else{
+        $usersamerole=User::where('role',$role)->with('employee')->get();
+        $piclist = $usersamerole->map(function($users){
+            return[
+            'user_id' => $users ? $users->id : "No User ID",
+            'name' => $users ? $users->employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            
+            ];
+            });  
+        } 
+        
+        }
+        else 
+           { 
+            $employees = Employee::Where('area',$area)->get();
+            $employees->load("user");
+            $piclist = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
+            ];
+            });
+
+           }
+        
+        
+       
+        
+
+        $data['province'] = $provincelist;
+        $data['pic']=$piclist;
+        $data['dept'] = $dept;
+        $data['bunit']=$bunit;
+        $data['role']=$role;
+        return response()->json($data);
+
     }
 
     /**

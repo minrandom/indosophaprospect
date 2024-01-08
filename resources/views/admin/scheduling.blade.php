@@ -27,7 +27,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 
 @section('content')
 <div class="notify"></div>
-<button onclick="showSwal()">Show Swal</button>
+<!--<button onclick="showSwal()">Show Swal</button>-->
 
 <div class="row">
     <div class="col-lg-8">
@@ -258,6 +258,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
+<script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
@@ -305,7 +306,7 @@ $(document).ready(function () {
                 header: {
                     left: 'prev, next today',
                     center: 'title',
-                    // right: 'month,agendaWeek',
+                    right: 'month,agendaWeek',
                 },
                 events: eventsdata, // Assuming that the response contains the events directly
                 selectable: true,
