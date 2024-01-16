@@ -10,7 +10,9 @@
 
     <!-- Divider -->
     <hr class="sidebar-divider my-0">
-
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
     <!-- Nav Item - Dashboard -->
     <!--@can('admin')
     <li class="nav-item">
@@ -31,100 +33,61 @@
     <!-- Divider -->
     <hr class="sidebar-divider">
 
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Prospect
-    </div>
-
     <li class="nav-item">
-        <a class="nav-link" href="{{ route('admin.prospectcreation') }}">
-            <i class="fas fa-fw fa-file-alt"></i>
-            <span>Create New Prospect</span></a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('admin.prospectcheckview') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Prospect Check</span></a>
-            </li>   
-
-    @can('admin')
-
-    <!--
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOne"
-            aria-expanded="true" aria-controls="collapseOne">
-            <i class="fas fa-fw fa-table"></i>
-            <span>Prospect Validation</span>
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseJadwal"
+            aria-expanded="true" aria-controls="collapseJadwal">
+            <i class="fas fa-fw fa-calendar"></i>
+            <span>JADWAL</span>
         </a>
-        <div id="collapseOne" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="collapseJadwal" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <a class="collapse-item" href="{{ route('user.index') }}">User</a>
+                <h6 class="collapse-header">Jadwal Menu:</h6>
+                <a class="collapse-item" href="../admin/jadwal">
+            <i class="fas fa-fw fa-calendar"></i>
+<span>Penjadwalan</span></a>
             </div>
         </div>
     </li>
+    
+    <!-- Divider -->
+    <hr class="sidebar-divider">
 
--->
-     
-
-
-            <li class="nav-item">
-        <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Prospect Validation</span></a>
-            </li>
-            <li class="nav-item">
-        <a class="nav-link" href="{{ route('admin.prospect.index') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Prospect Review</span></a>
-            </li>
-          
-            <li class="nav-item">
-        <a class="nav-link" href="{{ route('admin.prospect.index') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Prospect Drop Request</span></a>
-            </li>
-            <li class="nav-item">
-        <a class="nav-link" href="{{ route('admin.prospect.index') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Prospect Update Request</span></a>
-            </li>
-
-    @elseCan('fs')
-           
-            <li class="nav-item">
-             <a class="nav-link" href="{{ route('admin.prospect.index') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>My Prospect</span></a>
-            </li>
-            <li class="nav-item">
-    @elseCan('am')
-           
-            <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Approval Prospect</span></a>
-            </li>
-            <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.prospect.index') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Prospect Review</span></a>
-            </li>
-            <li class="nav-item">
-
-    @elseCan('nsm')
     <li class="nav-item">
-            <a class="nav-link" href="{{ route('admin.prospectvalidationview') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Approval Prospect</span></a>
-            </li>
-            <li class="nav-item">
-             <a class="nav-link" href="{{ route('admin.prospect.index') }}">
-            <i class="fas fa-fw fa-tasks"></i>
-            <span>Review Prospect In My Region</span></a>
-            </li>
-            <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProspect"
+            aria-expanded="true" aria-controls="collapseProspect">
+            <i class="fas fa-fw fa-handshake"></i>
+            <span>PROSPECT</span>
+        </a>
+        <div id="collapseProspect" class="collapse" aria-labelledby="headingProspect" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Prospect Menu:</h6>
+                <a class="collapse-item" href="{{ route('admin.prospectcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create New Prospect</span></a>
+                <a class="collapse-item" href="{{ route('admin.prospectcheckview') }}"><i class="fas fa-fw fa-tasks"></i><span> Prospect Check</span></a>
+                @can('admin')  
+                <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span> Prospect Validation</span></a>
+                <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-briefcase"></i><span> Prospect Review</span></a>
+                <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-handshake-slash"></i><span> Drop Request</span></a>
+                <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-pen"></i><span> Update Request</span></a>
+                @elsecan('fs')
+                <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>My Prospect</span></a>
+                @elsecan('am')
+                <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
+                <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Area Prospect Review</span></a>
+         
+                @elsecan('nsm')
+                <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
+                <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Region Prospect Review</span></a>
+         
 
-    @endcan
+                @endcan
+            </div>
+        </div>
+
+
+        
+    </li>
+    
+    
 
     <!--
     @can('admin')
