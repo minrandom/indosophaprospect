@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Auth;
 //Namespace Auth
 use App\Http\Controllers\Auth\LoginController;
 
@@ -31,10 +31,24 @@ use App\Http\Controllers\Admin\DataCompileController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('/home', function () {
-    return redirect()->route('user2');
-})->name('start');
-Route::view('/','auth.login')->name('login');
+
+Route::get('/', function () {
+    // Check if the user is already authenticated
+    if (Auth::check()) {
+        // Redirect authenticated users away from the login page
+        return redirect('/home'); // Change '/dashboard' to the desired route
+    }
+
+    // Render the login view for non-authenticated users
+    return view('auth.login');
+})->name('start')->middleware('prevent-back');
+
+
+Route::middleware('prevent-back')->group(function () {
+    // Other routes...
+});
+
+
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
 Route::post('/check-in', 'JojoController@store')->name('check-in.store');
 Route::get('/check-in', 'JojoController@index')->name('check-in');
@@ -79,14 +93,14 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::post('/get-product-details','DataCompileController@getProductDetail')->name('data.proddetail');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');
 	Route::get('/dataa',[PrincipalBrandController::class,'index'])->name('dataa')->middleware(['can:admin']);
+	Route::view('/jadwal','admin.scheduling')->name('schedule');
 	
 	//Route View
-	Route::view('/jadwal','admin.scheduling')->name('schedule');
 	Route::get('/load-tab-content', 'TabController@loadTabContent')->name('load-tab-content');
 	Route::view('/404-page','admin.404-page')->name('404-page');
 	Route::view('/blank-page','admin.blank-page')->name('blank-page');
 	Route::view('/buttons','admin.buttons')->name('buttons');
-	//Route::view('/prospectDetail/{prospect}/edit','admin.prospectedit')->name('prp.detail');
+	Route::view('/prospectDetail/{prospect}/edit','admin.prospectedit')->name('prp.detail');
 	Route::view('/cards','admin.cards')->name('cards');
 	Route::view('/utilities-colors','admin.utilities-color')->name('utilities-colors');
 	Route::view('/utilities-borders','admin.utilities-border')->name('utilities-borders');
@@ -115,17 +129,25 @@ Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'user'],
 
 Route::group(['namespace' => 'Auth','middleware' => 'guest','prefix' => 'Auth'],function(){
 	Route::view('/login','auth.login')->name('login');
-	Route::post('/login',[LoginController::class,'authenticate'])->name('login.post');
+	
 });
 
 // Other
 Route::view('/register','auth.register')->name('register');
 Route::view('/forgot-password','auth.forgot-password')->name('forgot-password');
-Route::post('/logout',function(){
-	return redirect()->to('/')->with(Auth::logout());
-})->name('logout');
 
 //Route::get('/location', 'LocationController@index')->name('location.index');
+
+	Route::post('/login',[LoginController::class,'authenticate'])->name('login.post');
+Route::post('/logout',function(){
+	return redirect()->to('/')->with(Auth::logout())->with('refresh', true);
+})->name('logout');
+
+Route::get('/home', function () {
+    return redirect()->route('user')->with('refresh', true);
+})->name('homestart');
+
+
 
 //Route::get('/geoloc', 'GeolocationController@index');
 //Route::post('/location', 'GeolocationController@getLocation')->name('location');

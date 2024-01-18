@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Check-in</title>
     <link rel="stylesheet" href="{{ asset('openlayers/ol.css') }}">
@@ -37,12 +37,16 @@
                 .then(data => {
                     var placeName = data.display_name.split(',')[0];
                     var address = data.address.road + ', ' + data.address.city + ', ' + data.address.country;
-                    var checkInAt= placeName;
-                    // Save the data to the database via AJAX request
-                    saveCheckInData(placeName, address,checkInAt);
+                    var checkInAt = placeName;
 
-                    // Use the place name and address as needed, such as displaying them on the screen
-                    alert('Place Name: ' + placeName + '\nAddress: ' + address);
+                    // Prompt the user to capture a photo
+                    capturePhoto(function(photoData) {
+                        // Save the data to the database via AJAX request
+                        saveCheckInData(placeName, address, checkInAt, photoData);
+
+                        // Use the place name, address, and photo data as needed
+                        alert('Place Name: ' + placeName + '\nAddress: ' + address);
+                    });
 
                     // Show the user's location on the map...
                 })
@@ -52,8 +56,38 @@
                 });
         }
 
-        function saveCheckInData(placeName, address ,checkInAt) {
+        function capturePhoto(callback) {
+            // Access the device camera and prompt the user to capture a photo
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    var video = document.createElement('video');
+                    document.body.appendChild(video);
+                    video.srcObject = stream;
+                    video.play();
 
+                    // Capture a photo after a delay
+                    setTimeout(() => {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+                        var photoData = canvas.toDataURL('image/jpeg');
+
+                        // Cleanup: stop the video stream and remove the video element
+                        video.srcObject.getTracks().forEach(track => track.stop());
+                        document.body.removeChild(video);
+
+                        // Pass the captured photo data to the callback function
+                        callback(photoData);
+                    }, 2000); // Delay for 2 seconds (adjust as needed)
+                })
+                .catch(error => {
+                    console.log(error);
+                    alert('Failed to access the camera.');
+                });
+        }
+
+        function saveCheckInData(placeName, address, checkInAt, photoData) {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -66,7 +100,8 @@
                 data: {
                     place_name: placeName,
                     address: address,
-                    check_in_loc: checkInAt
+                    check_in_loc: checkInAt,
+                    photo_data: photoData
                 },
                 success: function (response) {
                     console.log(response);
