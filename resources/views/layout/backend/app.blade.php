@@ -13,6 +13,8 @@
     <title>Indosopha | {{ $title ?? 'Dashboard' }}</title>
 
     <style>
+    
+
     .fixed-card {
   /* Set a fixed height for the card container on smaller screens */
    /* Adjust this value as needed */

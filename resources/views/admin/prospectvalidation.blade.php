@@ -387,10 +387,10 @@
         columns: [
           {data: 'DT_RowIndex' , name: 'rowindex'},
           {data: 'submitdate' , name: 'submitdate'},
-          {data: 'province' , name: 'province'},
+          {data: 'hospitaldata' , name: 'province'},
           {data: 'prospect_source' , name: 'prospect_source'},
             {data: 'personInCharge' , name: 'personInCharge'},
-            {data: 'hospital' , name: 'hospital'},
+            {data: 'hospitaldata' , name: 'hospital'},
             //{data: 'department' , name: 'department'},
             //{data: 'unit' , name: 'unit'},
      

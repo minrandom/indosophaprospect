@@ -306,10 +306,16 @@ $(document).ready(function () {
                 header: {
                     left: 'prev, next today',
                     center: 'title',
-                    right: 'month,agendaWeek',
+                    right: 'month,agendaWeek,agendaDay'
                 },
+                defaultView:'agendaWeek',
                 events: eventsdata, // Assuming that the response contains the events directly
                 selectable: true,
+                eventOverlap: true,
+                slotEventOverlap: true,
+                weekends:false,
+                //eventLimit: true, // More events indicator (if you have many events in a day)
+   
                 selectHelper: true,
                 editable: true, // Enable drag and drop
                 eventAfterAllRender: function (view) {
@@ -323,6 +329,11 @@ $(document).ready(function () {
                     }
                 },
                 eventRender: function (event, element) {
+                    var durationInMinutes = moment(event.end).diff(moment(event.start), 'minutes');
+        
+        // Set a fixed height based on the duration
+        var fixedHeight = durationInMinutes * 2; // Adjust the multiplier as needed
+        element.css('height', fixedHeight + 'px');
                     // Customize the event HTML here
                     // element.find('.fc-time').hide(),
                     element.find('.fc-title').append('<br>' + event.hospital + ' | ' + event.department);
