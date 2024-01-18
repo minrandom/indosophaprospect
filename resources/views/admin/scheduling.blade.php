@@ -136,29 +136,11 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
     </div>
     </div>
 
-    
-</div> 
-
-</br>
-
-<div class="row">
-    <!-- Calendar Column -->
-    <div class="col-lg-8">
+     <!-- Task List Column -->
+     <div class="col-lg-4">
         <div class="card mb-6">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Schedule Calendar</h6>
-            </div>
-            <div class="card-body">
-                <div id="calendar"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Task List Column -->
-    <div class="col-lg-4">
-        <div class="card mb-6">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Task List</h6>
+                <h6 class="m-0 font-weight-bold text-primary">To Do List</h6>
             </div>
             <div class="card-body">
 
@@ -177,6 +159,26 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
             </div>
         </div>
     </div>
+
+    
+</div> 
+
+</br>
+
+<div class="row">
+    <!-- Calendar Column -->
+    <div class="col-lg-8">
+        <div class="card mb-6">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Schedule Calendar</h6>
+            </div>
+            <div class="card-body">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+
+   
 </div>
    
 
@@ -306,16 +308,20 @@ $(document).ready(function () {
                 header: {
                     left: 'prev, next today',
                     center: 'title',
-                    right: 'month,agendaWeek,agendaDay'
+                    right: 'month,listWeek'
                 },
-                defaultView:'agendaWeek',
+                buttonText: {
+                    month:'Monthly Schedule',
+                    listWeek: 'Weekly Schedule'
+                 },
+                defaultView:'listWeek',
                 events: eventsdata, // Assuming that the response contains the events directly
                 selectable: true,
                 eventOverlap: true,
                 slotEventOverlap: true,
                 weekends:false,
-                //eventLimit: true, // More events indicator (if you have many events in a day)
-   
+               // eventLimit: true, // More events indicator (if you have many events in a day)
+                
                 selectHelper: true,
                 editable: true, // Enable drag and drop
                 eventAfterAllRender: function (view) {
@@ -328,15 +334,10 @@ $(document).ready(function () {
                         $('.fc-time').show();
                     }
                 },
-                eventRender: function (event, element) {
-                    var durationInMinutes = moment(event.end).diff(moment(event.start), 'minutes');
-        
-        // Set a fixed height based on the duration
-        var fixedHeight = durationInMinutes * 2; // Adjust the multiplier as needed
-        element.css('height', fixedHeight + 'px');
-                    // Customize the event HTML here
-                    // element.find('.fc-time').hide(),
+                eventRender: function (event, element,view) {
                     element.find('.fc-title').append('<br>' + event.hospital + ' | ' + event.department);
+                    element.find('.fc-list-item-title').append('<div style="float: right;">PIC: ' + event.create_for_name + '</div>');
+               
                 },
                 eventClick: function (event) {
                     openEventModal(event);
@@ -347,7 +348,7 @@ $(document).ready(function () {
 
                 // Other calendar options...
             });
-
+            /*
             $('#taskList').empty();
                     // Filter and update tasks based on the current month
                 eventsdata.forEach(function (event) {   
@@ -356,7 +357,7 @@ $(document).ready(function () {
                      $('#taskList').append('<li class="list-group-item d-flex justify-content-between align-items-center">' +event.hospitalName+"-"+event.departmentName+'</br> '+event.title+'</br>'+StartDate + ' <span class="badge badge-primary badge-pill">14</span></li>');
                     }
                         
-                });
+                });*/
             userFilter.select2({
                 placeholder: 'All Users',
                 width: '40%',
@@ -396,13 +397,14 @@ $(document).ready(function () {
                 // Refetch events to display the newly added events
                 calendar.fullCalendar('refetchEvents');
                 
+         /*
                 eventfilter.forEach(function (event) {
                     if(event.status<2){
                         var StartDate = moment(event.start).format('DD/MMM/YY HH:mm');
                      $('#taskList').append('<li class="list-group-item d-flex justify-content-between align-items-center">' +event.hospitalName+"-"+event.departmentName+'</br> '+event.title+'</br>'+StartDate + ' <span class="badge badge-primary badge-pill">14</span></li>');
                     }
             });
-
+*/
                 //calendar.fullCalendar('refetchEvents');
             },
             error: function (error) {
