@@ -2,7 +2,7 @@
     'title' => 'Indosopha Web App'
 ])
 @section('content')
-@if(request()->is('/'))
+
     <script>
         window.onpageshow = function(event) {
             if (event.persisted) {
@@ -11,7 +11,7 @@
             }
         };
     </script>
-@endif
+
 <div class="row justify-content-center">
 
     <div class="col-xl-5 col-lg-12 col-md-9">
