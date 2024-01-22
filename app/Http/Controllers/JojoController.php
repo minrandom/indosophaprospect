@@ -42,8 +42,29 @@ class JojoController extends Controller
         //$attendance->address = $request->input('address');
         //$attendance->check_in_at = now();
        // $attendance->save();
+       $photoData = $request->input('photo_data');
+      
+       $photoPath = 'photos/' . uniqid() . '.png'; // Unique filename, adjust as needed
+       $photoPaths=public_path($photoPath);
+       //echo $photoPath;
+       
+       list($type, $data) = explode(';', $photoData);
+       list(, $data)      = explode(',', $data);
+       $data = base64_decode($data);
+       
+       //file_put_contents('test.jpg', $data);
+       file_put_contents($photoPaths,$data);
 
-        Attendance::create($request->all());
+       // Create a new Attendance instance with the data
+       $attendance = new Attendance([
+           'place_name' => $request->input('place_name'),
+           'address' => $request->input('address'),
+           'check_in_loc'=>$request->input('check_in_loc'),
+           'photo_data' => $photoPaths,
+       ]);
+   
+       // Save the Attendance instance to the database
+       $attendance->save();
 
         return response()->json(['success' => true]);
     }

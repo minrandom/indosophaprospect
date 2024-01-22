@@ -15,6 +15,7 @@ class Attendance extends Model
         'place_name',
         'address',
         'check_in_loc',
+        'photo_data',
     ];
 
     protected $dates = [

@@ -14,8 +14,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
-    <button onclick="getLocation()">Check-in</button>
-    <div id="map"></div>
+    <!--<button onclick="getLocation()">Check-in</button>-->
+    <button id="start-camera">Start Checkin</button>
+<video id="video" width="320" height="240" autoplay></video>
+<button id="click-photo">Click Photo</button>
+<canvas id="canvas" width="320" height="240"></canvas>
 
     <script>
         function getLocation() {
@@ -25,6 +28,25 @@
                 alert('Geolocation is not supported by this browser.');
             }
         }
+
+
+        let camera_button = document.querySelector("#start-camera");
+let video = document.querySelector("#video");
+let click_button = document.querySelector("#click-photo");
+let canvas = document.querySelector("#canvas");
+let image_data_url;
+camera_button.addEventListener('click', async function() {
+   	let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+	video.srcObject = stream;
+});
+
+click_button.addEventListener('click', function() {
+   canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+   	image_data_url = canvas.toDataURL('image/jpeg');
+    getLocation();
+   	// data url of the image
+   	console.log(canvas);
+});
 
         function showPosition(position) {
             var latitude = position.coords.latitude;
@@ -38,15 +60,15 @@
                     var placeName = data.display_name.split(',')[0];
                     var address = data.address.road + ', ' + data.address.city + ', ' + data.address.country;
                     var checkInAt = placeName;
-
+                    var photoData =image_data_url;
                     // Prompt the user to capture a photo
-                    capturePhoto(function(photoData) {
+                  
                         // Save the data to the database via AJAX request
-                        saveCheckInData(placeName, address, checkInAt, photoData);
+                    alert('Place Name: ' + placeName + '\nAddress: ' + address);
+                    saveCheckInData(placeName, address, checkInAt, photoData);
 
                         // Use the place name, address, and photo data as needed
-                        alert('Place Name: ' + placeName + '\nAddress: ' + address);
-                    });
+                   
 
                     // Show the user's location on the map...
                 })
@@ -56,36 +78,6 @@
                 });
         }
 
-        function capturePhoto(callback) {
-            // Access the device camera and prompt the user to capture a photo
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    var video = document.createElement('video');
-                    document.body.appendChild(video);
-                    video.srcObject = stream;
-                    video.play();
-
-                    // Capture a photo after a delay
-                    setTimeout(() => {
-                        var canvas = document.createElement('canvas');
-                        canvas.width = video.videoWidth;
-                        canvas.height = video.videoHeight;
-                        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-                        var photoData = canvas.toDataURL('image/jpeg');
-
-                        // Cleanup: stop the video stream and remove the video element
-                        video.srcObject.getTracks().forEach(track => track.stop());
-                        document.body.removeChild(video);
-
-                        // Pass the captured photo data to the callback function
-                        callback(photoData);
-                    }, 2000); // Delay for 2 seconds (adjust as needed)
-                })
-                .catch(error => {
-                    console.log(error);
-                    alert('Failed to access the camera.');
-                });
-        }
 
         function saveCheckInData(placeName, address, checkInAt, photoData) {
             $.ajaxSetup({
@@ -103,12 +95,14 @@
                     check_in_loc: checkInAt,
                     photo_data: photoData
                 },
-                success: function (response) {
-                    console.log(response);
-                },
-                error: function (error) {
-                    console.log(error);
-                }
+                 success: function (response) {
+            console.log('Data saved successfully:', response);
+            // You can add additional checks or logs here
+        },
+        error: function (error) {
+            console.error('Error saving data:', error);
+            // You can add additional error handling here
+        }
             });
         }
     </script>
