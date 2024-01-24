@@ -14,6 +14,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
+    <form method="POST" action="{{ route('gdrive.store') }}" enctype="multipart/form-data">
+    @csrf
+    <input type='file' >
+    <input type="submit" value="Submit"></form>
+<button id="testkirimdata">Test Kirim</button>
     <!--<button onclick="getLocation()">Check-in</button>-->
     <button id="start-camera">Start Checkin</button>
 <video id="video" width="320" height="240" autoplay></video>
@@ -31,6 +36,7 @@
 
 
         let camera_button = document.querySelector("#start-camera");
+        let testkirim = document.querySelector("#testkirimdata");
 let video = document.querySelector("#video");
 let click_button = document.querySelector("#click-photo");
 let canvas = document.querySelector("#canvas");
@@ -38,6 +44,10 @@ let image_data_url;
 camera_button.addEventListener('click', async function() {
    	let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
 	video.srcObject = stream;
+});
+
+testkirim.addEventListener('click',function(){
+
 });
 
 click_button.addEventListener('click', function() {
@@ -61,6 +71,7 @@ click_button.addEventListener('click', function() {
                     var address = data.address.road + ', ' + data.address.city + ', ' + data.address.country;
                     var checkInAt = placeName;
                     var photoData =image_data_url;
+                   
                     // Prompt the user to capture a photo
                   
                         // Save the data to the database via AJAX request

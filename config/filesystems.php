@@ -26,8 +26,9 @@ return [
     |
     */
 
-    'cloud' => env('FILESYSTEM_CLOUD', 's3'),
-
+    //'cloud' => env('FILESYSTEM_CLOUD', 's3'),
+    'cloud' => 'google', // Optional: set Google Drive as default cloud storage
+    
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -55,7 +56,16 @@ return [
             'visibility' => 'public',
         ],
 
-        's3' => [
+        
+        'google' => [
+            'driver' => 'google',
+            'clientId' => env('GOOGLE_DRIVE_CLIENT_ID'),
+            'clientSecret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
+            'refreshToken' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
+            'folder' => env('GOOGLE_DRIVE_FOLDER'),
+        ],
+
+        /*'s3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
@@ -63,7 +73,7 @@ return [
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
-        ],
+        ],*/
 
     ],
 

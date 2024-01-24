@@ -6,6 +6,8 @@ use App\Models\jojo;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
 
+use Yaza\LaravelGoogleDriveStorage\Gdrive;
+
 class JojoController extends Controller
 {
     /**
@@ -27,6 +29,13 @@ class JojoController extends Controller
     {
         //
     }
+
+    public function testkirim()
+    {
+ 
+    }
+
+
 
     /**
      * Store a newly created resource in storage.

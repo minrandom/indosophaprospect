@@ -2,17 +2,21 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 //Namespace Auth
 use App\Http\Controllers\Auth\LoginController;
-
+//use App\Providers\GoogleDriveAdapter;
+//use App\Providers\GoogleDriverServiceProvider;
 //Namespace Admin
 use App\Http\Controllers\Admin\AdminController;
+
 use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\ProspectController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ScheduleController;
 
+ 
 //Namespace User
 use App\Http\Controllers\User\UserController;
 
@@ -21,6 +25,10 @@ use App\Http\Controllers\User\ProfileController;
 
 use App\Http\Controllers\Admin\PrincipalBrandController;
 use App\Http\Controllers\Admin\DataCompileController;
+
+//use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -31,6 +39,18 @@ use App\Http\Controllers\Admin\DataCompileController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
+Route::GET('/testput', function() {
+	//       $photoPaths=public_path($photoPath);
+	Storage::disk('google')->put('test.txt', 'Hello World');
+	//Storage::disk('google')->put('download.png', $photoPaths);
+    //return 'File was saved to Google Drive';
+});
+
+
+Route::resource('/gdrive',TampanController::class);
+
 
 Route::get('/', function () {
     // Check if the user is already authenticated
@@ -53,8 +73,8 @@ Route::get('/user2',[UserController::class,'index2'])->name('user2');
 Route::post('/check-in', 'JojoController@store')->name('check-in.store');
 Route::get('/check-in', 'JojoController@index')->name('check-in');
 Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin'],function(){
-	
 	Route::get('/',[AdminController::class,'index'])->name('admin')->middleware(['can:admin']);
+	
 	Route::get('/hospital',[HospitalController::class,'index'])->name('admin.hospital')->middleware(['can:admin']);
 	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['can:admin']);
 	Route::PATCH('/prospectupdate/{prospect}',[ProspectController::class,'update'])->name('admin.prospectupdate')->middleware(['can:admin']);
