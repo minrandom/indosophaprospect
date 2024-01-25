@@ -36,6 +36,11 @@ class ScheduleController extends Controller
               $color = '#68B01A';
           }
 
+          $by=$booking->created_by;
+          $for=$booking->create_for;
+
+          //dd($userNamesById[$by]);
+
           $events[] = [
               'id'   => $booking->id,
               'title' => $booking->task,
@@ -47,8 +52,8 @@ class ScheduleController extends Controller
               'start' => $booking->start_time,
               'end' => $booking->end_time,
               'created_by' => $booking->created_by,
-              'created_by_name' => $userNamesById[$booking->created_by],
-              'create_for_name' => $userNamesById[$booking->create_for],
+              'created_by_name' => $userNamesById[$by],
+              'create_for_name' => $userNamesById[$for],
               'create_for'=> $booking->create_for,
               'color' => $color
           ];
