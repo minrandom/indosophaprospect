@@ -25,7 +25,7 @@ class ScheduleController extends Controller
       $bookings = schedule::orderBy('start_time','asc')->with(['hospital', 'department', 'creator', 'createFor', 'validator'])->get();
       $users = User::all();
       $userNamesById = $users->pluck('name', 'id')->all();
-      $data = $this->create();
+     $data = $this->create();
       
       foreach($bookings as $booking) {
           $color = null;
@@ -36,10 +36,16 @@ class ScheduleController extends Controller
               $color = '#68B01A';
           }
 
-          $by=$userNamesById[$booking->created_by];
-          $for=$userNamesById[$booking->create_for];
+          //$by=$userNamesById[$booking->created_by];
+          //$for=$userNamesById[$booking->create_for];
+          $by= $users->where('id',$booking->created_by)->pluck('name', 'id')->first();
+          $for= $users->where('id',$booking->create_for)->pluck('name', 'id')->first();
+          
+          
 
-          //dd($by);
+
+
+          //dd($for);
 
           $events[] = [
               'id'   => $booking->id,
