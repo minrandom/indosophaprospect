@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\jojo;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
+use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
+use League\Flysystem\Filesystem;
+use Illuminate\Support\Facades\Storage;
 
-use Yaza\LaravelGoogleDriveStorage\Gdrive;
 
 class JojoController extends Controller
 {
@@ -52,8 +54,8 @@ class JojoController extends Controller
         //$attendance->check_in_at = now();
        // $attendance->save();
        $photoData = $request->input('photo_data');
-      
-       $photoPath = 'photos/' . uniqid() . '.png'; // Unique filename, adjust as needed
+       $photoFilename= uniqid() . '.png';
+       $photoPath = 'photos/' . $photoFilename; // Unique filename, adjust as needed
        $photoPaths=public_path($photoPath);
        //echo $photoPath;
        
@@ -62,7 +64,11 @@ class JojoController extends Controller
        $data = base64_decode($data);
        
        //file_put_contents('test.jpg', $data);
+       
+       Storage::disk('google')->put($photoFilename, $data);
        file_put_contents($photoPaths,$data);
+
+
 
        // Create a new Attendance instance with the data
        $attendance = new Attendance([

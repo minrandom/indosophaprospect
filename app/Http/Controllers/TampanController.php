@@ -6,10 +6,12 @@ use App\Models\tampan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 //use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Storage;
 
 class TampanController extends Controller
 {
 
+    /*
     private function token(){
         $client_id=\Config('services.google.clientId');
         //dd($client_id);
@@ -29,7 +31,7 @@ class TampanController extends Controller
         //dd($accessToken);
         return $accessToken;
     }
-
+    */
     /**
      * Display a listing of the resource.
      *

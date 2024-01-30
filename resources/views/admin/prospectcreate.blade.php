@@ -347,17 +347,9 @@
     });
 
 
-  $('body').on("click",".btn-cr8",function(){
-        var id = $(this).attr("id")
-        
-        
-    });
-
- 
-
     // Create 
 
-    $("#createForm").on("submit",function(e){
+    $(document).on("submit", "#createForm", function(e) {
       e.preventDefault();
         var clickedButton = $(document.activeElement);
 

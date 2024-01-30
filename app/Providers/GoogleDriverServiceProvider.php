@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Providers\GoogleDriveAdapter;
-use Illuminate\Support\Facades\Storage;
-use google;
+use Google_Client;
+use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
+
+use League\Flysystem\Filesystem;
+use Storage;
 class GoogleDriverServiceProvider extends ServiceProvider
 {
     /**
@@ -15,27 +17,24 @@ class GoogleDriverServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        \Storage::extend('google', function ($app, $config) {
+        Storage::extend('google', function ($app, $config) {
             $client = new \Google_Client();
             $client->setClientId($config['clientId']);
             $client->setClientSecret($config['clientSecret']);
             $client->refreshToken($config['refreshToken']);
             
            
-            //var_dump($config['refreshToken']);
-            // Add the DRIVE scope for Google Drive
-            $client->addScope(\Google_Service_Drive::DRIVE);
-            // Fetch the access token explicitly
-            //$accessToken = $client->fetchAccessTokenWithRefreshToken($config['refreshToken']);
-
-            //$client->setAccessToken($accessToken);
-
             $service = new \Google_Service_Drive($client);
-            //dd($service);
-            dd($service);
-            $adapter = new \Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter($service, $config['folder']);
-            //dd($adapter);
-            return new \League\Flysystem\Filesystem($adapter);
+
+            $options = [];
+            if(isset($config['teamDriveId'])) {
+                $options['teamDriveId'] = $config['teamDriveId'];
+            }
+
+            $adapter = new GoogleDriveAdapter($service, $config['folder'], $options);
+
+            return new Filesystem($adapter);
+
         });
        
     }
