@@ -383,7 +383,8 @@
               d.status=0 ;d.url="prospectvalidation"
            }
 
-      },   
+      }, 
+      
         columns: [
           {data: 'DT_RowIndex' , name: 'rowindex'},
           {data: 'submitdate' , name: 'submitdate'},

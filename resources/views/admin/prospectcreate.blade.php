@@ -349,16 +349,22 @@
 
     // Create 
 
-    $(document).on("submit", "#createForm", function(e) {
-      e.preventDefault();
-        var clickedButton = $(document.activeElement);
+    window.addEventListener('pageshow', function(event) {
+    var form = document.getElementById('createForm'); // Assuming your form has an ID of "createForm"
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var clickedButton = $(document.activeElement);
 
-        if (clickedButton.is('#btn-store')) {
-            submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
-        } else if (clickedButton.is('#btn-draft')) {
-            submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
-        }
-    });
+            if (clickedButton.is('#btn-store')) {
+                submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
+            } else if (clickedButton.is('#btn-draft')) {
+                submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
+            }
+        });
+    }
+});
+
     
     function submitForm(url, successMessage) {
         var formData = $("#createForm").serialize();
