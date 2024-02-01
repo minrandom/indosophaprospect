@@ -49,7 +49,7 @@ Route::GET('/testput', function() {
 });
 
 
-Route::resource('/gdrive',TampanController::class);
+//Route::resource('/gdrive',TampanController::class);
 
 
 Route::get('/', function () {

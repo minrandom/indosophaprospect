@@ -261,11 +261,14 @@ public function getProductDetail(Request $request)
     function getareaman($isi,$isi2)
     {
         $am=Employee::with('user')->where([['area',$isi],['position','AM']])->get();
+       
         $nsm=Employee::with('user')->where([['area',$isi2],['position','NSM']])->get();
+   
         $result = [];
 
         if ($am->count() > 0) {
             $useram = $am->pluck('user.name');
+            
             $useramid = $am->pluck('user.id');
             $arr1=json_decode($useramid);
             $array = json_decode($useram);
@@ -293,6 +296,7 @@ public function getProductDetail(Request $request)
 {
     foreach ($prospects as $prospect) {
         $userdata = getareaman($prospect->province->iss_area_code, $prospect->province->wilayah);
+   
         $existingAlert = Alert::where('prospect_id', $prospect->id)->where('type', $alertType)->first();
 
         // Create alert if an appropriate alert type is generated
@@ -495,7 +499,8 @@ public function getProductDetail(Request $request)
     ->addIndexColumn()   
     ->addColumn('provincedata', function ($prp) {
 
-    $newprov=$prp->province->name;
+    $newprov=$prp->province?$prp->province->name:'No Province detected';
+    
     $AM= getareaman($prp->province->iss_area_code,$prp->province->wilayah);
     
     
@@ -519,13 +524,14 @@ public function getProductDetail(Request $request)
     
     
     ->addColumn('unit', function ($prp) {
-        return $prp->unit->name;
+        
+        return $prp->unit?$prp->unit->name:'data BU Error';
     }) 
     ->addColumn('category', function ($prp) {
         return $prp->config->category;
     }) 
     ->addColumn('namaprod', function ($prp) {
-        return $prp->config->name;
+        return $prp->config?$prp->config->name:'data config error';
     }) 
     ->addColumn('configno', function ($prp) {
         return $prp->config->config_code;
@@ -533,13 +539,15 @@ public function getProductDetail(Request $request)
     ->addColumn('category', function ($prp) {
         $cats= $prp->config->category_id;
         $cekcat = Category::where('id',$cats)->first();
-        return $cekcat->name;
+        
+        return $cekcat?$cekcat->name:'data category error';
 
     }) 
     ->addColumn('brand', function ($prp) {
         $brand= $prp->config->brand_id;
         $cekbrand = Brand::where('id',$brand)->first();
-        return $cekbrand->name;
+        //$validname?$validname->name:"Belum di Validasi"
+        return $cekbrand?$cekbrand->name:'data brand error';
 
     }) 
 
@@ -697,14 +705,23 @@ public function getProductDetail(Request $request)
 
         ->addColumn('submitdate', function ($prp) {
             $dt=$prp->created_at->format('d-M-Y');
-            $creator=$prp->creator->name;
+            $creator='missing data creator';
+            if($prp->creator->name !=null){
+                $creator=$prp->creator->name;
+            }
+            
             $comdata="(".$creator.")</br>".$dt;
             return $comdata;
             })
        
       
         ->addColumn('personInCharge', function ($prp) {
-            return $prp->personInCharge ? $prp->personInCharge->name : "Pilih PIC saat validasi";
+            $picdata="Pilih PIC saat validasi";
+            if ($prp->personInCharge !== null) {
+                $picdata = $prp->personInCharge->name;
+            }
+ 
+            return $picdata;
         })
 
  
@@ -713,6 +730,7 @@ public function getProductDetail(Request $request)
   ->addColumn('hospitaldata', function ($prp) {
     $dep=$prp->department->name;
     $host=$prp->hospital->name;
+    
     $muncul=$host."</br>".$dep;
      return $muncul;
     })
@@ -785,15 +803,24 @@ public function getProductDetail(Request $request)
         
         ->addColumn('validasi',function($prp){
             
-            $startdate = new \DateTime($prp->validation_time); // Create a DateTime object
-            $formattedDate = $startdate->format('Y-m-d'); // Format to get only the date part
-        
-            //dd($formattedDate);
-
-            $validname=User::where('id',$prp->validation_by)->first();
-                       
-            $data=$validname?$validname->name:"Belum di Validasi";
+            $startdate = null;
+            $formattedDate = '';
+            $data = 'Belum di Validasi';
+            
+            if ($prp->validation_time !== null) {
+                $startdate = new \DateTime($prp->validation_time); // Create a DateTime object
+                $formattedDate = $startdate->format('Y-m-d'); // Format to get only the date part
+            }
+            
+            if ($prp->validation_by !== null) {
+                $validname = User::where('id', $prp->validation_by)->first();
+                $data=$validname?$validname->name:"Belum di Validasi";
+            }
+            
+           
+            
             $show = $data.'</br>'.$formattedDate;
+            
             return $show;
           
         })

@@ -368,9 +368,14 @@
             method: "POST",
             data: formData,
             success: function() {
-                $("#create-modal").modal("hide");
-                $('.data-table').DataTable().ajax.reload();
+                //$("#create-modal").modal("hide");
+                //$('.data-table').DataTable().ajax.reload();
+                $("#createForm")[0].reset();
                 flash("success", successMessage);
+                document.querySelector(".notify").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+                });
             }
         });
     };

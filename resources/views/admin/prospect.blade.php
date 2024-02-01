@@ -99,7 +99,8 @@
                 <table class="table table-bordered data-table ">
                     <thead>
                         <tr>
-                        <th>Validasi</th>
+                        <th>Creator</th>
+                        <th>Validator</th>
                             <th>PIC</th>
                             <th>Prospect No</th>
                             <th>Province</th>
@@ -409,6 +410,7 @@
           return{
             pic:item.personInCharge,
             validasi:item.validasi,
+            submitdate:item.submitdate,
             //validasi: item.validation_time,
             propdetail:item.propdetail,
             province: item.provincedata,
@@ -433,7 +435,7 @@
             TanggalSubmit : datz.validation_time,
             Creator : datz.creator.name,
             ProspectNo : datz.prospect_no,
-            Province : datz.provincedata,
+            Province : datz.province.name,
             SumberInfoProspect: datz.prospect_source,
             PIC : datz.personInCharge,
             AM : datz.AMNSM,
@@ -582,6 +584,7 @@
    // data : dataprospect,
                 
     columns: [
+      {data: 'submitdate' , name: 'submitdate'},
      {
             data: 'validasi',
             name: 'validasi',
