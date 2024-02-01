@@ -25,70 +25,56 @@
         <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
 
 
-        <div class="collapse" id="filterCollapse">
-         <div class="row mt-4">
-          <div class="col-4">
-          <div class="col col-lg-8">
+ <div class="collapse" id="filterCollapse">
+    <div class="row mt-4">
+        <div class="col-md-3">
             <div class="form-group">
-            <label for="sumberinfofilter">Sumber Prospect :</label>
-             <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required=""  >
-             <option value="8888" selected>Show All</option> 
-               </select>
-              </div>
-          </div>  
-            <div class="col col-lg-8">
-              <div class="form-group">
-                  <label for="tempefilter">Temperature :</label>
-                   <select id="tempefilter" name="tempefilter" class="form-control dropdown" required=""  >
-                      <option value="8888" selected>Show All</option>
-                      <option value="1">HOT PROSPECT</option>
-                      <option value="2">PROSPECT</option>
-                      <option value="3">FUNNEL</option>
-                      <option value="4">DROP</option>
-                   </select>
-              </div>
+                <label for="sumberinfofilter">Sumber Prospect :</label>
+                <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required="">
+                    <option value="8888" selected>Show All</option>
+                </select>
             </div>
+            <div class="form-group">
+                <label for="tempefilter">Temperature :</label>
+                <select id="tempefilter" name="tempefilter" class="form-control dropdown" required="">
+                    <option value="8888" selected>Show All</option>
+                    <option value="1">HOT PROSPECT</option>
+                    <option value="2">PROSPECT</option>
+                    <option value="3">FUNNEL</option>
+                    <option value="4">DROP</option>
+                </select>
             </div>
-        
-        <div class="col-4">
-            <div class="col col-lg-8">
-              <div class="form-group">
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
                 <label for="provincefilter">Province :</label>
-                <select id="provincefilter" name="provincefilter" class="form-control dropdown" required=""  >
-                <option value="8888" selected>Show All</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col col-lg-8">
-                <div class="form-group">
+                <select id="provincefilter" name="provincefilter" class="form-control dropdown" required="">
+                    <option value="8888" selected>Show All</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="picfilter">PIC :</label>
-                <select id="picfilter" name="picfilter" class="form-control dropdown" required=""  >
-          
-                 </select>
-              </div>
-              </div>
-          </div>
-        
-          <div class="col-4">
-      <div class="col col-lg-8">
-        <div class="form-group">
-            <label for="BUfilter">Business Unit :</label>
-             <select id="BUfilter" name="BUfilter" class="form-control dropdown" required=""  >
-             <option value="8888" selected>Show All</option>
-          </select>
+                <select id="picfilter" name="picfilter" class="form-control dropdown" required="">
+                </select>
+            </div>
         </div>
-      </div>
-      <div class="col col-lg-8">
-        <div class="form-group">
-            <label for="catfilter">Product Category :</label>
-             <select id="catfilter" name="catfilter" class="form-control dropdown" required=""  >
-             <option value="8888" selected>Show All</option>
-          </select>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="BUfilter">Business Unit :</label>
+                <select id="BUfilter" name="BUfilter" class="form-control dropdown" required="">
+                    <option value="8888" selected>Show All</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="catfilter">Product Category :</label>
+                <select id="catfilter" name="catfilter" class="form-control dropdown" required="">
+                    <option value="8888" selected>Show All</option>
+                </select>
+            </div>
         </div>
-      </div>
-
+        <div id="noDataMessage" class="col-lg-12 alert alert-danger mt-3" style="display: none;"></div>
     </div>
-
+</div>
     </div>
     </div>
   </div>
@@ -248,8 +234,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 
 <!-- Include DataTables Buttons JS and CSS -->
+
+
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/rowreorder/1.4.1/css/rowReorder.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+
+
+
+
+<script type="text/javascript" src="https://cdn.datatables.net/rowreorder/1.4.1/js/dataTables.rowReorder.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
@@ -387,6 +384,18 @@
               return sfilterdt.temperaturedata === SourceFilter2;
             })
           }
+              // Check if filteredData is empty
+          if (filteredData.length === 0) {
+              // Show the message if filteredData is empty
+              $('#noDataMessage').text('No data available for ' + SourceFilter2).show();
+          } else {
+              // Hide the message if filteredData is not empty
+              $('#noDataMessage').hide();
+              // Proceed with displaying or processing the filtered data
+          }
+
+
+
         } 
 
       if(SourceFilter3){
@@ -483,9 +492,9 @@
         });
       };
 
-      var infoFilter = $('#sumberinfofilter').val();
-        console.log(infoFilter);
-        updateData(infoFilter,$('#tempefilter').val(),$('#provincefilter').val());
+      //var infoFilter = ;
+        //console.log(infoFilter);
+        updateData($('#sumberinfofilter').val(),$('#tempefilter').val(),$('#provincefilter').val());
 
         
        
@@ -565,6 +574,11 @@
         serverSide: false,
         lengthMenu: [[5, 10, 20], [5, 10, 20]],
         pageLength: 5,
+        responsive: true,
+    rowReorder: {
+        selector: 'td:nth-child(2)'
+    },
+
         
        dom: 'filprtip', // Include buttons in the DataTable layout
         /*buttons: [
@@ -590,13 +604,13 @@
             name: 'validasi',
      }  ,        
     {data: 'pic', name: 'pic'},
-   {data: 'propdetail', name: 'prospect_no'},
+   {data: 'propdetail', name: 'prospect_no',responsivePriority: 1, targets: 0},
     {data: 'province', name: 'province'},
-    {data: 'hospital', name: 'hospital'},
+    {data: 'hospital', name: 'hospital',responsivePriority: 2, targets: 1},
    {data: 'namaprod', name: 'namaprod',render: function (data, type, full, meta) {
         // Compile the 'namaprod' and 'qty' columns
         return data + '</br>' + full.qty+" "+ full.uom;
-      },searchable:true},
+      },searchable:true,responsivePriority: 3, targets: 2},
    
     {data: 'value', name: 'value'},
    {data: 'promotion', name: 'promotion'},
@@ -610,8 +624,7 @@
       
            
         ],
-
-
+  
     initComplete: function (settings, json) {
         $('#downloadDataButton').on('click', function () {
             // Trigger DataTables Buttons export functionality
@@ -622,6 +635,8 @@
     });
     //console.log(dataprospect);
     table.clear().rows.add(dataprospect).draw();
+
+
   }
   else {
     console.error("Data is null or empty;")
