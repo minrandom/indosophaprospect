@@ -66,16 +66,16 @@ class JojoController extends Controller
        //file_put_contents('test.jpg', $data);
        
        Storage::disk('google')->put($photoFilename, $data);
-       file_put_contents($photoPaths,$data);
-
-
+       //file_put_contents($photoPaths,$data);
+       $photoUrl = Storage::disk('google')->url($photoFilename);
+        //dd($photoUrl);
 
        // Create a new Attendance instance with the data
        $attendance = new Attendance([
            'place_name' => $request->input('place_name'),
            'address' => $request->input('address'),
            'check_in_loc'=>$request->input('check_in_loc'),
-           'photo_data' => $photoPaths,
+           'photo_data' => $photoUrl,
        ]);
    
        // Save the Attendance instance to the database

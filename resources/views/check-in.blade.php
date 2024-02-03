@@ -14,10 +14,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
-    <form method="POST" action="{{ route('gdrive.store') }}" enctype="multipart/form-data">
+ 
     @csrf
-    <input type='file' >
-    <input type="submit" value="Submit"></form>
+
 <button id="testkirimdata">Test Kirim</button>
     <!--<button onclick="getLocation()">Check-in</button>-->
     <button id="start-camera">Start Checkin</button>

@@ -31,13 +31,13 @@
             <div class="form-group">
                 <label for="sumberinfofilter">Sumber Prospect :</label>
                 <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required="">
-                    <option value="8888" selected>Show All</option>
+                    <option value="0" selected>Show All</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="tempefilter">Temperature :</label>
                 <select id="tempefilter" name="tempefilter" class="form-control dropdown" required="">
-                    <option value="8888" selected>Show All</option>
+                    <!--<option value="0" selected>Show All</option>-->
                     <option value="1">HOT PROSPECT</option>
                     <option value="2">PROSPECT</option>
                     <option value="3">FUNNEL</option>
@@ -49,7 +49,7 @@
             <div class="form-group">
                 <label for="provincefilter">Province :</label>
                 <select id="provincefilter" name="provincefilter" class="form-control dropdown" required="">
-                    <option value="8888" selected>Show All</option>
+                    <option value="0" selected>Show All</option>
                 </select>
             </div>
             <div class="form-group">
@@ -62,13 +62,13 @@
             <div class="form-group">
                 <label for="BUfilter">Business Unit :</label>
                 <select id="BUfilter" name="BUfilter" class="form-control dropdown" required="">
-                    <option value="8888" selected>Show All</option>
+                    <option value="0" selected>Show All</option>
                 </select>
             </div>
             <div class="form-group">
                 <label for="catfilter">Product Category :</label>
                 <select id="catfilter" name="catfilter" class="form-control dropdown" required="">
-                    <option value="8888" selected>Show All</option>
+                    <option value="0" selected>Show All</option>
                 </select>
             </div>
         </div>
@@ -274,7 +274,7 @@
                 eventSelect.append(option);
               });
               
-              var showall = $("<option>").val(8888).text("Show All").attr('selected', true);
+              var showall = $("<option>").val(0).text("Show All").attr('selected', true);
               eventSelect.prepend(showall);
 
               
@@ -286,12 +286,12 @@
                 placeholder: keterangantempe,
                 width: '100%' // Adjust the width to fit the container
               });
-          var tempall = $("<option>").val(8888).text("Show All").attr('selected', true);
+          var tempall = $("<option>").val(0).text("Show All").attr('selected', true);
            tempselect.prepend(tempall);
               
               var provfilter = $("#provincefilter");
               populateSelectFromDatalist('provincefilter', response.province,"Filter Provinsi");
-              var provall = $("<option>").val(8888).text("Show All").attr('selected', true);
+              var provall = $("<option>").val(0).text("Show All").attr('selected', true);
               provfilter.prepend(provall);
 
               var keteranganpic = "Filter PIC"
@@ -307,13 +307,13 @@
 
               var placeholderPicOption = new Option(keteranganpic, '', true, true);
               picfilter.append(placeholderPicOption);
-              var picall = $("<option>").val(8888).text("Show All").attr('selected', true);
+              var picall = $("<option>").val(0).text("Show All").attr('selected', true);
               picfilter.prepend(picall);
 
               var unitSelect = $("#BUfilter");
                 populateSelectFromDatalist('BUfilter', response.bunit,"Pilih Business Unit");
                 var catSelect=$("#catfilter");
-                var catall = $("<option>").val(8888).text("Show All").attr('selected', true);
+                var catall = $("<option>").val(0).text("Show All").attr('selected', true);
                 function fetchcat(unitId) {
                   // Make an AJAX call to retrieve hospitals based on provinceId
                   $.ajax({
@@ -325,7 +325,7 @@
                     }
                   });
                 }
-                var unitall = $("<option>").val(8888).text("Show All").attr('selected', true);
+                var unitall = $("<option>").val(0).text("Show All").attr('selected', true);
                 unitSelect.prepend(unitall)
                 
                 catSelect.prepend(catall);
@@ -354,67 +354,47 @@
         jsonData = response.data; // Store the fetched data in the variable
         //console.log(jsonData);
 
-    function updateData(SourceFilter1,SourceFilter2,SourceFilter3){
-          var filteredData;
-          var newData;
-          console.log(SourceFilter1);
-          if(SourceFilter1==8888||!SourceFilter1){
-            filteredData=jsonData;
-            newData=jsonData;
-          }else{
-            filteredData=jsonData.filter(function(sfilterdt){
-              return sfilterdt.prospect_source===SourceFilter1;
-            })
-            newData=jsonData.filter(function(sfilterdt){
-              return sfilterdt.prospect_source === SourceFilter1;
-            })
-          }
-      
+  function updateData(params) {
+    var filteredData = jsonData.slice(); // Make a copy of the original data
+    var newData=jsonData;
+    var x=0;
+    for(var i = 0; i < params.length; i++){
+      if(params[i]!='0'){x=x+1}
+
+    }
+    
+   // console.log(x);
+    if(x>0){
+    for (var i = 0; i < params.length; i++) {
+        if (params[i] && params[i] != 0) {
+            filteredData = filteredData.filter(function(item) {
+                switch (i) {
+                    case 0:
+                        return item.prospect_source === params[i];
+                    case 1:
+                        return item.temperaturedata === params[i];
+                    case 2:
+                        return item.province.name === params[i];
+                    // Add more cases for additional parameters
+                    default:
+                        return true;
+                }
+            });
+           
+        }
+        newData=filteredData;
         
-      if(SourceFilter2){
-
-        if(SourceFilter2==8888||!SourceFilter2){
-            filteredData=filteredData;
-            newData=filteredData;
-          }else{
-            filteredData=filteredData.filter(function(sfilterdt){
-              return sfilterdt.temperaturedata===SourceFilter2;
-            })
-            newData=filteredData.filter(function(sfilterdt){
-              return sfilterdt.temperaturedata === SourceFilter2;
-            })
-          }
-              // Check if filteredData is empty
-          if (filteredData.length === 0) {
-              // Show the message if filteredData is empty
-              $('#noDataMessage').text('No data available for ' + SourceFilter2).show();
-          } else {
-              // Hide the message if filteredData is not empty
-              $('#noDataMessage').hide();
-              // Proceed with displaying or processing the filtered data
-          }
-
-
-
-        } 
-
-      if(SourceFilter3){
-
-        if(SourceFilter3==8888||!SourceFilter3){
-            filteredData=filteredData;
-            newData=filteredData;
-          }else{
-            filteredData=filteredData.filter(function(sfilterdt){
-              return sfilterdt.province.name===SourceFilter3;
-            })
-            newData=filteredData.filter(function(sfilterdt){
-              return sfilterdt.province.name === SourceFilter3;
-            })
-          }
-        } 
-
-       console.log(newData);
-
+    }
+    
+    
+    // Show message if filteredData is empty
+    if (filteredData.length === 0) {
+        $('#noDataMessage').text('No data for this filter').show();
+    } else {
+        $('#noDataMessage').hide();
+        // Proceed with displaying or processing the filtered data
+    }
+  }
         var dataprospect=filteredData.map(function(item){
           return{
             pic:item.personInCharge,
@@ -437,7 +417,7 @@
           }
         });
 
-        //console.log(newData);
+        //console.log(dataprospect);
 
         var prospectsheet = newData.map(function(datz){
           return{
@@ -477,24 +457,24 @@
         
           }
 
-          console.log(prospectsheet);
+         
+        });
+
+       // console.log(prospectsheet);
+        //console.log(dataprospect);
+        initialProspectTable(dataprospect);
           $('#dlexcel').on('click', function () {
             downloadExcel(prospectsheet);
-        });
 
 
         });
        
-        //console.log(prospectsheet);
-        initialProspectTable(dataprospect);
-        $('#dlexcel').off('click').on('click', function () {
-                    downloadExcel(prospectsheet);
-        });
       };
 
+     var filterkirim=[$('#sumberinfofilter').val(),$('#tempefilter').val(),$('#provincefilter').val()];
       //var infoFilter = ;
         //console.log(infoFilter);
-        updateData($('#sumberinfofilter').val(),$('#tempefilter').val(),$('#provincefilter').val());
+        updateData(filterkirim);
 
         
        
@@ -511,18 +491,22 @@
           var provValue = $('#provincefilter').val();
           var provText= $('#provincefilter').find('option:selected').text();
           
-          if(selectedValue!=8888){
+          if(selectedValue!=0){
             selectedValue=selectedText
           }
-          if(tempValue!=8888){
+          if(tempValue!=0){
             tempValue=tempText
           }
-          if(provValue!=8888){
+          if(provValue!=0){
             provValue=provText
           }
              // selectedValue=$(this).text();
            
-            updateData(selectedValue,tempValue,provValue); 
+
+             var filterupdate=[selectedValue,tempValue,provValue];
+
+
+            updateData(filterupdate); 
           //console.log(selectedText)
         });
 
@@ -532,7 +516,7 @@
         // Handle the case when the filter dropdown is cleared
         $('#clearFilterButton').on('click', function () {
           // Set the dropdown to "All" or an appropriate default value
-          $('#sumberinfofilter').val(8888).trigger('change');
+          $('#sumberinfofilter').val(0).trigger('change');
         });
 
 
@@ -576,7 +560,7 @@
         pageLength: 5,
         responsive: true,
     rowReorder: {
-        selector: 'td:nth-child(2)'
+        selector: 'td:nth-child(1)'
     },
 
         
@@ -598,28 +582,28 @@
    // data : dataprospect,
                 
     columns: [
-      {data: 'submitdate' , name: 'submitdate'},
+      {data: 'submitdate' , name: 'submitdate',responsivePriority: 11, targets: 11},
      {
             data: 'validasi',
-            name: 'validasi',
+            name: 'validasi',responsivePriority: 13, targets: 13
      }  ,        
-    {data: 'pic', name: 'pic'},
-   {data: 'propdetail', name: 'prospect_no',responsivePriority: 1, targets: 0},
-    {data: 'province', name: 'province'},
-    {data: 'hospital', name: 'hospital',responsivePriority: 2, targets: 1},
+    {data: 'pic', name: 'pic',responsivePriority: 10, targets: 10},
+   {data: 'propdetail', name: 'prospect_no',responsivePriority: 0, targets: 0},
+    {data: 'province', name: 'province',responsivePriority: 12, targets: 12},
+    {data: 'hospital', name: 'hospital',responsivePriority: 1, targets: 1},
    {data: 'namaprod', name: 'namaprod',render: function (data, type, full, meta) {
         // Compile the 'namaprod' and 'qty' columns
         return data + '</br>' + full.qty+" "+ full.uom;
-      },searchable:true,responsivePriority: 3, targets: 2},
+      },searchable:true,responsivePriority: 2, targets: 2},
    
-    {data: 'value', name: 'value'},
-   {data: 'promotion', name: 'promotion'},
-    {data: 'review', name: 'review'},
-    {data: 'anggaran', name: 'anggaran'},
-   {data: 'etaPoDate', name: 'eta_po_date'},
-    {data: 'temperature', name: 'temperature'},
+    {data: 'value', name: 'value',responsivePriority: 3, targets: 3},
+   {data: 'promotion', name: 'promotion',responsivePriority: 5, targets: 5},
+    {data: 'review', name: 'review',responsivePriority: 6, targets: 6},
+    {data: 'anggaran', name: 'anggaran',responsivePriority: 7, targets: 7},
+   {data: 'etaPoDate', name: 'eta_po_date',responsivePriority: 8, targets: 8},
+    {data: 'temperature', name: 'temperature',responsivePriority: 4, targets: 4},
     
-  {data: 'action', name: 'action', orderable: false, searchable: true},
+  {data: 'action', name: 'action', orderable: false, searchable: true,responsivePriority: 9, targets: 9},
             
       
            
@@ -633,8 +617,7 @@
     }
 
     });
-    //console.log(dataprospect);
-    table.clear().rows.add(dataprospect).draw();
+     table.clear().rows.add(dataprospect).draw();
 
 
   }
