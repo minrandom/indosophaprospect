@@ -37,7 +37,7 @@
             <div class="form-group">
                 <label for="tempefilter">Temperature :</label>
                 <select id="tempefilter" name="tempefilter" class="form-control dropdown" required="">
-                    <!--<option value="0" selected>Show All</option>-->
+                    <option value="0" selected>Show All</option>
                     <option value="1">HOT PROSPECT</option>
                     <option value="2">PROSPECT</option>
                     <option value="3">FUNNEL</option>
@@ -282,13 +282,13 @@
               var keterangantempe = "Filter Temperature"
               var placeholderTempeOption = new Option(keterangantempe, '', true, true);
               tempselect.append(placeholderTempeOption);
+              //var tempall = $("<option>").val(0).text("Show All").attr('selected', true);
+              // tempselect.prepend(tempall);
+                  
               tempselect.select2({
                 placeholder: keterangantempe,
                 width: '100%' // Adjust the width to fit the container
               });
-          var tempall = $("<option>").val(0).text("Show All").attr('selected', true);
-           tempselect.prepend(tempall);
-              
               var provfilter = $("#provincefilter");
               populateSelectFromDatalist('provincefilter', response.province,"Filter Provinsi");
               var provall = $("<option>").val(0).text("Show All").attr('selected', true);
@@ -352,22 +352,43 @@
     //async: false, // Make the call synchronous to ensure data is fetched before DataTable initialization
     success: function (response) {
         jsonData = response.data; // Store the fetched data in the variable
-        //console.log(jsonData);
-
-  function updateData(params) {
-    var filteredData = jsonData.slice(); // Make a copy of the original data
-    var newData=jsonData;
-    var x=0;
-    for(var i = 0; i < params.length; i++){
-      if(params[i]!='0'){x=x+1}
-
+       // console.log(jsonData);
+       var cek=$('#tempefilter').val();
+       if(cek==''){cek='0';}
+       console.log(cek);
+       var filterkirim=[$('#sumberinfofilter').val(),cek,$('#provincefilter').val(),$('#picfilter').val(),$('#BUfilter').val()];
+      //var infoFilter = ;
+        //console.log(filterkirim);
+        updateData(jsonData,filterkirim);
+      },
+    error: function (xhr, status, error) {
+        console.error("AJAX Error: " + status, error);
     }
+  });
+
+  //console.log(jsonData);
+        function updateData(jsonData,params) {
+          var filteredData = jsonData; // Make a copy of the original data
+          var newData=jsonData;
+          //console.log(filteredData);
+          //console.log(params);
+          var x=0;
+          for(var i = 0; i < params.length; i++){
+            if(params[i]!='0'){x=x+1;}
+            //console.log(params[i]);
+            // console.log(x);
+            
+          }
+          console.log(x);
     
-   // console.log(x);
-    if(x>0){
+         //console.log(params);
+          if(x>0){
     for (var i = 0; i < params.length; i++) {
         if (params[i] && params[i] != 0) {
             filteredData = filteredData.filter(function(item) {
+             //console.log("item"+item.pic_user_id);
+             //console.log("params"+params[i]);
+             //console.log(item.pic_user_id == params[i]);
                 switch (i) {
                     case 0:
                         return item.prospect_source === params[i];
@@ -375,17 +396,23 @@
                         return item.temperaturedata === params[i];
                     case 2:
                         return item.province.name === params[i];
+                    case 3:
+                        return item.pic_user_id == params[i];
+                    case 4:
+                        return item.unit_id == params[i];
+                    
                     // Add more cases for additional parameters
                     default:
-                        return true;
+                      return true;
                 }
             });
            
+          }
+          newData=filteredData;
+          
         }
-        newData=filteredData;
         
-    }
-    
+        //console.log(filteredData);
     
     // Show message if filteredData is empty
     if (filteredData.length === 0) {
@@ -395,27 +422,7 @@
         // Proceed with displaying or processing the filtered data
     }
   }
-        var dataprospect=filteredData.map(function(item){
-          return{
-            pic:item.personInCharge,
-            validasi:item.validasi,
-            submitdate:item.submitdate,
-            //validasi: item.validation_time,
-            propdetail:item.propdetail,
-            province: item.provincedata,
-            hospital: item.hospitaldata,
-            namaprod:item.namaprod,
-            qty:item.qty,
-            uom:item.config.uom,
-            value:item.value,
-            promotion:item.promotion,
-            review:item.reviewStats,
-            anggaran:item.anggaran,
-            etaPoDate:item.eta_po_date,
-            temperature:item.temperature,
-            action:item.action,
-          }
-        });
+        var dataprospect=filteredData;
 
         //console.log(dataprospect);
 
@@ -471,25 +478,29 @@
        
       };
 
-     var filterkirim=[$('#sumberinfofilter').val(),$('#tempefilter').val(),$('#provincefilter').val()];
-      //var infoFilter = ;
-        //console.log(infoFilter);
-        updateData(filterkirim);
 
-        
+    
+
+        // Handle the case when the filter dropdown is cleared
        
-
-        $('#sumberinfofilter,#tempefilter,#provincefilter').on('change', function () {
+        $('#sumberinfofilter,#tempefilter,#provincefilter,#picfilter,#BUfilter').on('change', function () {
           
           var selectedValue = $('#sumberinfofilter').val();
           var selectedText= $('#sumberinfofilter').find('option:selected').text();
          // console.log(selectedValue);
-
+          
           var tempValue = $('#tempefilter').val();
+       if(tempValue==''){tempValue='0'}
           var tempText= $('#tempefilter').find('option:selected').text();
 
           var provValue = $('#provincefilter').val();
           var provText= $('#provincefilter').find('option:selected').text();
+          
+          var picValue = $('#picfilter').val();
+          var picText= $('#picfilter').find('option:selected').text();
+          
+          var buValue = $('#BUfilter').val();
+          var buText= $('#BUfilter').find('option:selected').text();
           
           if(selectedValue!=0){
             selectedValue=selectedText
@@ -500,32 +511,26 @@
           if(provValue!=0){
             provValue=provText
           }
+         //console.log(buValue)
              // selectedValue=$(this).text();
            
 
-             var filterupdate=[selectedValue,tempValue,provValue];
-
-
-            updateData(filterupdate); 
+             var filterupdate=[selectedValue,tempValue,provValue,picValue,buValue];
+          
+            updateData(jsonData,filterupdate); 
           //console.log(selectedText)
         });
 
-        
 
 
-        // Handle the case when the filter dropdown is cleared
-        $('#clearFilterButton').on('click', function () {
-          // Set the dropdown to "All" or an appropriate default value
-          $('#sumberinfofilter').val(0).trigger('change');
-        });
 
+  
 
         
-      },
-    error: function (xhr, status, error) {
-        console.error("AJAX Error: " + status, error);
-    }
-  });
+   
+
+ 
+ 
 
   function downloadExcel(data) {
     // Create a new Excel workbook
@@ -540,6 +545,30 @@
     // Save the workbook as an Excel file
     XLSX.writeFile(workbook, 'Prospects.xlsx');
 }
+
+
+function updateColumnPriorities() {
+    var columns = table.settings().init().columns;
+    columns.forEach(function (column, index) {
+        switch (index) {
+            case 3: // Set new responsive priority for the first column
+                column.responsivePriority = 13;
+                break;
+            case 5: // Set new responsive priority for the first column
+                column.responsivePriority = 12;
+                break;
+            default: // Set new responsive priority for the second column
+                column.responsivePriority = 0;
+                break;
+            // Add cases for other columns using their indexes here
+          
+        }
+    });
+    // Redraw the DataTable to reflect the changes
+    table.columns.adjust().draw();
+}
+
+
 
 
   function initialProspectTable(dataprospect){
@@ -560,7 +589,7 @@
         pageLength: 5,
         responsive: true,
     rowReorder: {
-        selector: 'td:nth-child(1)'
+        selector: 'td:nth-child(2)'
     },
 
         
@@ -587,10 +616,10 @@
             data: 'validasi',
             name: 'validasi',responsivePriority: 13, targets: 13
      }  ,        
-    {data: 'pic', name: 'pic',responsivePriority: 10, targets: 10},
-   {data: 'propdetail', name: 'prospect_no',responsivePriority: 0, targets: 0},
-    {data: 'province', name: 'province',responsivePriority: 12, targets: 12},
-    {data: 'hospital', name: 'hospital',responsivePriority: 1, targets: 1},
+    {data: 'personInCharge', name: 'personInCharge',responsivePriority: 10, targets: 10},
+   {data: 'propdetail', name: 'prospectdetail',responsivePriority: 0, targets: 13},
+    {data: 'provincedata', name: 'provincedata',responsivePriority: 12, targets: 12},
+    {data: 'hospitaldata', name: 'hospitaldata',responsivePriority: 1, targets: 1},
    {data: 'namaprod', name: 'namaprod',render: function (data, type, full, meta) {
         // Compile the 'namaprod' and 'qty' columns
         return data + '</br>' + full.qty+" "+ full.uom;
@@ -598,9 +627,9 @@
    
     {data: 'value', name: 'value',responsivePriority: 3, targets: 3},
    {data: 'promotion', name: 'promotion',responsivePriority: 5, targets: 5},
-    {data: 'review', name: 'review',responsivePriority: 6, targets: 6},
+    {data: 'reviewStats', name: 'reviewStats',responsivePriority: 6, targets: 6},
     {data: 'anggaran', name: 'anggaran',responsivePriority: 7, targets: 7},
-   {data: 'etaPoDate', name: 'eta_po_date',responsivePriority: 8, targets: 8},
+   {data: 'eta_po_date', name: 'eta_po_date',responsivePriority: 8, targets: 8},
     {data: 'temperature', name: 'temperature',responsivePriority: 4, targets: 4},
     
   {data: 'action', name: 'action', orderable: false, searchable: true,responsivePriority: 9, targets: 9},
@@ -618,7 +647,7 @@
 
     });
      table.clear().rows.add(dataprospect).draw();
-
+    updateColumnPriorities;
 
   }
   else {
