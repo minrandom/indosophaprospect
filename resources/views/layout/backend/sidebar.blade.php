@@ -68,7 +68,7 @@
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-briefcase"></i><span> Prospect Review</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-handshake-slash"></i><span> Drop Request</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-pen"></i><span> Update Request</span></a>
-                <a class="collapse-item" href="{{ route('admin.prospectchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
+                <a class="collapse-item" href="{{ route('admin.pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
          
                 @elsecan('fs')
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>My Prospect</span></a>
@@ -81,7 +81,7 @@
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Region Prospect Review</span></a>
                 @elsecan('bu')
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>BU Prospect Review</span></a>
-                <a class="collapse-item" href="{{ route('admin.prospectchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
+                <a class="collapse-item" href="{{ route('admin.pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
          
 
                 @endcan
