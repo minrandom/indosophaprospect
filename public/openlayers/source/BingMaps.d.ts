@@ -62,6 +62,12 @@ export type Options = {
      * zoom levels. See {@link module :ol/tilegrid/TileGrid~TileGrid#getZForResolution}.
      */
     zDirection?: number | import("../array.js").NearestDirectionFunction | undefined;
+    /**
+     * Whether to show BingMaps placeholder tiles when zoomed past the maximum level provided in an area. When `false`, requests beyond
+     * the maximum zoom level will return no tile. When `true`, the placeholder tile will be returned. When not set, the default behaviour of the imagery set takes place,
+     * which is unique for each imagery set in BingMaps.
+     */
+    placeholderTiles?: boolean | undefined;
 };
 export type BingMapsImageryMetadataResponse = {
     /**
@@ -165,6 +171,9 @@ export type CoverageArea = {
  * @property {number|import("../array.js").NearestDirectionFunction} [zDirection=0]
  * Choose whether to use tiles with a higher or lower zoom level when between integer
  * zoom levels. See {@link module:ol/tilegrid/TileGrid~TileGrid#getZForResolution}.
+ * @property {boolean} [placeholderTiles] Whether to show BingMaps placeholder tiles when zoomed past the maximum level provided in an area. When `false`, requests beyond
+ * the maximum zoom level will return no tile. When `true`, the placeholder tile will be returned. When not set, the default behaviour of the imagery set takes place,
+ * which is unique for each imagery set in BingMaps.
  */
 /**
  * @typedef {Object} BingMapsImageryMetadataResponse
@@ -233,6 +242,11 @@ declare class BingMaps extends TileImage {
      * @type {string}
      */
     private imagerySet_;
+    /**
+     * @private
+     * @type {boolean|undefined}
+     */
+    private placeholderTiles_;
     /**
      * Get the api key used for this source.
      *

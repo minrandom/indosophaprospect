@@ -79,28 +79,28 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['can:admin']);
 	Route::PATCH('/prospectupdate/{prospect}',[ProspectController::class,'update'])->name('admin.prospectupdate')->middleware(['can:admin']);
 	Route::PATCH('/prospectinfoupdate/{prospect}',[ProspectController::class,'infoupdate'])->name('admin.prospectinfoupdate')->middleware(['can:admin']);
-	Route::PATCH('/prospectinfoupdaterequest/{prospect}',[ProspectController::class,'infoupdaterequest'])->name('admin.prospect.infoupdaterequest')->middleware(['auth', 'role:admin,am,nsm']);
-	Route::PATCH('/productupdaterequest/{prospect}',[ProspectController::class,'produpdaterequest'])->name('admin.prospect.produpdaterequest')->middleware(['auth', 'role:admin,am,nsm']);
-	Route::PATCH('/promoteupdate/{prospect}',[ProspectController::class,'promodateupdate'])->name('admin.prospect.promoteupdate')->middleware(['auth', 'role:admin,am,nsm']);
-	Route::PATCH('/reviewupdate/{prospect}',[ProspectController::class,'reviewupdate'])->name('admin.prospect.reviewupdate')->middleware(['auth', 'role:admin,am,nsm']);
-	Route::get('/prospect/{prospect}/edit',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['auth', 'role:admin,am,nsm']);
+	Route::PATCH('/prospectinfoupdaterequest/{prospect}',[ProspectController::class,'infoupdaterequest'])->name('admin.prospect.infoupdaterequest')->middleware(['auth', 'role:admin,am,nsm,bu']);
+	Route::PATCH('/productupdaterequest/{prospect}',[ProspectController::class,'produpdaterequest'])->name('admin.prospect.produpdaterequest')->middleware(['auth', 'role:admin,am,nsm,bu']);
+	Route::PATCH('/promoteupdate/{prospect}',[ProspectController::class,'promodateupdate'])->name('admin.prospect.promoteupdate')->middleware(['auth', 'role:admin,am,nsm,bu']);
+	Route::PATCH('/reviewupdate/{prospect}',[ProspectController::class,'reviewupdate'])->name('admin.prospect.reviewupdate')->middleware(['auth', 'role:admin,am,nsm,bu']);
+	Route::get('/prospect/{prospect}/edit',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['auth', 'role:admin,am,nsm,bu']);
 	
 	//Route::get('/province',[ProvinceController::class,'index'])->name('province')->middleware(['can:admin']);
 	//Route Rescource
 	//Route::resource('/prospect',ProspectController::class)->middleware(['can:admin']);
-	Route::get('/prospecteditz/{prospect}',[ProspectController::class,'show'])->name('admin.prospecteditdata')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/prospectvalidation',[ProspectController::class,'validationprospect'])->name('admin.prospectvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/prospectcheck',[ProspectController::class,'creationcheck'])->name('admin.prospectcheckview')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::PATCH('/prospectvalidation/{prospect}',[ProspectController::class,'validationupdate'])->name('admin.prospectvalidationupdate')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/prospectvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect.index')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::POST('/prospect',[ProspectController::class,'store'])->name('admin.prospect.store')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/prospectcreate',[ProspectController::class,'create'])->name('admin.prospectcreate')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::POST('/draft',[ProspectController::class,'savedraft'])->name('admin.prospect.saveDraft')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/prospectcreation',[ProspectController::class,'creation'])->name('admin.prospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/hospital/{provinceId}/hospital',[HospitalController::class,'getHospitalsByProvince'])->name('admin.getHospitalsByProvince')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/category/{unitId}/category',[CategoryController::class,'getCategoriesByUnit'])->name('admin.getCategoriesByUnit')->middleware(['auth', 'role:admin,fs,am,nsm']);
-	Route::get('/categorydata/{unitId}/category',[CategoryController::class,'getCatname'])->name('admin.getCatname')->middleware(['auth', 'role:admin,fs,am,nsm']);
+	Route::get('/prospecteditz/{prospect}',[ProspectController::class,'show'])->name('admin.prospecteditdata')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/prospectvalidation',[ProspectController::class,'validationprospect'])->name('admin.prospectvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/prospectcheck',[ProspectController::class,'creationcheck'])->name('admin.prospectcheckview')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::PATCH('/prospectvalidation/{prospect}',[ProspectController::class,'validationupdate'])->name('admin.prospectvalidationupdate')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/prospectvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect.index')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::POST('/prospect',[ProspectController::class,'store'])->name('admin.prospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/prospectcreate',[ProspectController::class,'create'])->name('admin.prospectcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::POST('/draft',[ProspectController::class,'savedraft'])->name('admin.prospect.saveDraft')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/prospectcreation',[ProspectController::class,'creation'])->name('admin.prospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/hospital/{provinceId}/hospital',[HospitalController::class,'getHospitalsByProvince'])->name('admin.getHospitalsByProvince')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/category/{unitId}/category',[CategoryController::class,'getCategoriesByUnit'])->name('admin.getCategoriesByUnit')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/categorydata/{unitId}/category',[CategoryController::class,'getCatname'])->name('admin.getCatname')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/config/get-products', [ConfigController::class, 'getProducts'])->name('product.getProducts');
 	Route::resource('/user','UserController')->middleware(['can:admin']);
 	Route::resource('/province','ProvinceController')->middleware(['can:admin']);
@@ -127,6 +127,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::view('/utilities-animations','admin.utilities-animation')->name('utilities-animations');
 	Route::view('/utilities-other','admin.utilities-other')->name('utilities-other');
 	Route::view('/chart','admin.chart')->name('chart');
+	Route::view('/pchart','admin.prospectchart')->name('pchart');
 	Route::view('/tables','admin.tables')->name('tables');
 	
 	

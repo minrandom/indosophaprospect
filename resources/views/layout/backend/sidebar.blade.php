@@ -77,6 +77,9 @@
                 @elsecan('nsm')
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Region Prospect Review</span></a>
+                @elsecan('bu')
+                <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>BU Prospect Review</span></a>
+                <a class="collapse-item" href="{{ route('admin.prospectchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
          
 
                 @endcan

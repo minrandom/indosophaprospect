@@ -9,6 +9,7 @@ export const Uniforms: {
     TRANSITION_ALPHA: string;
     DEPTH: string;
     RENDER_EXTENT: string;
+    PATTERN_ORIGIN: string;
     RESOLUTION: string;
     ZOOM: string;
     GLOBAL_ALPHA: string;
@@ -16,7 +17,7 @@ export const Uniforms: {
     SCREEN_TO_WORLD_MATRIX: string;
 };
 export namespace Attributes {
-    const TEXTURE_COORD: string;
+    let TEXTURE_COORD: string;
 }
 export default WebGLTileLayerRenderer;
 export type Options = {

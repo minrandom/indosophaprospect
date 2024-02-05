@@ -15,9 +15,6 @@ import {clear} from '../obj.js';
 import {
   compose as composeTransform,
   create as createTransform,
-  reset as resetTransform,
-  rotate as rotateTransform,
-  scale as scaleTransform,
 } from '../transform.js';
 import {create, fromTransform} from '../vec/mat4.js';
 import {getUid} from '../util.js';
@@ -44,13 +41,14 @@ export const ShaderType = {
  */
 export const DefaultUniform = {
   PROJECTION_MATRIX: 'u_projectionMatrix',
-  OFFSET_SCALE_MATRIX: 'u_offsetScaleMatrix',
-  OFFSET_ROTATION_MATRIX: 'u_offsetRotateMatrix',
+  SCREEN_TO_WORLD_MATRIX: 'u_screenToWorldMatrix',
   TIME: 'u_time',
   ZOOM: 'u_zoom',
   RESOLUTION: 'u_resolution',
+  ROTATION: 'u_rotation',
   VIEWPORT_SIZE_PX: 'u_viewportSizePx',
   PIXEL_RATIO: 'u_pixelRatio',
+  HIT_DETECTION: 'u_hitDetection',
 };
 
 /**
@@ -113,7 +111,7 @@ export const AttributeType = {
 
 /**
  * @typedef {Object} CanvasCacheItem
- * @property {HTMLCanvasElement} canvas Canvas element.
+ * @property {WebGLRenderingContext} context The context of this canvas.
  * @property {number} users The count of users of this canvas.
  */
 
@@ -143,20 +141,23 @@ function getUniqueCanvasCacheKey() {
 
 /**
  * @param {string} key The cache key for the canvas.
- * @return {HTMLCanvasElement} The canvas.
+ * @return {WebGLRenderingContext} The canvas.
  */
-function getCanvas(key) {
+function getOrCreateContext(key) {
   let cacheItem = canvasCache[key];
   if (!cacheItem) {
     const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
     canvas.style.position = 'absolute';
     canvas.style.left = '0';
-    cacheItem = {users: 0, canvas};
+    const context = getContext(canvas);
+    cacheItem = {users: 0, context};
     canvasCache[key] = cacheItem;
   }
 
   cacheItem.users += 1;
-  return cacheItem.canvas;
+  return cacheItem.context;
 }
 
 /**
@@ -173,12 +174,14 @@ function releaseCanvas(key) {
     return;
   }
 
-  const canvas = cacheItem.canvas;
-  const gl = getContext(canvas);
+  const gl = cacheItem.context;
   const extension = gl.getExtension('WEBGL_lose_context');
   if (extension) {
     extension.loseContext();
   }
+  const canvas = gl.canvas;
+  canvas.width = 1;
+  canvas.height = 1;
 
   delete canvasCache[key];
 }
@@ -332,15 +335,9 @@ class WebGLHelper extends Disposable {
 
     /**
      * @private
-     * @type {HTMLCanvasElement}
-     */
-    this.canvas_ = getCanvas(this.canvasCacheKey_);
-
-    /**
-     * @private
      * @type {WebGLRenderingContext}
      */
-    this.gl_ = getContext(this.canvas_);
+    this.gl_ = getOrCreateContext(this.canvasCacheKey_);
 
     /**
      * @private
@@ -360,11 +357,19 @@ class WebGLHelper extends Disposable {
      */
     this.currentProgram_ = null;
 
-    this.canvas_.addEventListener(
+    /**
+     * @private
+     * @type boolean
+     */
+    this.needsToBeRecreated_ = false;
+
+    const canvas = this.gl_.canvas;
+
+    canvas.addEventListener(
       ContextEventType.LOST,
       this.boundHandleWebGLContextLost_
     );
-    this.canvas_.addEventListener(
+    canvas.addEventListener(
       ContextEventType.RESTORED,
       this.boundHandleWebGLContextRestored_
     );
@@ -448,6 +453,13 @@ class WebGLHelper extends Disposable {
    */
   setUniforms(uniforms) {
     this.uniforms_ = [];
+    this.addUniforms(uniforms);
+  }
+
+  /**
+   * @param {Object<string, UniformValue>} uniforms Uniform definitions.
+   */
+  addUniforms(uniforms) {
     for (const name in uniforms) {
       this.uniforms_.push({
         name: name,
@@ -528,11 +540,12 @@ class WebGLHelper extends Disposable {
    * Clean up.
    */
   disposeInternal() {
-    this.canvas_.removeEventListener(
+    const canvas = this.gl_.canvas;
+    canvas.removeEventListener(
       ContextEventType.LOST,
       this.boundHandleWebGLContextLost_
     );
-    this.canvas_.removeEventListener(
+    canvas.removeEventListener(
       ContextEventType.RESTORED,
       this.boundHandleWebGLContextRestored_
     );
@@ -540,7 +553,6 @@ class WebGLHelper extends Disposable {
     releaseCanvas(this.canvasCacheKey_);
 
     delete this.gl_;
-    delete this.canvas_;
   }
 
   /**
@@ -549,8 +561,9 @@ class WebGLHelper extends Disposable {
    * subsequent draw calls.
    * @param {import("../Map.js").FrameState} frameState current frame state
    * @param {boolean} [disableAlphaBlend] If true, no alpha blending will happen.
+   * @param {boolean} [enableDepth] If true, enables depth testing.
    */
-  prepareDraw(frameState, disableAlphaBlend) {
+  prepareDraw(frameState, disableAlphaBlend, enableDepth) {
     const gl = this.gl_;
     const canvas = this.getCanvas();
     const size = frameState.size;
@@ -574,10 +587,18 @@ class WebGLHelper extends Disposable {
     gl.bindTexture(gl.TEXTURE_2D, null);
 
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.depthRange(0.0, 1.0);
+    gl.clearDepth(1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, disableAlphaBlend ? gl.ZERO : gl.ONE_MINUS_SRC_ALPHA);
+    if (enableDepth) {
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
+    } else {
+      gl.disable(gl.DEPTH_TEST);
+    }
   }
 
   /**
@@ -600,18 +621,33 @@ class WebGLHelper extends Disposable {
    * @param {import("../Map.js").FrameState} frameState current frame state
    * @param {import("./RenderTarget.js").default} renderTarget Render target to draw to
    * @param {boolean} [disableAlphaBlend] If true, no alpha blending will happen.
+   * @param {boolean} [enableDepth] If true, enables depth testing.
    */
-  prepareDrawToRenderTarget(frameState, renderTarget, disableAlphaBlend) {
+  prepareDrawToRenderTarget(
+    frameState,
+    renderTarget,
+    disableAlphaBlend,
+    enableDepth
+  ) {
     const gl = this.gl_;
     const size = renderTarget.getSize();
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, renderTarget.getFramebuffer());
+    gl.bindRenderbuffer(gl.RENDERBUFFER, renderTarget.getDepthbuffer());
     gl.viewport(0, 0, size[0], size[1]);
     gl.bindTexture(gl.TEXTURE_2D, renderTarget.getTexture());
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.depthRange(0.0, 1.0);
+    gl.clearDepth(1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, disableAlphaBlend ? gl.ZERO : gl.ONE_MINUS_SRC_ALPHA);
+    if (enableDepth) {
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
+    } else {
+      gl.disable(gl.DEPTH_TEST);
+    }
   }
 
   /**
@@ -660,7 +696,7 @@ class WebGLHelper extends Disposable {
    * @return {HTMLCanvasElement} Canvas.
    */
   getCanvas() {
-    return this.canvas_;
+    return /** @type {HTMLCanvasElement} */ (this.gl_.canvas);
   }
 
   /**
@@ -680,23 +716,6 @@ class WebGLHelper extends Disposable {
     const rotation = frameState.viewState.rotation;
     const pixelRatio = frameState.pixelRatio;
 
-    const offsetScaleMatrix = resetTransform(this.offsetScaleMatrix_);
-    scaleTransform(offsetScaleMatrix, 2 / size[0], 2 / size[1]);
-
-    const offsetRotateMatrix = resetTransform(this.offsetRotateMatrix_);
-    if (rotation !== 0) {
-      rotateTransform(offsetRotateMatrix, -rotation);
-    }
-
-    this.setUniformMatrixValue(
-      DefaultUniform.OFFSET_SCALE_MATRIX,
-      fromTransform(this.tmpMat4_, offsetScaleMatrix)
-    );
-    this.setUniformMatrixValue(
-      DefaultUniform.OFFSET_ROTATION_MATRIX,
-      fromTransform(this.tmpMat4_, offsetRotateMatrix)
-    );
-
     this.setUniformFloatValue(
       DefaultUniform.TIME,
       (Date.now() - this.startTime_) * 0.001
@@ -711,6 +730,21 @@ class WebGLHelper extends Disposable {
       size[0],
       size[1],
     ]);
+    this.setUniformFloatValue(DefaultUniform.ROTATION, rotation);
+  }
+
+  /**
+   * Sets the `u_hitDetection` uniform.
+   * @param {boolean} enabled Whether to enable the hit detection code path
+   */
+  applyHitDetectionUniform(enabled) {
+    const loc = this.getUniformLocation(DefaultUniform.HIT_DETECTION);
+    this.getGL().uniform1i(loc, enabled ? 1 : 0);
+
+    // hit detection uses a fixed pixel ratio
+    if (enabled) {
+      this.setUniformFloatValue(DefaultUniform.PIXEL_RATIO, 0.5);
+    }
   }
 
   /**
@@ -739,8 +773,7 @@ class WebGLHelper extends Disposable {
           uniform.prevValue = undefined;
           uniform.texture = gl.createTexture();
         }
-        gl.activeTexture(gl[`TEXTURE${textureSlot}`]);
-        gl.bindTexture(gl.TEXTURE_2D, uniform.texture);
+        this.bindTexture(uniform.texture, textureSlot, uniform.name);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
@@ -759,9 +792,7 @@ class WebGLHelper extends Disposable {
             value
           );
         }
-
-        // fill texture slots by increasing index
-        gl.uniform1i(this.getUniformLocation(uniform.name), textureSlot++);
+        textureSlot++;
       } else if (Array.isArray(value) && value.length === 6) {
         this.setUniformMatrixValue(
           uniform.name,
@@ -990,7 +1021,7 @@ class WebGLHelper extends Disposable {
    */
   enableAttributeArray_(attribName, size, type, stride, offset) {
     const location = this.getAttributeLocation(attribName);
-    // the attribute has not been found in the shaders; do not enable it
+    // the attribute has not been found in the shaders or is not used; do not enable it
     if (location < 0) {
       return;
     }
@@ -1022,18 +1053,31 @@ class WebGLHelper extends Disposable {
 
   /**
    * WebGL context was lost
+   * @param {WebGLContextEvent} event The context loss event.
    * @private
    */
-  handleWebGLContextLost() {
+  handleWebGLContextLost(event) {
     clear(this.bufferCache_);
     this.currentProgram_ = null;
+
+    event.preventDefault();
   }
 
   /**
    * WebGL context was restored
    * @private
    */
-  handleWebGLContextRestored() {}
+  handleWebGLContextRestored() {
+    this.needsToBeRecreated_ = true;
+  }
+
+  /**
+   * Returns whether this helper needs to be recreated, as the context was lost and then restored.
+   * @return {boolean} Whether this helper needs to be recreated.
+   */
+  needsToBeRecreated() {
+    return this.needsToBeRecreated_;
+  }
 
   /**
    * Will create or reuse a given webgl texture and apply the given size. If no image data

@@ -4,11 +4,13 @@
  */
 export type Attributes = string;
 export namespace Attributes {
-    const POSITION: string;
-    const INDEX: string;
-    const SEGMENT_START: string;
-    const SEGMENT_END: string;
-    const PARAMETERS: string;
+    let POSITION: string;
+    let INDEX: string;
+    let SEGMENT_START: string;
+    let SEGMENT_END: string;
+    let PARAMETERS: string;
+    let JOIN_ANGLES: string;
+    let DISTANCE: string;
 }
 export default VectorStyleRenderer;
 /**
@@ -25,7 +27,7 @@ export type AttributeDefinition = {
      * This callback computes the numerical value of the
      * attribute for a given feature.
      */
-    callback: (arg0: import("../../Feature").FeatureLike) => number | Array<number>;
+    callback: (this: import("./MixedGeometryBatch.js").GeometryBatchItem, arg1: import("../../Feature").FeatureLike) => number | Array<number>;
 };
 export type AttributeDefinitions = {
     [x: string]: AttributeDefinition;
@@ -35,29 +37,17 @@ export type UniformDefinitions = {
 };
 export type WebGLBuffers = {
     /**
-     * Polygon indices buffer
+     * Array containing indices and vertices buffers for polygons
      */
-    polygonIndicesBuffer: WebGLArrayBuffer;
+    polygonBuffers: Array<WebGLArrayBuffer>;
     /**
-     * Polygon vertices buffer
+     * Array containing indices and vertices buffers for line strings
      */
-    polygonVerticesBuffer: WebGLArrayBuffer;
+    lineStringBuffers: Array<WebGLArrayBuffer>;
     /**
-     * LineString indices buffer
+     * Array containing indices and vertices buffers for points
      */
-    lineStringIndicesBuffer: WebGLArrayBuffer;
-    /**
-     * LineString vertices buffer
-     */
-    lineStringVerticesBuffer: WebGLArrayBuffer;
-    /**
-     * Point indices buffer
-     */
-    pointIndicesBuffer: WebGLArrayBuffer;
-    /**
-     * Point vertices buffer
-     */
-    pointVerticesBuffer: WebGLArrayBuffer;
+    pointBuffers: Array<WebGLArrayBuffer>;
     /**
      * Inverse of the transform applied when generating buffers
      */
@@ -65,17 +55,17 @@ export type WebGLBuffers = {
 };
 export type RenderInstructions = {
     /**
-     * Polygon instructions
+     * Polygon instructions; null if nothing to render
      */
-    polygonInstructions: Float32Array;
+    polygonInstructions: Float32Array | null;
     /**
-     * LineString instructions
+     * LineString instructions; null if nothing to render
      */
-    lineStringInstructions: Float32Array;
+    lineStringInstructions: Float32Array | null;
     /**
-     * Point instructions
+     * Point instructions; null if nothing to render
      */
-    pointInstructions: Float32Array;
+    pointInstructions: Float32Array | null;
 };
 /**
  * An object containing both shaders (vertex and fragment)
@@ -92,17 +82,9 @@ export type ShaderProgram = {
 };
 export type StyleShaders = {
     /**
-     * Shaders for filling polygons.
+     * Shader builder with the appropriate presets.
      */
-    fill?: ShaderProgram | undefined;
-    /**
-     * Shaders for line strings and polygon strokes.
-     */
-    stroke?: ShaderProgram | undefined;
-    /**
-     * Shaders for symbols.
-     */
-    symbol?: ShaderProgram | undefined;
+    builder: import("../../webgl/ShaderBuilder.js").ShaderBuilder;
     /**
      * Custom attributes made available in the vertex shaders.
      * Default shaders rely on the attributes in {@link Attributes }.
@@ -117,13 +99,13 @@ export type StyleShaders = {
         [x: string]: import("../../webgl/Helper.js").UniformValue;
     } | undefined;
 };
-export type VectorStyle = import('../../style/literal.js').LiteralStyle | StyleShaders;
+export type VectorStyle = import('../../style/webgl.js').WebGLStyle | StyleShaders;
 /**
  * @typedef {Object} AttributeDefinition A description of a custom attribute to be passed on to the GPU, with a value different
  * for each feature.
  * @property {number} [size] Amount of numerical values composing the attribute, either 1, 2, 3 or 4; in case size is > 1, the return value
  * of the callback should be an array; if unspecified, assumed to be a single float value
- * @property {function(import("../../Feature").FeatureLike):number|Array<number>} callback This callback computes the numerical value of the
+ * @property {function(this:import("./MixedGeometryBatch.js").GeometryBatchItem, import("../../Feature").FeatureLike):number|Array<number>} callback This callback computes the numerical value of the
  * attribute for a given feature.
  */
 /**
@@ -132,19 +114,16 @@ export type VectorStyle = import('../../style/literal.js').LiteralStyle | StyleS
  */
 /**
  * @typedef {Object} WebGLBuffers
- * @property {WebGLArrayBuffer} polygonIndicesBuffer Polygon indices buffer
- * @property {WebGLArrayBuffer} polygonVerticesBuffer Polygon vertices buffer
- * @property {WebGLArrayBuffer} lineStringIndicesBuffer LineString indices buffer
- * @property {WebGLArrayBuffer} lineStringVerticesBuffer LineString vertices buffer
- * @property {WebGLArrayBuffer} pointIndicesBuffer Point indices buffer
- * @property {WebGLArrayBuffer} pointVerticesBuffer Point vertices buffer
+ * @property {Array<WebGLArrayBuffer>} polygonBuffers Array containing indices and vertices buffers for polygons
+ * @property {Array<WebGLArrayBuffer>} lineStringBuffers Array containing indices and vertices buffers for line strings
+ * @property {Array<WebGLArrayBuffer>} pointBuffers Array containing indices and vertices buffers for points
  * @property {import("../../transform.js").Transform} invertVerticesTransform Inverse of the transform applied when generating buffers
  */
 /**
  * @typedef {Object} RenderInstructions
- * @property {Float32Array} polygonInstructions Polygon instructions
- * @property {Float32Array} lineStringInstructions LineString instructions
- * @property {Float32Array} pointInstructions Point instructions
+ * @property {Float32Array|null} polygonInstructions Polygon instructions; null if nothing to render
+ * @property {Float32Array|null} lineStringInstructions LineString instructions; null if nothing to render
+ * @property {Float32Array|null} pointInstructions Point instructions; null if nothing to render
  */
 /**
  * @typedef {Object} ShaderProgram An object containing both shaders (vertex and fragment)
@@ -153,15 +132,13 @@ export type VectorStyle = import('../../style/literal.js').LiteralStyle | StyleS
  */
 /**
  * @typedef {Object} StyleShaders
- * @property {ShaderProgram} [fill] Shaders for filling polygons.
- * @property {ShaderProgram} [stroke] Shaders for line strings and polygon strokes.
- * @property {ShaderProgram} [symbol] Shaders for symbols.
+ * @property {import("../../webgl/ShaderBuilder.js").ShaderBuilder} builder Shader builder with the appropriate presets.
  * @property {AttributeDefinitions} [attributes] Custom attributes made available in the vertex shaders.
  * Default shaders rely on the attributes in {@link Attributes}.
  * @property {UniformDefinitions} [uniforms] Additional uniforms usable in shaders.
  */
 /**
- * @typedef {import('../../style/literal.js').LiteralStyle|StyleShaders} VectorStyle
+ * @typedef {import('../../style/webgl.js').WebGLStyle|StyleShaders} VectorStyle
  */
 /**
  * @classdesc This class is responsible for:
@@ -171,7 +148,8 @@ export type VectorStyle = import('../../style/literal.js').LiteralStyle | StyleS
  * A layer renderer will typically maintain several of these in order to have several styles rendered separately.
  *
  * A VectorStyleRenderer instance can be created either from a literal style or from shaders using either
- * `VectorStyleRenderer.fromStyle` or `VectorStyleRenderer.fromShaders`.
+ * `VectorStyleRenderer.fromStyle` or `VectorStyleRenderer.fromShaders`. The shaders should not be provided explicitly
+ * but instead as a preconfigured ShaderBuilder instance.
  *
  * The `generateBuffers` method returns a promise resolving to WebGL buffers that are intended to be rendered by the
  * same renderer.
@@ -180,21 +158,47 @@ declare class VectorStyleRenderer {
     /**
      * @param {VectorStyle} styleOrShaders Literal style or custom shaders
      * @param {import('../../webgl/Helper.js').default} helper Helper
+     * @param {boolean} enableHitDetection Whether to enable the hit detection (needs compatible shader)
      */
-    constructor(styleOrShaders: VectorStyle, helper: import('../../webgl/Helper.js').default);
+    constructor(styleOrShaders: VectorStyle, helper: import('../../webgl/Helper.js').default, enableHitDetection: boolean);
     helper_: import("../../webgl/Helper.js").default;
-    fillVertexShader_: string | undefined;
-    fillFragmentShader_: string | undefined;
-    fillProgram_: WebGLProgram;
-    strokeVertexShader_: string | undefined;
-    strokeFragmentShader_: string | undefined;
-    strokeProgram_: WebGLProgram;
-    symbolVertexShader_: string | undefined;
-    symbolFragmentShader_: string | undefined;
-    symbolProgram_: WebGLProgram;
-    customAttributes_: {
+    hitDetectionEnabled_: boolean;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    private hasFill_;
+    fillVertexShader_: string | null | undefined;
+    fillFragmentShader_: string | null | undefined;
+    fillProgram_: WebGLProgram | undefined;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    private hasStroke_;
+    strokeVertexShader_: string | null | undefined;
+    strokeFragmentShader_: string | null | undefined;
+    strokeProgram_: WebGLProgram | undefined;
+    /**
+     * @type {boolean}
+     * @private
+     */
+    private hasSymbol_;
+    symbolVertexShader_: string | null | undefined;
+    symbolFragmentShader_: string | null | undefined;
+    symbolProgram_: WebGLProgram | undefined;
+    customAttributes_: ({
+        hitColor: {
+            callback(): number[];
+            size: number;
+        };
+    } & {
         [x: string]: AttributeDefinition;
-    } | undefined;
+    }) | ({
+        hitColor?: undefined;
+    } & {
+        [x: string]: AttributeDefinition;
+    });
     uniforms_: {
         [x: string]: import("../../webgl/Helper.js").UniformValue;
     } | undefined;
@@ -227,10 +231,10 @@ declare class VectorStyleRenderer {
      */
     private generateRenderInstructions_;
     /**
-     * @param {Float32Array} renderInstructions Render instructions
+     * @param {Float32Array|null} renderInstructions Render instructions
      * @param {import("../../geom/Geometry.js").Type} geometryType Geometry type
      * @param {import("../../transform.js").Transform} transform Transform to apply to coordinates
-     * @return {Promise<Array<WebGLArrayBuffer>>} Vertices buffer and indices buffer
+     * @return {Promise<Array<WebGLArrayBuffer>>|null} Indices buffer and vertices buffer; null if nothing to render
      * @private
      */
     private generateBuffersForType_;

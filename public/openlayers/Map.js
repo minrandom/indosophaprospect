@@ -294,7 +294,7 @@ class Map extends BaseObject {
 
     /**
      * @private
-     * @type {*}
+     * @type {ReturnType<typeof setTimeout>}
      */
     this.postRenderTimeoutHandle_;
 
@@ -1367,7 +1367,7 @@ class Map extends BaseObject {
     }
     const view = this.getView();
     if (view) {
-      this.updateViewportSize_();
+      this.updateViewportSize_(this.getSize());
 
       this.viewPropertyListenerKey_ = listen(
         view,
@@ -1455,6 +1455,21 @@ class Map extends BaseObject {
     if (this.renderer_ && this.animationDelayKey_ === undefined) {
       this.animationDelayKey_ = requestAnimationFrame(this.animationDelay_);
     }
+  }
+
+  /**
+   * This method is meant to be called in a layer's `prerender` listener. It causes all collected
+   * declutter items to be decluttered and rendered on the map immediately. This is useful for
+   * layers that need to appear entirely above the decluttered items of layers lower in the layer
+   * stack.
+   * @api
+   */
+  flushDeclutterItems() {
+    const frameState = this.frameState_;
+    if (!frameState) {
+      return;
+    }
+    this.renderer_.flushDeclutterItems(frameState);
   }
 
   /**
@@ -1723,25 +1738,18 @@ class Map extends BaseObject {
     const oldSize = this.getSize();
     if (size && (!oldSize || !equals(size, oldSize))) {
       this.setSize(size);
-      this.updateViewportSize_();
+      this.updateViewportSize_(size);
     }
   }
 
   /**
    * Recomputes the viewport size and save it on the view object (if any)
+   * @param {import("./size.js").Size|undefined} size The size.
    * @private
    */
-  updateViewportSize_() {
+  updateViewportSize_(size) {
     const view = this.getView();
     if (view) {
-      let size = undefined;
-      const computedStyle = getComputedStyle(this.viewport_);
-      if (computedStyle.width && computedStyle.height) {
-        size = [
-          parseInt(computedStyle.width, 10),
-          parseInt(computedStyle.height, 10),
-        ];
-      }
       view.setViewportSize(size);
     }
   }
@@ -1793,8 +1801,8 @@ function createOptionsInternal(options) {
     } else {
       assert(
         typeof (/** @type {?} */ (options.controls).getArray) === 'function',
-        47
-      ); // Expected `controls` to be an array or an `import("./Collection.js").Collection`
+        'Expected `controls` to be an array or an `ol/Collection.js`'
+      );
       controls = options.controls;
     }
   }
@@ -1808,8 +1816,8 @@ function createOptionsInternal(options) {
       assert(
         typeof (/** @type {?} */ (options.interactions).getArray) ===
           'function',
-        48
-      ); // Expected `interactions` to be an array or an `import("./Collection.js").Collection`
+        'Expected `interactions` to be an array or an `ol/Collection.js`'
+      );
       interactions = options.interactions;
     }
   }
@@ -1822,8 +1830,8 @@ function createOptionsInternal(options) {
     } else {
       assert(
         typeof (/** @type {?} */ (options.overlays).getArray) === 'function',
-        49
-      ); // Expected `overlays` to be an array or an `import("./Collection.js").Collection`
+        'Expected `overlays` to be an array or an `ol/Collection.js`'
+      );
       overlays = options.overlays;
     }
   } else {

@@ -64,7 +64,7 @@ import {listen, unlistenByKey} from '../events.js';
  * @property {boolean} visible Visible.
  * @property {boolean} managed Managed.
  * @property {import("../extent.js").Extent} [extent] Extent.
- * @property {number} zIndex ZIndex.
+ * @property {number | undefined} zIndex ZIndex.
  * @property {number} maxResolution Maximum resolution.
  * @property {number} minResolution Minimum resolution.
  * @property {number} minZoom Minimum zoom.
@@ -432,12 +432,11 @@ class Layer extends BaseLayer {
             /** @type {import("../render/Event.js").default} */ (evt);
           const layerStatesArray = renderEvent.frameState.layerStatesArray;
           const layerState = this.getLayerState(false);
-          // A layer can only be added to the map once. Use either `layer.setMap()` or `map.addLayer()`, not both.
           assert(
             !layerStatesArray.some(function (arrayLayerState) {
               return arrayLayerState.layer === layerState.layer;
             }),
-            67
+            'A layer can only be added to the map once. Use either `layer.setMap()` or `map.addLayer()`, not both.'
           );
           layerStatesArray.push(layerState);
         },

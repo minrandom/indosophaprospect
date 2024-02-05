@@ -251,12 +251,39 @@ public function getProductDetail(Request $request)
         }
 
     }
+
+    function budata($bu){
+        $result = new \stdClass();
+
+        switch ($bu) { 
+            case 'BUICU':
+                $result->name = 'ICU/Anesthesia';
+                $result->id = 2;
+                break;
+            case 'BUCV':
+                $result->name = 'CARDIOVASCULAR';
+                $result->id = 3;
+                break;
+            default:
+                $result->name = "BUKAN BU Indosopha";
+                $result->id = 404;
+                break;
+        }
+    
+        return $result;
+    }
+
+
+
     $user = auth()->user();
     $usid=$user->id;
     $roles= $user->role;
     $imnow=User::with('employee')->where('id',$usid)->first();
     $area=$imnow->employee->area;
-
+    $position=$imnow->employee->position;
+    $buname=budata($position)->name;
+   $buid=budata($position)->id;
+   
 
     function getareaman($isi,$isi2)
     {
@@ -409,6 +436,18 @@ public function getProductDetail(Request $request)
               
                break;
 
+
+            case "bu":
+            $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
+                    ->where("status",$status)->where('unit_id',$buid)
+                    ->orderBy('status','ASC')
+                    ->orderBy("id",'DESC') 
+                    ->get();
+                
+            
+            break;
+
+
             case "fs":
                 $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
                 ->where("status",$status)->where('pic_user_id',$usid)->orderBy('status','ASC')->orderBy("id",'DESC') 
@@ -450,6 +489,8 @@ public function getProductDetail(Request $request)
             
         
         break;
+
+        
         
         case "fs":
             $prv = Prospect::with("creator","hospital","review","province","department","unit","config","rejection")
@@ -495,7 +536,7 @@ public function getProductDetail(Request $request)
 
 
 
-    return DataTables::of($prv)
+   $dataTable=  DataTables::of($prv)
     ->addIndexColumn()   
     ->addColumn('provincedata', function ($prp) {
 
@@ -563,6 +604,13 @@ public function getProductDetail(Request $request)
        $total=$qty*$price;
        $rupiah =number_format($total,0,',-','.');
        return $rupiah;
+    })
+    ->addColumn('valueraw', function ($prp) {
+       $qty=$prp->qty;
+       $price=$prp->config->price_include_ppn;
+       $total=$qty*$price;
+       
+       return $total;
     })
     ->addColumn('etadate', function ($prp) {
         $podate=$prp->eta_po_date;
@@ -828,7 +876,26 @@ public function getProductDetail(Request $request)
     //->only(['id','creator','personInCharge',"prospect_no"])
         ->rawColumns(['propdetail','action','promotion',"reviewStats",'temperature','statsname',"submitdate","provincedata","anggaran",'hospitaldata','validasi'])
         
-        ->toJson();
+        ->toJson([
+            
+        ]);
+
+        $data=$dataTable->original;
+        $data['additionalData'] = [
+            'user' => $user,
+            'usid' => $usid,
+            'roles' => $roles,
+            'imnow' => $imnow,
+            'area' => $area,
+            'position' => $position,
+            'buname' => $buname,
+            'buid' => $buid,
+        ];
+        
+        return response()->json($data);
+
+        
+      
 
  }
 

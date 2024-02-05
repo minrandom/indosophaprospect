@@ -8,7 +8,6 @@ import TileRange from '../../TileRange.js';
 import TileState from '../../TileState.js';
 import WebGLLayerRenderer from './Layer.js';
 import {abstract, getUid} from '../../util.js';
-import {ascending} from '../../array.js';
 import {create as createMat4} from '../../vec/mat4.js';
 import {
   createOrUpdate as createTileCoord,
@@ -21,6 +20,7 @@ import {
   scale as scaleTransform,
   translate as translateTransform,
 } from '../../transform.js';
+import {descending} from '../../array.js';
 import {fromUserExtent} from '../../proj.js';
 import {getIntersection, isEmpty} from '../../extent.js';
 import {toSize} from '../../size.js';
@@ -30,6 +30,7 @@ export const Uniforms = {
   TRANSITION_ALPHA: 'u_transitionAlpha',
   DEPTH: 'u_depth',
   RENDER_EXTENT: 'u_renderExtent', // intersection of layer, source, and view extent
+  PATTERN_ORIGIN: 'u_patternOrigin',
   RESOLUTION: 'u_resolution',
   ZOOM: 'u_zoom',
   GLOBAL_ALPHA: 'u_globalAlpha',
@@ -43,12 +44,13 @@ export const Uniforms = {
 const empty = {};
 
 /**
- * Transform a zoom level into a depth value ranging from -1 to 1.
+ * Transform a zoom level into a depth value; zoom level zero has a depth value of 0.5, and increasing values
+ * have a depth trending towards 0
  * @param {number} z A zoom level.
  * @return {number} A depth value.
  */
 function depthForZ(z) {
-  return 2 * (1 - 1 / (z + 1)) - 1;
+  return 1 / (z + 2);
 }
 
 /**
@@ -409,7 +411,16 @@ class WebGLBaseTileLayerRenderer extends WebGLLayerRenderer {
    * @protected
    */
   beforeTilesRender(frameState, tilesWithAlpha) {
-    this.helper.prepareDraw(this.frameState, !tilesWithAlpha);
+    this.helper.prepareDraw(this.frameState, !tilesWithAlpha, true);
+  }
+
+  /**
+   * @param {import("../../Map.js").FrameState} frameState Frame state.
+   * @return {boolean} If returns false, tile mask rendering will be skipped
+   * @protected
+   */
+  beforeTilesMaskRender(frameState) {
+    return false;
   }
 
   /**
@@ -439,6 +450,88 @@ class WebGLBaseTileLayerRenderer extends WebGLLayerRenderer {
     gutter,
     alpha
   ) {}
+
+  /**
+   * @param {TileRepresentation} tileRepresentation Tile representation
+   * @param {number} tileZ Tile Z
+   * @param {import("../../extent.js").Extent} extent Render extent
+   * @param {number} depth Depth
+   * @protected
+   */
+  renderTileMask(tileRepresentation, tileZ, extent, depth) {}
+
+  drawTile_(
+    frameState,
+    tileRepresentation,
+    tileZ,
+    gutter,
+    extent,
+    alphaLookup,
+    tileGrid
+  ) {
+    if (!tileRepresentation.ready) {
+      return;
+    }
+    const tile = tileRepresentation.tile;
+    const tileCoord = tile.tileCoord;
+    const tileCoordKey = getTileCoordKey(tileCoord);
+    const alpha = tileCoordKey in alphaLookup ? alphaLookup[tileCoordKey] : 1;
+
+    const tileResolution = tileGrid.getResolution(tileZ);
+    const tileSize = toSize(tileGrid.getTileSize(tileZ), this.tempSize_);
+    const tileOrigin = tileGrid.getOrigin(tileZ);
+    const tileExtent = tileGrid.getTileCoordExtent(tileCoord);
+    // tiles with alpha are rendered last to allow blending
+    const depth = alpha < 1 ? -1 : depthForZ(tileZ);
+    if (alpha < 1) {
+      frameState.animate = true;
+    }
+
+    const viewState = frameState.viewState;
+    const centerX = viewState.center[0];
+    const centerY = viewState.center[1];
+
+    const tileWidthWithGutter = tileSize[0] + 2 * gutter;
+    const tileHeightWithGutter = tileSize[1] + 2 * gutter;
+
+    const aspectRatio = tileWidthWithGutter / tileHeightWithGutter;
+
+    const centerI = (centerX - tileOrigin[0]) / (tileSize[0] * tileResolution);
+    const centerJ = (tileOrigin[1] - centerY) / (tileSize[1] * tileResolution);
+
+    const tileScale = viewState.resolution / tileResolution;
+
+    const tileCenterI = tileCoord[1];
+    const tileCenterJ = tileCoord[2];
+
+    resetTransform(this.tileTransform_);
+    scaleTransform(
+      this.tileTransform_,
+      2 / ((frameState.size[0] * tileScale) / tileWidthWithGutter),
+      -2 / ((frameState.size[1] * tileScale) / tileWidthWithGutter)
+    );
+    rotateTransform(this.tileTransform_, viewState.rotation);
+    scaleTransform(this.tileTransform_, 1, 1 / aspectRatio);
+    translateTransform(
+      this.tileTransform_,
+      (tileSize[0] * (tileCenterI - centerI) - gutter) / tileWidthWithGutter,
+      (tileSize[1] * (tileCenterJ - centerJ) - gutter) / tileHeightWithGutter
+    );
+
+    this.renderTile(
+      /** @type {TileRepresentation} */ (tileRepresentation),
+      this.tileTransform_,
+      frameState,
+      extent,
+      tileResolution,
+      tileSize,
+      tileOrigin,
+      tileExtent,
+      depth,
+      gutter,
+      alpha
+    );
+  }
 
   /**
    * Render the layer.
@@ -520,7 +613,7 @@ class WebGLBaseTileLayerRenderer extends WebGLLayerRenderer {
       }
       const tileCoord = tile.tileCoord;
 
-      if (tileRepresentation.loaded) {
+      if (tileRepresentation.ready) {
         const alpha = tile.getAlpha(uid, time);
         if (alpha === 1) {
           // no need to look for alt tiles
@@ -561,80 +654,67 @@ class WebGLBaseTileLayerRenderer extends WebGLLayerRenderer {
       }
     }
 
-    this.beforeTilesRender(frameState, blend);
-
     const representationsByZ = tileRepresentationLookup.representationsByZ;
-    const zs = Object.keys(representationsByZ).map(Number).sort(ascending);
+    const zs = Object.keys(representationsByZ).map(Number).sort(descending);
+
+    const renderTileMask = this.beforeTilesMaskRender(frameState);
+
+    if (renderTileMask) {
+      for (let j = 0, jj = zs.length; j < jj; ++j) {
+        const tileZ = zs[j];
+        for (const tileRepresentation of representationsByZ[tileZ]) {
+          const tileCoord = tileRepresentation.tile.tileCoord;
+          const tileCoordKey = getTileCoordKey(tileCoord);
+          // do not render the tile mask if alpha < 1
+          if (tileCoordKey in alphaLookup) {
+            continue;
+          }
+          const tileExtent = tileGrid.getTileCoordExtent(tileCoord);
+          this.renderTileMask(
+            /** @type {TileRepresentation} */ (tileRepresentation),
+            tileZ,
+            tileExtent,
+            depthForZ(tileZ)
+          );
+        }
+      }
+    }
+
+    this.beforeTilesRender(frameState, blend);
 
     for (let j = 0, jj = zs.length; j < jj; ++j) {
       const tileZ = zs[j];
       for (const tileRepresentation of representationsByZ[tileZ]) {
-        if (!tileRepresentation.loaded) {
+        const tileCoord = tileRepresentation.tile.tileCoord;
+        const tileCoordKey = getTileCoordKey(tileCoord);
+        if (tileCoordKey in alphaLookup) {
           continue;
         }
-        const tile = tileRepresentation.tile;
-        const tileCoord = tile.tileCoord;
-        const tileCoordKey = getTileCoordKey(tileCoord);
-        const alpha =
-          tileCoordKey in alphaLookup ? alphaLookup[tileCoordKey] : 1;
 
-        if (alpha < 1) {
-          frameState.animate = true;
-        }
-
-        const tileResolution = tileGrid.getResolution(tileZ);
-        const tileSize = toSize(tileGrid.getTileSize(tileZ), this.tempSize_);
-        const tileOrigin = tileGrid.getOrigin(tileZ);
-        const tileExtent = tileGrid.getTileCoordExtent(tileCoord);
-        const depth = depthForZ(tileZ);
-
-        const viewState = frameState.viewState;
-        const centerX = viewState.center[0];
-        const centerY = viewState.center[1];
-
-        const tileWidthWithGutter = tileSize[0] + 2 * gutter;
-        const tileHeightWithGutter = tileSize[1] + 2 * gutter;
-
-        const aspectRatio = tileWidthWithGutter / tileHeightWithGutter;
-
-        const centerI =
-          (centerX - tileOrigin[0]) / (tileSize[0] * tileResolution);
-        const centerJ =
-          (tileOrigin[1] - centerY) / (tileSize[1] * tileResolution);
-
-        const tileScale = viewState.resolution / tileResolution;
-
-        const tileCenterI = tileCoord[1];
-        const tileCenterJ = tileCoord[2];
-
-        resetTransform(this.tileTransform_);
-        scaleTransform(
-          this.tileTransform_,
-          2 / ((frameState.size[0] * tileScale) / tileWidthWithGutter),
-          -2 / ((frameState.size[1] * tileScale) / tileWidthWithGutter)
-        );
-        rotateTransform(this.tileTransform_, viewState.rotation);
-        scaleTransform(this.tileTransform_, 1, 1 / aspectRatio);
-        translateTransform(
-          this.tileTransform_,
-          (tileSize[0] * (tileCenterI - centerI) - gutter) /
-            tileWidthWithGutter,
-          (tileSize[1] * (tileCenterJ - centerJ) - gutter) /
-            tileHeightWithGutter
-        );
-
-        this.renderTile(
-          /** @type {TileRepresentation} */ (tileRepresentation),
-          this.tileTransform_,
+        this.drawTile_(
           frameState,
-          extent,
-          tileResolution,
-          tileSize,
-          tileOrigin,
-          tileExtent,
-          depth,
+          tileRepresentation,
+          tileZ,
           gutter,
-          alpha
+          extent,
+          alphaLookup,
+          tileGrid
+        );
+      }
+    }
+
+    for (const tileRepresentation of representationsByZ[z]) {
+      const tileCoord = tileRepresentation.tile.tileCoord;
+      const tileCoordKey = getTileCoordKey(tileCoord);
+      if (tileCoordKey in alphaLookup) {
+        this.drawTile_(
+          frameState,
+          tileRepresentation,
+          z,
+          gutter,
+          extent,
+          alphaLookup,
+          tileGrid
         );
       }
     }
@@ -703,7 +783,7 @@ class WebGLBaseTileLayerRenderer extends WebGLLayerRenderer {
         if (tileRepresentationCache.containsKey(cacheKey)) {
           const tileRepresentation = tileRepresentationCache.get(cacheKey);
           if (
-            tileRepresentation.loaded &&
+            tileRepresentation.ready &&
             !lookupHasTile(tileRepresentationLookup, tileRepresentation.tile)
           ) {
             addTileRepresentationToLookup(
