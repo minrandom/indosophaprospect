@@ -30,6 +30,29 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 <!--<button onclick="showSwal()">Show Swal</button>-->
 
 <div class="row">
+    <!-- Task List Column -->
+    <div class="col-lg-4">
+        <div class="card mb-6">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">To Do List</h6>
+            </div>
+            <div class="card-body">
+
+                <!-- Bootstrap Alert Inside Jumbotron 
+                <div class="jumbotron" id="taskListJumbotron">
+                    <h1 class="display-4">Task List</h1>-->
+
+                    <!-- Bootstrap Alert -->
+                    <ul class="list-group" id="taskList">
+                        <!-- List of calendar events will be dynamically inserted here -->
+                    </ul>
+                    <!-- End Bootstrap Alert -->
+
+               
+                <!-- End Bootstrap Alert Inside Jumbotron -->
+            </div>
+        </div>
+    </div>
     <div class="col-lg-8">
       <div class="card mb-6">
         <div class="card-header py-3">
@@ -51,9 +74,16 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
                                 
                                 <div class="row">
                                     <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="createPersonInCharge" class="form-label">PIC Task</label>
+                                        <br>
+                                        <select class="form-select" id="createPersonInCharge">
+                                    
+                                        </select>
+                                     </div>
                                         <div class="mb-3">
                                             <label for="createTask" class="form-label">Task</label>
-                                            <input type="text" class="form-control" id="createTask" placeholder="Task" style="height: 50px;">
+                                            <input type="text" class="form-control" id="createTask" placeholder="Task" style="height: 38px;" width="40%">
                                         </div>
                                         <!--
                             <div class="mb-3">
@@ -63,41 +93,36 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
                             </div>-->
                             <div class="mb-3">
                                 <label for="createStartDate" class="form-label">Start Date</label>
-                                <input type="datetime-local" class="form-control" id="createStartDate" placeholder="Start Date">
+                                <input type="datetime-local" class="form-control" id="createStartDate" placeholder="Start Date" style="height: 38px;" width="40%">
                             </div>
                             <div class="mb-3">
                                 <label for="createEndDate" class="form-label">End Date</label>
-                                <input type="datetime-local" class="form-control" id="createEndDate" placeholder="End Date">
+                                <input type="datetime-local" class="form-control" id="createEndDate" placeholder="End Date" style="height: 38px;" width="40%">
                             </div>
                         </div>
 
                         <div class="col-md-6">
+                        
                             <div class="mb-3">
                                 <label for="createProvince" class="form-label">Province</label>
                                 <br>
                                 <select class="form-select" id="createProvince">
-                                    <option value="1">Province 1</option>
-                                    <option value="2">Province 2</option>
-                                    <!-- Add more options as needed -->
                                 </select>
                             </div>
-                            <br>
-                            <div class="mb-3">
-                                <label for="createDepartment" class="form-label">Department</label>
-                                <br>
-                                <select class="form-select" id="createDepartment">
-                                    <option value="1">Department 1</option>
-                                    <option value="2">Department 2</option>
-                                    <!-- Add more options as needed -->
-                                </select>
-                            </div>
+                          
+                           
                             <div class="mb-3">
                                 <label for="createRs" class="form-label">RS</label>
                                 <br>
                                 <select class="form-select" id="createRs">
-                                    <option value="1">RS 1</option>
-                                    <option value="2">RS 2</option>
-                                    <!-- Add more options as needed -->
+                                
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="createDepartment" class="form-label">Department</label>
+                                <br>
+                                <select class="form-select" id="createDepartment">
+                                   
                                 </select>
                             </div>
                         </div>
@@ -136,29 +161,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
     </div>
     </div>
 
-     <!-- Task List Column -->
-     <div class="col-lg-4">
-        <div class="card mb-6">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">To Do List</h6>
-            </div>
-            <div class="card-body">
-
-                <!-- Bootstrap Alert Inside Jumbotron 
-                <div class="jumbotron" id="taskListJumbotron">
-                    <h1 class="display-4">Task List</h1>-->
-
-                    <!-- Bootstrap Alert -->
-                    <ul class="list-group" id="taskList">
-                        <!-- List of calendar events will be dynamically inserted here -->
-                    </ul>
-                    <!-- End Bootstrap Alert -->
-
-               
-                <!-- End Bootstrap Alert Inside Jumbotron -->
-            </div>
-        </div>
-    </div>
+     
 
     
 </div> 
@@ -298,11 +301,22 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 $(document).ready(function () {
     var calendar = $('#calendar');
     var userFilter = $('#userFilter');
+     //var createTitle = 'Judul-Default';
+          var createProvince = $('#createProvince');
+          var createPersonInCharge = $('#createPersonInCharge');
+          var createRs = $('#createRs');
+          var createDepartment = $('#createDepartment');
+          var createTask = $('#createTask');
+          var createStartDate =$('#createStartDate');
+          var createEndDate =$('#createEndDate');
+
     $.ajax({
         url: "{{ route('schedule.index') }}",
         method: "GET",
         success: function (response) {
            var eventsdata = response.schedule;
+           var formdata=response.data;
+          
            var userNames = response.userdata
             $('#calendar').fullCalendar({
                 header: {
@@ -348,25 +362,76 @@ $(document).ready(function () {
 
                 // Other calendar options...
             });
-            /*
-            $('#taskList').empty();
-                    // Filter and update tasks based on the current month
-                eventsdata.forEach(function (event) {   
-                    if(event.status<2){
-                        var StartDate = moment(event.start).format('DD/MMM/YY HH:mm');
-                     $('#taskList').append('<li class="list-group-item d-flex justify-content-between align-items-center">' +event.hospitalName+"-"+event.departmentName+'</br> '+event.title+'</br>'+StartDate + ' <span class="badge badge-primary badge-pill">14</span></li>');
-                    }
-                        
-                });*/
+       
             userFilter.select2({
-                placeholder: 'All Users',
-                width: '40%',
+                placeholder: 'Pick Users',
+                
             });
             userFilter.empty();
-            userFilter.append('<option value="">All Users</option>');
+            //userFilter.append('<option value="">All Users</option>');
             $.each(userNames, function (userId, userName) {
                 userFilter.append('<option value="' + userId + '">' + userName + '</option>');
             });
+            
+            userFilter.val("");
+
+            createProvince.select2({
+                placeholder: 'Select Province',
+               
+            });
+
+            createRs.select2({
+                placeholder: 'Select Hospital',
+            });
+            createDepartment.select2({
+                placeholder: 'Select Department',
+            });
+
+            createProvince.empty();
+            formdata.province.forEach(function(province) {
+                createProvince.append('<option value="' + province.id + '">' + province.name + '</option>');
+            });
+            createProvince.val("");
+
+            function fetchHospitals2(provinceId) {
+                  // Make an AJAX call to retrieve hospitals based on provinceId
+                  $.ajax({
+                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
+                    method: "GET",
+                    success: function (response) {
+                        //console.log(response.hosopt);
+                        response.hosopt.forEach(function(hospital) {
+                            createRs.append('<option value="' + hospital.id + '">' + hospital.name + '</option>');
+                        });
+                    }
+                  });
+                }
+               
+                createProvince.on("change", function () {
+                  var selectedProvinceId = $(this).val();
+                  console.log(selectedProvinceId);
+                  fetchHospitals2(selectedProvinceId);
+                });
+
+
+
+            createPersonInCharge.select2({
+                placeholder: 'Choose User to be PIC',
+               
+            });
+
+            createPersonInCharge.empty();
+            formdata.pic.forEach(function(pic) {
+                createPersonInCharge.append('<option value="' + pic.user_id + '">' + pic.name + '</option>');
+            });
+            createPersonInCharge.val("");
+
+
+            createDepartment.empty();
+            formdata.dept.forEach(function(dept){
+                createDepartment.append('<option value="' + dept.id + '">' + dept.name + '</option>');
+            });
+            createDepartment.val("");
 
            
         },
@@ -520,8 +585,9 @@ $(document).ready(function () {
       });
 
       $('#createBtn').click(function () {
-          var createTitle = 'Judul-Default';
+       
           var createProvince = $('#createProvince').val();
+          var createPersonInCharge = $('#createPersonInCharge').val();
           var createRs = $('#createRs').val();
           var createDepartment = $('#createDepartment').val();
           var createTask = $('#createTask').val();
@@ -529,8 +595,9 @@ $(document).ready(function () {
           var createEndDate = moment($('#createEndDate').val()).format('YYYY-MM-DD HH:mm:ss');
 
           var createEventData = {
-              title: createTitle,
+            
               province: createProvince,
+              create_for:createPersonInCharge,
               rs: createRs,
               department: createDepartment,
               task: createTask,

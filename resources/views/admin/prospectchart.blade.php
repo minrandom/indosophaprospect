@@ -81,9 +81,9 @@ async function initializeChart(prosdata) {
   }, {});
   
   console.log(datasementara);
-
+var showname='';
   var buname= prosdata.additionalData.buname;
-
+  if(buname!="BUKAN BU Indosopha"){showname=buname}else{showname = ''}
 
   const topology = await fetch('../js/topoiss.json').then(response => response.json());
 
@@ -103,7 +103,7 @@ const chart = Highcharts.mapChart('container', {
     },
 
     title: {
-        text: 'Peta Persebaran Data Jumlah Prospect'+buname
+        text: 'Peta Persebaran Data Jumlah Prospect '+showname
     },
 
     subtitle: {

@@ -24,7 +24,7 @@ class ScheduleController extends Controller
         $events = array();
       $bookings = schedule::orderBy('start_time','asc')->with(['hospital', 'department', 'creator', 'createFor', 'validator'])->get();
       $users = User::all();
-      $userNamesById = $users->pluck('name', 'id')->all();
+    
      $data = $this->create();
       
       foreach($bookings as $booking) {
@@ -35,11 +35,11 @@ class ScheduleController extends Controller
           if($booking->task == 'Test 1') {
               $color = '#68B01A';
           }
-
+          //dd($booking->create_for);
           //$by=$userNamesById[$booking->created_by];
           //$for=$userNamesById[$booking->create_for];
-          $by= $users->where('id',$booking->created_by)->pluck('name', 'id')->first();
-          $for= $users->where('id',$booking->create_for)->pluck('name', 'id')->first();
+          $by= $users->where('id',$booking->created_by)->first();
+          $for= $users->where('id',$booking->create_for)->first();
           
           
 
@@ -74,12 +74,12 @@ class ScheduleController extends Controller
 
         $filteredEvents=array_values($filteredEvents);
 
-        return response()->json(['filterschedule' => $filteredEvents, 'userdata' => $userNamesById,'data'=>$data->original]);
+        return response()->json(['filterschedule' => $filteredEvents, 'data'=>$data->original]);
 
       }
    
 
-      return response()->json(['schedule'=>$events,'userdata'=>$userNamesById,'data'=>$data->original]);
+      return response()->json(['schedule'=>$events,'data'=>$data->original]);
  
     }
 
@@ -95,21 +95,17 @@ class ScheduleController extends Controller
         $user=User::with('employee')->where('id',$usid)->first();
         $role=$user->role;
         $area=$user->employee->area;
-        if($area=="HO"){
-        $provincelist=Province::all();
-        }else if(strlen($area)<2){
+        
+        if($area==="HO"){
+        $provincelist=Province::with('area')->get();
+        }else {if(strlen($area)<2){
         $provincelist=Province::with('area')->where('wilayah',$area)->get();
-        }else
-        $provincelist=Province::with('area')->where('iss_area_code',$area)->get();
+        }else{
+        $provincelist=Province::with('area')->where('iss_area_code',$area)->get();}}
         $dept=Department::all();
         $today = now();
         $bunit=Unit::all();
 
-        
-        if(strlen($area)<2)
-             {$provincelist=Province::with('area')->where('wilayah',$area)->get();}
-            else
-            {$provincelist=Province::with('area')->where('iss_area_code',$area)->get();}
         $specialrole = ['admin','direksi'];
 
         if($area=="HO")
@@ -121,7 +117,6 @@ class ScheduleController extends Controller
             return[
             'user_id' => $employee ? $employee->user->id : "No User ID",
             'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
-            
             ];
             }); 
         }
@@ -151,8 +146,8 @@ class ScheduleController extends Controller
            }
         
         
-       
-        
+   
+
 
         $data['province'] = $provincelist;
         $data['pic']=$piclist;
@@ -173,11 +168,12 @@ class ScheduleController extends Controller
     {
         //
         $request->validate([
-            'title' => 'string',
+            //'title' => 'string',
             'province' => 'string',
             'rs' => 'string',
             'department' => 'string',
             'task' => 'string',
+            'create_for'=>'string',
             'start_time' => 'date_format:Y-m-d H:i:s',
             'end_time' => 'date_format:Y-m-d H:i:s|after_or_equal:start_time'
         ]);
@@ -193,6 +189,8 @@ class ScheduleController extends Controller
         $booking = schedule::create([
            // 'title' => $request->title,
            // 'province_id' => $request->province,
+           'status'=>0,
+           'create_for'=>$request->create_for,
             'hospital_id' => $request->rs,
             'department_id' => $request->department,
             'task' => $request->task,
@@ -202,15 +200,8 @@ class ScheduleController extends Controller
 
         ]);
         
-        return response()->json([
-            'id' => $booking->id,
-            'start' => $booking->start_date,
-            'end' => $booking->end_date,
-            'task' => $booking->task,
-            'hospital_id' => $booking->hospital_id,
-            'department_id' => $booking->department_id,
-            'color' => $color ?: '',
-        ]);
+        return response()->json(['success' => true]);
+        
 
 
 
