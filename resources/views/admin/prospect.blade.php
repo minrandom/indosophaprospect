@@ -444,6 +444,7 @@
             ConfigNumber : datz.configno,
             UnitPrice : datz.submitted_price,
             Qty : datz.qty,
+            uom : datz.config.uom,
             Value:datz.submitted_price*datz.qty,
             FirstOffer : datz.review.first_offer_date,
             Demo : datz.review.demo_date,
@@ -622,7 +623,7 @@ function updateColumnPriorities() {
     {data: 'hospitaldata', name: 'hospitaldata',responsivePriority: 1, targets: 1},
    {data: 'namaprod', name: 'namaprod',render: function (data, type, full, meta) {
         // Compile the 'namaprod' and 'qty' columns
-        return data + '</br>' + full.qty+" "+ full.uom;
+        return data + '</br>' + full.qty+" "+ full.config.uom;
       },searchable:true,responsivePriority: 2, targets: 2},
    
     {data: 'value', name: 'value',responsivePriority: 3, targets: 3},

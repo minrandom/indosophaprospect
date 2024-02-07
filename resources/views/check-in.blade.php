@@ -1,7 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Check-in</title>
+@extends('layout.backend.app',[
+    'title' => 'Attendance',
+    'pageTitle' =>'Attendance',
+    ])
+    
+    @push('css')
     <link rel="stylesheet" href="{{ asset('openlayers/ol.css') }}">
     <style>
         #map {
@@ -9,84 +11,115 @@
             height: 400px;
         }
     </style>
-    <script src="{{ asset('openlayers/ol.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
-<body>
- 
+    <script src="{{ asset('openlayers/dist/ol.js') }}"></script>
+    @endpush
+    @section('content')
     @csrf
+    <div class="card">
+    <h1 class="h3 mb-4 text-gray-800">Check-in</h1>
 
-<button id="testkirimdata">Test Kirim</button>
-    <!--<button onclick="getLocation()">Check-in</button>-->
-    <button id="start-camera">Start Checkin</button>
-<video id="video" width="320" height="240" autoplay></video>
-<button id="click-photo">Click Photo</button>
-<canvas id="canvas" width="320" height="240"></canvas>
+    <!-- Check-in Card -->
+    <div class="card-body">
+        <button id="toggle-camera" class="btn btn-primary">Start Checkin</button>
+        <div id="video-container" style="position: relative;">
+            <video id="video" width="320" height="240" style="display: none;" autoplay></video>
+            <button id="click-photo" class="btn btn-primary mt-2" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: none;">Click Photo</button>
+            <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+        </div>
+    </div>
+    </div>
 
-    <script>
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition);
-            } else {
-                alert('Geolocation is not supported by this browser.');
-            }
+    @stop
+    @push('js')
+    <script src="{{ asset('template/backend/sb-admin-2')}}/vendor/sweetalert/sweetalert.all.js"></script>
+    <script type="text/javascript">
+        
+ let toggle_button = document.querySelector("#toggle-camera");
+    let video = document.querySelector("#video");
+    //let click_button = document.querySelector("#click-photo");
+    let canvas = document.querySelector("#canvas");
+    let image_data_url;
+
+
+    toggle_button.addEventListener('click', function() {
+        if (toggle_button.innerText === "Start Checkin") {
+            startCamera();
+        } else {
+            capturePhoto();
+        }
+    });
+
+    function startCamera() {
+
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.style.display = "block";
+                toggle_button.innerText = "Capture Photo";
+            })
+            .catch(function(err) {
+                console.error('Error accessing camera:', err);
+                alert('Error accessing camera. Please make sure you have granted access.');
+            });
+    }
+
+
+    function capturePhoto() {
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        image_data_url = canvas.toDataURL('image/jpeg');
+        getLocationAndCheckIn(image_data_url);
+    }
+
+    function getLocationAndCheckIn(photoData) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                showPosition(position, photoData);
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Geolocation Error',
+                text: 'Geolocation is not supported by this browser.',
+                confirmButtonText: 'OK'
+            });
         }
 
-
-        let camera_button = document.querySelector("#start-camera");
-        let testkirim = document.querySelector("#testkirimdata");
-let video = document.querySelector("#video");
-let click_button = document.querySelector("#click-photo");
-let canvas = document.querySelector("#canvas");
-let image_data_url;
-camera_button.addEventListener('click', async function() {
-   	let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-	video.srcObject = stream;
-});
-
-testkirim.addEventListener('click',function(){
-
-});
-
-click_button.addEventListener('click', function() {
-   canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-   	image_data_url = canvas.toDataURL('image/jpeg');
-    getLocation();
-   	// data url of the image
-   	console.log(canvas);
-});
-
-        function showPosition(position) {
+        function showPosition(position, photoData) {
             var latitude = position.coords.latitude;
             var longitude = position.coords.longitude;
 
             // Perform reverse geocoding using OpenLayers API
             var url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + latitude + '&lon=' + longitude;
             fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    var placeName = data.display_name.split(',')[0];
-                    var address = data.address.road + ', ' + data.address.city + ', ' + data.address.country;
-                    var checkInAt = placeName;
-                    var photoData =image_data_url;
-                   
-                    // Prompt the user to capture a photo
-                  
-                        // Save the data to the database via AJAX request
-                    alert('Place Name: ' + placeName + '\nAddress: ' + address);
-                    saveCheckInData(placeName, address, checkInAt, photoData);
+            .then(response => response.json())
+            .then(data => {
+                var placeName = data.display_name.split(',')[0];
+                var address = data.address.road + ', ' + data.address.city + ', ' + data.address.country;
+                var checkInAt = placeName;
+                
 
-                        // Use the place name, address, and photo data as needed
-                   
 
-                    // Show the user's location on the map...
-                })
-                .catch(error => {
-                    console.log(error);
-                    alert('Failed to retrieve location information.');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Location Found',
+                    html: '<p>Place Name: ' + placeName + '</p><p>Address: ' + address + '</p><img src="' + photoData + '" width="200">',
+                    confirmButtonText: 'OK',
+                    allowOutsideClick: false,
+                    didClose: function() {
+                        saveCheckInData(placeName, address, checkInAt, photoData);
+                    }
                 });
-        }
+            })
+            .catch(error => {
+                console.log(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Location Error',
+                    text: 'Failed to retrieve location information.',
+                    confirmButtonText: 'OK'
+                });
+            });
+    }
 
 
         function saveCheckInData(placeName, address, checkInAt, photoData) {
@@ -107,6 +140,7 @@ click_button.addEventListener('click', function() {
                 },
                  success: function (response) {
             console.log('Data saved successfully:', response);
+            stopCamera();
             // You can add additional checks or logs here
         },
         error: function (error) {
@@ -115,6 +149,20 @@ click_button.addEventListener('click', function() {
         }
             });
         }
-    </script>
-</body>
-</html>
+
+    function stopCamera() {
+        let stream = video.srcObject;
+        let tracks = stream.getTracks();
+        tracks.forEach(function(track) {
+            track.stop();
+        });
+        video.srcObject = null;
+        video.style.display = "none";
+        click_button.style.display = "none";
+        toggle_button.innerText = "Start Checkin";
+    }
+
+    
+    }
+        </script>
+@endpush

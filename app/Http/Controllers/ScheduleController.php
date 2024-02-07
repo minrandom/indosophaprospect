@@ -22,7 +22,8 @@ class ScheduleController extends Controller
     {
         //
         $events = array();
-      $bookings = schedule::orderBy('start_time','asc')->with(['hospital', 'department', 'creator', 'createFor', 'validator'])->get();
+    
+      $bookings = schedule::orderBy('start_time','asc')->with(['hospital','province', 'department', 'creator', 'createFor', 'validator'])->get();
       $users = User::all();
     
      $data = $this->create();
@@ -35,21 +36,26 @@ class ScheduleController extends Controller
           if($booking->task == 'Test 1') {
               $color = '#68B01A';
           }
-          //dd($booking->create_for);
+
+          //$provincename=
+        
+          //dd($provincename);
           //$by=$userNamesById[$booking->created_by];
           //$for=$userNamesById[$booking->create_for];
           $by= $users->where('id',$booking->created_by)->first();
           $for= $users->where('id',$booking->create_for)->first();
           
           
-
-
-
-          //dd($for);
+          $forName = $for && isset($for->name) ? $for->name : 'noname';
+          
+          
+          //dd($for->name);
 
           $events[] = [
               'id'   => $booking->id,
               'title' => $booking->task,
+              'provinceName'=>$booking->province->name,
+              'province'=>$booking->province_id,
               'hospital' => $booking->hospital_id,
               'hospitalName' => $booking->hospital->name,
               'department' => $booking->department_id,
@@ -59,21 +65,24 @@ class ScheduleController extends Controller
               'end' => $booking->end_time,
               'created_by' => $booking->created_by,
               'created_by_name' => $by,
-              'create_for_name' => $for,
+              'create_for_name' => $forName,
               'create_for'=> $booking->create_for,
               'color' => $color
           ];
       }
 
       //var_dump($request->user_id);
-
+     
       if($request->user_id>0 and $request->user_id!=NULL){
         $filteredEvents = array_filter($events, function ($event) use ($request) {
+            //dd($event);
+           // dd($event['create_for']);
+           
             return $event['create_for'] == $request->user_id;
         });
-
+        
+        
         $filteredEvents=array_values($filteredEvents);
-
         return response()->json(['filterschedule' => $filteredEvents, 'data'=>$data->original]);
 
       }
@@ -173,24 +182,23 @@ class ScheduleController extends Controller
             'rs' => 'string',
             'department' => 'string',
             'task' => 'string',
-            'create_for'=>'string',
+            'createFor'=>'string',
             'start_time' => 'date_format:Y-m-d H:i:s',
             'end_time' => 'date_format:Y-m-d H:i:s|after_or_equal:start_time'
         ]);
         
-        $color = null;
-        if ($request->title == 'Test') {
-            $color = '#924ACE';
-        }
+        //dd($request->create_for);
 
+       
         $user=auth()->user();
         $usid=$user->id;
 
+        
         $booking = schedule::create([
            // 'title' => $request->title,
-           // 'province_id' => $request->province,
+           'province_id' => $request->province,
            'status'=>0,
-           'create_for'=>$request->create_for,
+           'create_for'=>$request->createFor,
             'hospital_id' => $request->rs,
             'department_id' => $request->department,
             'task' => $request->task,
@@ -200,7 +208,7 @@ class ScheduleController extends Controller
 
         ]);
         
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true,$booking]);
         
 
 
@@ -239,7 +247,33 @@ class ScheduleController extends Controller
      */
     public function update(Request $request, schedule $schedule)
     {
-        //
+        $request->validate([
+            //'title' => 'string',
+            'province_id' => 'string',
+            'hospital_id' => 'string',
+            'department_id' => 'string',
+            'task' => 'string',
+            'create_for'=>'string',
+            'start_date' => 'date_format:Y-m-d H:i:s',
+            'end_date' => 'date_format:Y-m-d H:i:s|after_or_equal:start_time'
+        ]);
+
+        $schedule->update([
+            'task'=>$request->task,
+            'province_id'=>$request->province_id,
+            'hospital_id'=>$request->hospital_id,
+            'department_id'=>$request->department_id,
+            'create_for'=>$request->create_for,
+            'start_time'=>$request->start_date,
+            'end_time'=>$request->end_date,
+
+        ]);
+           
+     
+        return response()->json(['message' => 'Schedule updated successfully']);
+
+
+        
     }
 
     /**

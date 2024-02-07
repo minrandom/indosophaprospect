@@ -37,14 +37,21 @@
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseJadwal"
             aria-expanded="true" aria-controls="collapseJadwal">
             <i class="fas fa-fw fa-calendar"></i>
-            <span>JADWAL</span>
+            <span>Jadwal dan Kehadiran</span>
         </a>
         <div id="collapseJadwal" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Jadwal Menu:</h6>
+                <h6 class="collapse-header">Jadwal Menu</h6>
                 <a class="collapse-item" href="{{ route('schedule') }}">
             <i class="fas fa-fw fa-calendar"></i>
-<span>Penjadwalan</span></a>
+            <span>Jadwal Kegiatan</span></a>
+          
+       
+          
+                
+        <a class="collapse-item" href="{{ route('check-in') }}">
+            <i class="fas fa fa-address-card"></i>
+            <span>Kehadiran</span></a>
             </div>
         </div>
     </li>

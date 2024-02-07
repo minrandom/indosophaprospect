@@ -170,7 +170,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
 
 <div class="row">
     <!-- Calendar Column -->
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <div class="card mb-6">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Schedule Calendar</h6>
@@ -190,29 +190,34 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
       <div class="modal-content">
           <div class="modal-header">
               <h5 class="modal-title" id="exampleModalLabel">View/Update Event</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" class="close" data-dismiss="modal" aria-label="close">
+  <span aria-hidden="true">&times;</span>
+</button>
+              
           </div>
           <div class="modal-body">
-              <input type="text" id="eventId">
               <div class="mb-3">
-                  <label for="title" class="form-label">Event Title</label>
-                  <input type="text" class="form-control" id="title" placeholder="Event Title">
+              <input type="hidden" class="form-control" id="id" placeholder="TASK">
+                  <label for="taskupdate" class="form-label">Task</label>
+                  <input type="text" class="form-control" id="taskupdate" placeholder="TASK">
                   <span id="titleError" class="text-danger"></span>
+              </div>
+              <div class="mb-3">
+                  <label for="personInChargeupdate" class="form-label">PIC</label>
+                  <select class="form-select" id="personInChargeupdate">
+                 </select>
               </div>
               <div class="mb-3">
                   <label for="province" class="form-label">Province</label>
                   <select class="form-select" id="province">
-                      <option value="1">Province 1</option>
-                      <option value="2">Province 2</option>
+                    
                       <!-- Add more options as needed -->
                   </select>
               </div>
               <div class="mb-3">
                   <label for="rs" class="form-label">RS</label>
                   <select class="form-select" id="rs">
-                      <option value="1">RS 1</option>
-                      <option value="2">RS 2</option>
-                      <!-- Add more options as needed -->
+                    
                   </select>
               </div>
               <div class="mb-3">
@@ -223,10 +228,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
                       <!-- Add more options as needed -->
                   </select>
               </div>
-              <div class="mb-3">
-                  <label for="task" class="form-label">Task</label>
-                  <input type="text" class="form-control" id="task" placeholder="Task">
-              </div>
+            
               <div class="mb-3">
                   <label for="startDate" class="form-label">Start Date</label>
                   <input type="datetime-local" class="form-control" id="startDate" placeholder="Start Date">
@@ -237,7 +239,7 @@ https://cdn.jsdelivr.net/npm/evo-calendar@1.1.3/evo-calendar/css/evo-calendar.mi
               </div>
           </div>
           <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" >Close</button>
               <button type="button" id="updateBtn" class="btn btn-primary">Update Event</button>
           </div>
       </div>
@@ -310,6 +312,23 @@ $(document).ready(function () {
           var createStartDate =$('#createStartDate');
           var createEndDate =$('#createEndDate');
 
+    function fetchHospitals2(provinceId,selecthospital) {
+                  // Make an AJAX call to retrieve hospitals based on provinceId
+                  $.ajax({
+                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
+                    method: "GET",
+                    success: function (response) {
+                        //console.log(response.hosopt);
+                        response.hosopt.forEach(function(hospital) {
+                            selecthospital.append('<option value="' + hospital.id + '">' + hospital.name + '</option>');
+                        });
+                    }
+                  });
+            };
+
+
+
+
     $.ajax({
         url: "{{ route('schedule.index') }}",
         method: "GET",
@@ -317,13 +336,14 @@ $(document).ready(function () {
            var eventsdata = response.schedule;
            var formdata=response.data;
           
-           var userNames = response.userdata
-            $('#calendar').fullCalendar({
+           //var userNames = response.data.pic;
+            var calendar = $('#calendar').fullCalendar({
                 header: {
                     left: 'prev, next today',
                     center: 'title',
                     right: 'month,listWeek'
                 },
+                timeFormat: 'HH:mm',
                 buttonText: {
                     month:'Monthly Schedule',
                     listWeek: 'Weekly Schedule'
@@ -331,13 +351,12 @@ $(document).ready(function () {
                 defaultView:'listWeek',
                 events: eventsdata, // Assuming that the response contains the events directly
                 selectable: true,
-                eventOverlap: true,
-                slotEventOverlap: true,
+
                 weekends:false,
                // eventLimit: true, // More events indicator (if you have many events in a day)
                 
                 selectHelper: true,
-                editable: true, // Enable drag and drop
+                //editable: true, // Enable drag and drop
                 eventAfterAllRender: function (view) {
                     // Check if the current view is month
                     if (view.name === 'month') {
@@ -349,12 +368,13 @@ $(document).ready(function () {
                     }
                 },
                 eventRender: function (event, element,view) {
-                    element.find('.fc-title').append('<br>' + event.hospital + ' | ' + event.department);
-                    element.find('.fc-list-item-title').append('<div style="float: right;">PIC: ' + event.create_for_name + '</div>');
+                    element.find('.fc-title').append('<br>' + event.hospitalName + ' | ' + event.create_for_name);
+                    element.find('.fc-list-item-title').html("<span style='font-size:1rem'>"+event.hospitalName+ " | "+ event.title +"<span>");
+                    element.find('.fc-list-item-title').append('<div style="float: right;font-size:1rem">PIC: ' + event.create_for_name + '</div>');
                
                 },
                 eventClick: function (event) {
-                    openEventModal(event);
+                    openEventModal(event,formdata);
                 },
 
                 
@@ -362,16 +382,19 @@ $(document).ready(function () {
 
                 // Other calendar options...
             });
-       
+            
+            
+
             userFilter.select2({
                 placeholder: 'Pick Users',
                 
             });
             userFilter.empty();
             //userFilter.append('<option value="">All Users</option>');
-            $.each(userNames, function (userId, userName) {
-                userFilter.append('<option value="' + userId + '">' + userName + '</option>');
+            formdata.pic.forEach(function(pic) {
+                userFilter.append('<option value="' + pic.user_id + '">' + pic.name +'</option>');
             });
+            
             
             userFilter.val("");
 
@@ -380,9 +403,13 @@ $(document).ready(function () {
                
             });
 
+            createProvince.empty();
             createRs.select2({
                 placeholder: 'Select Hospital',
             });
+
+
+            createDepartment.empty();
             createDepartment.select2({
                 placeholder: 'Select Department',
             });
@@ -393,24 +420,12 @@ $(document).ready(function () {
             });
             createProvince.val("");
 
-            function fetchHospitals2(provinceId) {
-                  // Make an AJAX call to retrieve hospitals based on provinceId
-                  $.ajax({
-                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
-                    method: "GET",
-                    success: function (response) {
-                        //console.log(response.hosopt);
-                        response.hosopt.forEach(function(hospital) {
-                            createRs.append('<option value="' + hospital.id + '">' + hospital.name + '</option>');
-                        });
-                    }
-                  });
-                }
+           
                
                 createProvince.on("change", function () {
                   var selectedProvinceId = $(this).val();
-                  console.log(selectedProvinceId);
-                  fetchHospitals2(selectedProvinceId);
+                  //console.log(selectedProvinceId);
+                  fetchHospitals2(selectedProvinceId,createRs);
                 });
 
 
@@ -449,11 +464,11 @@ $(document).ready(function () {
             method: "GET",
             data: { user_id: selectedUserId }, // Pass the selected user ID as a parameter
             success: function (response) {
-                console.log("Response from server:", response);
+                //console.log("Response from server:", response);
                 var eventfilter = response.filterschedule;
                 console.log("Filtered events:", eventfilter);
 
-                $('#taskList').empty();
+                //$('#taskList').empty();
 
 
                 // Update FullCalendar with filtered events
@@ -480,7 +495,7 @@ $(document).ready(function () {
 
 
 
-});
+
 
 
       // Function to handle event drop (drag and drop)
@@ -530,13 +545,52 @@ $(document).ready(function () {
 
 */
       // Function to open event modal for viewing/updating
-      function openEventModal(event) {
-          $('#eventId').val(event.id);
-          $('#title').val(event.title);
-         $('#province').val(event.province);
-          $('#rs').val(event.rs);
-        $('#department').val(event.department);
-         $('#task').val(event.task);
+      function openEventModal(event,data) {
+        console.log(data);
+
+          iddata=$('#id').val(event.id);
+          //$('#title').val(event.tit);
+         updateprov=$('#province');
+         updateprov.empty();
+         updateprov.select2();
+         data.province.forEach(function(province) {
+                updateprov.append('<option value="' + province.id + '">' + province.name + '</option>');
+            });
+
+            updateprov.val(event.province);
+            updatehospital=$('#rs');
+            updatehospital.empty();
+           updatehospital.select2();
+               
+                updateprov.on("change", function () {
+                  var selectedProvinceId = $(this).val();
+                  //console.log(selectedProvinceId);
+                  updatehospital.empty();
+                  fetchHospitals2(selectedProvinceId,updatehospital);
+                  updatehospital.append('<option value="' + event.hospital + '">' + event.hospitalName + '</option>');
+                });
+
+                updatehospital.append('<option value="' + event.hospital + '">' + event.hospitalName + '</option>');
+            
+            picupdate=$('#personInChargeupdate');
+            picupdate.empty();
+            picupdate.select2();
+            data.pic.forEach(function(pics) {
+             picupdate.append('<option value="' + pics.user_id + '">' + pics.name +'</option>');
+            });
+        picupdate.append('<option value="' + event.create_for + '">' + event.create_for_name + '</option>');
+        picupdate.val(event.create_for).prop('selected', true);
+           
+          
+        deptupdate=$('#department');
+        deptupdate.select2();
+        deptupdate.empty();
+        data.dept.forEach(function(dpt) {
+             deptupdate.append('<option value="' + dpt.id + '">' + dpt.name +'</option>');
+            });
+        deptupdate.append('<option value="' + event.department + '">' + event.departmentName + '</option>');
+        deptupdate.val(event.department).prop('selected', true);
+         $('#taskupdate').val(event.title);
           $('#startDate').val(moment(event.start).format('YYYY-MM-DD HH:mm:ss'));
           $('#endDate').val(moment(event.end).format('YYYY-MM-DD HH:mm:ss'));
 
@@ -545,24 +599,26 @@ $(document).ready(function () {
 
       // Function to handle modal close and update event
       $('#updateBtn').click(function () {
-          var id = $('#eventId').val();
-          var task = $('#title').val();
+        
+          var id= $('#id').val();      
           var province = $('#province').val();
           var rs = $('#rs').val();
           var department = $('#department').val();
-          var task = $('#task').val();
+          var task = $('#taskupdate').val();
           var startDate = moment($('#startDate').val()).format('YYYY-MM-DD HH:mm:ss');
           var endDate = moment($('#endDate').val()).format('YYYY-MM-DD HH:mm:ss');
+        var createFor= $('#personInChargeupdate').val();
 
           var eventData = {
-      task: task,
-      province: province,
-      hospital_id: rs,
-      department_id: department,
-      task: task,
-      start_date: startDate,
-      end_date: endDate
-  };
+                create_for:createFor,
+                province_id: province,
+                hospital_id: rs,
+                department_id: department,
+                task: task,
+                start_date: startDate,
+                end_date: endDate
+            };
+            console.log(eventData);
           $.ajax({
               url: "{{ route('events.update', '') }}" + '/' + id,
               type: "PATCH",
@@ -594,10 +650,11 @@ $(document).ready(function () {
           var createStartDate = moment($('#createStartDate').val()).format('YYYY-MM-DD HH:mm:ss');
           var createEndDate = moment($('#createEndDate').val()).format('YYYY-MM-DD HH:mm:ss');
 
+          //console.log(createPersonInCharge);
           var createEventData = {
             
               province: createProvince,
-              create_for:createPersonInCharge,
+              createFor:createPersonInCharge,
               rs: createRs,
               department: createDepartment,
               task: createTask,
@@ -612,7 +669,7 @@ $(document).ready(function () {
               data: createEventData,
               success: function (response) {
                   // Handle success (if needed)
-                  console.log(response);
+                  //console.log(response);
                   $('#calendar').fullCalendar('refetchEvents');
                   $('#createEventForm')[0].reset();
 
@@ -644,6 +701,9 @@ $(document).ready(function () {
                 text: 'This is a test Swal notification.',
             });
         }
+
+
+    });
 
 </script>
 

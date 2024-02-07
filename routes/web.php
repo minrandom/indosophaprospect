@@ -133,7 +133,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	
 });
 Route::get('/scheduledata','ScheduleController@index')->name('schedule.index');
-Route::PATCH('/scheduleupdate','ScheduleController@update')->name('events.update');
+Route::PATCH('/scheduleupdate/{schedule}','ScheduleController@update')->name('events.update');
 Route::POST('/schedulestore','ScheduleController@store')->name('events.store');
 
 Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'fs'],function(){
