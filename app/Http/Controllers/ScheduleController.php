@@ -37,9 +37,9 @@ class ScheduleController extends Controller
               $color = '#68B01A';
           }
 
-          //$provincename=
+          $provincename=$booking->province->name;
         
-          //dd($provincename);
+         // dd($provincename);
           //$by=$userNamesById[$booking->created_by];
           //$for=$userNamesById[$booking->create_for];
           $by= $users->where('id',$booking->created_by)->first();
@@ -54,7 +54,7 @@ class ScheduleController extends Controller
           $events[] = [
               'id'   => $booking->id,
               'title' => $booking->task,
-              'provinceName'=>$booking->province->name,
+              'provinceName'=>$provincename,
               'province'=>$booking->province_id,
               'hospital' => $booking->hospital_id,
               'hospitalName' => $booking->hospital->name,
