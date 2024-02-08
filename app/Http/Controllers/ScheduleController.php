@@ -37,7 +37,8 @@ class ScheduleController extends Controller
               $color = '#68B01A';
           }
 
-          $provincename=$booking->province->name;
+          $provincename = $booking->province ? $booking->province->name : 'Unknown Province';
+          
         
          // dd($provincename);
           //$by=$userNamesById[$booking->created_by];
