@@ -10,6 +10,18 @@
             width: 100%;
             height: 400px;
         }
+        /* Adjust button styles */
+#click-photo {
+    z-index: 1; /* Ensure button is above video */
+}
+
+/* Additional styles for the video container */
+#video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Ensure the container takes up the full height */
+}
     </style>
     <script src="{{ asset('openlayers/dist/ol.js') }}"></script>
     @endpush
@@ -23,9 +35,10 @@
         <button id="toggle-camera" class="btn btn-primary">Start Checkin</button>
         <div id="video-container" style="position: relative;">
             <video id="video" width="320" height="240" style="display: none;" autoplay></video>
-            <button id="click-photo" class="btn btn-primary mt-2" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: none;">Click Photo</button>
+            <button id="click-photo" class="btn btn-primary mt-2" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;"><i class="fas fa-camera"></i> Click Photo</button>
             <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
         </div>
+
     </div>
     </div>
 
@@ -55,7 +68,7 @@
             .then(function(stream) {
                 video.srcObject = stream;
                 video.style.display = "block";
-                toggle_button.innerText = "Capture Photo";
+                toggle_button.innerHTML = '<i class="fas fa-camera"></i> Capture Photo';
             })
             .catch(function(err) {
                 console.error('Error accessing camera:', err);
