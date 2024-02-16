@@ -73,21 +73,6 @@ class ScheduleController extends Controller
       }
 
       //var_dump($request->user_id);
-     
-      if($request->user_id>0 and $request->user_id!=NULL){
-        $filteredEvents = array_filter($events, function ($event) use ($request) {
-            //dd($event);
-           // dd($event['create_for']);
-           
-            return $event['create_for'] == $request->user_id;
-        });
-        
-        
-        $filteredEvents=array_values($filteredEvents);
-        return response()->json(['filterschedule' => $filteredEvents, 'data'=>$data->original]);
-
-      }
-   
 
       return response()->json(['schedule'=>$events,'data'=>$data->original]);
  

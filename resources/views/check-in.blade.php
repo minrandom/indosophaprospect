@@ -19,9 +19,10 @@
 #video-container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100%; /* Ensure the container takes up the full height */
+    align-items: flex-end;
+    position: relative;
 }
+
     </style>
     <script src="{{ asset('openlayers/dist/ol.js') }}"></script>
     @endpush
@@ -32,12 +33,13 @@
 
     <!-- Check-in Card -->
     <div class="card-body">
-        <button id="toggle-camera" class="btn btn-primary">Start Checkin</button>
         <div id="video-container" style="position: relative;">
             <video id="video" width="320" height="240" style="display: none;" autoplay></video>
-            <button id="click-photo" class="btn btn-primary mt-2" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;"><i class="fas fa-camera"></i> Click Photo</button>
             <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+            <button id="click-photo" class="btn btn-primary mt-2" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: none;"><i class="fas fa-camera"></i> Click Photo</button>
         </div>
+        <button id="toggle-camera" class="btn btn-primary"><i class='fas fa-street-view'></i> Start Checkin</button>
+
 
     </div>
     </div>
@@ -55,7 +57,7 @@
 
 
     toggle_button.addEventListener('click', function() {
-        if (toggle_button.innerText === "Start Checkin") {
+        if (toggle_button.innerText === " Start Checkin") {
             startCamera();
         } else {
             capturePhoto();
@@ -63,12 +65,12 @@
     });
 
     function startCamera() {
-
+        $("#sidebarToggle").trigger('click');
         navigator.mediaDevices.getUserMedia({ video: true, audio: false })
             .then(function(stream) {
                 video.srcObject = stream;
                 video.style.display = "block";
-                toggle_button.innerHTML = '<i class="fas fa-camera"></i> Capture Photo';
+                toggle_button.innerHTML = '<i class="fas fa-camera"></i> Photo Check-In';
             })
             .catch(function(err) {
                 console.error('Error accessing camera:', err);
@@ -166,13 +168,16 @@
     function stopCamera() {
         let stream = video.srcObject;
         let tracks = stream.getTracks();
+        
         tracks.forEach(function(track) {
             track.stop();
         });
         video.srcObject = null;
         video.style.display = "none";
+        $("#sidebarToggle").trigger('click');
         click_button.style.display = "none";
-        toggle_button.innerText = "Start Checkin";
+        toggle_button.innerHTML = "<i class='fas fa-location-check'></i> Start Checkin";
+        $("#click-photo").hide();
     }
 
     

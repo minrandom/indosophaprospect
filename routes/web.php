@@ -70,8 +70,8 @@ Route::middleware('prevent-back')->group(function () {
 
 
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
-Route::post('/check-in', 'JojoController@store')->name('check-in.store');
-Route::get('/check-in', 'JojoController@index')->name('check-in');
+Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+Route::get('/check-in', 'JojoController@index')->name('check-in')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin'],function(){
 	Route::get('/',[AdminController::class,'index'])->name('admin')->middleware(['can:admin']);
 	
@@ -158,8 +158,8 @@ Route::view('/register','auth.register')->name('register');
 Route::view('/forgot-password','auth.forgot-password')->name('forgot-password');
 
 //Route::get('/location', 'LocationController@index')->name('location.index');
+Route::post('/login',[LoginController::class,'authenticate'])->name('login.post');
 
-	Route::post('/login',[LoginController::class,'authenticate'])->name('login.post');
 Route::post('/logout',function(){
 	return redirect()->to('/')->with(Auth::logout())->with('refresh', true);
 })->name('logout');
