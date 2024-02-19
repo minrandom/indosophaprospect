@@ -68,8 +68,8 @@ Route::middleware('prevent-back')->group(function () {
     // Other routes...
 });
 
-
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
+
 Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/check-in', 'JojoController@index')->name('check-in')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin'],function(){

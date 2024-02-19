@@ -73,6 +73,7 @@ class ScheduleController extends Controller
       }
 
       //var_dump($request->user_id);
+     
 
       return response()->json(['schedule'=>$events,'data'=>$data->original]);
  
