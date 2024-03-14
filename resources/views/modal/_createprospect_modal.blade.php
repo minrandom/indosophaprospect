@@ -30,6 +30,13 @@
           <input type="" placeholder="Input Nama Event Disini" style="display: none;" id="eventname" name="eventname" class="form-control">
 
           </div>
+
+          <div class="form-group">
+            <label for="cr8infoextra">Informasi Tambahan</label>
+             <input type='' placeholder='Misal : " Kebutuhan untuk ruang OK baru " , " Kebutuhan Banyak Ventilator ", dsb' id="cr8infoextra" name="cr8infoextra" class="form-control" required=""  title='ex: "Kebutuhan ruang OK","Kebutuhan instrumen baru"' >
+          </div>
+
+
           <div class="form-group">
             <label for="cr8province">Provinsi</label>
              <select id="cr8province" name="cr8province" class="form-control" required=""  >

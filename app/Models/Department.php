@@ -16,5 +16,8 @@ class Department extends Model
     public function prospects(){
         return $this->hasMany(Prospect::class);
     }
+    public function schedules(){
+        return $this->hasMany(schedule::class);
+    }
 
 }

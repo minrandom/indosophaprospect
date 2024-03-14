@@ -11,9 +11,11 @@
         "php": "^8.1",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^2.0",
+        "google/apiclient": "^2.15.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.0",
         "laravel/tinker": "^2.0",
+        "nao-pon/flysystem-google-drive": "~1.1",
         "yajra/laravel-datatables-oracle": "^9.15"
     },
     "require-dev": {

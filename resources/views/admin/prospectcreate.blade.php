@@ -40,12 +40,16 @@
           <label for="cr8source">Sumber Info</label>
           
           <select id="cr8source" name="cr8source" class="form-control " required="" >
-           
           </select>
           <input type="" placeholder="Input Nama Event Disini" style="display: none;" id="eventname" name="eventname" class="form-control">
 
           </div>
+
           <div class="form-group">
+            <label for="cr8infoextra">Informasi Tambahan</label>
+             <input type='' placeholder='Misal : " Kebutuhan untuk ruang OK baru " , " Kebutuhan Banyak Ventilator ", dsb' id="cr8infoextra" name="cr8infoextra" class="form-control" required=""  >
+          </div>
+           <div class="form-group">
             <label for="cr8province">Provinsi</label>
              <select id="cr8province" name="cr8province" class="form-control" required=""  >
             
@@ -343,27 +347,7 @@
     });
 
 
-  $('body').on("click",".btn-cr8",function(){
-        var id = $(this).attr("id")
-        
-        
-    });
-
- 
-
     // Create 
-
-    $("#createForm").on("submit",function(e){
-      e.preventDefault();
-        var clickedButton = $(document.activeElement);
-
-        if (clickedButton.is('#btn-store')) {
-            submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
-        } else if (clickedButton.is('#btn-draft')) {
-            submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
-        }
-    });
-    
     function submitForm(url, successMessage) {
         var formData = $("#createForm").serialize();
 
@@ -372,12 +356,33 @@
             method: "POST",
             data: formData,
             success: function() {
-                $("#create-modal").modal("hide");
-                $('.data-table').DataTable().ajax.reload();
+                //$("#create-modal").modal("hide");
+                //$('.data-table').DataTable().ajax.reload();
+                $("#createForm")[0].reset();
                 flash("success", successMessage);
+                document.querySelector(".notify").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+                });
             }
         });
     };
+
+
+
+    $('#createForm').on('submit', function(e) {
+        e.preventDefault();
+        var clickedButton = $(document.activeElement);
+
+        if (clickedButton.is('#btn-store')) {
+            submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
+        } else if (clickedButton.is('#btn-draft')) {
+            submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
+        }
+    });
+
+    
+  
 
 
 

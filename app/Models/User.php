@@ -24,9 +24,23 @@ class User extends Authenticatable
     public function creator(){
         return $this->hasMany(Prospect::class,"user_creator");
     }
+    public function scheduleCreators(){
+        return $this->hasMany(schedule::class,"created_by");
+    }
+
+    public function scheduleFor(){
+        return $this->hasMany(schedule::class,"create_for");
+    }
+    public function prospectRemarks(){
+        return $this->hasMany(prospectRemarks::class,"creator");
+    }
+
+    public function scheduleValidators(){
+        return $this->hasMany(schedule::class,"validation_by");
+    }
 
     public function personInCharge(){
-        return $this->hasMany(Prospect::class,"user_creator");
+        return $this->hasMany(Prospect::class,"pic_user_id");
     }
 
     public function draftinput(){

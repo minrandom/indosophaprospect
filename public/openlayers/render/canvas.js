@@ -93,7 +93,7 @@ export const defaultFont = '10px sans-serif';
 
 /**
  * @const
- * @type {import("../colorlike.js").ColorLike}
+ * @type {string}
  */
 export const defaultFillStyle = '#000';
 
@@ -439,7 +439,7 @@ export function drawImageOrLabel(
     context.globalAlpha *= opacity;
   }
   if (transform) {
-    context.setTransform.apply(context, transform);
+    context.transform.apply(context, transform);
   }
 
   if (/** @type {*} */ (labelOrImage).contextInstructions) {

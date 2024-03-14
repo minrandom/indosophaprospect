@@ -20,6 +20,9 @@
 
     <!-- Custom styles for this template-->
     <link href="{{ asset('template/backend/sb-admin-2') }}/css/sb-admin-2.min.css" rel="stylesheet">
+   
+<!-- Other head content -->
+
 
 </head>
 
@@ -31,6 +34,8 @@
         @yield('content')
     </div>
 
+   
+
     <!-- Bootstrap core JavaScript-->
     <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/jquery/jquery.min.js"></script>
     <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -40,6 +45,8 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('template/backend/sb-admin-2') }}/js/sb-admin-2.min.js"></script>
+
+   
 
 </body>
 

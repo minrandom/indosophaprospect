@@ -13,6 +13,8 @@
     <title>Indosopha | {{ $title ?? 'Dashboard' }}</title>
 
     <style>
+    
+
     .fixed-card {
   /* Set a fixed height for the card container on smaller screens */
    /* Adjust this value as needed */
@@ -158,6 +160,14 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
+    <script>
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                // Page is loaded from cache (user pressed the back button)
+                location.reload(true); // Reload the page
+            }
+        };
+    </script>
     <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/jquery/jquery.min.js"></script>
     <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 

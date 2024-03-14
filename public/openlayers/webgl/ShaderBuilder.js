@@ -2,8 +2,16 @@
  * Class for generating shaders from literal style objects
  * @module ol/webgl/ShaderBuilder
  */
+import {LINESTRING_ANGLE_COSINE_CUTOFF} from '../render/webgl/utils.js';
+import {colorToGlsl, numberToGlsl, stringToGlsl} from '../expr/gpu.js';
+import {createDefaultStyle} from '../style/flat.js';
 
-const BASE_UNIFORMS = `uniform mat4 u_projectionMatrix;
+export const COMMON_HEADER = `#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+uniform mat4 u_projectionMatrix;
 uniform mat4 u_screenToWorldMatrix;
 uniform vec2 u_viewportSizePx;
 uniform float u_pixelRatio;
@@ -11,7 +19,23 @@ uniform float u_globalAlpha;
 uniform float u_time;
 uniform float u_zoom;
 uniform float u_resolution;
-uniform vec4 u_renderExtent;`;
+uniform float u_rotation;
+uniform vec4 u_renderExtent;
+uniform vec2 u_patternOrigin;
+uniform float u_depth;
+uniform mediump int u_hitDetection;
+
+const float PI = 3.141592653589793238;
+const float TWO_PI = 2.0 * PI;
+
+// this used to produce an alpha-premultiplied color from a texture
+vec4 samplePremultiplied(sampler2D sampler, vec2 texCoord) {
+  vec4 color = texture2D(sampler, texCoord);
+  return vec4(color.rgb * color.a, color.a);
+}
+`;
+
+const DEFAULT_STYLE = createDefaultStyle();
 
 /**
  * @typedef {Object} VaryingDescription
@@ -32,7 +56,7 @@ uniform vec4 u_renderExtent;`;
  *   .addUniform('u_time')
  *   .setColorExpression('...')
  *   .setSymbolSizeExpression('...')
- *   .outputSymbolFragmentShader();
+ *   .getSymbolFragmentShader();
  * ```
  */
 export class ShaderBuilder {
@@ -59,10 +83,18 @@ export class ShaderBuilder {
     this.varyings_ = [];
 
     /**
+     * @type {boolean}
+     * @private
+     */
+    this.hasSymbol_ = false;
+
+    /**
      * @type {string}
      * @private
      */
-    this.symbolSizeExpression_ = 'vec2(1.0)';
+    this.symbolSizeExpression_ = `vec2(${numberToGlsl(
+      DEFAULT_STYLE['circle-radius']
+    )} + ${numberToGlsl(DEFAULT_STYLE['circle-stroke-width'] * 0.5)})`;
 
     /**
      * @type {string}
@@ -80,7 +112,9 @@ export class ShaderBuilder {
      * @type {string}
      * @private
      */
-    this.symbolColorExpression_ = 'vec4(1.0)';
+    this.symbolColorExpression_ = colorToGlsl(
+      /** @type {string} */ (DEFAULT_STYLE['circle-fill-color'])
+    );
 
     /**
      * @type {string}
@@ -101,22 +135,63 @@ export class ShaderBuilder {
     this.symbolRotateWithView_ = false;
 
     /**
-     * @type {string}
+     * @type {boolean}
      * @private
      */
-    this.strokeWidthExpression_ = '1.0';
+    this.hasStroke_ = false;
 
     /**
      * @type {string}
      * @private
      */
-    this.strokeColorExpression_ = 'vec4(1.0)';
+    this.strokeWidthExpression_ = numberToGlsl(DEFAULT_STYLE['stroke-width']);
 
     /**
      * @type {string}
      * @private
      */
-    this.fillColorExpression_ = 'vec4(1.0)';
+    this.strokeColorExpression_ = colorToGlsl(
+      /** @type {string} */ (DEFAULT_STYLE['stroke-color'])
+    );
+
+    /**
+     * @private
+     */
+    this.strokeOffsetExpression_ = '0.';
+
+    /**
+     * @private
+     */
+    this.strokeCapExpression_ = stringToGlsl('round');
+
+    /**
+     * @private
+     */
+    this.strokeJoinExpression_ = stringToGlsl('round');
+
+    /**
+     * @private
+     */
+    this.strokeMiterLimitExpression_ = '10.';
+
+    /**
+     * @private
+     */
+    this.strokeDistanceFieldExpression_ = '-1000.';
+
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.hasFill_ = false;
+
+    /**
+     * @type {string}
+     * @private
+     */
+    this.fillColorExpression_ = colorToGlsl(
+      /** @type {string} */ (DEFAULT_STYLE['fill-color'])
+    );
 
     /**
      * @type {Array<string>}
@@ -178,8 +253,16 @@ export class ShaderBuilder {
    * @return {ShaderBuilder} the builder object
    */
   setSymbolSizeExpression(expression) {
+    this.hasSymbol_ = true;
     this.symbolSizeExpression_ = expression;
     return this;
+  }
+
+  /**
+   * @return {string} The current symbol size expression
+   */
+  getSymbolSizeExpression() {
+    return this.symbolSizeExpression_;
   }
 
   /**
@@ -198,13 +281,19 @@ export class ShaderBuilder {
    * Sets an expression to compute the offset of the symbol from the point center.
    * This expression can use all the uniforms and attributes available
    * in the vertex shader, and should evaluate to a `vec2` value.
-   * Note: will only be used for point geometry shaders.
    * @param {string} expression Offset expression
    * @return {ShaderBuilder} the builder object
    */
   setSymbolOffsetExpression(expression) {
     this.symbolOffsetExpression_ = expression;
     return this;
+  }
+
+  /**
+   * @return {string} The current symbol offset expression
+   */
+  getSymbolOffsetExpression() {
+    return this.symbolOffsetExpression_;
   }
 
   /**
@@ -215,8 +304,16 @@ export class ShaderBuilder {
    * @return {ShaderBuilder} the builder object
    */
   setSymbolColorExpression(expression) {
+    this.hasSymbol_ = true;
     this.symbolColorExpression_ = expression;
     return this;
+  }
+
+  /**
+   * @return {string} The current symbol color expression
+   */
+  getSymbolColorExpression() {
+    return this.symbolColorExpression_;
   }
 
   /**
@@ -246,6 +343,13 @@ export class ShaderBuilder {
   }
 
   /**
+   * @return {string} The current fragment discard expression
+   */
+  getFragmentDiscardExpression() {
+    return this.discardExpression_;
+  }
+
+  /**
    * Sets whether the symbols should rotate with the view or stay aligned with the map.
    * Note: will only be used for point geometry shaders.
    * @param {boolean} rotateWithView Rotate with view
@@ -261,18 +365,89 @@ export class ShaderBuilder {
    * @return {ShaderBuilder} the builder object
    */
   setStrokeWidthExpression(expression) {
+    this.hasStroke_ = true;
     this.strokeWidthExpression_ = expression;
     return this;
   }
 
+  /**
+   * @param {string} expression Stroke color expression, evaluate to `vec4`: can rely on currentLengthPx and currentRadiusPx
+   * @return {ShaderBuilder} the builder object
+   */
   setStrokeColorExpression(expression) {
+    this.hasStroke_ = true;
     this.strokeColorExpression_ = expression;
     return this;
   }
 
+  /**
+   * @return {string} The current stroke color expression
+   */
+  getStrokeColorExpression() {
+    return this.strokeColorExpression_;
+  }
+
+  /**
+   * @param {string} expression Stroke color expression, evaluate to `float`
+   * @return {ShaderBuilder} the builder object
+   */
+  setStrokeOffsetExpression(expression) {
+    this.strokeOffsetExpression_ = expression;
+    return this;
+  }
+
+  /**
+   * @param {string} expression Stroke line cap expression, evaluate to `float`
+   * @return {ShaderBuilder} the builder object
+   */
+  setStrokeCapExpression(expression) {
+    this.strokeCapExpression_ = expression;
+    return this;
+  }
+
+  /**
+   * @param {string} expression Stroke line join expression, evaluate to `float`
+   * @return {ShaderBuilder} the builder object
+   */
+  setStrokeJoinExpression(expression) {
+    this.strokeJoinExpression_ = expression;
+    return this;
+  }
+
+  /**
+   * @param {string} expression Stroke miter limit expression, evaluate to `float`
+   * @return {ShaderBuilder} the builder object
+   */
+  setStrokeMiterLimitExpression(expression) {
+    this.strokeMiterLimitExpression_ = expression;
+    return this;
+  }
+
+  /**
+   * @param {string} expression Stroke distance field expression, evaluate to `float`
+   * This can override the default distance field; can rely on currentLengthPx and currentRadiusPx
+   * @return {ShaderBuilder} the builder object
+   */
+  setStrokeDistanceFieldExpression(expression) {
+    this.strokeDistanceFieldExpression_ = expression;
+    return this;
+  }
+
+  /**
+   * @param {string} expression Fill color expression, evaluate to `vec4`
+   * @return {ShaderBuilder} the builder object
+   */
   setFillColorExpression(expression) {
+    this.hasFill_ = true;
     this.fillColorExpression_ = expression;
     return this;
+  }
+
+  /**
+   * @return {string} The current fill color expression
+   */
+  getFillColorExpression() {
+    return this.fillColorExpression_;
   }
 
   addVertexShaderFunction(code) {
@@ -290,44 +465,14 @@ export class ShaderBuilder {
 
   /**
    * Generates a symbol vertex shader from the builder parameters
-   *
-   * Four uniforms are hardcoded in all shaders: `u_projectionMatrix`, `u_offsetScaleMatrix`,
-   * `u_offsetRotateMatrix`, `u_time`.
-   *
-   * The following attributes are hardcoded and expected to be present in the vertex buffers:
-   * `vec2 a_position`, `float a_index` (being the index of the vertex in the quad, 0 to 3).
-   *
-   * The following varyings are hardcoded and gives the coordinate of the pixel both in the quad and on the texture:
-   * `vec2 v_quadCoord`, `vec2 v_texCoord`
-   *
-   * @param {boolean} [forHitDetection] If true, the shader will be modified to include hit detection variables
-   * (namely, hit color with encoded feature id).
-   * @return {string} The full shader as a string.
+   * @return {string|null} The full shader as a string; null if no size or color specified
    */
-  getSymbolVertexShader(forHitDetection) {
-    const offsetMatrix = this.symbolRotateWithView_
-      ? 'u_offsetScaleMatrix * u_offsetRotateMatrix'
-      : 'u_offsetScaleMatrix';
-
-    let attributes = this.attributes_;
-    let varyings = this.varyings_;
-
-    if (forHitDetection) {
-      attributes = attributes.concat('vec4 a_hitColor');
-      varyings = varyings.concat({
-        name: 'v_hitColor',
-        type: 'vec4',
-        expression: 'a_hitColor',
-      });
+  getSymbolVertexShader() {
+    if (!this.hasSymbol_) {
+      return null;
     }
 
-    return `precision mediump float;
-uniform mat4 u_projectionMatrix;
-uniform mat4 u_offsetScaleMatrix;
-uniform mat4 u_offsetRotateMatrix;
-uniform float u_time;
-uniform float u_zoom;
-uniform float u_resolution;
+    return `${COMMON_HEADER}
 ${this.uniforms_
   .map(function (uniform) {
     return 'uniform ' + uniform + ';';
@@ -335,49 +480,65 @@ ${this.uniforms_
   .join('\n')}
 attribute vec2 a_position;
 attribute float a_index;
-${attributes
+attribute vec4 a_hitColor;
+${this.attributes_
   .map(function (attribute) {
     return 'attribute ' + attribute + ';';
   })
   .join('\n')}
 varying vec2 v_texCoord;
 varying vec2 v_quadCoord;
-${varyings
+varying vec4 v_hitColor;
+varying vec2 v_centerPx;
+varying float v_angle;
+varying vec2 v_quadSizePx;
+${this.varyings_
   .map(function (varying) {
     return 'varying ' + varying.type + ' ' + varying.name + ';';
   })
   .join('\n')}
 ${this.vertexShaderFunctions_.join('\n')}
+vec2 pxToScreen(vec2 coordPx) {
+  vec2 scaled = coordPx / u_viewportSizePx / 0.5;
+  return scaled;
+}
+
+vec2 screenToPx(vec2 coordScreen) {
+  return (coordScreen * 0.5 + 0.5) * u_viewportSizePx;
+}
+
 void main(void) {
-  mat4 offsetMatrix = ${offsetMatrix};
-  vec2 halfSize = ${this.symbolSizeExpression_} * 0.5;
-  vec2 offset = ${this.symbolOffsetExpression_};
-  float angle = ${this.symbolRotationExpression_};
-  float offsetX;
-  float offsetY;
+  v_quadSizePx = ${this.symbolSizeExpression_};
+  vec2 halfSizePx = v_quadSizePx * 0.5;
+  vec2 centerOffsetPx = ${this.symbolOffsetExpression_};
+  vec2 offsetPx = centerOffsetPx;
   if (a_index == 0.0) {
-    offsetX = (offset.x - halfSize.x) * cos(angle) + (offset.y - halfSize.y) * sin(angle);
-    offsetY = (offset.y - halfSize.y) * cos(angle) - (offset.x - halfSize.x) * sin(angle);
+    offsetPx -= halfSizePx;
   } else if (a_index == 1.0) {
-    offsetX = (offset.x + halfSize.x) * cos(angle) + (offset.y - halfSize.y) * sin(angle);
-    offsetY = (offset.y - halfSize.y) * cos(angle) - (offset.x + halfSize.x) * sin(angle);
+    offsetPx += halfSizePx * vec2(1., -1.);
   } else if (a_index == 2.0) {
-    offsetX = (offset.x + halfSize.x) * cos(angle) + (offset.y + halfSize.y) * sin(angle);
-    offsetY = (offset.y + halfSize.y) * cos(angle) - (offset.x + halfSize.x) * sin(angle);
+    offsetPx += halfSizePx;
   } else {
-    offsetX = (offset.x - halfSize.x) * cos(angle) + (offset.y + halfSize.y) * sin(angle);
-    offsetY = (offset.y + halfSize.y) * cos(angle) - (offset.x - halfSize.x) * sin(angle);
+    offsetPx += halfSizePx * vec2(-1., 1.);
   }
-  vec4 offsets = offsetMatrix * vec4(offsetX, offsetY, 0.0, 0.0);
-  gl_Position = u_projectionMatrix * vec4(a_position, 0.0, 1.0) + offsets;
+  float angle = ${this.symbolRotationExpression_};
+  ${this.symbolRotateWithView_ ? 'angle += u_rotation;' : ''}
+  float c = cos(-angle);
+  float s = sin(-angle);
+  offsetPx = vec2(c * offsetPx.x - s * offsetPx.y, s * offsetPx.x + c * offsetPx.y);
+  vec4 center = u_projectionMatrix * vec4(a_position, 0.0, 1.0);
+  gl_Position = center + vec4(pxToScreen(offsetPx), u_depth, 0.);
   vec4 texCoord = ${this.texCoordExpression_};
   float u = a_index == 0.0 || a_index == 3.0 ? texCoord.s : texCoord.p;
   float v = a_index == 2.0 || a_index == 3.0 ? texCoord.t : texCoord.q;
   v_texCoord = vec2(u, v);
-  u = a_index == 0.0 || a_index == 3.0 ? 0.0 : 1.0;
-  v = a_index == 2.0 || a_index == 3.0 ? 0.0 : 1.0;
-  v_quadCoord = vec2(u, v);
-${varyings
+  v_hitColor = a_hitColor;
+  v_angle = angle;
+  c = cos(-v_angle);
+  s = sin(-v_angle);
+  centerOffsetPx = vec2(c * centerOffsetPx.x - s * centerOffsetPx.y, s * centerOffsetPx.x + c * centerOffsetPx.y); 
+  v_centerPx = screenToPx(center.xy) + centerOffsetPx;
+${this.varyings_
   .map(function (varying) {
     return '  ' + varying.name + ' = ' + varying.expression + ';';
   })
@@ -387,80 +548,55 @@ ${varyings
 
   /**
    * Generates a symbol fragment shader from the builder parameters
-   *
-   * Expects the following varyings to be transmitted by the vertex shader:
-   * `vec2 v_quadCoord`, `vec2 v_texCoord`
-   *
-   * @param {boolean} [forHitDetection] If true, the shader will be modified to include hit detection variables
-   * (namely, hit color with encoded feature id).
-   * @return {string} The full shader as a string.
+   * @return {string|null} The full shader as a string; null if no size or color specified
    */
-  getSymbolFragmentShader(forHitDetection) {
-    const hitDetectionBypass = forHitDetection
-      ? '  if (gl_FragColor.a < 0.1) { discard; } gl_FragColor = v_hitColor;'
-      : '';
-
-    let varyings = this.varyings_;
-
-    if (forHitDetection) {
-      varyings = varyings.concat({
-        name: 'v_hitColor',
-        type: 'vec4',
-        expression: 'a_hitColor',
-      });
+  getSymbolFragmentShader() {
+    if (!this.hasSymbol_) {
+      return null;
     }
 
-    return `precision mediump float;
-uniform float u_time;
-uniform float u_zoom;
-uniform float u_resolution;
+    return `${COMMON_HEADER}
 ${this.uniforms_
   .map(function (uniform) {
     return 'uniform ' + uniform + ';';
   })
   .join('\n')}
 varying vec2 v_texCoord;
-varying vec2 v_quadCoord;
-${varyings
+varying vec4 v_hitColor;
+varying vec2 v_centerPx;
+varying float v_angle;
+varying vec2 v_quadSizePx;
+${this.varyings_
   .map(function (varying) {
     return 'varying ' + varying.type + ' ' + varying.name + ';';
   })
   .join('\n')}
 ${this.fragmentShaderFunctions_.join('\n')}
+
 void main(void) {
   if (${this.discardExpression_}) { discard; }
+  vec2 coordsPx = gl_FragCoord.xy / u_pixelRatio - v_centerPx; // relative to center
+  float c = cos(v_angle);
+  float s = sin(v_angle);
+  coordsPx = vec2(c * coordsPx.x - s * coordsPx.y, s * coordsPx.x + c * coordsPx.y);
   gl_FragColor = ${this.symbolColorExpression_};
-  gl_FragColor.rgb *= gl_FragColor.a;
-${hitDetectionBypass}
+  if (u_hitDetection > 0) {
+    if (gl_FragColor.a < 0.05) { discard; };
+    gl_FragColor = v_hitColor;
+  }
 }`;
   }
 
   /**
    * Generates a stroke vertex shader from the builder parameters
-   *
-   * @param {boolean} [forHitDetection] If true, the shader will be modified to include hit detection variables
-   * (namely, hit color with encoded feature id).
-   * @return {string} The full shader as a string.
+   * @return {string|null} The full shader as a string; null if no size or color specified
    */
-  getStrokeVertexShader(forHitDetection) {
-    let attributes = this.attributes_;
-    let varyings = this.varyings_;
-
-    if (forHitDetection) {
-      attributes = attributes.concat('vec4 a_hitColor');
-      varyings = varyings.concat({
-        name: 'v_hitColor',
-        type: 'vec4',
-        expression: 'a_hitColor',
-      });
+  getStrokeVertexShader() {
+    if (!this.hasStroke_) {
+      return null;
     }
 
-    return `#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-${BASE_UNIFORMS}
+    return `${COMMON_HEADER}
 ${this.uniforms_
   .map(function (uniform) {
     return 'uniform ' + uniform + ';';
@@ -471,7 +607,10 @@ attribute float a_index;
 attribute vec2 a_segmentStart;
 attribute vec2 a_segmentEnd;
 attribute float a_parameters;
-${attributes
+attribute float a_distance;
+attribute vec2 a_joinAngles;
+attribute vec4 a_hitColor;
+${this.attributes_
   .map(function (attribute) {
     return 'attribute ' + attribute + ';';
   })
@@ -481,7 +620,9 @@ varying vec2 v_segmentEnd;
 varying float v_angleStart;
 varying float v_angleEnd;
 varying float v_width;
-${varyings
+varying vec4 v_hitColor;
+varying float v_distanceOffsetPx;
+${this.varyings_
   .map(function (varying) {
     return 'varying ' + varying.type + ' ' + varying.name + ';';
   })
@@ -493,41 +634,71 @@ vec2 worldToPx(vec2 worldPos) {
 }
 
 vec4 pxToScreen(vec2 pxPos) {
-  vec2 screenPos = pxPos * 4.0 / u_viewportSizePx;
-  return vec4(screenPos.xy, 0.0, 0.0);
+  vec2 screenPos = 2.0 * pxPos / u_viewportSizePx - 1.0;
+  return vec4(screenPos, u_depth, 1.0);
 }
 
-vec2 getOffsetDirection(vec2 normalPx, vec2 tangentPx, float joinAngle) {
-  if (cos(joinAngle) > 0.93) return normalPx - tangentPx;
+bool isCap(float joinAngle) {
+  return joinAngle < -0.1;
+}
+
+vec2 getJoinOffsetDirection(vec2 normalPx, float joinAngle) {
   float halfAngle = joinAngle / 2.0;
-  vec2 angleBisectorNormal = vec2(
-    sin(halfAngle) * normalPx.x + cos(halfAngle) * normalPx.y,
-    -cos(halfAngle) * normalPx.x + sin(halfAngle) * normalPx.y
-  );
-  float length = 1.0 / sin(halfAngle);
+  float c = cos(halfAngle);
+  float s = sin(halfAngle);
+  vec2 angleBisectorNormal = vec2(s * normalPx.x + c * normalPx.y, -c * normalPx.x + s * normalPx.y);
+  float length = 1.0 / s;
   return angleBisectorNormal * length;
 }
 
+vec2 getOffsetPoint(vec2 point, vec2 normal, float joinAngle, float offsetPx) {
+  // if on a cap or the join angle is too high, offset the line along the segment normal
+  if (cos(joinAngle) > 0.998 || isCap(joinAngle)) {
+    return point - normal * offsetPx;
+  }
+  // offset is applied along the inverted normal (positive offset goes "right" relative to line direction)
+  return point - getJoinOffsetDirection(normal, joinAngle) * offsetPx;
+}
+
 void main(void) {
+  v_angleStart = a_joinAngles.x;
+  v_angleEnd = a_joinAngles.y;
+  float vertexNumber = floor(abs(a_parameters) / 10000. + 0.5);
+  // we're reading the fractional part while keeping the sign (so -4.12 gives -0.12, 3.45 gives 0.45)
+  float angleTangentSum = fract(abs(a_parameters) / 10000.) * 10000. * sign(a_parameters);
+
   float lineWidth = ${this.strokeWidthExpression_};
-  float anglePrecision = 1500.0;
-  float paramShift = 10000.0;
-  v_angleStart = fract(a_parameters / paramShift) * paramShift / anglePrecision;
-  v_angleEnd = fract(floor(a_parameters / paramShift + 0.5) / paramShift) * paramShift / anglePrecision;
-  float vertexNumber = floor(a_parameters / paramShift / paramShift + 0.0001);
-  vec2 tangentPx = worldToPx(a_segmentEnd) - worldToPx(a_segmentStart);
-  tangentPx = normalize(tangentPx);
+  float lineOffsetPx = ${this.strokeOffsetExpression_};
+
+  // compute segment start/end in px with offset
+  vec2 segmentStartPx = worldToPx(a_segmentStart);
+  vec2 segmentEndPx = worldToPx(a_segmentEnd);
+  vec2 tangentPx = normalize(segmentEndPx - segmentStartPx);
   vec2 normalPx = vec2(-tangentPx.y, tangentPx.x);
+  segmentStartPx = getOffsetPoint(segmentStartPx, normalPx, v_angleStart, lineOffsetPx),
+  segmentEndPx = getOffsetPoint(segmentEndPx, normalPx, v_angleEnd, lineOffsetPx);
+  
+  // compute current vertex position
   float normalDir = vertexNumber < 0.5 || (vertexNumber > 1.5 && vertexNumber < 2.5) ? 1.0 : -1.0;
   float tangentDir = vertexNumber < 1.5 ? 1.0 : -1.0;
   float angle = vertexNumber < 1.5 ? v_angleStart : v_angleEnd;
-  vec2 offsetPx = getOffsetDirection(normalPx * normalDir, tangentDir * tangentPx, angle) * lineWidth * 0.5;
-  vec2 position =  vertexNumber < 1.5 ? a_segmentStart : a_segmentEnd;
-  gl_Position = u_projectionMatrix * vec4(position, 0.0, 1.0) + pxToScreen(offsetPx);
-  v_segmentStart = worldToPx(a_segmentStart);
-  v_segmentEnd = worldToPx(a_segmentEnd);
+  vec2 joinDirection;
+  vec2 positionPx = vertexNumber < 1.5 ? segmentStartPx : segmentEndPx;
+  // if angle is too high, do not make a proper join
+  if (cos(angle) > ${LINESTRING_ANGLE_COSINE_CUTOFF} || isCap(angle)) {
+    joinDirection = normalPx * normalDir - tangentPx * tangentDir;
+  } else {
+    joinDirection = getJoinOffsetDirection(normalPx * normalDir, angle);
+  }
+  positionPx = positionPx + joinDirection * lineWidth * 0.5;
+  gl_Position = pxToScreen(positionPx);
+
+  v_segmentStart = segmentStartPx;
+  v_segmentEnd = segmentEndPx;
   v_width = lineWidth;
-${varyings
+  v_hitColor = a_hitColor;
+  v_distanceOffsetPx = a_distance / u_resolution - (lineOffsetPx * angleTangentSum);
+${this.varyings_
   .map(function (varying) {
     return '  ' + varying.name + ' = ' + varying.expression + ';';
   })
@@ -538,31 +709,14 @@ ${varyings
   /**
    * Generates a stroke fragment shader from the builder parameters
    *
-   * @param {boolean} [forHitDetection] If true, the shader will be modified to include hit detection variables
-   * (namely, hit color with encoded feature id).
-   * @return {string} The full shader as a string.
+   * @return {string|null} The full shader as a string; null if no size or color specified
    */
-  getStrokeFragmentShader(forHitDetection) {
-    const hitDetectionBypass = forHitDetection
-      ? '  if (gl_FragColor.a < 0.1) { discard; } gl_FragColor = v_hitColor;'
-      : '';
-
-    let varyings = this.varyings_;
-
-    if (forHitDetection) {
-      varyings = varyings.concat({
-        name: 'v_hitColor',
-        type: 'vec4',
-        expression: 'a_hitColor',
-      });
+  getStrokeFragmentShader() {
+    if (!this.hasStroke_) {
+      return null;
     }
 
-    return `#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-${BASE_UNIFORMS}
+    return `${COMMON_HEADER}
 ${this.uniforms_
   .map(function (uniform) {
     return 'uniform ' + uniform + ';';
@@ -573,93 +727,174 @@ varying vec2 v_segmentEnd;
 varying float v_angleStart;
 varying float v_angleEnd;
 varying float v_width;
-${varyings
+varying vec4 v_hitColor;
+varying float v_distanceOffsetPx;
+${this.varyings_
   .map(function (varying) {
     return 'varying ' + varying.type + ' ' + varying.name + ';';
   })
   .join('\n')}
 ${this.fragmentShaderFunctions_.join('\n')}
+
 vec2 pxToWorld(vec2 pxPos) {
   vec2 screenPos = 2.0 * pxPos / u_viewportSizePx - 1.0;
   return (u_screenToWorldMatrix * vec4(screenPos, 0.0, 1.0)).xy;
 }
 
-float segmentDistanceField(vec2 point, vec2 start, vec2 end, float radius) {
+bool isCap(float joinAngle) {
+  return joinAngle < -0.1;
+}
+
+float segmentDistanceField(vec2 point, vec2 start, vec2 end, float width) {
+  vec2 tangent = normalize(end - start);
+  vec2 normal = vec2(-tangent.y, tangent.x);
   vec2 startToPoint = point - start;
-  vec2 startToEnd = end - start;
-  float ratio = clamp(dot(startToPoint, startToEnd) / dot(startToEnd, startToEnd), 0.0, 1.0);
-  float dist = length(startToPoint - ratio * startToEnd);
-  return 1.0 - smoothstep(radius - 1.0, radius, dist);
+  return abs(dot(startToPoint, normal)) - width * 0.5;
+}
+
+float buttCapDistanceField(vec2 point, vec2 start, vec2 end) {
+  vec2 startToPoint = point - start;
+  vec2 tangent = normalize(end - start);
+  return dot(startToPoint, -tangent);
+}
+
+float squareCapDistanceField(vec2 point, vec2 start, vec2 end, float width) {
+  return buttCapDistanceField(point, start, end) - width * 0.5;
+}
+
+float roundCapDistanceField(vec2 point, vec2 start, vec2 end, float width) {
+  float onSegment = max(0., 1000. * dot(point - start, end - start)); // this is very high when inside the segment
+  return length(point - start) - width * 0.5 - onSegment;
+}
+
+float roundJoinDistanceField(vec2 point, vec2 start, vec2 end, float width) {
+  return roundCapDistanceField(point, start, end, width);
+}
+
+float bevelJoinField(vec2 point, vec2 start, vec2 end, float width, float joinAngle) {
+  vec2 startToPoint = point - start;
+  vec2 tangent = normalize(end - start);
+  float c = cos(joinAngle * 0.5);
+  float s = sin(joinAngle * 0.5);
+  float direction = -sign(sin(joinAngle));
+  vec2 bisector = vec2(c * tangent.x - s * tangent.y, s * tangent.x + c * tangent.y);
+  float radius = width * 0.5 * s;
+  return dot(startToPoint, bisector * direction) - radius;
+}
+
+float miterJoinDistanceField(vec2 point, vec2 start, vec2 end, float width, float joinAngle) {
+  if (cos(joinAngle) > ${LINESTRING_ANGLE_COSINE_CUTOFF}) { // avoid risking a division by zero
+    return bevelJoinField(point, start, end, width, joinAngle);
+  }
+  float miterLength = 1. / sin(joinAngle * 0.5);
+  float miterLimit = ${this.strokeMiterLimitExpression_};
+  if (miterLength > miterLimit) {
+    return bevelJoinField(point, start, end, width, joinAngle);
+  }
+  return -1000.;
+}
+
+float capDistanceField(vec2 point, vec2 start, vec2 end, float width, float capType) {
+   if (capType == ${stringToGlsl('butt')}) {
+    return buttCapDistanceField(point, start, end);
+  } else if (capType == ${stringToGlsl('square')}) {
+    return squareCapDistanceField(point, start, end, width);
+  }
+  return roundCapDistanceField(point, start, end, width);
+}
+
+float joinDistanceField(vec2 point, vec2 start, vec2 end, float width, float joinAngle, float joinType) {
+  if (joinType == ${stringToGlsl('bevel')}) {
+    return bevelJoinField(point, start, end, width, joinAngle);
+  } else if (joinType == ${stringToGlsl('miter')}) {
+    return miterJoinDistanceField(point, start, end, width, joinAngle);
+  }
+  return roundJoinDistanceField(point, start, end, width);
+}
+
+float computeSegmentPointDistance(vec2 point, vec2 start, vec2 end, float width, float joinAngle, float capType, float joinType) {
+  if (isCap(joinAngle)) {
+    return capDistanceField(point, start, end, width, capType);
+  }
+  return joinDistanceField(point, start, end, width, joinAngle, joinType);
 }
 
 void main(void) {
-  vec2 v_currentPoint = gl_FragCoord.xy / u_pixelRatio;
+  vec2 currentPoint = gl_FragCoord.xy / u_pixelRatio;
   #ifdef GL_FRAGMENT_PRECISION_HIGH
-  vec2 v_worldPos = pxToWorld(v_currentPoint);
+  vec2 worldPos = pxToWorld(currentPoint);
   if (
     abs(u_renderExtent[0] - u_renderExtent[2]) > 0.0 && (
-      v_worldPos[0] < u_renderExtent[0] ||
-      v_worldPos[1] < u_renderExtent[1] ||
-      v_worldPos[0] > u_renderExtent[2] ||
-      v_worldPos[1] > u_renderExtent[3]
+      worldPos[0] < u_renderExtent[0] ||
+      worldPos[1] < u_renderExtent[1] ||
+      worldPos[0] > u_renderExtent[2] ||
+      worldPos[1] > u_renderExtent[3]
     )
   ) {
     discard;
   }
   #endif
   if (${this.discardExpression_}) { discard; }
-  gl_FragColor = ${this.strokeColorExpression_} * u_globalAlpha;
-  gl_FragColor *= segmentDistanceField(v_currentPoint, v_segmentStart, v_segmentEnd, v_width);
-${hitDetectionBypass}
+
+  float segmentLength = length(v_segmentEnd - v_segmentStart);
+  vec2 segmentTangent = (v_segmentEnd - v_segmentStart) / segmentLength;
+  vec2 segmentNormal = vec2(-segmentTangent.y, segmentTangent.x);
+  vec2 startToPoint = currentPoint - v_segmentStart;
+  float currentLengthPx = max(0., min(dot(segmentTangent, startToPoint), segmentLength)) + v_distanceOffsetPx; 
+  float currentRadiusPx = abs(dot(segmentNormal, startToPoint));
+  float currentRadiusRatio = dot(segmentNormal, startToPoint) * 2. / v_width;
+  vec4 color = ${this.strokeColorExpression_} * u_globalAlpha;
+  float capType = ${this.strokeCapExpression_};
+  float joinType = ${this.strokeJoinExpression_};
+  float segmentStartDistance = computeSegmentPointDistance(currentPoint, v_segmentStart, v_segmentEnd, v_width, v_angleStart, capType, joinType);
+  float segmentEndDistance = computeSegmentPointDistance(currentPoint, v_segmentEnd, v_segmentStart, v_width, v_angleEnd, capType, joinType);
+  float distance = max(
+    segmentDistanceField(currentPoint, v_segmentStart, v_segmentEnd, v_width),
+    max(segmentStartDistance, segmentEndDistance)
+  );
+  distance = max(distance, ${this.strokeDistanceFieldExpression_});
+  gl_FragColor = color * smoothstep(0., -1., distance);
+  if (u_hitDetection > 0) {
+    if (gl_FragColor.a < 0.1) { discard; };
+    gl_FragColor = v_hitColor;
+  }
 }`;
   }
 
   /**
    * Generates a fill vertex shader from the builder parameters
    *
-   * @param {boolean} [forHitDetection] If true, the shader will be modified to include hit detection variables
-   * (namely, hit color with encoded feature id).
-   * @return {string} The full shader as a string.
+   * @return {string|null} The full shader as a string; null if no color specified
    */
-  getFillVertexShader(forHitDetection) {
-    let attributes = this.attributes_;
-    let varyings = this.varyings_;
-
-    if (forHitDetection) {
-      attributes = attributes.concat('vec4 a_hitColor');
-      varyings = varyings.concat({
-        name: 'v_hitColor',
-        type: 'vec4',
-        expression: 'a_hitColor',
-      });
+  getFillVertexShader() {
+    if (!this.hasFill_) {
+      return null;
     }
 
-    return `#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-${BASE_UNIFORMS}
+    return `${COMMON_HEADER}
 ${this.uniforms_
   .map(function (uniform) {
     return 'uniform ' + uniform + ';';
   })
   .join('\n')}
 attribute vec2 a_position;
-${attributes
+attribute vec4 a_hitColor;
+${this.attributes_
   .map(function (attribute) {
     return 'attribute ' + attribute + ';';
   })
   .join('\n')}
-${varyings
+varying vec4 v_hitColor;
+${this.varyings_
   .map(function (varying) {
     return 'varying ' + varying.type + ' ' + varying.name + ';';
   })
   .join('\n')}
 ${this.vertexShaderFunctions_.join('\n')}
 void main(void) {
-  gl_Position = u_projectionMatrix * vec4(a_position, 0.0, 1.0);
-${varyings
+  gl_Position = u_projectionMatrix * vec4(a_position, u_depth, 1.0);
+  v_hitColor = a_hitColor;
+${this.varyings_
   .map(function (varying) {
     return '  ' + varying.name + ' = ' + varying.expression + ';';
   })
@@ -669,38 +904,21 @@ ${varyings
 
   /**
    * Generates a fill fragment shader from the builder parameters
-   *
-   * @param {boolean} [forHitDetection] If true, the shader will be modified to include hit detection variables
-   * (namely, hit color with encoded feature id).
-   * @return {string} The full shader as a string.
+   * @return {string|null} The full shader as a string; null if no color specified
    */
-  getFillFragmentShader(forHitDetection) {
-    const hitDetectionBypass = forHitDetection
-      ? '  if (gl_FragColor.a < 0.1) { discard; } gl_FragColor = v_hitColor;'
-      : '';
-
-    let varyings = this.varyings_;
-
-    if (forHitDetection) {
-      varyings = varyings.concat({
-        name: 'v_hitColor',
-        type: 'vec4',
-        expression: 'a_hitColor',
-      });
+  getFillFragmentShader() {
+    if (!this.hasFill_) {
+      return null;
     }
 
-    return `#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-${BASE_UNIFORMS}
+    return `${COMMON_HEADER}
 ${this.uniforms_
   .map(function (uniform) {
     return 'uniform ' + uniform + ';';
   })
   .join('\n')}
-${varyings
+varying vec4 v_hitColor;
+${this.varyings_
   .map(function (varying) {
     return 'varying ' + varying.type + ' ' + varying.name + ';';
   })
@@ -711,15 +929,22 @@ vec2 pxToWorld(vec2 pxPos) {
   return (u_screenToWorldMatrix * vec4(screenPos, 0.0, 1.0)).xy;
 }
 
+vec2 worldToPx(vec2 worldPos) {
+  vec4 screenPos = u_projectionMatrix * vec4(worldPos, 0.0, 1.0);
+  return (0.5 * screenPos.xy + 0.5) * u_viewportSizePx;
+}
+
 void main(void) {
+  vec2 pxPos = gl_FragCoord.xy / u_pixelRatio;
+  vec2 pxOrigin = worldToPx(u_patternOrigin);
   #ifdef GL_FRAGMENT_PRECISION_HIGH
-  vec2 v_worldPos = pxToWorld(gl_FragCoord.xy / u_pixelRatio);
+  vec2 worldPos = pxToWorld(pxPos);
   if (
     abs(u_renderExtent[0] - u_renderExtent[2]) > 0.0 && (
-      v_worldPos[0] < u_renderExtent[0] ||
-      v_worldPos[1] < u_renderExtent[1] ||
-      v_worldPos[0] > u_renderExtent[2] ||
-      v_worldPos[1] > u_renderExtent[3]
+      worldPos[0] < u_renderExtent[0] ||
+      worldPos[1] < u_renderExtent[1] ||
+      worldPos[0] > u_renderExtent[2] ||
+      worldPos[1] > u_renderExtent[3]
     )
   ) {
     discard;
@@ -727,7 +952,10 @@ void main(void) {
   #endif
   if (${this.discardExpression_}) { discard; }
   gl_FragColor = ${this.fillColorExpression_} * u_globalAlpha;
-${hitDetectionBypass}
+  if (u_hitDetection > 0) {
+    if (gl_FragColor.a < 0.1) { discard; };
+    gl_FragColor = v_hitColor;
+  }
 }`;
   }
 }

@@ -24,7 +24,7 @@ export type Options = {
  */
 /**
  * @classdesc
- * Allows the user to zoom the map by double tap/clik then drag up/down
+ * Allows the user to zoom the map by double tap/click then drag up/down
  * with one finger/left mouse.
  * @api
  */
@@ -60,6 +60,11 @@ declare class DblClickDragZoom extends Interaction {
      * @private
      */
     private handlingDoubleDownSequence_;
+    /**
+     * @type {ReturnType<typeof setTimeout>}
+     * @private
+     */
+    private doubleTapTimeoutId_;
     /**
      * @type {!Object<string, PointerEvent>}
      * @private
@@ -98,13 +103,13 @@ declare class DblClickDragZoom extends Interaction {
     private updateTrackedPointers_;
     /**
      * Wait the second double finger tap.
+     * @private
      */
-    waitForDblTap(): void;
-    doubleTapTimeoutId_: NodeJS.Timeout | undefined;
+    private waitForDblTap_;
     /**
      * @private
      */
-    private endInteraction;
+    private endInteraction_;
 }
 import Interaction from './Interaction.js';
 //# sourceMappingURL=DblClickDragZoom.d.ts.map

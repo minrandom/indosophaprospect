@@ -2,6 +2,16 @@
     'title' => 'Indosopha Web App'
 ])
 @section('content')
+
+    <script>
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                // Page is loaded from cache (user pressed the back button)
+                location.reload(true); // Reload the page
+            }
+        };
+    </script>
+
 <div class="row justify-content-center">
 
     <div class="col-xl-5 col-lg-12 col-md-9">

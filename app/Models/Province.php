@@ -18,6 +18,9 @@ class Province extends Model
     public function hospitals(){
         return $this->hasMany(Hospital::class);
     }
+    public function schedules(){
+        return $this->hasMany(schedule::class);
+    }
 
     public function prospects(){
         return $this->hasMany(Prospect::class);

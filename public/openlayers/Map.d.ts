@@ -305,7 +305,7 @@ declare class Map extends BaseObject {
     private pixelRatio_;
     /**
      * @private
-     * @type {*}
+     * @type {ReturnType<typeof setTimeout>}
      */
     private postRenderTimeoutHandle_;
     /**
@@ -758,6 +758,14 @@ declare class Map extends BaseObject {
      */
     render(): void;
     /**
+     * This method is meant to be called in a layer's `prerender` listener. It causes all collected
+     * declutter items to be decluttered and rendered on the map immediately. This is useful for
+     * layers that need to appear entirely above the decluttered items of layers lower in the layer
+     * stack.
+     * @api
+     */
+    flushDeclutterItems(): void;
+    /**
      * Remove the given control from the map.
      * @param {import("./control/Control.js").default} control Control.
      * @return {import("./control/Control.js").default|undefined} The removed control (or undefined
@@ -839,6 +847,7 @@ declare class Map extends BaseObject {
     updateSize(): void;
     /**
      * Recomputes the viewport size and save it on the view object (if any)
+     * @param {import("./size.js").Size|undefined} size The size.
      * @private
      */
     private updateViewportSize_;

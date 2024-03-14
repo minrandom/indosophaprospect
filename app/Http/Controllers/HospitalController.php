@@ -21,8 +21,9 @@ class HospitalController extends Controller
     public function getHospitalsByProvince($provinceId)
     {
     // Retrieve hospitals based on the province ID
+    //dd($provinceId);
     $hospitals = Hospital::where('province_id', $provinceId)->get();
-
+       
     return response()->json(['hosopt' => $hospitals]);
     }
     /**

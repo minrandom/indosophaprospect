@@ -61,6 +61,9 @@ class Prospect extends Model
     public function mappings(){
         return $this->hasMany(Mapping::class);
     }
+    public function remarks(){
+        return $this->hasMany(prospectRemarks::class);
+    }
 
     public function review(){
         return $this->hasOne(Review::class);

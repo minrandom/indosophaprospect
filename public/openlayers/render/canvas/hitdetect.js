@@ -53,7 +53,7 @@ export function createHitDetectionImageData(
   for (let i = 1; i <= featureCount; ++i) {
     const feature = features[i - 1];
     const featureStyleFunction = feature.getStyleFunction() || styleFunction;
-    if (!styleFunction) {
+    if (!featureStyleFunction) {
       continue;
     }
     let styles = featureStyleFunction(feature, resolution);
@@ -83,7 +83,7 @@ export function createHitDetectionImageData(
       }
       style.setText(undefined);
       const image = originalStyle.getImage();
-      if (image && image.getOpacity() !== 0) {
+      if (image) {
         const imgSize = image.getImageSize();
         if (!imgSize) {
           continue;
@@ -101,7 +101,6 @@ export function createHitDetectionImageData(
         style.setImage(
           new Icon({
             img: img,
-            imgSize: imgSize,
             anchor: image.getAnchor(),
             anchorXUnits: 'pixels',
             anchorYUnits: 'pixels',
@@ -171,6 +170,7 @@ export function createHitDetectionImageData(
  * @template {import("../../Feature.js").FeatureLike} F
  */
 export function hitDetect(pixel, features, imageData) {
+  /** @type {Array<F>} */
   const resultFeatures = [];
   if (imageData) {
     const x = Math.floor(Math.round(pixel[0]) * HIT_DETECT_RESOLUTION);
@@ -191,6 +191,5 @@ export function hitDetect(pixel, features, imageData) {
       resultFeatures.push(features[i / indexFactor - 1]);
     }
   }
-  // @ts-ignore Features are copied from `features` to `resultFeatures` so the type should be the same
   return resultFeatures;
 }
