@@ -68,7 +68,7 @@ class DataCompileController extends Controller
 
         $usid = $user->id;
 
-        $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+        $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
             ->where("status", '!=', 1)
             ->where("user_creator", $usid)
             ->orderBy('status', 'ASC')
@@ -433,7 +433,7 @@ class DataCompileController extends Controller
         if ($status == 1) {
             switch ($data['roles']) {
                 case "admin":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", $status)->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
 
@@ -441,7 +441,7 @@ class DataCompileController extends Controller
 
 
                 case "bu":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", $status)->where('unit_id', $data['buid'])
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
@@ -452,7 +452,7 @@ class DataCompileController extends Controller
 
 
                 case "fs":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", $status)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
 
@@ -460,7 +460,7 @@ class DataCompileController extends Controller
                     break;
 
                 case "am":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", $status)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
@@ -470,7 +470,7 @@ class DataCompileController extends Controller
                     break;
 
                 case "nsm":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", $status)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('wilayah', $area);
@@ -484,7 +484,7 @@ class DataCompileController extends Controller
         } else {
             switch ($data['roles']) {
                 case "admin":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", '!=', 1)->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
                         ->get();
@@ -495,7 +495,7 @@ class DataCompileController extends Controller
 
 
                 case "fs":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", '!=', 1)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
 
@@ -503,7 +503,7 @@ class DataCompileController extends Controller
                     break;
 
                 case "am":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", '!=', 1)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
@@ -514,7 +514,7 @@ class DataCompileController extends Controller
                     break;
 
                 case "nsm":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
                         ->where("status", '!=', 1)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('wilayah', $area);
@@ -748,8 +748,19 @@ class DataCompileController extends Controller
             ->addColumn('propdetail', function ($prp) {
                 $no = $prp->prospect_no;
                 $theroutes = route('admin.prospecteditdata', ['prospect' => $prp->id]);
+                
 
-                $data = "<a href='$theroutes' ><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a></br>$prp->prospect_source";
+                $data = "<a href='$theroutes' ><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a>";
+                /*$data.="<a class='nav-link dropdown-toggle' href='#' id='alertsDropdown'role='button'
+                data-toggle=' aria-haspopup='true' aria-expanded='>
+                <i class='fas fa-bell fa-fw'></i>
+                <!-- Counter - Alerts -->
+                <span class='badge badge-danger badge-counter' id='remarksCount'>$remarksCount</span>
+            </a>";*/
+                $data.="</br>$prp->prospect_source";
+                
+                
+                
                 return $data;
             })
 
@@ -814,8 +825,18 @@ class DataCompileController extends Controller
                 $validasi = route('admin.prospectvalidation', $prp);
                 $util = userutil();
                 $roles = ['fs', 'bu', 'admin'];
-
-
+                $dataRemarks = [];
+                if (!empty($prp->remarks)) {
+                    $dataRemarks = $prp->remarks;
+                }
+                $dataRemarksString = !empty($dataRemarks) ? htmlentities(json_encode($dataRemarks)) : '';
+                $remarksCount = count($prp->remarks);
+                if($remarksCount>0){
+                $remarksshowcount='<a href="#" id="remarksPopover" class="btn-remarksPopover" data-remarks="'.$dataRemarksString.'" title="Remarks" >
+                      <!-- Counter - Alerts -->
+                <span class="badge badge-danger badge-counter" id="remarksCount">'.$remarksCount.'</span>
+                </a>';}else $remarksshowcount="";
+                //var_dump($dataRemarks);
                 $roleToCheck = $util['roles'];
                 $test = $url;
 
@@ -823,9 +844,10 @@ class DataCompileController extends Controller
                     case (1):
                         if ($url == "prospect") {
                             $theroutes = route('admin.prospecteditdata', (['prospect' => $prp->id]));
-                            $btn = "<a href='$theroutes' ><h5><span class='badge bg-primary text-light'>Detail Data</span></h5></a>";
+                            $btn = "<div class='d-inline-flex align-items-center'><a href='$theroutes' ><h5><span class='badge bg-primary text-light'>Detail Data</span></h5></a></div>";
                             if (in_array($roleToCheck, $roles)) {
-                                $btn .= '<a href="javascript:void(0)" id="' . $prp->id . '"><h5><span class="badge bg-warning text-light">Remarks</span></h5></a>';
+                                $btn .= '<div class="d-inline-flex align-items-center"><a href="javascript:void(0)" class="btn-remarks" data-id="' . $prp->id . '" ><h5><span class="badge bg-warning text-light">Remarks</span></h5></a>';
+                                $btn.=$remarksshowcount.'</div>';
                             }
                         } else {
                             $btn = '<div class="row"><a href="' . $editform . '" class="btn aksi  btn-primary btn-sm ml-2 btn-edit">Edit</a> ';

@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\LoginController;
 //use App\Providers\GoogleDriverServiceProvider;
 //Namespace Admin
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\prospectRemarksController;
 
 use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\ConfigController;
@@ -69,6 +70,8 @@ Route::middleware('prevent-back')->group(function () {
 });
 
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
+Route::post('/remarks', [prospectRemarksController::class,'store'])->name('remarks.store')->middleware(['auth', 'role:admin,bu,fs']);
+Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 
 Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/check-in', 'JojoController@index')->name('check-in')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);

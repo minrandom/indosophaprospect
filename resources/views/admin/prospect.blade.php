@@ -9,7 +9,6 @@
 @endpush
 
 @section('content')
-<div class="notify"></div>
 
 <div class="card">
   <div class="card-header">
@@ -18,22 +17,22 @@
       Filter
     </button>
     <!--
-        <button class="btn btn-primary btn-sm ml-2q" type="button" id="downloadDataButton">
+      <button class="btn btn-primary btn-sm ml-2q" type="button" id="downloadDataButton">
         Download data
         </button>-->
+        
+        <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
 
-    <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
-
-
-    <div class="collapse" id="filterCollapse">
-      <div class="row mt-4">
-        <div class="col-md-3">
-          <div class="form-group">
-            <label for="sumberinfofilter">Sumber Prospect :</label>
-            <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required="">
-              <option value="0" selected>Show All</option>
-            </select>
-          </div>
+        
+        <div class="collapse" id="filterCollapse">
+          <div class="row mt-4">
+            <div class="col-md-3">
+              <div class="form-group">
+                <label for="sumberinfofilter">Sumber Prospect :</label>
+                <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required="">
+                  <option value="0" selected>Show All</option>
+                </select>
+              </div>
           <div class="form-group">
             <label for="tempefilter">Temperature :</label>
             <select id="tempefilter" name="tempefilter" class="form-control dropdown" required="">
@@ -55,8 +54,8 @@
           <div class="form-group">
             <label for="picfilter">PIC :</label>
             <select id="picfilter" name="picfilter" class="form-control dropdown" required="">
-            </select>
-          </div>
+              </select>
+            </div>
         </div>
         <div class="col-md-3">
           <div class="form-group">
@@ -80,7 +79,8 @@
 </div>
 
 <div class="card-body ">
-
+  <div class="notify"></div>
+  
   <div class="table-responsive ml-2 mr-2 drag table-hover">
     <table class="table table-bordered data-table ">
       <thead>
@@ -98,7 +98,7 @@
           <th>Anggaran</th>
           <th>Eta PO Date</th>
           <th>Temperature</th>
-
+          
 
           <th>Table Action</th>
 
@@ -115,7 +115,8 @@
 
 </div>
 
-@include('modal._createprospect_modal')
+
+@include('modal._createprospectremarks_modal')
 
 <div id="productData" data-url="{{ route('product.getProducts') }}"></div>
 
@@ -224,6 +225,7 @@
 @stop
 
 @push('js')
+
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
@@ -747,7 +749,51 @@
   // Trigger DataTables Buttons export functionality
   //  table.buttons('.buttons-excel').trigger();
   // });
+  var datarem=datarem();
+  //console.log(datarem);
 
+  $('body').on("click", ".btn-remarks", function() {
+    var id = $(this).data("id");
+    console.log(id);
+    var remarksData = $(this).data("remarks");
+//var remarksArray = JSON.parse(remarksData);
+console.log(remarksData);
+    $('#prospectid').val(id);
+    populateSelectFromDatalist('cr8type',datarem.tiperem,'Pilih Tipe Remarks');
+    populateSelectFromDatalist('cr8colupdate',datarem.column,'Pilih Kolom yang diUpdate');
+    
+    
+
+
+
+    $("#prospectremarks-modal").modal("show");
+  });
+
+  $("#createRemForm").on("submit", function(e) {
+    e.preventDefault()
+
+    $.ajax({
+      url: "{{ route('remarks.store') }}",
+      method: "POST",
+      data: $(this).serialize(),
+      success: function() {
+        $("#prospectremarks-modal").modal("hide")
+        //$('.data-table').DataTable().ajax.reload();
+        flash("success", "Create Remarks Done");
+        var cek = $('#tempefilter').val();
+      if (cek == '') {
+        cek = '0';
+      }
+        var filterkirim = [$('#sumberinfofilter').val(), cek, $('#provincefilter').val(), $('#picfilter').val(), $('#BUfilter').val(),$('#catfilter').val()];
+      //var infoFilter = ;
+      //console.log(filterkirim);
+    
+      updateData(jsonData, filterkirim);
+      DataLine(jsonData);
+
+      }
+    })
+  })
 
 
   $('body').on("click", ".btn-cr8", function() {
