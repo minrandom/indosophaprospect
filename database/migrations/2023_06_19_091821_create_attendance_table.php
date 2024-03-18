@@ -17,7 +17,8 @@ class CreateAttendanceTable extends Migration
             $table->id();
             $table->string('place_name');
             $table->string('address');
-            $table->timestamp('check_in_at')->nullable();
+            $table->longText('check_in_loc')->nullable();
+            $table->photo_data('longtext')->nullable();
             $table->timestamps();
         });
     }

@@ -18,6 +18,7 @@ class CreatePrincipalsTable extends Migration
             $table->string('name');
             $table->longText('address')->nullable();
             $table->string('contact')->nullable();//principal number to call or contact person
+            $table->string('pic')->nullable();//principal number to call or contact person
             $table->timestamps();
         });
     }

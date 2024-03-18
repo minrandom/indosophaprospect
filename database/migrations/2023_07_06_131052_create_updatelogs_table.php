@@ -15,6 +15,15 @@ class CreateUpdatelogsTable extends Migration
     {
         Schema::create('updatelogs', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('prospect_id');
+            $table->string('col_update');
+            $table->string('col_before');
+            $table->string('col_after');
+            $table->date('logdate');
+            $table->unsignedBigInteger('request_by');
+            $table->date('approve_date');
+            $table->unsignedBigInteger('approve_by');
+            $table->string('request_status');
             $table->timestamps();
         });
     }

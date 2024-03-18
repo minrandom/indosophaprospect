@@ -15,6 +15,18 @@ class CreateTmpProspectInputsTable extends Migration
     {
         Schema::create('tmp_prospect_inputs', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->integer('source');
+            $table->unsignedBigInteger('province_id');
+            $table->unsignedBigInteger('hospital_id');
+            $table->unsignedBigInteger('department_id');
+            $table->unsignedBigInteger('unit_id');
+            $table->unsignedBigInteger('category_id');
+            $table->unsignedBigInteger('config_id');
+            $table->integer('qty');
+            $table->integer('review_anggaran');
+            $table->integer('jns_aggr');
+            $table->date('eta_po_date');
             $table->timestamps();
         });
     }

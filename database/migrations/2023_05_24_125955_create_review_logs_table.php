@@ -22,7 +22,9 @@ class CreateReviewLogsTable extends Migration
             $table->string('col_after');
             $table->string('update_at_lat');
             $table->string('update_at_long');
-            $table->unsignedBigInteger('upated_by');
+            $table->unsignedBigInteger('updated_by');
+            $table->data('approve_at');
+            $table->unsignedBigInteger('approve_by');
             
             $table->timestamps();
 

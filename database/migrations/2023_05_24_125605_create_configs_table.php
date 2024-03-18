@@ -19,7 +19,7 @@ class CreateConfigsTable extends Migration
             $table->unsignedBigInteger('unit_id');
             $table->string('config_code');
             $table->unsignedBigInteger('brand_id');
-            $table->string('category');
+            $table->unsignedBigInteger('category_id');
             $table->string('genre');//unit,option,acc,set
             $table->string('type');//type item from unit
             $table->string('uom');//set,box,package

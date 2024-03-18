@@ -13,7 +13,20 @@ class ProspectRemarks extends Migration
      */
     public function up()
     {
-        //
+        Schema::create('prospect_remarks', function (Blueprint $table) {
+        
+                $table->id();
+                $table->unsignedBigInteger('prospect_id');
+                $table->string('type');
+                $table->unsignedBigInteger('creator');
+                $table->string('creator_role');
+                $table->integer('column_target');
+                $table->text('messages');
+                $table->integer('status');
+    
+                $table->timestamps();
+            });
+
     }
 
     /**
@@ -23,6 +36,7 @@ class ProspectRemarks extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('prospect_remarks');
         //
     }
 }

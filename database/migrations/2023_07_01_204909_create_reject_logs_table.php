@@ -15,6 +15,9 @@ class CreateRejectLogsTable extends Migration
     {
         Schema::create('reject_logs', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('prospect_id');
+            $table->unsignedBigInteger('rejected_by');
+            $table->text('reason');
             $table->timestamps();
         });
     }
