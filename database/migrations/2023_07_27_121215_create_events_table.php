@@ -17,7 +17,7 @@ class CreateEventsTable extends Migration
             $table->id();
             $table->string('name');
             $table->date('tgl_acara');
-            $table->lama_event('tgl_acara');
+            $table->date('lama_event');
             $table->timestamps();
         });
     }
