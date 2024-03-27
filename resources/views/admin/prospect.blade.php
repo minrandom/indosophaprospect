@@ -230,6 +230,8 @@
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
+<script src="{{ asset('template/backend/sb-admin-2') }}/js/busyload.js"></script>
+<script src="{{ asset('template/backend/sb-admin-2') }}/css/busyload.css"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
 
 <!-- Include JSZip for DataTables Buttons -->
@@ -256,6 +258,11 @@
 
 <script type="text/javascript">
   $(document).ready(function() {
+
+    $.busyLoadSetup({
+    animation: "slide",
+    background: "rgba(0, 114, 255, 0.86)"
+    }); 
 
 
     $.ajax({
@@ -589,6 +596,7 @@
     //console.log(dataprospect);
 
     if (dataprospect && dataprospect.length > 0) {
+      $.busyLoadFull("show");
       var existingTable = $('.data-table').DataTable();
       if (existingTable) {
         existingTable.destroy(); // Destroy the existing DataTable
@@ -608,10 +616,7 @@
         rowReorder: {
           selector: 'td:nth-child(2)'
         },
-        language: {
-        // Customizing the loading message
-        processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>'
-        },
+
 
         dom: 'filprtip', // Include buttons in the DataTable layout
         /*buttons: [
@@ -735,6 +740,7 @@
             // Trigger DataTables Buttons export functionality
             table.buttons().trigger();
           });
+          $.busyLoadFull("hide");
         }
 
       });
