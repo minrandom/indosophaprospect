@@ -608,7 +608,10 @@
         rowReorder: {
           selector: 'td:nth-child(2)'
         },
-
+        language: {
+        // Customizing the loading message
+        processing: '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>'
+        },
 
         dom: 'filprtip', // Include buttons in the DataTable layout
         /*buttons: [
