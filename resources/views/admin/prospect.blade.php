@@ -5,6 +5,7 @@
 
 @push('css')
 <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('template/backend/sb-admin-2/css')}}/busyload.css">
 
 @endpush
 
@@ -231,7 +232,7 @@
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/busyload.js"></script>
-<script src="{{ asset('template/backend/sb-admin-2') }}/css/busyload.css"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
 
 <!-- Include JSZip for DataTables Buttons -->
@@ -261,9 +262,20 @@
 
     $.busyLoadSetup({
     animation: "slide",
-    background: "rgba(0, 114, 255, 0.86)"
+    background: "rgba(0, 114, 255, 0.86)",
+    
     }); 
 
+/*
+    $.ajaxSetup({
+      beforeSend: function() {
+        
+      },
+      complete: function() {
+        $.busyLoadFull("hide");
+      }
+      });
+*/
 
     $.ajax({
       url: "{{ route('admin.prospectcreate') }}",
@@ -349,6 +361,10 @@
 
   var jsonData;
 
+  $.busyLoadFull("show",{spinner: "cubes",
+      text: "Please Wait, Loading the Data...",
+textPosition: "bottom",maxSize: "150px",
+minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 255, 0.6)"});
   $.ajax({
     url: "{{ route('data.prospect') }}",
     type: "POST",
@@ -356,6 +372,7 @@
       status: 1,
       url: "prospect"
     },
+    
     //async: false, // Make the call synchronous to ensure data is fetched before DataTable initialization
     success: function(response) {
       jsonData = response.data; // Store the fetched data in the variable
@@ -363,13 +380,15 @@
       var cek = $('#tempefilter').val();
       if (cek == '') {
         cek = '0';
-      }
-      //console.log(cek);
+      }      //console.log(cek);
       var filterkirim = [$('#sumberinfofilter').val(), cek, $('#provincefilter').val(), $('#picfilter').val(), $('#BUfilter').val(),$('#catfilter').val()];
       //var infoFilter = ;
       //console.log(filterkirim);
       updateData(jsonData, filterkirim);
       DataLine(jsonData);
+
+      $.busyLoadFull("hide");
+
     },
     error: function(xhr, status, error) {
       console.error("AJAX Error: " + status, error);
@@ -596,7 +615,7 @@
     //console.log(dataprospect);
 
     if (dataprospect && dataprospect.length > 0) {
-      $.busyLoadFull("show");
+      
       var existingTable = $('.data-table').DataTable();
       if (existingTable) {
         existingTable.destroy(); // Destroy the existing DataTable
@@ -740,7 +759,7 @@
             // Trigger DataTables Buttons export functionality
             table.buttons().trigger();
           });
-          $.busyLoadFull("hide");
+          
         }
 
       });
