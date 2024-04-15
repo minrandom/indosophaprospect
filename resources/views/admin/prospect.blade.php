@@ -23,58 +23,11 @@
         </button>-->
         
         <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
-
+        @can('admin')  
+        @include('modal._filter_review_admin')
+      
+        @endcan
         
-        <div class="collapse" id="filterCollapse">
-          <div class="row mt-4">
-            <div class="col-md-3">
-              <div class="form-group">
-                <label for="sumberinfofilter">Sumber Prospect :</label>
-                <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required="">
-                  <option value="0" selected>Show All</option>
-                </select>
-              </div>
-          <div class="form-group">
-            <label for="tempefilter">Temperature :</label>
-            <select id="tempefilter" name="tempefilter" class="form-control dropdown" required="">
-              <option value="0" selected>Show All</option>
-              <option value="1">HOT PROSPECT</option>
-              <option value="2">PROSPECT</option>
-              <option value="3">FUNNEL</option>
-              <option value="4">DROP</option>
-            </select>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="form-group">
-            <label for="provincefilter">Province :</label>
-            <select id="provincefilter" name="provincefilter" class="form-control dropdown" required="">
-              <option value="0" selected>Show All</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="picfilter">PIC :</label>
-            <select id="picfilter" name="picfilter" class="form-control dropdown" required="">
-              </select>
-            </div>
-        </div>
-        <div class="col-md-3">
-          <div class="form-group">
-            <label for="BUfilter">Business Unit :</label>
-            <select id="BUfilter" name="BUfilter" class="form-control dropdown" required="">
-              <option value="0" selected>Show All</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="catfilter">Product Category :</label>
-            <select id="catfilter" name="catfilter" class="form-control dropdown" required="">
-              <option value="0" selected>Show All</option>
-            </select>
-          </div>
-        </div>
-        <div id="noDataMessage" class="col-lg-12 alert alert-danger mt-3" style="display: none;"></div>
-      </div>
-    </div>
   </div>
 </div>
 </div>
@@ -403,10 +356,15 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
   //console.log(jsonData);
   function updateData(jsonData, params) {
+    
+    console.log(jsonData);
+   
     var filteredData = jsonData; // Make a copy of the original data
     var newData = jsonData;
     //console.log(filteredData);
     var x = 0;
+
+  //set how much params that change
     for (var i = 0; i < params.length; i++) {
       if (params[i] != '0') {
         x = x + 1;
@@ -498,7 +456,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         Chance: (datz.review.chance * 100).toFixed(0) + ' %',
 
         EtaPoDate: datz.eta_po_date,
-        Temperature: datz.temperaturedata,
+        Temperature: datz.temperaturebtn,
         NextAction: datz.review.next_action
 
       }
@@ -638,8 +596,11 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
 
         dom: 'filprtip', // Include buttons in the DataTable layout
+        
+        order:[],
+        
         /*buttons: [
-
+        
         {
             extend: 'excel',
             text: 'Dowload Excel Format Web',
@@ -735,7 +696,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
             targets: 8
           },
           {
-            data: 'temperature',
+            data: 'temperaturebtn',
             name: 'temperature',
             responsivePriority: 4,
             targets: 4

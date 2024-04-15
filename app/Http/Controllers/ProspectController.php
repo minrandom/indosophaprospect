@@ -15,6 +15,7 @@ use App\Models\Config;
 use App\Models\Unit;
 use App\Models\Event;
 use App\Models\tmpProspectInput;
+use App\Models\prospectTemperature;
 use App\Models\User;
 use App\Models\Brand;
 use App\Models\Employee;
@@ -253,6 +254,19 @@ class ProspectController extends Controller
         'jenis_anggaran'=>$anggaranjnsopt,
         'comment'=>$request->cr8infoextra,
         ]);
+
+
+        $tempeName="EARLY STAGE";
+        $tempeCode=1;
+        prospectTemperature::create([
+            'prospect_id'=>$id,
+            'tempName'=>$tempeName,
+            'tempCodeName'=>$tempeCode
+        ]);
+                                      
+
+
+
 
         $newProspect = Prospect::with("creator","province")
             ->where("id",$id)
@@ -668,7 +682,8 @@ $send=0;
         //var_dump($request->data);
         $user=Auth::id();
      $review=Review::where('prospect_id',$prospect->id)->first();
-     $prospect = Prospect::where('id',$prospect->id)->first();
+    $temper=prospectTemperature::where('prospect_id',$prospect->id)->first();
+     //$prospect = Prospect::where('id',$prospect->id)->first();
     $send=0;
          $user2=$request->user_status?$request->user_status:"Belum Tahu";$user1=$review->user_status?$review->user_status:"Belum Tahu";
         $pur2=$request->purchasing_status?$request->purchasing_status:"Belum Tahu";$pur1=$review->purchasing_status?$review->purchasing_status:"Belum Tahu";
@@ -802,7 +817,7 @@ $send=0;
             ReviewLog::create([
                 'review_id'=>$review->id,
                 'log_date'=>now(),
-                'col_update'=>"chance",
+                'col_update'=>"next_action",
                 'col_before'=>$nac1,
                 'col_after'=>$nac2,
                 'updated_by'=>$user
@@ -810,6 +825,44 @@ $send=0;
             $send=$send+1;
         }     
        
+
+
+
+        $review->chance;
+        $podate = $review->eta_po_date;
+        $qty = strtotime($podate);
+        $now = strtotime(now());
+        $diffsec = $qty - $now;
+        $diff = floor($diffsec / 86400);
+       
+        $tempename=$temper->tempName;
+        $tempecode=$temper->tempCodeName;
+
+        if ($review->chance == 0) {
+            $tempename = 'DROP';
+            $tempecode = '0';
+        } elseif (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
+            $tempename = 'EARLY STAGE';
+            $tempecode = '1';
+        } elseif ($review->chance < 0.5 && $review->chance > 0.2) {
+            $tempename = 'FUNNEL';
+            $tempecode = '2';
+        } elseif ($review->chance > 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()) {
+            $tempename = 'HOT PROSPECT';
+            $tempecode = '4';
+        } elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
+            $tempename = 'MISSED';
+            $tempecode = '-1';
+        } else {
+            $tempename = 'PROSPECT';
+            $tempecode = '3';
+        }
+
+        $temper->update([
+            'tempName'=>$tempename,
+            'tempCodeName'=>$tempecode
+        ]);
+
 
         $data1='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>

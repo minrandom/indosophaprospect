@@ -433,15 +433,20 @@ class DataCompileController extends Controller
         if ($status == 1) {
             switch ($data['roles']) {
                 case "admin":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
-                        ->where("status", $status)->orderBy('status', 'ASC')->orderBy("id", 'DESC')
-                        ->get();
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
+                    ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
+                    ->where("status", $status)
+                    ->orderByRaw("FIELD(prospect_temperatures.tempCodeName, 4, 1,-1, 2, 3, 5,0)")
+                    ->orderBy('status', 'ASC')
+                    ->orderBy("prospects.id", 'DESC')
+                    ->get();
+                
 
                     break;
 
 
                 case "bu":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)->where('unit_id', $data['buid'])
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
@@ -452,7 +457,7 @@ class DataCompileController extends Controller
 
 
                 case "fs":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
 
@@ -460,7 +465,7 @@ class DataCompileController extends Controller
                     break;
 
                 case "am":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
@@ -470,7 +475,7 @@ class DataCompileController extends Controller
                     break;
 
                 case "nsm":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('wilayah', $area);
@@ -484,18 +489,20 @@ class DataCompileController extends Controller
         } else {
             switch ($data['roles']) {
                 case "admin":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
-                        ->where("status", '!=', 1)->orderBy('status', 'ASC')
-                        ->orderBy("id", 'DESC')
-                        ->get();
-
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
+                    ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
+                        ->where("status", '!=', 1)
+                        ->orderByRaw("FIELD(tempCodeName, 4, 1,-1, 2, 3, 5,0)")
+                        ->orderBy('status', 'ASC')
+                    ->orderBy("prospects.id", 'DESC')
+                    ->get();
 
                     break;
 
 
 
                 case "fs":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", '!=', 1)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
 
@@ -503,7 +510,7 @@ class DataCompileController extends Controller
                     break;
 
                 case "am":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", '!=', 1)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
@@ -514,7 +521,7 @@ class DataCompileController extends Controller
                     break;
 
                 case "nsm":
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks")
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", '!=', 1)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('wilayah', $area);
@@ -628,7 +635,7 @@ class DataCompileController extends Controller
                 } else return $podate;
             })
 
-
+            /*
 
 
             ->addColumn('temperaturedata', function ($prp) {
@@ -644,13 +651,13 @@ class DataCompileController extends Controller
                 if ($ch == 0) {
                     return "DROP";
                 } else {
-                    if ($anggaran == "BELUM ADA" || $anggaran == "USULAN") {
-                        return "PROSPECT";
+                    if ($anggaran == "BELUM ADA" || $anggaran == "USULAN" || $ch==0.2) {
+                        return "EARLY STAGE";
                     } else {
-                        if ($ch < 0.7 && $ch > 0.2) {
+                        if ($ch < 0.5 && $ch > 0.2) {
                             return "FUNNEL";
                         } else {
-                            if ($diff < 150 && $ch > 0.5) {
+                            if ($diff < 150 && $ch > 0.6) {
                                 return "HOT PROSPECT";
                             } else {
                                 return "PROSPECT";
@@ -659,40 +666,45 @@ class DataCompileController extends Controller
                     }
                 };
             })
-            ->addColumn('temperature', function ($prp) {
+            */
+            ->addColumn('temperid',function($prp){
+                return $prp->temperature->tempCodeName;
+            })
+            ->addColumn('temperaturebtn', function ($prp) {
+                $tempName=$prp->temperature->tempName;
+                $tempCode=$prp->temperature->tempCodeName;
                 $ch = $prp->review->chance;
                 $chs = number_format($ch * 100, 0);
-                $anggaran = $prp->anggaran_status;
-                $podate = $prp->eta_po_date;
-                $qty = strtotime($podate);
-                $now = strtotime(now());
-
-                $diffsec = $qty - $now;
-                $diff = floor($diffsec / 86400);
-
-                if ($ch == 0) {
-                    return "<h4><span class='badge tmpe bg-dark text-light'>DROP</span></h4>
-            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
-                } else {
-                    if ($anggaran == "BELUM ADA" || $anggaran == "USULAN") {
-                        return "<h4><span class='badge tmpe bg-secondary text-light'>PROSPECT</span></h4>
-            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
-                    } else {
-                        if ($ch < 0.7 && $ch > 0.2) {
-                            return "<h4><span class='badge tmpe bg-warning text-light'>FUNNEL</span></h4>
-            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
-                        } else {
-                            if ($diff < 150 && $ch > 0.5) {
-                                return "<h4><span class='badge tmpe bg-danger text-light'>HOT PROSPECT</span></h4>
-            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
-                            } else {
-                                return "<h4><span class='badge tmpe bg-secondary text-light'>PROSPECT</span></h4>
-            <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
-                            }
-                        }
-                    }
-                };
-
+                switch ($tempCode){
+                    case (-1);
+                    return "<h4><span class='badge tmpe bg-secondary text-light'>MISSED</span></h4>
+                    <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                    break;
+                    case 0:
+                        return "<h4><span class='badge tmpe bg-dark text-light'>DROP</span></h4>
+                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        break;
+                    case 1:
+                        return "<h4><span class='badge tmpe text-light' style='background-color:CornflowerBlue'>EARLY STAGE</span></h4>
+                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        break;
+                    case 2:
+                        return "<h4><span class='badge tmpe text-light' style='background-color:MediumOrchid'>FUNNEL</span></h4>
+                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        break;
+                    case 3:
+                        return "<h4><span class='badge tmpe text-light' style='background-color:Salmon'>PROSPECT</span></h4>
+                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        break;
+                    case 4:
+                        return "<h4><span class='badge tmpe bg-danger text-light'>HOT PROSPECT</span></h4>
+                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        break;
+                    case 5:
+                        return "<h4><span class='badge tmpe bg-success text-light'>GOALS</span></h4>
+                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        break;
+                }
                 //return $data;
             })
 
@@ -717,6 +729,7 @@ class DataCompileController extends Controller
                 }
                 return $data;
             })
+
             ->addColumn('reviewStats', function ($prp) {
                 $usersts = $prp->review->user_status;
                 $userc = reviewcolor($usersts);
@@ -896,11 +909,16 @@ class DataCompileController extends Controller
             })
 
             //->only(['id','creator','personInCharge',"prospect_no"])
-            ->rawColumns(['propdetail', 'action', 'promotion', "reviewStats", 'temperature', 'statsname', "submitdate", "provincedata", "anggaran", 'hospitaldata', 'validasi'])
+            ->rawColumns(['propdetail', 'action', 'promotion', "reviewStats", 'temperaturebtn', 'statsname', "submitdate", "provincedata", "anggaran", 'hospitaldata', 'validasi'])
 
             ->toJson([]);
+
         $utils = userutil();
         $data = $dataTable->original;
+        //$dcollect=collect($data)->sortByDesc('temperid');
+       // dd($dcollect);
+        //$jsondata=json_encode($data);
+        //dd($jsondata);
         $data['additionalData'] = [
             'user' => $utils['user'],
             'usid' => $utils['usid'],

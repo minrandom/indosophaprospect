@@ -8,6 +8,10 @@ use App\Models\Attendance;
 use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
 use League\Flysystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Prospect;
+use App\Models\prospectTemperature;
+use App\Models\Review;
+use Carbon\Carbon;
 
 
 class JojoController extends Controller
@@ -124,6 +128,46 @@ class JojoController extends Controller
      * @param  \App\Models\jojo  $jojo
      * @return \Illuminate\Http\Response
      */
+
+    public function fixtemperature(){
+      // Get all prospects with their associated reviews and temperatures
+    $prospects = Prospect::with('review', 'temperature')->get();
+    
+    // Iterate through each prospect
+    foreach ($prospects as $prospect) {
+        // Get the review and temperature
+        $review = $prospect->review;
+        $temperature = $prospect->temperature;
+
+        // Determine the new temperature name and code based on conditions
+        if ($review->chance == 0) {
+            $tempName = 'DROP';
+            $tempCodeName = '0';
+        } elseif (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
+            $tempName = 'EARLY STAGE';
+            $tempCodeName = '1';
+        } elseif ($review->chance < 0.5 && $review->chance > 0.2) {
+            $tempName = 'FUNNEL';
+            $tempCodeName = '2';
+        } elseif ($review->chance > 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()) {
+            $tempName = 'HOT PROSPECT';
+            $tempCodeName = '4';
+        } elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
+            $tempName = 'MISSED';
+            $tempCodeName = '-1';
+        } else {
+            $tempName = 'PROSPECT';
+            $tempCodeName = '3';
+        }
+
+        // Update the temperature in the database
+        $temperature->tempName = $tempName;
+        $temperature->tempCodeName = $tempCodeName;
+        $temperature->save();
+    }
+    }
+
+
     public function destroy(jojo $jojo)
     {
         //

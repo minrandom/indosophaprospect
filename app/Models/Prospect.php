@@ -64,6 +64,9 @@ class Prospect extends Model
     public function remarks(){
         return $this->hasMany(prospectRemarks::class);
     }
+    public function temperature(){
+        return $this->hasOne(prospectTemperature::class);
+    }
 
     public function review(){
         return $this->hasOne(Review::class);

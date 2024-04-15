@@ -74,6 +74,7 @@ Route::post('/remarks', [prospectRemarksController::class,'store'])->name('remar
 Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 
 Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+Route::get('/fixdata', 'JojoController@fixtemperature')->name('fix.temperature')->middleware(['auth', 'role:admin']);
 Route::get('/check-in', 'JojoController@index')->name('check-in')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin'],function(){
 	Route::get('/',[AdminController::class,'index'])->name('admin')->middleware(['can:admin']);
@@ -132,7 +133,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::view('/chart','admin.chart')->name('chart');
 	Route::view('/pchart','admin.prospectchart')->name('pchart');
 	Route::view('/tables','admin.tables')->name('tables');
-	
+
 	
 });
 Route::get('/scheduledata','ScheduleController@index')->name('schedule.index');
