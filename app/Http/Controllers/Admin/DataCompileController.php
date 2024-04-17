@@ -254,6 +254,30 @@ class DataCompileController extends Controller
                     $result->name = 'CARDIOVASCULAR';
                     $result->id = 3;
                     break;
+                case 'BUSWP':
+                    $result->name = 'Sarana OK';
+                    $result->id = 4;
+                    break;
+                case 'BUESU':
+                    $result->name = 'Electrosurgery';
+                    $result->id = 5;
+                    break;
+                case 'BUURO':
+                    $result->name = 'URO Imaging';
+                    $result->id = 6;
+                    break;
+                case 'BUMOT':
+                    $result->name = 'MOT';
+                    $result->id = 7;
+                    break;
+                case 'BUINS':
+                    $result->name = 'Instrument';
+                    $result->id = 8;
+                    break;
+                case 'BURT':
+                    $result->name = 'RT Onco';
+                    $result->id = 9;
+                    break;
                 default:
                     $result->name = "BUKAN BU Indosopha";
                     $result->id = 404;
