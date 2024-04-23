@@ -464,10 +464,7 @@ class DataCompileController extends Controller
                     ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
-                
-
                     break;
-
 
                 case "bu":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
@@ -475,8 +472,6 @@ class DataCompileController extends Controller
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
                         ->get();
-
-
                     break;
 
 
@@ -484,8 +479,6 @@ class DataCompileController extends Controller
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
-
-
                     break;
 
                 case "am":
@@ -506,8 +499,6 @@ class DataCompileController extends Controller
                         })
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
-
-
                     break;
             }
         } else {
@@ -529,8 +520,6 @@ class DataCompileController extends Controller
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", '!=', 1)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
-
-
                     break;
 
                 case "am":
@@ -541,7 +530,6 @@ class DataCompileController extends Controller
                         })
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
-
                     break;
 
                 case "nsm":
@@ -552,8 +540,6 @@ class DataCompileController extends Controller
                         })
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
-
-
                     break;
             }
         }
@@ -787,7 +773,7 @@ class DataCompileController extends Controller
                 $theroutes = route('admin.prospecteditdata', ['prospect' => $prp->id]);
                 
 
-                $data = "<a href='$theroutes' ><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a>";
+                $data = "<a href=$theroutes onclick='storeSequenceData()'><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a>";
                 /*$data.="<a class='nav-link dropdown-toggle' href='#' id='alertsDropdown'role='button'
                 data-toggle=' aria-haspopup='true' aria-expanded='>
                 <i class='fas fa-bell fa-fw'></i>

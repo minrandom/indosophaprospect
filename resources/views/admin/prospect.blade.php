@@ -24,10 +24,14 @@
         
         <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
         @can('admin')  
-        @include('modal._filter_review_admin')
-      
+        @include('dropdownfilter._filter_review_admin')
+        @elsecan('fs')
+        @include('dropdownfilter._filter_review_salesteam')
+        @elsecan('am')
+        @include('dropdownfilter._filter_review_salesteam')
+        @elsecan('nsm')
+        @include('dropdownfilter._filter_review_salesteam')
         @endcan
-        
   </div>
 </div>
 </div>
@@ -313,6 +317,7 @@
 
 
   var jsonData;
+  var ids;
 
   $.busyLoadFull("show",{spinner: "cubes",
       text: "Please Wait, Loading the Data...",
@@ -350,8 +355,12 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
   function DataLine(data) {
     // Implement your logic to update the data here
-    jsonData = data;
-    console.log(jsonData);
+    dataLine = data;
+   ids = dataLine.map(function(item) {
+        return item.id;
+    });
+    console.log(ids);
+    //console.log(jsonData);
   }
 
   //console.log(jsonData);
@@ -409,7 +418,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       }
 
       console.log(filteredData);
-
+      DataLine(filteredData);
       // Show message if filteredData is empty
       if (filteredData.length === 0) {
         $('#noDataMessage').text('No data for this filter').show();
@@ -923,6 +932,25 @@ console.log(remarksData);
       }
     })
   })
+
+
+  function storeSequenceData() {
+        $.ajax({
+            url: '{{ route("sequence.up") }}', // Replace 'store.sequence.data' with your actual route name
+            type: 'POST',
+            data: {
+                sequenceData: JSON.stringify(ids) // Convert JSON data to a string before sending
+            },
+            success: function(response) {
+                // Handle success response from the server
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                // Handle error response from the server
+                console.error(xhr.responseText);
+            }
+        });
+    }
 
   // Create
 </script>

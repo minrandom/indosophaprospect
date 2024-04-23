@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Province;
 use App\Models\Department;
+use App\Models\sequence;
 
 use App\Models\Hospital;
 use App\Models\Prospect;
@@ -10,6 +11,7 @@ use App\Models\Review;
 use App\Models\ReviewLog;
 use App\Models\Alert as AlertData;
 use App\Http\Controllers\AlertController as Alert;
+use App\Http\Controllers\sequenceController as seq;
 use App\Models\Category;
 use App\Models\Config;
 use App\Models\Unit;
@@ -63,6 +65,7 @@ class ProspectController extends Controller
     public function create(Prospect $prospect)
     {
         //
+
         $sourceoption = $this->optiondata()->getData();
         $usid=Auth::user()->id;
         $user=User::with('employee')->where('id',$usid)->first();
@@ -120,14 +123,34 @@ class ProspectController extends Controller
         else 
          {
           if(in_array($role, ['am','fs'])){
+            
+            
+            
+            //dd($provdata)
             $employees = Employee::Where('area',$area)->get();
             $employees->load("user");
-            $piclist = $employees->map(function($employee){
+            //for AM
+            $amdata = $employees->map(function($employee){
             return[
             'user_id' => $employee ? $employee->user->id : "No User ID",
-            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
-            ];
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            'area' => $employee?$employee->area:"No data "
+            ];});
+            //call FS
+            $provdata= Province::where('iss_area_code',$area)->get();
+            $employefs = Employee::whereIn('area', $provdata->pluck('prov_order_no'))->get();
+            $employefs->load("user");
+            $fsdata= $employefs->map(function($employee){
+                return[
+                'user_id' => $employee ? $employee->user->id : "No User ID",
+                'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+                'area'=>$employee?$employee->area:"No data "
+                ];
             });
+
+            $piclist = array_merge($amdata->toArray(), $fsdata->toArray());
+
+
           }else{
             $employees = Employee::where('area', 'LIKE', '%' . $area . '%')->get();
             $employees->load("user");
@@ -286,12 +309,41 @@ class ProspectController extends Controller
     public function show(Prospect $prospect)
     {
         //\
+        $userId = auth()->user()->id;          
+           // Check if the sequence data already exists for the user
+        $Sequence = Sequence::where('sequenceUser', $userId)->first();
+        $a = trim($Sequence->sequenceData, "[]"); // Remove square brackets
+        $arraySeq = explode(',', $a); 
+
+        // Get the index of the current prospect ID in $arraySeq
+        
+
+
+
         $prospect->load("personInCharge","creator","hospital","review","province","department","unit","config");
         //$picdata=User::with('employee')->where('id',$prospect->pic_user_id);
         //$brand=Brand::where('id',$prospect->config->brand_id);
+        
+        $currentIndex = array_search($prospect->id, $arraySeq);
+
+        // Get the IDs of the previous and next prospects
+        $prev = ($currentIndex > 0) ? $arraySeq[$currentIndex - 1] : null;
+        $next = ($currentIndex < count($arraySeq) - 1) ? $arraySeq[$currentIndex + 1] : null;
+        
+        $nextprospect= Prospect::where('id',$next)->first();
+        $prevprospect= Prospect::where('id',$prev)->first();
+        
+        
         $ch=$prospect->review->chance;
         $anggaran=$prospect->review->anggaran_status;
         $podate=$prospect->eta_po_date;
+        $reviewdata=ReviewLog::with('UpdatedBy')->where('review_id',$prospect->review->id)->orderBy('updated_at','desc')->orderBy('id','desc')->first();
+        $colUpdate = $reviewdata->col_update ?? "Update Terakhir di GoogleSheet";
+
+       
+
+
+        //dd($reviewdata);
         $qty=strtotime($podate);
         $now=strtotime(now());
         
@@ -312,7 +364,7 @@ class ProspectController extends Controller
             $tempe= "<h4><span class='badge bg-warning text-light'>FUNNEL</span></h4>";
         }
         $provOpt= Province::all();
-        return view('admin.prospectedit',compact('prospect','provOpt','tempe'));
+        return view('admin.prospectedit',compact('prospect','provOpt','tempe','reviewdata','colUpdate','prev','next','prevprospect','nextprospect'));
     }
 
     /**

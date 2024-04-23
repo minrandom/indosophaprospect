@@ -16,7 +16,7 @@ class ReviewLog extends Model
         return $this->belongsTo(Review::class);
     }
 
-    public function reviewUpdate(){
+    public function UpdatedBy(){
         return $this->belongsTo(User::class, 'updated_by');
     }
 }

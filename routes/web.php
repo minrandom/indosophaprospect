@@ -16,6 +16,7 @@ use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\ProspectController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\sequenceController;
 
  
 //Namespace User
@@ -72,7 +73,8 @@ Route::middleware('prevent-back')->group(function () {
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
 Route::post('/remarks', [prospectRemarksController::class,'store'])->name('remarks.store')->middleware(['auth', 'role:admin,bu,fs']);
 Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
-
+Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+Route::post('/sequencedata', [sequenceController::class,'upload'])->name('sequence.up')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/fixdata', 'JojoController@fixtemperature')->name('fix.temperature')->middleware(['auth', 'role:admin']);
 Route::get('/check-in', 'JojoController@index')->name('check-in')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);

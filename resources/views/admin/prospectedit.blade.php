@@ -12,54 +12,57 @@
 
 
 
+   <!-- Tasks Card Example -->
+   <nav aria-label="...">
+  <ul class="pagination justify-content-between">
+  
+      @if($prev)
+      <li class="page-item">
+      <div class="card-body">
+          <a class="page-link" href="{{ route('admin.prospecteditdata', $prev) }}">&laquo;Previous Prospect</a>
+          <p class="card-text">{{$prevprospect->hospital->name}}({{$prevprospect->province->name}})</br>
+          {{$prevprospect->config->name}}</p>
+        </div>  
+      </li>
+      @else
+      <li class="page-item disabled">
+      <div class="card-body">  
+          <a class="page-link" href="#" aria-disabled="true">&laquo;Previous Prospect</a>
+          <p class="card-text">No More Prev Prospect</p>
+      </div>  
+      
+      </li>
+      @endif
+    
+   
+    
+      @if ($next)
+      <li class="">
+        <div class="card-body">
+          <a class="page-link" href="{{ route('admin.prospecteditdata', $next) }}">Next Prospect&raquo;</a>
+          <p class="card-text">{{$nextprospect->hospital->name}}({{$nextprospect->province->name}})</br>
+          {{$nextprospect->config->name}}
+        </div>
+       
+        </li>
+      @else
+      <li class="page-item disabled">
+      <div class="card-body">
+        <a class="page-link" href="#" aria-disabled="true">Next Prospect&raquo;</a>
+        <p class="card-text">No More Next Prospect</p>
+      </div>  
+    
+      </li>
+      @endif
+ 
+  </ul>
+</nav>
+
 <div class="inner-container fixed-card">
 <div class="row ">
 <div id="productData" data-url="{{ route('product.getProducts') }}"></div>
-    <!-- Earnings (Monthly) Card Example -->
-    <div class="col-xl-3 col-md-6 mb-4 ">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Nomor Prospect</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{$prospect->prospect_no}}</div></br>
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                           Tanggal Validasi</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{date('d-M-Y', strtotime($prospect->validation_time))}}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-file-alt fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Earnings (Annual) Card Example -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Nilai Prospect</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">Rp {{ number_format($prospect->qty * $prospect->submitted_price, 0, ',', '.') }} </div>
-                        <br>
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Product</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{$prospect->config->name}}<br>( {{$prospect->qty}} {{$prospect->config->uom}} ) </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tasks Card Example -->
-    <div class="col-xl-3 col-md-6 mb-4">
+   <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-info shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
@@ -72,12 +75,43 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{$prospect->department->name}}</div>
                       </div>
                     <div class="col-auto">
-                        <i class="fas fa-hospital fa-2x text-gray-300"></i>
+                        <i class="fas fa-hospital-user fa-2x text-gray-500"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+
+
+
+   
+
+    <!-- Earnings (Annual) Card Example -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Product</div>
+                        <div class="h6 mb-0 font-weight-bold text-gray-800">{{$prospect->config->name}}<br>( {{$prospect->qty}} {{$prospect->config->uom}} ) </div>
+                        <br>
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Nilai Prospect</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">Rp {{$prospect->submitted_price }} </div>
+                     
+                        
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-money-bill-wave fa-2x text-gray-500"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
 
     <!-- Pending Requests Card Example -->
     <div class="col-xl-3 col-md-6 mb-4">
@@ -95,12 +129,38 @@
                     
                       </div>
                     <div class="col-auto">
-                        <i class="fas fa-temperature-high fa-2x text-gray-300"></i>
+                        <i class="fas fa-percent fa-2x text-gray-500"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+     <!-- Earnings (Monthly) Card Example -->
+     <div class="col-xl-3 col-md-6 mb-4 ">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                          
+
+                            Nomor Prospect</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{$prospect->prospect_no}}</div></br>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                           Last Review At</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{date('d-M-Y', strtotime($prospect->review->updated_at))}}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{$colUpdate}}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-alt fa-2x text-gray-500"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 <div class="notify" id="thealert"></div>
 <div class="row">
@@ -174,7 +234,7 @@
               <label for="province" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->review->comment }}</label>
             </div>
             <div class="col-sm-12">
-@can('admin')Request 
+@can('admin')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit PIC dan Info</a>
 @endcan    
 @can('am')
@@ -660,6 +720,9 @@ $(document).ready(function() {
   // Clear the alert message from local storage
   localStorage.removeItem("alertMessage");
 
+ 
+
+
   // Check if the alert message exists and display it
   if (alertMessage) {
     $("#thealert").html(alertMessage);
@@ -1139,6 +1202,10 @@ $('body').on("click",".btn-edit",function(){
              }
          })
      });
+
+
+
+     
     
 </script>
 @endpush

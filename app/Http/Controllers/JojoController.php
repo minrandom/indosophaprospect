@@ -167,6 +167,9 @@ class JojoController extends Controller
     }
     }
 
+    public function prospectsequence(){
+        
+    }
 
     public function destroy(jojo $jojo)
     {

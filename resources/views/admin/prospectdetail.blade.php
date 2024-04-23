@@ -40,10 +40,7 @@
                         <tr>
                         <th>Tanggal Submit</th>
                             <th>User Creator</th>
-                          
-                            
-                            
-                         
+                      
                          
                         </tr>
                     </thead>
