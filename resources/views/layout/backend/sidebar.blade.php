@@ -49,7 +49,7 @@
        
           
                 
-        <a class="collapse-item" href="{{ route('check-in') }}">
+        <a class="collapse-item" href="{{ route('kehadiran') }}">
             <i class="fas fa fa-address-card"></i>
             <span>Kehadiran</span></a>
             </div>

@@ -76,8 +76,10 @@ Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('re
 Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::post('/sequencedata', [sequenceController::class,'upload'])->name('sequence.up')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+Route::post('/check-out', 'JojoController@outstore')->name('check-out.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/fixdata', 'JojoController@fixtemperature')->name('fix.temperature')->middleware(['auth', 'role:admin']);
 Route::get('/check-in', 'JojoController@index')->name('check-in')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+Route::get('/kehadiran', 'JojoController@kehadiran')->name('kehadiran')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/check-out', 'JojoController@indx')->name('check-out')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin'],function(){
 	Route::get('/',[AdminController::class,'index'])->name('admin')->middleware(['can:admin']);

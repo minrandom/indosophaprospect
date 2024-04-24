@@ -29,7 +29,7 @@
     @section('content')
     @csrf
     <div class="card">
-    <h1 class="h3 mb-4 text-gray-800">Check-in</h1>
+    <h1 class="h3 mb-4 text-gray-800">Check-OUT</h1>
 
     <!-- Check-in Card -->
     <div class="card-body">
@@ -43,6 +43,17 @@
 
     </div>
     </div>
+</br>
+</br>
+<div class="card" style="width: 18rem;">
+  <img src="{{ $hariini->photo_data }}&authuser=0" class="card-img-top" alt="...">
+  <div class="card-body">
+    <h5 class="card-title">Check-in Terakhir </h5>
+    <p class="card-text">{{$hariini->created_at}}</p>
+    <p class="card-text">{{$hariini->address}}</p>
+   <input type='hidden' id='checkinId' value='{{ $hariini->id}}'>
+  </div>
+</div>
 
     @stop
     @push('js')
@@ -111,8 +122,8 @@
                 var placeName = data.display_name.split(',')[0];
                 var address = data.address.road + ', ' + data.address.city + ', ' + data.address.country;
                 var checkInAt = placeName;
-                
-
+                var checkinid = $("#checkinId").val();
+                console.log(checkinid);
 
                 Swal.fire({
                     icon: 'success',
@@ -121,7 +132,7 @@
                     confirmButtonText: 'OK',
                     allowOutsideClick: false,
                     didClose: function() {
-                        saveCheckInData(placeName, address, checkInAt, photoData);
+                        saveCheckInData(placeName, address, checkInAt, photoData,checkinid);
                     }
                 });
             })
@@ -137,7 +148,7 @@
     }
 
 
-        function saveCheckInData(placeName, address, checkInAt, photoData) {
+        function saveCheckInData(placeName, address, checkInAt, photoData,checkinid) {
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -145,9 +156,10 @@
             });
 
             $.ajax({
-                url: '{{route("check-in.store")}}',
+                url: '{{route("check-out.store")}}',
                 method: 'POST',
                 data: {
+                    checkinid:checkinid,
                     place_name: placeName,
                     address: address,
                     check_in_loc: checkInAt,
