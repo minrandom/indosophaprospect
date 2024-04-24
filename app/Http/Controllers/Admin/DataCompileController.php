@@ -459,7 +459,7 @@ class DataCompileController extends Controller
                 case "admin":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
                     ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
-                    ->where("status", $status)
+                    ->where("status", $status)->whereIn('tempCodeName',[1,2,3,4,5,-1])
                     ->orderByRaw("FIELD(prospect_temperatures.tempCodeName, 4, 1,-1, 2, 3, 5,0)")
                     ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
@@ -505,9 +505,9 @@ class DataCompileController extends Controller
             switch ($data['roles']) {
                 case "admin":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
-                    ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
+                   
                         ->where("status", '!=', 1)
-                        ->orderByRaw("FIELD(tempCodeName, 4, 1,-1, 2, 3, 5,0)")
+                
                         ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
@@ -546,9 +546,16 @@ class DataCompileController extends Controller
         //->whereHas('config', function ($query) {
         //  $query->wherePivot('main', 1);
         // })
+    
 
-
-
+       /* $test = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
+        ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
+        ->where("status", $status)->whereIn('tempCodeName',[1,2,3,4,5])
+        ->orderByRaw("FIELD(prospect_temperatures.tempCodeName, 4, 1,-1, 2, 3, 5,0)")
+        ->orderBy('status', 'ASC')
+        ->orderBy("prospects.id", 'DESC');
+        */
+        //dd($test->toSql());
 
 
 
@@ -695,15 +702,15 @@ class DataCompileController extends Controller
                         <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
                         break;
                     case 1:
-                        return "<h4><span class='badge tmpe text-light' style='background-color:CornflowerBlue'>EARLY STAGE</span></h4>
+                        return "<h4><span class='badge tmpe text-light' style='background-color:CornflowerBlue'>LEAD</span></h4>
                         <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
                         break;
                     case 2:
-                        return "<h4><span class='badge tmpe text-light' style='background-color:MediumOrchid'>FUNNEL</span></h4>
+                        return "<h4><span class='badge tmpe text-light' style='background-color:MediumOrchid'>PROSPECT</span></h4>
                         <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
                         break;
                     case 3:
-                        return "<h4><span class='badge tmpe text-light' style='background-color:Salmon'>PROSPECT</span></h4>
+                        return "<h4><span class='badge tmpe text-light' style='background-color:Salmon'>FUNNEL</span></h4>
                         <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
                         break;
                     case 4:
@@ -711,7 +718,7 @@ class DataCompileController extends Controller
                         <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
                         break;
                     case 5:
-                        return "<h4><span class='badge tmpe bg-success text-light'>GOALS</span></h4>
+                        return "<h4><span class='badge tmpe bg-success text-light'>SUCCESS</span></h4>
                         <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
                         break;
                 }
@@ -812,9 +819,23 @@ class DataCompileController extends Controller
             ->addColumn('hospitaldata', function ($prp) {
                 $dep = $prp->department->name;
                 $host = $prp->hospital->name;
-
-                $muncul = $host . "</br>" . $dep;
+                $target = $prp->hospital->target;
+            
+                if($target=="Key Account" || $target =="Prioritas"){
+                    $show="<div class='text-success'>".$target."</div>";
+                    $muncul = $host . "</br>" . $show. "</br></br>" . $dep;
+                }else{
+                $muncul = $host . "</br>" . $target. "</br></br>" . $dep;}
+               
                 return $muncul;
+            })
+
+            ->addColumn('hospitaltarget',function($prp){
+                $target = $prp->hospital->target;
+                if($target=="Key Account" ||$target=="Prioritas"){
+                    return 1;}
+                    else
+                {return 0;}
             })
             ->addColumn('city', function ($prp) {
                 return $prp->hospital->city;

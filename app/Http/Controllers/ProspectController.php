@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 use App\Models\Province;
 use App\Models\Department;
 use App\Models\sequence;
-
 use App\Models\Hospital;
 use App\Models\Prospect;
 use App\Models\Review;
@@ -70,14 +69,22 @@ class ProspectController extends Controller
         $usid=Auth::user()->id;
         $user=User::with('employee')->where('id',$usid)->first();
         $role=$user->role;
+        
         $area=$user->employee->area;
+        $pos=$user->employee->position;
         if($area=="HO"){
         $provincelist=Province::all();
-        }else if(strlen($area)<2){
-        $provincelist=Province::with('area')->where('wilayah',$area)->get();
-        }else
+        }else if($role=="nsm"){
+        $provincelist=Province::with('area')->where('wilayah',$area)->orWhere('wilayah')->get();
+        }else if($role==="am"){
         $provincelist=Province::with('area')->where('iss_area_code',$area)->get();       
     
+        }else if($role==="fs")
+        $provincelist=Province::with('area')->where('prov_order_no',$area)->get();       
+    
+        $provOrderNos = $provincelist->pluck('prov_order_no')->toArray();
+       //dd($provOrderNos);
+        
         //$rumahsakit=Hospital::all();
         $dept=Department::all();
         $today = now();
@@ -93,7 +100,7 @@ class ProspectController extends Controller
        
         }
 
-        $specialrole = ['admin','direksi'];
+        $specialrole = ['admin','direksi','db'];
 
         if($area=="HO")
         {
@@ -104,30 +111,27 @@ class ProspectController extends Controller
             return[
             'user_id' => $employee ? $employee->user->id : "No User ID",
             'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
-            
+            'area' => $employee?$employee->area:"No data "
             ];
             }); 
         }
         else{
-        $usersamerole=User::where('role',$role)->with('employee')->get();
-        $piclist = $usersamerole->map(function($users){
-            return[
-            'user_id' => $users ? $users->id : "No User ID",
-            'name' => $users ? $users->employee->longname : "Tidak ada AM/ FS bertugas di area ini",
-            
-            ];
-            });  
-        } 
-        
+            $employees = Employee::where('position',$pos);
+            $piclist = $employees->map(function($employee){
+                return[
+                'user_id' => $employee ? $employee->user->id : "No User ID",
+                'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+                'area' => $employee?$employee->area:"No data "
+                ];
+                }); 
         }
-        else 
-         {
-          if(in_array($role, ['am','fs'])){
-            
-            
-            
-            //dd($provdata)
-            $employees = Employee::Where('area',$area)->get();
+        }
+        else
+        {
+          if($role=="am"){
+                       
+             //dd($provdata)
+            $employees = Employee::Where('area',$area)->orWhereIn('area',$provOrderNos)->get();
             $employees->load("user");
             //for AM
             $amdata = $employees->map(function($employee){
@@ -136,28 +140,18 @@ class ProspectController extends Controller
             'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
             'area' => $employee?$employee->area:"No data "
             ];});
-            //call FS
-            $provdata= Province::where('iss_area_code',$area)->get();
-            $employefs = Employee::whereIn('area', $provdata->pluck('prov_order_no'))->get();
-            $employefs->load("user");
-            $fsdata= $employefs->map(function($employee){
-                return[
-                'user_id' => $employee ? $employee->user->id : "No User ID",
-                'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
-                'area'=>$employee?$employee->area:"No data "
-                ];
-            });
-
-            $piclist = array_merge($amdata->toArray(), $fsdata->toArray());
+            //call F
+            $piclist = array_merge($amdata->toArray());
 
 
           }else{
-            $employees = Employee::where('area', 'LIKE', '%' . $area . '%')->get();
+            $employees = Employee::where('area', 'LIKE', '%' . $area . '%')->orWhereIn('area',$provOrderNos)->get();
             $employees->load("user");
             $piclist = $employees->map(function($employee){
             return[
             'user_id' => $employee ? $employee->user->id : "No User ID",
-            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            'area' => $employee?$employee->area:"No data "
             ];
             });
           } 
@@ -316,11 +310,7 @@ class ProspectController extends Controller
         $arraySeq = explode(',', $a); 
 
         // Get the index of the current prospect ID in $arraySeq
-        
-
-
-
-        $prospect->load("personInCharge","creator","hospital","review","province","department","unit","config");
+         $prospect->load("personInCharge","creator","hospital","review","province","department","unit","config");
         //$picdata=User::with('employee')->where('id',$prospect->pic_user_id);
         //$brand=Brand::where('id',$prospect->config->brand_id);
         
@@ -340,29 +330,42 @@ class ProspectController extends Controller
         $reviewdata=ReviewLog::with('UpdatedBy')->where('review_id',$prospect->review->id)->orderBy('updated_at','desc')->orderBy('id','desc')->first();
         $colUpdate = $reviewdata->col_update ?? "Update Terakhir di GoogleSheet";
 
-       
-
-
+        $temper = prospectTemperature::where('prospect_id',$prospect->id)->first();
+        $tempName=$temper->tempName;
+        $tempCode=$temper->tempCodeName;
+  
         //dd($reviewdata);
-        $qty=strtotime($podate);
-        $now=strtotime(now());
-        
-        $diffsec= $qty-$now;
-        $diff=floor($diffsec/86400);
 
-
-
-        if ($ch == 0) {
+        switch ($tempCode){
+            case (-1);
             $tempe= "<h4><span class='badge bg-dark text-light'>DROP</span></h4>";
-        } else if ($anggaran == "BELUM ADA" || $anggaran == "USULAN") {
-            $tempe= "<h4><span class='badge bg-secondary text-light'>PROSPECT</span></h4>";
-        } else if ($ch < 0.5) {
-            $tempe= "<h4><span class='badge bg-warning text-light'>FUNNEL</span></h4>";
-        } else if ($diff < 150) {
-            $tempe= "<h4><span class='badge bg-danger text-light'>HOT PROSPECT</span></h4>";
-        } else {
-            $tempe= "<h4><span class='badge bg-warning text-light'>FUNNEL</span></h4>";
+            break;
+            case 0:
+               $tempe= "<h4><span class='badge tmpe bg-dark text-light'>DROP</span></h4>";
+                break;
+            case 1:
+                $tempe="<h4><span class='badge tmpe text-light' style='background-color:CornflowerBlue'>LEAD</span></h4>";
+                break;
+            case 2:
+                $tempe="<h4><span class='badge tmpe text-light' style='background-color:MediumOrchid'>PROSPECT</span></h4>";
+                break;
+            case 3:
+                $tempe="<h4><span class='badge tmpe text-light' style='background-color:Salmon'>FUNNEL</span></h4>";
+                break;
+            case 4:
+                $tempe="<h4><span class='badge tmpe bg-danger text-light'>HOT PROSPECT</span></h4>";
+                break;
+            case 5:
+                $tempe="<h4><span class='badge tmpe bg-success text-light'>SUCCESS</span></h4>";
+                break;
         }
+
+
+
+
+
+
+
         $provOpt= Province::all();
         return view('admin.prospectedit',compact('prospect','provOpt','tempe','reviewdata','colUpdate','prev','next','prevprospect','nextprospect'));
     }
@@ -585,8 +588,7 @@ class ProspectController extends Controller
         'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
         ];
         });
-        
-    $piclist->push(['user_id'=>14,'name'=>'Ayane']);
+    
         $prospect->piclist=$piclist;
      
         return response()->json($prospect);
@@ -728,6 +730,91 @@ $send=0;
    
    
     }
+     public function chcupdate(Request $request, Prospect $prospect)
+    {
+        $user=Auth::id();
+        $review=Review::where('prospect_id',$prospect->id)->first();
+       $temper=prospectTemperature::where('prospect_id',$prospect->id)->first();
+       $send=0;
+
+        $chc2=$request->chance?$request->chance:0;$chc1=$review->chance?$review->chance:0;
+        if($chc1==$chc2){$oke="oke";}else{
+            $review->update([
+                'chance'=>$chc2,
+         ]);
+
+        ReviewLog::create([
+            'review_id'=>$review->id,
+            'log_date'=>now(),
+            'col_update'=>"chance",
+            'col_before'=>$chc1,
+            'col_after'=>$chc2,
+            'updated_by'=>$user
+        ]);
+        $send=$send+1;
+    }  
+
+    
+    $review->chance;
+    $podate = $review->eta_po_date;
+    $qty = strtotime($podate);
+    $now = strtotime(now());
+    $diffsec = $qty - $now;
+    $diff = floor($diffsec / 86400);
+   
+    
+    $tempename=$temper->tempName;
+    $tempecode=$temper->tempCodeName;
+
+
+    $n =($review->chance == 0.4 && isset($review->first_offer_date));
+    //dd($n);
+
+    if ($review->chance == 1) {
+        $tempename = 'SUCCESS';
+        $tempecode = '5';
+    }elseif ($review->chance == 0) {
+        $tempename = 'DROP';
+        $tempecode = '0';
+    } elseif (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
+        $tempename = 'LEAD';
+        $tempecode = '1';
+    } elseif ($review->chance >= 0.4 && isset($review->first_offer_date)) {
+        $tempename = 'Prospect';
+        $tempecode = '2';
+    } elseif (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
+        $tempename = 'FUNNEL';
+        $tempecode = '3';
+    } elseif ($review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" &&(isset($review->user_status) || isset($review->direksi_status) || isset($review->purchasing_status)) ){
+        $tempename = 'HOT PROSPECT';
+        $tempecode = '4';
+    }  elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
+        $tempename = 'MISSED';
+        $tempecode = '-1';
+    }
+
+    $temper->update([
+        'tempName'=>$tempename,
+        'tempCodeName'=>$tempecode
+    ]);
+
+
+    $data1='<div class="alert alert-success" role="alert">
+    <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+</button>
+    </div>';
+   
+
+    if($send>0){
+    return response()->json(['success' => true,'message' => $data1]); 
+    } else
+    return "done";
+    
+    
+    }
+
      public function reviewupdate(Request $request, Prospect $prospect)
     {
         //return response()->json($request->demo);
@@ -742,7 +829,7 @@ $send=0;
         $dir2=$request->direksi_status?$request->direksi_status:"Belum Tahu";$dir1=$review->direksi_status?$review->direksi_status:"Belum Tahu";
         $agr2=$request->anggaran_status?$request->anggaran_status:"Belum Tahu";$agr1=$review->anggaran_status?$review->anggaran_status:"Belum Tahu";
         $jns2=$request->jenis_anggaran?$request->jenis_anggaran:"Belum Tahu";$jns1=$review->jenis_anggaran?$review->jenis_anggaran:"Belum Tahu";
-        $chc2=$request->chance?$request->chance:0;$chc1=$review->chance?$review->chance:0;
+        
         $nac2=$request->next_action?$request->next_action:"Mapping";$nac1=$review->next_action?$review->next_action:"Mapping";
         //dd($prospect->eta_po_date);
         $eta2=$request->etapodate?$request->etapodate:"";$eta1=$review->etapodate?$prospect->eta_po_date:"";
@@ -846,21 +933,7 @@ $send=0;
             $send=$send+1;
         }  
 
-        if($chc1==$chc2){$oke="oke";}else{
-                $review->update([
-                    'chance'=>$chc2,
-             ]);
-
-            ReviewLog::create([
-                'review_id'=>$review->id,
-                'log_date'=>now(),
-                'col_update'=>"chance",
-                'col_before'=>$chc1,
-                'col_after'=>$chc2,
-                'updated_by'=>$user
-            ]);
-            $send=$send+1;
-        }     
+           
         if($nac1==$nac2){$oke="oke";}else{
                 $review->update([
                     'next_action'=>$nac2,
@@ -889,26 +962,28 @@ $send=0;
        
         $tempename=$temper->tempName;
         $tempecode=$temper->tempCodeName;
+       
+
 
         if ($review->chance == 0) {
             $tempename = 'DROP';
             $tempecode = '0';
-        } elseif (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
-            $tempename = 'EARLY STAGE';
+        } elseif (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) && $review->chance == 0.2) {
+            $tempename = 'LEAD';
             $tempecode = '1';
-        } elseif ($review->chance < 0.5 && $review->chance > 0.2) {
-            $tempename = 'FUNNEL';
+        } elseif ($review->chance == 0.4 && isset($review->first_offer_date)) {
+            $tempename = 'Prospect';
             $tempecode = '2';
-        } elseif ($review->chance > 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()) {
+        } elseif (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
+            $tempename = 'FUNNEL';
+            $tempecode = '3';
+        } elseif ($review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status)) {
             $tempename = 'HOT PROSPECT';
             $tempecode = '4';
         } elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
             $tempename = 'MISSED';
             $tempecode = '-1';
-        } else {
-            $tempename = 'PROSPECT';
-            $tempecode = '3';
-        }
+        } 
 
         $temper->update([
             'tempName'=>$tempename,

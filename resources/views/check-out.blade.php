@@ -38,7 +38,7 @@
             <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
             <button id="click-photo" class="btn btn-primary mt-2" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: none;"><i class="fas fa-camera"></i> Click Photo</button>
         </div>
-        <button id="toggle-camera" class="btn btn-primary"><i class='fas fa-street-view'></i> Start Checkin</button>
+        <button id="toggle-camera" class="btn btn-primary"><i class='fas fa-street-view'></i> Checkout</button>
 
 
     </div>
@@ -57,7 +57,7 @@
 
 
     toggle_button.addEventListener('click', function() {
-        if (toggle_button.innerText === " Start Checkin") {
+        if (toggle_button.innerText === " Checkout") {
             startCamera();
         } else {
             capturePhoto();
@@ -70,7 +70,7 @@
             .then(function(stream) {
                 video.srcObject = stream;
                 video.style.display = "block";
-                toggle_button.innerHTML = '<i class="fas fa-camera"></i> Photo Check-In';
+                toggle_button.innerHTML = '<i class="fas fa-camera"></i> Photo Check-Out';
             })
             .catch(function(err) {
                 console.error('Error accessing camera:', err);

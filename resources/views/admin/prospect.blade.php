@@ -9,6 +9,9 @@
 
 @endpush
 
+
+
+
 @section('content')
 
 <div class="card">
@@ -23,15 +26,9 @@
         </button>-->
         
         <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
-        @can('admin')  
+       
         @include('dropdownfilter._filter_review_admin')
-        @elsecan('fs')
-        @include('dropdownfilter._filter_review_salesteam')
-        @elsecan('am')
-        @include('dropdownfilter._filter_review_salesteam')
-        @elsecan('nsm')
-        @include('dropdownfilter._filter_review_salesteam')
-        @endcan
+    
   </div>
 </div>
 </div>
@@ -249,9 +246,8 @@
         var showall = $("<option>").val(0).text("Show All").attr('selected', true);
         eventSelect.prepend(showall);
 
-
         var tempselect = $("#tempefilter");
-        var keterangantempe = "Filter Temperature"
+        var keterangantempe = "Filter Temperature";
         var placeholderTempeOption = new Option(keterangantempe, '', true, true);
         tempselect.append(placeholderTempeOption);
         //var tempall = $("<option>").val(0).text("Show All").attr('selected', true);
@@ -261,26 +257,69 @@
           placeholder: keterangantempe,
           width: '100%' // Adjust the width to fit the container
         });
+
         var provfilter = $("#provincefilter");
         populateSelectFromDatalist('provincefilter', response.province, "Filter Provinsi");
         var provall = $("<option>").val(0).text("Show All").attr('selected', true);
         provfilter.prepend(provall);
 
-        var keteranganpic = "Filter PIC"
+        var keteranganpic = "Pilih Provinsi untuk Memunculkan PIC"
         var picfilter = $("#picfilter");
         picfilter.select2({
           placeholder: keteranganpic,
           width: '100%' // Adjust the width to fit the container
         });
-        response.pic.forEach(function(pic) {
-          var option = new Option(pic.name, pic.user_id);
-          picfilter.append(option);
+
+
+        function populatePicFilter(provinceId) {
+            // Clear existing options
+            console.log(provinceId);
+            picfilter.empty();
+            
+            // Add placeholder option
+            picfilter.append(new Option(keteranganpic, ''));
+            
+            // Find the selected province object based on provinceId
+            var selectedProvince = response.province.find(function(province) {
+                return province.id == provinceId;
+            });
+
+            if (selectedProvince) {
+                // Filter response.pic based on selected province and pic.area
+                var filteredPics = response.pic.filter(function(pic) {
+                    // Assuming pic has properties representing the area it belongs to (e.g., pic.area)
+                    return pic.area == selectedProvince.wilayah || pic.area == selectedProvince.iss_area_code || pic.area == selectedProvince.prov_order_no;
+                });
+                
+                // Populate picfilter with filtered options
+                filteredPics.forEach(function(pic) {
+                    picfilter.append(new Option(pic.name, pic.user_id));
+                });
+            } else {
+                console.error('Province not found for ID:', provinceId);
+            }
+        }
+
+        provfilter.on('change', function() {
+          var selectedProvinceId = $(this).val();
+          populatePicFilter(selectedProvinceId);
         });
 
+
+      
         var placeholderPicOption = new Option(keteranganpic, '', true, true);
         picfilter.append(placeholderPicOption);
         var picall = $("<option>").val(0).text("Show All").attr('selected', true);
         picfilter.prepend(picall);
+       
+       
+        var role = '<?php echo $role; ?>'; // Assuming $role contains the role information
+  $(document).ready(function() {
+    if (role === 'fs') {
+      $('.prov-pic').hide(); // Hide the element with the 'prov-pic' class
+    }
+  });
+
 
         var unitSelect = $("#BUfilter");
         populateSelectFromDatalist('BUfilter', response.bunit, "Pilih Business Unit");
@@ -301,12 +340,32 @@
         var unitall = $("<option>").val(0).text("Show All").attr('selected', true);
         unitSelect.prepend(unitall)
 
+        catSelect.select2({
+          width: '100%' // Adjust the width to fit the container
+        });
+
         catSelect.prepend(catall);
         unitSelect.on("change", function() {
           var selectedunitId = $(this).val();
           fetchcat(selectedunitId);
 
         });
+
+
+
+        var etafilter = $("#etafilter");
+        etafilter.select2({
+
+          width: '100%' // Adjust the width to fit the container
+        });
+
+        var sasaran = $("#sasaran");
+        sasaran.select2({
+
+          width: '100%' // Adjust the width to fit the container
+        });
+
+
 
 
       }
@@ -366,7 +425,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
   //console.log(jsonData);
   function updateData(jsonData, params) {
     
-    console.log(jsonData);
+   // console.log(jsonData);
    
     var filteredData = jsonData; // Make a copy of the original data
     var newData = jsonData;
@@ -377,18 +436,19 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     for (var i = 0; i < params.length; i++) {
       if (params[i] != '0') {
         x = x + 1;
+        console.log(params[i]);
+        console.log(i);
       }
-      //console.log(params[i]);
-      // console.log(x);
-
+ 
     }
-    console.log(x);
+    
 
-    //console.log(params);
+
     if (x > 0) {
       for (var i = 0; i < params.length; i++) {
         if (params[i] && params[i] != 0) {
           filteredData = filteredData.filter(function(item) {
+    
             //console.log("item"+item.pic_user_id);
             //console.log("params"+params[i]);
             //console.log(item.pic_user_id == params[i]);
@@ -396,7 +456,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
               case 0:
                 return item.prospect_source === params[i];
               case 1:
-                return item.temperaturedata === params[i];
+                return item.temperid == params[i];
               case 2:
                 return item.province.name === params[i];
               case 3:
@@ -405,6 +465,16 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
                 return item.unit_id == params[i];
               case 5:
                 return item.category == params[i];
+              case 6:
+            // Calculate the date 'params[i]' months from now
+        var targetDate = new Date();
+        targetDate.setMonth(targetDate.getMonth() + parseInt(params[i]));
+        // Convert item.etadate to a Date object if it's not already
+        var etadate = new Date(item.etadate);
+        // Check if item.etadate is less than or equal to the target date
+        return etadate <= targetDate;
+              case 7:
+                return item.hospitaltarget == params[i];
 
                 // Add more cases for additional parameters
               default:
@@ -489,7 +559,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
   // Handle the case when the filter dropdown is cleared
 
-  $('#sumberinfofilter,#tempefilter,#provincefilter,#picfilter,#BUfilter,#catfilter').on('change', function() {
+  $('#sumberinfofilter,#tempefilter,#provincefilter,#picfilter,#BUfilter,#catfilter,#etafilter,#sasaran').on('change', function() {
 
     var selectedValue = $('#sumberinfofilter').val();
     var selectedText = $('#sumberinfofilter').find('option:selected').text();
@@ -513,14 +583,19 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     var catValue = $('#catfilter').val();
     var catText = $('#catfilter').find('option:selected').text();
 
-    console.log(catValue + catText);
+    var etaValue = $('#etafilter').val();
+    var etaText = $('#etafilter').find('option:selected').text();
+
+    var sasaranValue = $('#sasaran').val();
+    var sasaranText = $('#sasaran').find('option:selected').text();
+
+
+    //console.log(catValue + catText);
 
     if (selectedValue != 0) {
       selectedValue = selectedText
     }
-    if (tempValue != 0) {
-      tempValue = tempText
-    }
+   
     if (provValue != 0) {
       provValue = provText
     }
@@ -531,7 +606,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     // selectedValue=$(this).text();
 
 
-    var filterupdate = [selectedValue, tempValue, provValue, picValue, buValue,catValue];
+    var filterupdate = [selectedValue, tempValue, provValue, picValue, buValue,catValue,etaValue,sasaranValue];
 
     updateData(jsonData, filterupdate);
     //console.log(selectedText)

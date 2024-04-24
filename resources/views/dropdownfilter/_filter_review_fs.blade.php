@@ -23,9 +23,9 @@
 
 
            
-        <div class="col-md-3">
+        <div class="col-md-3 prov-pic">
           <div class="form-group">
-            <label for="provincefilter">Province :</label>
+            <!--<label for="provincefilter">Province :</label>-->
             <select id="provincefilter" name="provincefilter" class="form-control dropdown" required="">
               <option value="0" selected>Show All</option>
             </select>

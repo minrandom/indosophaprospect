@@ -5,13 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Attendance extends Model
+class AttendanceOut extends Model
 {
     use HasFactory;
 
-    protected $table = 'attendances';
-
     protected $fillable = [
+        'checkin_id',
         'user_id',
         'place_name',
         'address',
@@ -24,13 +23,12 @@ class Attendance extends Model
         'created_by',
     ];
 
-
     public function user(){
         return $this->belongsTo(User::class,"user_id");
     }
-
-    public function out(){
-        return $this->hasOne(AttendanceOut::class,'checkin_id');
+    public function attendance(){
+        return $this->belongsTo(Attendance::class,'checkin_id');
     }
+
 
 }

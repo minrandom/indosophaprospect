@@ -12,6 +12,7 @@ use App\Models\Prospect;
 use App\Models\prospectTemperature;
 use App\Models\Review;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 
 class JojoController extends Controller
@@ -26,6 +27,9 @@ class JojoController extends Controller
         return view('check-in');
     }
 
+    public function indx(){
+        return view('check-out');
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -74,8 +78,10 @@ class JojoController extends Controller
        $photoUrl = Storage::disk('google')->url($photoFilename);
         //dd($photoUrl);
 
+        $usid=Auth::user()->id;
        // Create a new Attendance instance with the data
        $attendance = new Attendance([
+            'user_id' =>$usid,
            'place_name' => $request->input('place_name'),
            'address' => $request->input('address'),
            'check_in_loc'=>$request->input('check_in_loc'),
@@ -140,31 +146,46 @@ class JojoController extends Controller
         $temperature = $prospect->temperature;
 
         // Determine the new temperature name and code based on conditions
-        if ($review->chance == 0) {
-            $tempName = 'DROP';
-            $tempCodeName = '0';
+       
+        if ($review->chance == 1) {
+            $tempename = 'SUCCESS';
+            $tempecode = '5';
+        }elseif ($review->chance == 0) {
+            $tempename = 'DROP';
+            $tempecode = '0';
         } elseif (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
-            $tempName = 'EARLY STAGE';
-            $tempCodeName = '1';
-        } elseif ($review->chance < 0.5 && $review->chance > 0.2) {
-            $tempName = 'FUNNEL';
-            $tempCodeName = '2';
-        } elseif ($review->chance > 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()) {
-            $tempName = 'HOT PROSPECT';
-            $tempCodeName = '4';
-        } elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
-            $tempName = 'MISSED';
-            $tempCodeName = '-1';
-        } else {
-            $tempName = 'PROSPECT';
-            $tempCodeName = '3';
+            $tempename = 'LEAD';
+            $tempecode = '1';
+        } elseif ($review->chance >= 0.4 && isset($review->first_offer_date)) {
+            $tempename = 'Prospect';
+            $tempecode = '2';
+        } elseif (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
+            $tempename = 'FUNNEL';
+            $tempecode = '3';
+        } elseif ($review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" &&(isset($review->user_status) || isset($review->direksi_status) || isset($review->purchasing_status)) ){
+            $tempename = 'HOT PROSPECT';
+            $tempecode = '4';
+        } 
+        elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
+            $tempename = 'MISSED';
+            $tempecode = '-1';
         }
 
+        $datacekk =$review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" &&(isset($review->user_status) || isset($review->direksi_status) || isset($review->purchasing_status)) ;
+
+       
+
+
         // Update the temperature in the database
-        $temperature->tempName = $tempName;
-        $temperature->tempCodeName = $tempCodeName;
+        $temperature->tempName = $tempename;
+        $temperature->tempCodeName = $tempecode;
         $temperature->save();
+        var_dump($temperature->tempCodeName);
     }
+
+    
+
+    //return redirect('/home');
     }
 
     public function prospectsequence(){

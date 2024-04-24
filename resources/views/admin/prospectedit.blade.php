@@ -121,7 +121,7 @@
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Temperatur</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{!! $tempe !!} {{ number_format($prospect->review->chance * 100, 0) }}%</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{!! $tempe !!} {{ number_format($prospect->review->chance * 100, 0) }}%</div></br>
 
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             ETA PO Date</div>
@@ -149,7 +149,9 @@
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{$prospect->prospect_no}}</div></br>
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                            Last Review At</div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{date('d-M-Y', strtotime($prospect->review->updated_at))}}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{date('d-M-Y', strtotime($prospect->review->updated_at))}}</div></br>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                           Last Column Update</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{$colUpdate}}</div>
                     </div>
                     <div class="col-auto">
@@ -1065,13 +1067,17 @@ $('body').on("click",".btn-edit",function(){
                
                $("#chc-modal").modal("show");
                $("#data").val(response.prospect.id);
-               var userSelect = $("#user_status");
-               userSelect.empty(); 
-               var optionuser = $("<option>").val(response.prospect.review.user_status).text(response.prospect.review.user_status);
-               userSelect.append(optionuser);
+              
+               var userstats=response.prospect.review.user_status;
+               var purchasingstats=response.prospect.review.purchasing_status;
+               var direksistats=response.prospect.review.direksi_status;
+             
+              
+
                var anggarancek = response.prospect.review.anggaran_status;
                var etapodatecek =response.prospect.eta_po_date;
-             
+             var penawaranpertama = response.prospect.review.first_offer_date;
+
                  var today = new Date();
                  // Calculate the date after 30 days from today
                  var thirtyDaysFromToday = new Date(today);
@@ -1117,10 +1123,18 @@ $('body').on("click",".btn-edit",function(){
                    
                    //console.log(anggarancek);
                    console.log(etapodatecek < onefiftyDaysFromTodayFormatted);
-                   
+                   console.log(penawaranpertama);
+                   if(penawaranpertama==null){
+                    if (selectedChance > 0.2) {
+                        alert("Warning: Silahkaan Update Tanggal First Offer !!");
+                        chanceSelect.empty();
+                        rolchance();
+                        
+                      }
+
+                   }else
                     if(['Belum Ada','Belum Tahu','Usulan'].includes(anggarancek)){
-                      
-                   
+                                      
                       if (selectedChance > 0.4) {
                         alert("Warning: Chance Tidak Bisa Lebih dari 40% Saat Anggaran Status masih 'Belum Ada' , 'Usulan' atau 'Belum Tahu'");
                         chanceSelect.empty();
@@ -1140,12 +1154,13 @@ $('body').on("click",".btn-edit",function(){
                       }
                       else
                       {
-                        if(anggarancek == 'Ada Sesuai' || etapodatecek < onefiftyDaysFromTodayFormatted){
+                        if(anggarancek == 'Ada Sesuai' && etapodatecek < onefiftyDaysFromTodayFormatted && (['Setuju','Positif','Neutral'].includes(userstats)) && (['Setuju','Positif','Neutral'].includes(direksistats)) && (['Setuju','Positif','Neutral'].includes(purchasingstats))) {
                        console.log(etapodatecek < onefiftyDaysFromTodayFormatted);
                        if (selectedChance > 0.8) {
                        
                          alert("Apakah pihak rumah sakit sudah melakukan pembelian ?");
-                           
+                         chanceSelect.empty();
+                          rolchance();
                          }
  
                      }
@@ -1190,7 +1205,7 @@ $('body').on("click",".btn-edit",function(){
          var prospect = $("#data").val()
  
          $.ajax({
-             url: "{{ route('admin.prospect.reviewupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
+             url: "{{ route('admin.prospect.chcupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
              method: "PATCH",
              data: $(this).serialize(),
              success:function(response){
