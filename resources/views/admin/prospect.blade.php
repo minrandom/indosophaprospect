@@ -448,8 +448,8 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
                 return item.prospect_source === params[i];
               case 1:
                 return item.temperid == params[i];
-              case 2:
-                return item.province.name === params[i];
+            //  case 2:
+              //  return item.province.name === params[i];
               case 3:
                 return item.pic_user_id == params[i];
               case 4:
