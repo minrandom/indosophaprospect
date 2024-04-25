@@ -311,15 +311,6 @@
         picfilter.append(placeholderPicOption);
         var picall = $("<option>").val(0).text("Show All").attr('selected', true);
         picfilter.prepend(picall);
-       
-       
-        var role = '<?php echo $role; ?>'; // Assuming $role contains the role information
-  $(document).ready(function() {
-    if (role === 'fs') {
-      $('.prov-pic').hide(); // Hide the element with the 'prov-pic' class
-    }
-  });
-
 
         var unitSelect = $("#BUfilter");
         populateSelectFromDatalist('BUfilter', response.bunit, "Pilih Business Unit");
