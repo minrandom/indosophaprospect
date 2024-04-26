@@ -799,10 +799,8 @@ class DataCompileController extends Controller
                 $dt = $prp->created_at->format('d-M-Y');
                 $creator = $prp->creator->name ? $prp->creator->name :'missing data creator';
             
-              
-
                 $comdata = "(" . $creator . ")</br>" . $dt;
-                dd($comdata);
+               
                 return $comdata;
             })
 
