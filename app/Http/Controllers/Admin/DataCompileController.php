@@ -458,9 +458,9 @@ class DataCompileController extends Controller
             switch ($data['roles']) {
                 case "admin":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
-                    //->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
-                    //->where("status", $status)->whereIn('tempCodeName',[1,2,3,4,5,-1])
-                    ->orderByRaw("FIELD(temperature.tempCodeName, 4, 1,-1, 2, 3, 5,0)")
+                    ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
+                    ->where("status", $status)->whereIn('tempCodeName',[1,2,3,4,5,-1])
+                    ->orderByRaw("FIELD(prospect_temperatures.tempCodeName, 4, 1,-1, 2, 3, 5,0)")
                     ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
