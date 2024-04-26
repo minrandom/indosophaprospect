@@ -571,7 +571,7 @@ class DataCompileController extends Controller
                 if ($AM['am'] != "0") {
                     $newdata = $newprov . "</br>" . $AM['am'];
                 } else 
-    if ($AM['nsm'] != "0") {
+                if ($AM['nsm'] != "0") {
                     $newdata = $newprov . "</br>" . $AM['nsm'];
                 } else
                     $newdata = $newprov . "</br>Tidak ada AM/NSM";
@@ -797,12 +797,12 @@ class DataCompileController extends Controller
 
             ->addColumn('submitdate', function ($prp) {
                 $dt = $prp->created_at->format('d-M-Y');
-                $creator = 'missing data creator';
-                if ($prp->creator->name != null) {
-                    $creator = $prp->creator->name;
-                }
+                $creator = $prp->creator->name ? $prp->creator->name :'missing data creator';
+            
+              
 
                 $comdata = "(" . $creator . ")</br>" . $dt;
+                dd($comdata);
                 return $comdata;
             })
 
