@@ -205,7 +205,7 @@ class JojoController extends Controller
         // Determine the new temperature name and code based on conditions
        
 
-        if ($review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" ){
+        if ($review->chance >= 0.6 && $review->chance < 1 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" ){
             $tempename = 'HOT PROSPECT';
             $tempecode = '4';
         } 
