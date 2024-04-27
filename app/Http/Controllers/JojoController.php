@@ -207,8 +207,8 @@ class JojoController extends Controller
         if (Carbon::parse($prospect->eta_po_date)->isPast()) {
             $tempename = 'MISSED';
             $tempecode = '-1';
-        }else
-        { 
+        }
+
             if ($review->chance == 1) {
                 $tempename = 'SUCCESS';
                 $tempecode = '5';
@@ -252,7 +252,7 @@ class JojoController extends Controller
                     }
                 }
             }
-        }
+        
         $datacekk =$review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" &&(isset($review->user_status) || isset($review->direksi_status) || isset($review->purchasing_status)) ;
 
        
