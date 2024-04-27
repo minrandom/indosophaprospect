@@ -206,9 +206,9 @@ class JojoController extends Controller
         $now= Carbon::now();
         $diff =$etapodate->diffInDays($now,false);
         var_dump($diff);
-        $usercek = $review->user_status="Setuju" || $review ->user_status="Positif" || $review->user_status="Neutral";
-        $purchasingcek = $review->purchasing_status="Setuju" || $review ->purchasing_status="Positif" || $review->purchasing_status="Neutral";
-        $direksicek = $review->direksi_status="Setuju" || $review ->direksi_status="Positif" || $review->direksi_status="Neutral";
+        $usercek = $review->user_status=="Setuju" || $review ->user_status=="Positif" || $review->user_status=="Neutral";
+        $purchasingcek = $review->purchasing_status=="Setuju" || $review ->purchasing_status=="Positif" || $review->purchasing_status=="Neutral";
+        $direksicek = $review->direksi_status=="Setuju" || $review ->direksi_status=="Positif" || $review->direksi_status=="Neutral";
         //var_dump($usercek);
         
         
