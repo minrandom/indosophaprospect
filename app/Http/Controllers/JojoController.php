@@ -222,7 +222,7 @@ class JojoController extends Controller
                     $tempecode = '0';
                 } else
                 {
-                    if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0&&$review->anggaran_status=="Ada Sesuai" ){
+                    if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0&&$review->anggaran_status=="Ada Sesuai" && (in_array($review->user_status, ['Positif','Neutral','Setuju'])||in_array($review->purchasing_status, ['Positif','Neutral','Setuju'])||in_array($review->direksi_status, ['Positif','Neutral','Setuju'])) ){
                         $tempename = 'HOT PROSPECT';
                         $tempecode = '4';
                     } else
