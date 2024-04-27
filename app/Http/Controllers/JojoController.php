@@ -206,9 +206,7 @@ class JojoController extends Controller
         $now= Carbon::now();
         $diff =$etapodate->diffInDays($now,false);
         var_dump($diff);
-        $usercek = $review->user_status=="Setuju" || $review ->user_status=="Positif" || $review->user_status=="Neutral";
-        $purchasingcek = $review->purchasing_status=="Setuju" || $review ->purchasing_status=="Positif" || $review->purchasing_status=="Neutral";
-        $direksicek = $review->direksi_status=="Setuju" || $review ->direksi_status=="Positif" || $review->direksi_status=="Neutral";
+    
         //var_dump($usercek);
         
         
@@ -228,7 +226,7 @@ class JojoController extends Controller
                     $tempecode = '0';
                 } else
                 {
-                    if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0 && $review->anggaran_status=="Ada Sesuai" && ($usercek ==TRUE || $purchasingcek == TRUE || $direksicek == TRUE)  ){
+                    if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0 && $review->anggaran_status=="Ada Sesuai" && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
                         $tempename = 'HOT PROSPECT';
                         $tempecode = '4';
                     } else
