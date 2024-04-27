@@ -209,23 +209,23 @@ class JojoController extends Controller
             $tempename = 'HOT PROSPECT';
             $tempecode = '4';
         } 
-        elseif ($review->chance == 1) {
+        if ($review->chance == 1) {
             $tempename = 'SUCCESS';
             $tempecode = '5';
-        }elseif ($review->chance == 0) {
+        }if ($review->chance == 0) {
             $tempename = 'DROP';
             $tempecode = '0';
-        } elseif (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
+        }if (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
             $tempename = 'LEAD';
             $tempecode = '1';
-        } elseif ($review->chance >= 0.4 && isset($review->first_offer_date)) {
+        }if ($review->chance >= 0.4 && isset($review->first_offer_date)) {
             $tempename = 'Prospect';
             $tempecode = '2';
-        } elseif (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
+        }if (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
             $tempename = 'FUNNEL';
             $tempecode = '3';
         }
-        elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
+        if (Carbon::parse($prospect->eta_po_date)->isPast()) {
             $tempename = 'MISSED';
             $tempecode = '-1';
         }
