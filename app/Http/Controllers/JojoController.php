@@ -206,6 +206,10 @@ class JojoController extends Controller
         $now= Carbon::now();
         $diff =$etapodate->diffInDays($now,false);
         var_dump($diff);
+        $usercek = $review->user_status="Setuju" || $review ->user_status="Positif" || $review->user_status="Neutral";
+        var_dump($usercek);
+        
+        
         // Determine the new temperature name and code based on conditions
         if($diff>0){var_dump("PAST");}
 
@@ -222,7 +226,7 @@ class JojoController extends Controller
                     $tempecode = '0';
                 } else
                 {
-                    if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0&&$review->anggaran_status=="Ada Sesuai" && (in_array($review->user_status, ['Positif','Neutral','Setuju'])||in_array($review->purchasing_status, ['Positif','Neutral','Setuju'])||in_array($review->direksi_status, ['Positif','Neutral','Setuju'])) ){
+                    if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0&&$review->anggaran_status=="Ada Sesuai"  ){
                         $tempename = 'HOT PROSPECT';
                         $tempecode = '4';
                     } else
