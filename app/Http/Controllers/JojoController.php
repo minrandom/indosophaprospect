@@ -204,7 +204,12 @@ class JojoController extends Controller
 
         // Determine the new temperature name and code based on conditions
        
-        if ($review->chance == 1) {
+
+        if ($review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" ){
+            $tempename = 'HOT PROSPECT';
+            $tempecode = '4';
+        } 
+        elseif ($review->chance == 1) {
             $tempename = 'SUCCESS';
             $tempecode = '5';
         }elseif ($review->chance == 0) {
@@ -219,10 +224,7 @@ class JojoController extends Controller
         } elseif (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
             $tempename = 'FUNNEL';
             $tempecode = '3';
-        } elseif ($review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" &&(isset($review->user_status) || isset($review->direksi_status) || isset($review->purchasing_status)) ){
-            $tempename = 'HOT PROSPECT';
-            $tempecode = '4';
-        } 
+        }
         elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
             $tempename = 'MISSED';
             $tempecode = '-1';
