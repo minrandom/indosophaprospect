@@ -273,7 +273,7 @@ class ProspectController extends Controller
         ]);
 
 
-        $tempeName="EARLY STAGE";
+        $tempeName="LEAD";
         $tempeCode=1;
         prospectTemperature::create([
             'prospect_id'=>$id,

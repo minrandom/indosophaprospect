@@ -695,7 +695,7 @@
                    picSelect.empty();
                 response.piclist.forEach(function (pivc) {
                   if (
-                    pivc.area === response.province.prov_order_no ||
+                    pivc.area == response.province.prov_order_no ||
                     pivc.area === response.province.iss_area_code ||
                     pivc.area === response.province.wilayah
                       ) {
