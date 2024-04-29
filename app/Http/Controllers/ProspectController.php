@@ -494,14 +494,13 @@ class ProspectController extends Controller
                         ['id'=>4,'name'=>'Ada Saingan']
                         ],
                     'Jenis'=>[
-                        ['id'=>0,'name'=>'DAK'],
+                        //['id'=>0,'name'=>'DAK'],
                         ['id'=>1,'name'=>'BLU / BLUD'],
-                        ['id'=>2,'name'=>'APBN'],
-                        ['id'=>3,'name'=>'APBD'],
-                        ['id'=>4,'name'=>'Ba BUN'],
-                        ['id'=>5,'name'=>'OTSUS'],
-                        ['id'=>6,'name'=>'Ban Prov'],
-                        ['id'=>7,'name'=>'Ban Gub'],
+                        ['id'=>2,'name'=>'APBN / Ba BUN / DAK'],
+                        ['id'=>3,'name'=>'APBD / OTSUS'],
+                        //['id'=>4,'name'=>'Ba BUN'],
+                        ['id'=>6,'name'=>'Ban Prov / Ban Gub'],
+                        ['id'=>7,'name'=>'Cukai'],
                         ['id'=>8,'name'=>'Swasta'],
                         ['id'=>9,'name'=>'Belum Tahu'],
                     ],
@@ -581,14 +580,86 @@ class ProspectController extends Controller
         $prospect->load("creator","hospital","review","province","department","unit","config");
         $employees = Employee::where('area', $prospect->province->iss_area_code)->orWhere('area',$wil)->get();
         
-        $employees->load("user");
-        $piclist = $employees->map(function($employee){
-        return[
-        'user_id' => $employee ? $employee->user->id : "No User ID",
-        'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini"
-        ];
-        });
+        $usid=Auth::user()->id;
+        $user=User::with('employee')->where('id',$usid)->first();
+        $role=$user->role;
+        
+        $area=$user->employee->area;
+        $pos=$user->employee->position;
+        if($area=="HO"){
+        $provincelist=Province::all();
+        }else if($role=="nsm"){
+        $provincelist=Province::with('area')->where('wilayah',$area)->orWhere('wilayah')->get();
+        }else if($role==="am"){
+        $provincelist=Province::with('area')->where('iss_area_code',$area)->get();       
     
+        }else if($role==="fs")
+        $provincelist=Province::with('area')->where('prov_order_no',$area)->get();       
+    
+        $provOrderNos = $provincelist->pluck('prov_order_no')->toArray();
+       //dd($provOrderNos);
+
+
+
+
+
+        $specialrole = ['admin','direksi','db'];
+
+        if($area=="HO")
+        {
+        if(in_array($role, $specialrole)){
+            $employees = Employee::all();
+            $employees->load("user");
+            $piclist = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            'area' => $employee?$employee->area:"No data "
+            ];
+            }); 
+        }
+        else{
+            $employees = Employee::where('position',$pos);
+            $piclist = $employees->map(function($employee){
+                return[
+                'user_id' => $employee ? $employee->user->id : "No User ID",
+                'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+                'area' => $employee?$employee->area:"No data "
+                ];
+                }); 
+        }
+        }
+        else
+        {
+          if($role=="am"){
+                       
+             //dd($provdata)
+            $employees = Employee::Where('area',$area)->orWhereIn('area',$provOrderNos)->get();
+            $employees->load("user");
+            //for AM
+            $amdata = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            'area' => $employee?$employee->area:"No data "
+            ];});
+            //call F
+            $piclist = array_merge($amdata->toArray());
+
+
+          }else{
+            $employees = Employee::where('area', 'LIKE', '%' . $area . '%')->orWhereIn('area',$provOrderNos)->get();
+            $employees->load("user");
+            $piclist = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            'area' => $employee?$employee->area:"No data "
+            ];
+            });
+          } 
+         }
+
         $prospect->piclist=$piclist;
      
         return response()->json($prospect);

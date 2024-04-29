@@ -1,6 +1,6 @@
 @extends('layout.backend.app',[
-    'title' => 'Prospect Validation',
-    'pageTitle' =>'Prospect Validation',
+    'title' => 'Approval Prospect',
+    'pageTitle' =>'Approval Prospect',
 ])
 
 @push('css')
@@ -14,16 +14,14 @@
 <div class="card">
     <div class="card-header">
         <!-- Button trigger modal -->
-        <a href="javascript:void(0)" id="{{ Auth::user()->name }}" class="btn btn-primary btn-sm ml-2 btn-cr8">Tambah Data</a>
+        <!--<a href="javascript:void(0)" id="{{ Auth::user()->name }}" class="btn btn-primary btn-sm ml-2 btn-cr8">Tambah Data</a>-->
   
         <!-- Button trigger modal 
         <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
         Filter
         </button>
 -->
-  
-
-
+ 
         <div class="collapse" id="filterCollapse">
          <div class="row mt-4">
           <div class="col-4">
@@ -405,17 +403,11 @@
             {data: 'etadate' , name: 'etadate'},
            //{data: 'temperature' , name: 'temperature'},
             {data: 'statsname' , name: 'statsname'},
-   
-            
-            
            
             {data: 'action', name: 'action', orderable: false, searchable: true},
         ]
     });
   });
-
-
-
 
 
   $('body').on("click",".btn-cr8",function(){
@@ -702,11 +694,21 @@
                    // Populate dropdown options
                    picSelect.empty();
                 response.piclist.forEach(function (pivc) {
+                  if (
+                    pivc.area === response.province.prov_order_no ||
+                    pivc.area === response.province.iss_area_code ||
+                    pivc.area === response.province.wilayah
+                      ) {
                   var option = $("<option>").val(pivc.user_id).text(pivc.name);
-                  picSelect.append(option);
+                  picSelect.append(option);}
                 });
 
-               
+                picSelect.select2({
+                
+                  width: '100%' // Adjust the width to fit the container
+                });
+
+                      
                 $("#validation").val(response.status).prop("selected",true);
                 
             }

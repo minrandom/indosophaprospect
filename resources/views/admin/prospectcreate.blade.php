@@ -5,6 +5,14 @@
 
 @push('css')
 <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+<style>
+        .tooltip-inner {
+            max-width: 300px; /* Set the maximum width of the tooltip */
+            width: auto; /* Allow the tooltip to expand horizontally if needed */
+        }
+    </style>
+
+
 
 @endpush
 
@@ -47,7 +55,8 @@
 
           <div class="form-group">
             <label for="cr8infoextra">Informasi Tambahan</label>
-             <input type='' placeholder='Misal : " Kebutuhan untuk ruang OK baru " , " Kebutuhan Banyak Ventilator ", dsb' id="cr8infoextra" name="cr8infoextra" class="form-control" required=""  >
+             <input type='' placeholder='Misal : " Kebutuhan untuk ruang OK baru " , " Kebutuhan Banyak Ventilator ", dsb' id="cr8infoextra" name="cr8infoextra" class="form-control" required  data-toggle="tooltip"
+           title="Misal: 'Kebutuhan untuk ruang OK baru', 'Kebutuhan Banyak Ventilator', 'Permintaan dari dr.ABC'." data-placement="top" >
           </div>
            <div class="form-group">
             <label for="cr8province">Provinsi</label>
@@ -146,7 +155,7 @@
 
   $(function () {
  var id = $(this).attr("id")
-       
+ $('[data-toggle="tooltip"]').tooltip(); 
         $.ajax({
             url: "{{ route('admin.prospectcreate') }}",
             method: "GET",
