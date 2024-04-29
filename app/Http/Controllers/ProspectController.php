@@ -306,6 +306,13 @@ class ProspectController extends Controller
         $userId = auth()->user()->id;          
            // Check if the sequence data already exists for the user
         $Sequence = Sequence::where('sequenceUser', $userId)->first();
+
+        if (!$Sequence) {
+            // If $Sequence is empty, reload the page
+            return redirect()->back();
+        }
+
+
         $a = trim($Sequence->sequenceData, "[]"); // Remove square brackets
         $arraySeq = explode(',', $a); 
 
