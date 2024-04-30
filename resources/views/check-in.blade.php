@@ -42,6 +42,9 @@
 
 
     </div>
+
+    
+
     </div>
 
     @stop
@@ -155,8 +158,8 @@
                 },
                  success: function (response) {
             console.log('Data saved successfully:', response);
-            stopCamera();
-            window.location.reload();
+   
+            window.location.reload(true);
             // You can add additional checks or logs here
         },
         error: function (error) {
