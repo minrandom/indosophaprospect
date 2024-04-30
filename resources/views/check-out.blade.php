@@ -45,8 +45,10 @@
     </div>
 </br>
 </br>
+
+
 <div class="card" style="width: 18rem;">
-  <img src="{{ $hariini->photo_data }}&authuser=0" class="card-img-top" alt="...">
+<img src="{{ $urlphotoshow }}" class="card-img-top" alt="...">
   <div class="card-body">
     <h5 class="card-title">Check-in Terakhir </h5>
     <p class="card-text">{{$hariini->created_at}}</p>
@@ -113,7 +115,8 @@
         function showPosition(position, photoData) {
             var latitude = position.coords.latitude;
             var longitude = position.coords.longitude;
-
+            var checkinid = $("#checkinId").val();
+            console.log(checkinid);
             // Perform reverse geocoding using OpenLayers API
             var url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + latitude + '&lon=' + longitude;
             fetch(url)
@@ -122,8 +125,8 @@
                 var placeName = data.display_name.split(',')[0];
                 var address = data.address.road + ', ' + data.address.city + ', ' + data.address.country;
                 var checkInAt = placeName;
-                var checkinid = $("#checkinId").val();
-                console.log(checkinid);
+               
+               
 
                 Swal.fire({
                     icon: 'success',

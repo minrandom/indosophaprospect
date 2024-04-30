@@ -156,6 +156,7 @@
                  success: function (response) {
             console.log('Data saved successfully:', response);
             stopCamera();
+            window.location.reload();
             // You can add additional checks or logs here
         },
         error: function (error) {

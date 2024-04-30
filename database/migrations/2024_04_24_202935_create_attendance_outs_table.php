@@ -19,7 +19,7 @@ class CreateAttendanceOutsTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('place_name');
             $table->string('address');
-            $table->longText('check_in_loc')->nullable();
+            $table->longText('check_out_loc')->nullable();
             $table->longText('photo_data')->nullable();
             $table->timestamps();
         });

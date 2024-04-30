@@ -36,7 +36,11 @@ class JojoController extends Controller
         $usid=Auth::user()->id;
         $hariini=Attendance::where('user_id',$usid)->whereDate("created_at",today())->doesntHave('out')->first();
         if(isset($hariini)){
-            return view('check-out',compact('hariini'));
+
+            $urlphoto =str_replace("https://drive.google.com/uc?id=", "https://drive.google.com/thumbnail?id=", $hariini->photo_data);
+            $urlphotoshow =str_replace("&export=media", "",$urlphoto);
+
+            return view('check-out',compact(['hariini','urlphotoshow']));
         }
         return view('check-in');
 
@@ -141,7 +145,7 @@ class JojoController extends Controller
             'checkin_id'=>$request->input('checkinid'),
            'place_name' => $request->input('place_name'),
            'address' => $request->input('address'),
-           'check_in_loc'=>$request->input('check_in_loc'),
+           'check_out_loc'=>$request->input('check_in_loc'),
            'photo_data' => $photoUrl,
        ]);
    

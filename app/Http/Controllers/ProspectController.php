@@ -839,36 +839,66 @@ $send=0;
     $now = strtotime(now());
     $diffsec = $qty - $now;
     $diff = floor($diffsec / 86400);
+    $etapodate = Carbon::parse($prospect->eta_po_date);
+    $now= Carbon::now();
+    $diff =$etapodate->diffInDays($now,false);
+    var_dump($diff);
+
    
-    
     $tempename=$temper->tempName;
     $tempecode=$temper->tempCodeName;
-
-
-    $n =($review->chance == 0.4 && isset($review->first_offer_date));
-    //dd($n);
+   
+    // update temperature need to create function so i can just call it
 
     if ($review->chance == 1) {
         $tempename = 'SUCCESS';
         $tempecode = '5';
-    }elseif ($review->chance == 0) {
-        $tempename = 'DROP';
-        $tempecode = '0';
-    } elseif (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
-        $tempename = 'LEAD';
-        $tempecode = '1';
-    } elseif ($review->chance >= 0.4 && isset($review->first_offer_date)) {
-        $tempename = 'Prospect';
-        $tempecode = '2';
-    } elseif (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
-        $tempename = 'FUNNEL';
-        $tempecode = '3';
-    } elseif ($review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" &&(isset($review->user_status) || isset($review->direksi_status) || isset($review->purchasing_status)) ){
-        $tempename = 'HOT PROSPECT';
-        $tempecode = '4';
-    }  elseif (Carbon::parse($prospect->eta_po_date)->isPast()) {
-        $tempename = 'MISSED';
-        $tempecode = '-1';
+    } else 
+    {
+        if ($review->chance == 0) {
+            $tempename = 'DROP';
+            $tempecode = '0';
+        } else
+        {
+            if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0 && $review->anggaran_status=="Ada Sesuai" && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
+                $tempename = 'HOT PROSPECT';
+                $tempecode = '4';
+            } else
+            {
+                if ($diff>0) {
+                    $tempename = 'MISSED';
+                    $tempecode = '-1';
+                } else
+                {
+                    if (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
+                        $tempename = 'LEAD';
+                        $tempecode = '1';
+                    }
+                    else
+                    {
+                        if (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
+                            $tempename = 'FUNNEL';
+                            $tempecode = '3';
+                        }
+                        
+                        else{
+
+                            if ($review->chance >= 0.4 && $review->chance < 0.8 && isset($review->first_offer_date)) {
+                                $tempename = 'Prospect';
+                                $tempecode = '2';
+                            }
+                            else
+                            {
+                                $tempename = 'Prospect';
+                                $tempecode = '2'; 
+                            }                
+
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
     $temper->update([

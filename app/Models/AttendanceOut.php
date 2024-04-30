@@ -14,7 +14,7 @@ class AttendanceOut extends Model
         'user_id',
         'place_name',
         'address',
-        'check_in_loc',
+        'check_out_loc',
         'photo_data',
     ];
 
