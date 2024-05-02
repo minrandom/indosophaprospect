@@ -116,7 +116,7 @@ class ProspectController extends Controller
             }); 
         }
         else{
-            $employees = Employee::where('position',$pos);
+            $employees = Employee::where('position',$pos)->get();
             $piclist = $employees->map(function($employee){
                 return[
                 'user_id' => $employee ? $employee->user->id : "No User ID",
@@ -626,7 +626,7 @@ class ProspectController extends Controller
             }); 
         }
         else{
-            $employees = Employee::where('position',$pos);
+            $employees = Employee::where('position',$pos)->get();
             $piclist = $employees->map(function($employee){
                 return[
                 'user_id' => $employee ? $employee->user->id : "No User ID",
