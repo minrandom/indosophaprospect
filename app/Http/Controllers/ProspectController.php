@@ -251,13 +251,17 @@ class ProspectController extends Controller
        $data="done";
         //$hosid=Hospital::where('name',$request->cr8hospital)->first();
         $config=Config::with('unit','brand')->where('id',$request->cr8product)->first();
-    
+        $ss = Event::where('id',$request->cr8source)->first();
         $options = $this->optiondata()->getData();
        //dd($options);
         foreach ($options->source as $option) {
             if ($option->id == $request->cr8source) {
                 $sourceoption=$option->name;
             }
+            else{
+            if($ss){
+            $sourceoption = $ss->name;}}
+            
         }
 
         foreach ($options->anggaran->review as $anggaransts) {
