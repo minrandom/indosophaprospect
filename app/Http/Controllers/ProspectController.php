@@ -50,6 +50,13 @@ class ProspectController extends Controller
     return view('admin.prospectcreate', ['username' => $username]);
      
     }
+    public function eventcreation()
+    {
+        $username = Auth::check() ? Auth::user()->name : 'Guest';
+
+    return view('admin.prospectcreate_event', ['username' => $username]);
+     
+    }
     public function creationcheck()
     {
         return view('admin.prospectcreatecheck');
@@ -61,6 +68,38 @@ class ProspectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function eventcreate(Prospect $prospect){
+        $provincelist = Province::all();
+        $employees = Employee::all();
+        $employees->load("user");
+        $sourceoption = $this->optiondata()->getData();
+        
+        $piclist = $employees->map(function($employee){
+        return[
+        'user_id' => $employee ? $employee->user->id : "No User ID",
+        'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+        'area' => $employee?$employee->area:"No data "
+        ];});
+        
+        $dept=Department::all();
+        $today = now();
+       $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
+        
+        $data['province'] = $provincelist;
+        //$data['draft']=$draft;
+        $data['pic']=$piclist;
+       
+       // $data['rumahsakit'] = $rumahsakit;
+        $data['dept'] = $dept;
+        $data['event'] = $event;
+        // $data['produk'] = $produk;
+        // $data['source']=$sourceoption;
+        $bunit=Unit::all();
+        $data['bunit'] = $bunit;
+        $data['source']=$sourceoption;
+        return response()->json($data);
+    }
+
     public function create(Prospect $prospect)
     {
         //

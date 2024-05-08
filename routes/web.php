@@ -106,8 +106,10 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect.index')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::POST('/prospect',[ProspectController::class,'store'])->name('admin.prospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospectcreate',[ProspectController::class,'create'])->name('admin.prospectcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/prospecteventcreate',[ProspectController::class,'eventcreate'])->name('admin.prospecteventcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::POST('/draft',[ProspectController::class,'savedraft'])->name('admin.prospect.saveDraft')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospectcreation',[ProspectController::class,'creation'])->name('admin.prospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/prospecteventcreation',[ProspectController::class,'eventcreation'])->name('admin.prospecteventcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/hospital/{provinceId}/hospital',[HospitalController::class,'getHospitalsByProvince'])->name('admin.getHospitalsByProvince')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/category/{unitId}/category',[CategoryController::class,'getCategoriesByUnit'])->name('admin.getCategoriesByUnit')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/categorydata/{unitId}/category',[CategoryController::class,'getCatname'])->name('admin.getCatname')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
