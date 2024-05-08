@@ -381,6 +381,7 @@ class ProspectController extends Controller
         $colUpdate = $reviewdata->col_update ?? "Update Terakhir di GoogleSheet";
 
         $temper = prospectTemperature::where('prospect_id',$prospect->id)->first();
+        //dd($temper);
         $tempName=$temper->tempName;
         $tempCode=$temper->tempCodeName;
   
