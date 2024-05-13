@@ -490,8 +490,11 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       var dataprospect = filteredData;
     } else
       var dataprospect = jsonData;
+      const customOrder = { 4: 1, 1: 2, 2: 3, 3: 4, 5: "-1", '-1': 6};
 
-    // console.log(dataprospect);
+      dataprospect.sort((a,b)=>customOrder[a.temperid] - customOrder[b.temperid]);
+
+     console.log(dataprospect);
 
     var prospectsheet = newData.map(function(datz) {
       return {
@@ -524,18 +527,16 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         JenisAnggaran: datz.review.jenis_anggaran,
         InformasiTambahan: datz.review.comment,
         Chance: (datz.review.chance * 100).toFixed(0) + ' %',
-
         EtaPoDate: datz.eta_po_date,
         Temperature: datz.temperaturebtn,
         NextAction: datz.review.next_action
-
       }
 
     });
 
 
-    // console.log(prospectsheet);
-    //console.log(dataprospect);
+    console.log(prospectsheet);
+    console.log(dataprospect);
     initialProspectTable(dataprospect);
     $('#dlexcel').on('click', function() {
       downloadExcel(prospectsheet);

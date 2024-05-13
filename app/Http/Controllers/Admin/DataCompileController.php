@@ -459,6 +459,9 @@ class DataCompileController extends Controller
                 case "admin":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
                     ->where("status", $status)
+                    ->whereHas('temperature', function ($query) {
+                        $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                    })
                     ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
@@ -467,6 +470,9 @@ class DataCompileController extends Controller
                 case "bu":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)->where('unit_id', $data['buid'])
+                        ->whereHas('temperature', function ($query) {
+                            $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                        })
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
                         ->get();
@@ -475,7 +481,11 @@ class DataCompileController extends Controller
 
                 case "fs":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
-                        ->where("status", $status)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
+                        ->where("status", $status)->where('pic_user_id', $data['usid'])
+                        ->whereHas('temperature', function ($query) {
+                            $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                        })
+                        ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
 
@@ -484,6 +494,9 @@ class DataCompileController extends Controller
                         ->where("status", $status)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
+                        })
+                        ->whereHas('temperature', function ($query) {
+                            $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
@@ -495,6 +508,10 @@ class DataCompileController extends Controller
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('wilayah', $area);
                         })
+                        ->whereHas('temperature', function ($query) {
+                            $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                        })
+
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
@@ -511,8 +528,6 @@ class DataCompileController extends Controller
                     ->get();
 
                     break;
-
-
 
                 case "fs":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")

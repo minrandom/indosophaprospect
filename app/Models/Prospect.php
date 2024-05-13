@@ -65,7 +65,7 @@ class Prospect extends Model
         return $this->hasMany(prospectRemarks::class);
     }
     public function temperature(){
-        return $this->hasOne(prospectTemperature::class);
+        return $this->hasOne(prospectTemperature::class,'prospect_id');
     }
 
     public function review(){
