@@ -86,7 +86,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	
 	Route::get('/hospital',[HospitalController::class,'index'])->name('admin.hospital')->middleware(['can:admin']);
 	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['can:admin']);
-	Route::PATCH('/prospectupdate/{prospect}',[ProspectController::class,'update'])->name('admin.prospectupdate')->middleware(['can:admin']);
+	Route::PATCH('/prospectupdate/{prospect}',[ProspectController::class,'update'])->name('admin.prospectupdate')->middleware(['auth', 'role:admin,am,nsm']);
 	Route::PATCH('/prospectinfoupdate/{prospect}',[ProspectController::class,'infoupdate'])->name('admin.prospectinfoupdate')->middleware(['can:admin']);
 	Route::PATCH('/prospectinfoupdaterequest/{prospect}',[ProspectController::class,'infoupdaterequest'])->name('admin.prospect.infoupdaterequest')->middleware(['auth', 'role:admin,am,nsm,bu']);
 	Route::PATCH('/productupdaterequest/{prospect}',[ProspectController::class,'produpdaterequest'])->name('admin.prospect.produpdaterequest')->middleware(['auth', 'role:admin,am,nsm,bu']);

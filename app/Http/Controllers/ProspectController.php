@@ -1363,10 +1363,21 @@ $send=0;
        
         $config=Config::where('id',$request->productlist)->first();
         
-        $options = $this->optiondata()->getData();
+       
        //dd($options);
       
-      
+        foreach($options->anggaran->review as $aggr){
+            if($aggr->id==$request->anggaranedit){
+                $anggaransts=$aggr->name;
+            }
+        }
+        foreach($options->anggaran->Jenis as $agjn){
+            if($agjn->id==$request->jenisanggaranedit){
+                $anggaranjns=$agjn->name;
+            }
+        }
+
+
 
 
         $source = intval($request->sourceedit);
@@ -1388,8 +1399,8 @@ $send=0;
         $price=$config->price_include_ppn;
         $bunit=$config->unit_id;
         $review->update([
-            'anggaran_status'=>$request->anggaranedit,
-            'jenis_anggaran'=>$request->jenisanggaranedit
+            'anggaran_status'=>$anggaransts,
+            'jenis_anggaran'=>$anggaranjns
         ]);
         $prospect->update([
             'prospect_source'=>$sourceoption,
