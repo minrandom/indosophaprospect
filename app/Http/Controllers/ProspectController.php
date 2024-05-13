@@ -1427,6 +1427,8 @@ $send=0;
                     "rejected_by"=>$request->validator,
                     "reason"=>$request->reason
                 ]);
+
+
             break;
 
             case 1:
@@ -1479,10 +1481,11 @@ $send=0;
         
         
         
-
-        
-        //return $request;
-        return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
+        if($cek==404){
+            return response()->json(['message' => "Data Berhasil di Reject, Silahkan Input Prospect Baru"]);
+        }else{   
+            return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
+        }
     }
 
     /**

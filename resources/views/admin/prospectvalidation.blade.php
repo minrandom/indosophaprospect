@@ -477,8 +477,8 @@
         e.preventDefault()
                 
     // Display alert message to confirm submission
-          if (confirm("Yakin Validasi Prospect ?")) {
-                  // Proceed with form submission
+          if (confirm("Yakin Update Status Prospect ?")) {
+                  // Proceed with form submissionU
                  
                   submitValid(id);
                   $("#validasi-modal").modal("hide");
