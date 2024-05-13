@@ -115,7 +115,7 @@ class ProspectController extends Controller
         $provincelist=Province::all();
         }else if($role=="nsm"){
         $provincelist=Province::with('area')->where('wilayah',$area)->orWhere('wilayah')->get();
-        }else if($role==="am"){
+        }else if($role==="am" || $pos==="FSX"){
         $provincelist=Province::with('area')->where('iss_area_code',$area)->get();       
     
         }else if($role==="fs")
