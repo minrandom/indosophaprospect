@@ -114,10 +114,10 @@ class ProspectController extends Controller
         if($area=="HO"){
         $provincelist=Province::all();
         }else if($role=="nsm"){
-        $provincelist=Province::with('area')->where('wilayah',$area)->orWhere('wilayah')->get();
+        $provincelist=Province::with('area')->where('wilayah',$area)->get();
          }else if($role==="fs"){
-         $provincelist=Province::with('area')->where('prov_order_no',$area)->get();
-        }else if($role==="am" || $pos==="FSX"){
+         $provincelist=Province::with('area')->where('prov_order_no',$area)->orWhere('iss_area_code',$area)->get();
+        }else if($role==="am"){
         $provincelist=Province::with('area')->where('iss_area_code',$area)->get();}       
      
     
@@ -743,11 +743,9 @@ class ProspectController extends Controller
 
      public function promodateupdate(Request $request, Prospect $prospect)
     {
-        //return response()->json($request->demo);
-        //var_dump($request->data);
         $user=Auth::id();
-     $review=Review::where('prospect_id',$prospect->id)->first();
-$send=0;
+        $review=Review::where('prospect_id',$prospect->id)->first();
+        $send=0;
          
         $f1=$review->first_offer_date?$review->first_offer_date:"new";
         $f2=$request->first?$request->first:"new";
@@ -761,9 +759,7 @@ $send=0;
         if($f1==$f2){$oke="oke";}else{
                 $review->update([
             'first_offer_date'=>$request->first,
-            //'last_offer_date'=>$request->last,
-           // 'demo_date'=>$request->demo,
-            //'presentation_date'=>$request->presentation,
+           
              ]);
 
             ReviewLog::create([
@@ -859,7 +855,7 @@ $send=0;
        $temper=prospectTemperature::where('prospect_id',$prospect->id)->first();
        $send=0;
 
-        $chc2=$request->chance?$request->chance:0;$chc1=$review->chance?$review->chance:0;
+        $chc2=$request->chance?$request->chance:0.2;$chc1=$review->chance?$review->chance:0.2;
         if($chc1==$chc2){$oke="oke";}else{
             $review->update([
                 'chance'=>$chc2,
@@ -1189,7 +1185,7 @@ $send=0;
        
 
         if($send>0){
-        return response()->json(['success' => true,'message' => $data1]); 
+        return response()->json(['success' => true,'message' => "Update Review Success,Terima Kasih sudah Update Review Prospect"]); 
         } else
         return "done";
    
