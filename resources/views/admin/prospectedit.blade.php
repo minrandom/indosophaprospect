@@ -287,8 +287,8 @@
 
           <div class="col-sm-12">
             <label for="Harga" class="col-sm-3 col-form-label font-weight-bold">Harga :</label>
-
-            <label for="Harga" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->submitted_price }}</label>
+           
+            <label for="Harga" style="color:black" class="col-sm-6 col-form-label font-weight-bold">Rp  {{ number_format($prospect->submitted_price, 0, ',-', '.') }}</label>
           </div>
           @can('admin')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Request Update Produk</a>
