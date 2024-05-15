@@ -87,8 +87,8 @@
 
 
 
-
-    <!-- Earnings (Annual) Card Example -->
+   
+    <!-- Earnings (Annual) Card Example   //number_format($prp->config->price_include_ppn, 0, ',-', '.')-->
     <div class="col-xl-3 col-md-6 mb-4">
       <div class="card border-left-success shadow h-100 py-2">
         <div class="card-body">
@@ -100,7 +100,7 @@
               <br>
               <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                 Nilai Prospect</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800">Rp {{$prospect->submitted_price }} </div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">Rp {{ number_format($prospect->submitted_price,0, ',-', '.') }} </div>
 
 
             </div>
