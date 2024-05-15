@@ -182,6 +182,7 @@
 @push('js')
 
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/jquery.dataTables.min.js"></script>
+<!--<script src="{{ asset('template/backend/sb-admin-2') }}/jquery.min.js"></script>-->
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
@@ -286,7 +287,7 @@
 
             if (selectedProvince) {
                 // Filter response.pic based on selected province and pic.area
-                var filteredPics = response.pic.filter(function(pic) {
+                var filteredPics = response.filterpiclist.filter(function(pic) {
                     // Assuming pic has properties representing the area it belongs to (e.g., pic.area)
                     return pic.area == selectedProvince.wilayah || pic.area == selectedProvince.iss_area_code || pic.area == selectedProvince.prov_order_no;
                 });

@@ -111,7 +111,7 @@ class ProspectController extends Controller
         
         $area=$user->employee->area;
         $pos=$user->employee->position;
-        if($area=="HO"){
+        if($area=="HO" ){
         $provincelist=Province::all();
         }else if($role=="nsm"){
         $provincelist=Province::with('area')->where('wilayah',$area)->get();
@@ -197,6 +197,20 @@ class ProspectController extends Controller
          }
         
         
+
+         if($role=="bu"){
+            $employees = Employee::all();
+            $employees->load("user");
+            $filterpiclist = $employees->map(function($employee){
+            return[
+            'user_id' => $employee ? $employee->user->id : "No User ID",
+            'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
+            'area' => $employee?$employee->area:"No data "
+            ];
+            }); 
+         }else {$filterpiclist = $piclist;}
+         $data['filterpiclist']=$filterpiclist;
+
         $data['province'] = $provincelist;
         $data['draft']=$draft;
         $data['pic']=$piclist;
@@ -872,7 +886,7 @@ class ProspectController extends Controller
         $send=$send+1;
     }  
 
-    
+    /*
     $review->chance;
     $podate = $review->eta_po_date;
     $qty = strtotime($podate);
@@ -946,6 +960,7 @@ class ProspectController extends Controller
         'tempCodeName'=>$tempecode
     ]);
 
+    */
 
     $data1='<div class="alert alert-success" role="alert">
     <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>
@@ -1107,7 +1122,7 @@ class ProspectController extends Controller
         //$now = strtotime(now());
         //$diffsec = $qty - $now;
         //$diffzz = floor($diffsec / 86400);
-        
+        /*
         $etapodate = Carbon::parse($prospect->eta_po_date);
         $now= Carbon::now();
         $diff =$etapodate->diffInDays($now,false);
@@ -1174,7 +1189,7 @@ class ProspectController extends Controller
             'tempName'=>$tempename,
             'tempCodeName'=>$tempecode
         ]);
-
+        */
 
         $data1='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>
