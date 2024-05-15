@@ -5,11 +5,11 @@
         <div class="sidebar-brand-icon">
             <i class="fab"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">Indosopha</div>
+        <div class="sidebar-brand-text mx-3">ISBIS APPS</div>
     </a>
 
     <!-- Divider -->
-    <hr class="sidebar-divider my-0">
+    <!--<hr class="sidebar-divider my-0">-->
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
     </div>
