@@ -403,7 +403,7 @@ class ProspectController extends Controller
 
         switch ($tempCode){
             case (-1);
-            $tempe= "<h4><span class='badge bg-dark text-light'>DROP</span></h4>";
+            $tempe= "<h4><span class='badge tmpe bg-secondary text-light'>MISSED</span></h4>";
             break;
             case 0:
                $tempe= "<h4><span class='badge tmpe bg-dark text-light'>DROP</span></h4>";
