@@ -361,6 +361,7 @@
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
+<script src="{{ asset('template/backend/sb-admin-2') }}/jquery.min.js"></script>
 
 <script type="text/javascript">
 

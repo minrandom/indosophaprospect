@@ -71,6 +71,62 @@ class JojoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
+     public function chancecontrol(Request $request){
+        $id = $request->id;
+        $temper = prospectTemperature::where('prospect_id',$id)->get();
+        $rev= Review::where('prospect_id',$id)->get();
+        $etapodate = Carbon::parse($rev->eta_po_date);
+        $now= Carbon::now();
+        $diff =$etapodate->diffInDays($now,false);
+
+        $n[0]=$rev->first_offer_date?10000000:0;
+        $n[6]=$rev->last_offer_date?10:0;
+        
+
+
+        if($rev->anggaran_status=="Belum Ada" || $rev->anggaran_status =="Usulan"){
+            $n[1]=0;
+        }elseif($rev->anggaran_status=="Ada Saingan" || $rev->anggaran_status=="Ada Neutral"){
+            $n[1]=1000000;
+        }elseif($rev->anggaran_status=="Ada Sesuai"){
+            $n[1]=3000000;
+        }
+
+        if($diff>=(-150)){
+            $n[2]=100000;
+        }
+
+
+        if($rev->user_status=="Belum Tahu"||$rev->user_status=="Menolak"){
+            $n[3]=0;
+        }else{$n[3]=10000;}
+
+        if($rev->purchasing_status=="Belum Tahu"||$rev->purchasing_status=="Menolak"){
+            $n[4]=0;
+        }else{$n[4]=1000;}
+        
+        if($rev->direksi_status=="Belum Tahu"||$rev->direksi_status=="Menolak"){
+            $n[5]=0;
+        }else{$n[5]=100;}
+        
+        if($rev->buy_status=="Done"){
+            $n[7]=5;
+        }else{$n[7]=0;}
+
+        $sum=array_sum($n);
+        
+
+         
+            
+
+
+        //var_dump($diff);
+        
+        
+     }
+
+
     public function store(Request $request)
     {
         //
@@ -286,8 +342,14 @@ class JojoController extends Controller
 
     
 
+    
+
     //return redirect('/home');
     }
+
+public function temperupdate(Request $request){
+
+}
 
     public function prospectsequence(){
         
