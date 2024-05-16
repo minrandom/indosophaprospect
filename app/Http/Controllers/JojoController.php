@@ -347,8 +347,94 @@ class JojoController extends Controller
     //return redirect('/home');
     }
 
-public function temperupdate(Request $request){
+public function temperupdate($id,Request $request){
+    //dd($request->update);
+$update = $request->update; 
+    if(isset($update)){
+    $prospect = Prospect::with('review', 'temperature')->where('id',$id)->first();
 
+
+     
+        // Get the review and temperature
+        $review = $prospect->review;
+   
+
+        $temperature = $prospect->temperature;
+        
+        $etapodate = Carbon::parse($prospect->eta_po_date);
+        $now= Carbon::now();
+        $diff =$etapodate->diffInDays($now,false);
+        var_dump($diff);
+    
+        //var_dump($usercek);
+        
+        
+        // Determine the new temperature name and code based on conditions
+        if($diff>0){var_dump("PAST");}
+
+
+        
+
+            if ($review->chance == 1) {
+                $tempename = 'SUCCESS';
+                $tempecode = '5';
+            } else 
+            {
+                if ($review->chance == 0) {
+                    $tempename = 'DROP';
+                    $tempecode = '0';
+                } else
+                {
+                    if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0 && $review->anggaran_status=="Ada Sesuai" && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
+                        $tempename = 'HOT PROSPECT';
+                        $tempecode = '4';
+                    } else
+                    {
+                        if ($diff>0) {
+                            $tempename = 'MISSED';
+                            $tempecode = '-1';
+                        } else
+                        {
+                            if (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
+                                $tempename = 'LEAD';
+                                $tempecode = '1';
+                            }
+                            else
+                            {
+                                if (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.4 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
+                                    $tempename = 'FUNNEL';
+                                    $tempecode = '3';
+                                }
+                                
+                                else{
+
+                                    if ($review->chance >= 0.4 && $review->chance < 0.8 && isset($review->first_offer_date)) {
+                                        $tempename = 'Prospect';
+                                        $tempecode = '2';
+                                    }
+                                    else
+                                    {
+                                        $tempename = 'Prospect';
+                                        $tempecode = '2'; 
+                                    }                
+
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            $temperature->tempName = $tempename;
+            $temperature->tempCodeName = $tempecode;
+            $temperature->save();
+
+
+    return response()->json(["success"=>true,"pesan"=>$temperature->tempName]);
+    }
+    else
+    return response()->json(["success"=>true,"pesan"=>"Ini adalah menu detail prospect, Silahkan Update Review Prospect Anda"]);
 }
 
     public function prospectsequence(){

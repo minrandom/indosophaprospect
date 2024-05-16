@@ -844,12 +844,17 @@ class ProspectController extends Controller
 
         $data1='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Terima Kasih sudah Update Review</h4>
+        <h5>Refresh Jika temperature belum terupdate</h5>
+        <button onClick="window.location.reload();">Refresh Page</button>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        
         <span aria-hidden="true">&times;</span>
     </button>
         </div>';
         $data='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Terima Kasih sudah Update Review</h4>
+        <h5>Refresh Jika temperature belum terupdate</h5>
+        <button onClick="window.location.reload();">Refresh Page</button>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -964,6 +969,8 @@ class ProspectController extends Controller
 
     $data1='<div class="alert alert-success" role="alert">
     <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>
+    <h5>Refresh Jika temperature belum terupdate</h5>
+        <button onClick="window.location.reload();">Refresh Page</button>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
 </button>
@@ -1193,6 +1200,8 @@ class ProspectController extends Controller
 
         $data1='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>
+        <h5>Refresh Jika temperature belum terupdate</h5>
+        <button onClick="window.location.reload();">Refresh Page</button>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
     </button>
@@ -1200,7 +1209,7 @@ class ProspectController extends Controller
        
 
         if($send>0){
-        return response()->json(['success' => true,'message' => "Update Review Success,Terima Kasih sudah Update Review Prospect"]); 
+        return response()->json(['success' => true,'message' => $data1]); 
         } else
         return "done";
    

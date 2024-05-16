@@ -17,6 +17,7 @@ use App\Http\Controllers\ProspectController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\sequenceController;
+use App\Http\Controllers\JojoController;
 
  
 //Namespace User
@@ -76,6 +77,7 @@ Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('re
 Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::post('/sequencedata', [sequenceController::class,'upload'])->name('sequence.up')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+Route::get('/temperupdate/{id}', [JojoController::class, 'temperupdate'])->name('temperupdate')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::post('/check-out', 'JojoController@outstore')->name('check-out.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/fixdata', 'JojoController@fixtemperature')->name('fix.temperature')->middleware(['auth', 'role:admin']);
 Route::get('/check-in', 'JojoController@index')->name('check-in')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);

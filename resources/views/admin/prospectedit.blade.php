@@ -138,7 +138,7 @@
     </div>
 
     <!-- Earnings (Monthly) Card Example -->
-    <div class="col-xl-3 col-md-6 mb-4 ">
+    <div class="col-xl-3 col-md-6 mb-4 " id="nopros">
       <div class="card border-left-primary shadow h-100 py-2">
         <div class="card-body">
           <div class="row no-gutters align-items-center">
@@ -727,8 +727,24 @@
     localStorage.removeItem("alertMessage");
     // Check if the alert message exists and display it
     if (alertMessage) {
-      $("#thealert").html(alertMessage);
+        $("#thealert").html(alertMessage);
+        $("#thealert").focus();
+        
+        // Scroll to the alert message
+        $('html, body').animate({
+            scrollTop: $("#nopros").offset().top
+        }, 1000); // Adjust the duration as needed (1000ms = 1 second)
     }
+  
+    function getLastSegment() {
+        var pathArray = window.location.pathname.split('/'); // Split the path by '/'
+        return pathArray[pathArray.length - 1]; // Get the last segment
+    }
+
+    // Extracted parameter
+    var id = getLastSegment();
+
+    console.log('Extracted Parameter:', id);
 
     /*
     var
@@ -742,12 +758,10 @@
     */
 
 
-  });
-
 
 
   $('body').on("click", ".btn-edit", function() {
-    var id = $(this).attr("id")
+    //var id = $(this).attr("id")
 
     $.ajax({
       url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
@@ -817,7 +831,7 @@
   //produk
 
   $('body').on("click", ".btn-updateproduk", function() {
-    var id = $(this).attr("id")
+    //var id = $(this).attr("id")
 
     $.ajax({
       url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
@@ -920,8 +934,12 @@
       method: "PATCH",
       data: $(this).serialize(),
       success: function(response) {
+        
         $("#produk-modal").modal("hide");
         $("#thealert").html(response.message).focus();
+
+
+
 
       }
     })
@@ -930,7 +948,7 @@
 
 
   $('body').on("click", ".btn-updatepromosi", function() {
-    var id = $(this).attr("id")
+ 
 
     $.ajax({
       url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
@@ -949,9 +967,10 @@
   });
 
   $("#promosiForm").on("submit", function(e) {
-    e.preventDefault()
-    var prospect = $("#data").val()
-
+    e.preventDefault();
+    var prospect = $("#data").val();
+    var update =1;
+    //console.log(id);
     $.ajax({
       url: "{{ route('admin.prospect.promoteupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
       method: "PATCH",
@@ -959,9 +978,37 @@
       success: function(response) {
         localStorage.setItem("alertMessage", response.message);
         $("#promosi-modal").modal("hide");
-        location.reload();
-        // flash('success', 'Data berhasil diupdate');
-        $('#thealert').focus();
+
+        $.ajax({
+                    url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id) ,
+                    type: 'GET',
+                    data: { update: update },
+                    success: function(response) {
+                        console.log("success");
+                             
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('There was an error in temper update!', error);
+                    }
+                });
+      
+                location.reload();
+                location.reload();
+            
+
+      },
+      error: function(xhr, status, error) {
+    console.error('There was an error in promote update!', error);
+                    
+
+
+
+    
+        
+
+
+
       }
     })
   });
@@ -970,7 +1017,7 @@
 
 
   $('body').on("click", ".btn-updatereview", function() {
-    var id = $(this).attr("id")
+    var id = $(this).attr("id");
     
     $.ajax({
       url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
@@ -1049,9 +1096,10 @@
   });
 
   $("#reviewForm").on("submit", function(e) {
-    e.preventDefault()
+    e.preventDefault();
     var prospect = $("#data").val()
-
+    var update =1;
+    console.log(id);
     $.ajax({
       url: "{{ route('admin.prospect.reviewupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
       method: "PATCH",
@@ -1059,10 +1107,30 @@
       success: function(response) {
         localStorage.setItem("alertMessage", response.message);
         $("#review-modal").modal("hide");
-        location.reload();
-        // flash('success', 'Data berhasil diupdate');
-        $('#thealert').focus();
-      }
+        
+              $.ajax({
+                          url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id) ,
+                          type: 'GET',
+                          data: { update: update },
+                          success: function(response) {
+                              console.log("success");
+                                  
+                              location.reload();
+                          },
+                          error: function(xhr, status, error) {
+                              console.error('There was an error in temper update!', error);
+                          }
+                      });
+            
+                      location.reload();
+                      location.reload();
+                  
+
+            },
+            error: function(xhr, status, error) {
+          console.error('There was an error in promote update!', error);
+     
+        }
     })
   });
 
@@ -1202,9 +1270,10 @@
 
 
 
-      }
-    })
+      })
+    }
   });
+});
 
 
 
@@ -1213,21 +1282,46 @@
   $("#chcForm").on("submit", function(e) {
     e.preventDefault()
     var prospect = $("#data").val()
-
+    var update =1;
+    console.log(id);
     $.ajax({
       url: "{{ route('admin.prospect.chcupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
       method: "PATCH",
       data: $(this).serialize(),
       success: function(response) {
         localStorage.setItem("alertMessage", response.message);
-        // Reload the page
-        location.reload();
-        // flash('success', 'Data berhasil diupdate');
-        $('#thealert').focus();
-      }
+        $("#chcForm").modal("hide");
+        
+              $.ajax({
+                          url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id) ,
+                          type: 'GET',
+                          data: { update: update },
+                          success: function(response) {
+                              console.log("success");
+                                  
+                              location.reload();
+                          },
+                          error: function(xhr, status, error) {
+                              console.error('There was an error in temper update!', error);
+                          }
+                      });
+            
+                      location.reload();
+                      location.reload();
+                  
+
+            },
+            error: function(xhr, status, error) {
+          console.error('There was an error in promote update!', error);
+     
+        }
+       
+      
     })
   });
 
+
+});
 
 
 </script>
