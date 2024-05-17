@@ -212,6 +212,10 @@
         </div>
         <div class="card-body">
           <div class="col-sm-12">
+            <label for="tglvalidasi" class="col-sm-3 col-form-label font-weight-bold">Dibuat Oleh : </label>
+            <label for="tglvalidasi" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->creator->name }}</label>
+          </div>
+          <div class="col-sm-12">
             <label for="tglvalidasi" class="col-sm-3 col-form-label font-weight-bold">Tanggal validasi : </label>
             <label for="tglvalidasi" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ date('d-M-Y', strtotime($prospect->validation_time)) }}</label>
           </div>

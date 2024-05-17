@@ -740,7 +740,7 @@ class ProspectController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-     public function infoupdate(Request $request, Prospect $prospect)
+     public function infoupdate($request, $prospect)
     {
         
         $review=Review::where('prospect_id',$request->data);
@@ -1121,83 +1121,6 @@ class ProspectController extends Controller
         }     
        
 
-
-
-        //$review->chance;
-        //$podate = $review->eta_po_date;
-        //$qty = strtotime($podate);
-        //$now = strtotime(now());
-        //$diffsec = $qty - $now;
-        //$diffzz = floor($diffsec / 86400);
-        /*
-        $etapodate = Carbon::parse($prospect->eta_po_date);
-        $now= Carbon::now();
-        $diff =$etapodate->diffInDays($now,false);
-        var_dump($diff);
-    
-       
-        $tempename=$temper->tempName;
-        $tempecode=$temper->tempCodeName;
-       
-        // update temperature need to create function so i can just call it
-
-        if ($review->chance == 1) {
-            $tempename = 'SUCCESS';
-            $tempecode = '5';
-        } else 
-        {
-            if ($review->chance == 0) {
-                $tempename = 'DROP';
-                $tempecode = '0';
-            } else
-            {
-                if ($review->chance >= 0.6 && $review->chance < 1 &&$diff>=(-150) && $diff<=0 && $review->anggaran_status=="Ada Sesuai" && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
-                    $tempename = 'HOT PROSPECT';
-                    $tempecode = '4';
-                } else
-                {
-                    if ($diff>0) {
-                        $tempename = 'MISSED';
-                        $tempecode = '-1';
-                    } else
-                    {
-                        if (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
-                            $tempename = 'LEAD';
-                            $tempecode = '1';
-                        }
-                        else
-                        {
-                            if (in_array($review->anggaran_status, ['Ada Sesuai', 'Ada Neutral','Ada Saingan'])&& $review->chance > 0.2 && $review->chance <0.7 && isset($review->user_status) && isset($review->direksi_status) && isset($review->purchasing_status) ){
-                                $tempename = 'FUNNEL';
-                                $tempecode = '3';
-                            }
-                            
-                            else{
-
-                                if ($review->chance >= 0.4 && $review->chance < 0.8 && isset($review->first_offer_date)) {
-                                    $tempename = 'Prospect';
-                                    $tempecode = '2';
-                                }
-                                else
-                                {
-                                    $tempename = 'Prospect';
-                                    $tempecode = '2'; 
-                                }                
-
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-
-        $temper->update([
-            'tempName'=>$tempename,
-            'tempCodeName'=>$tempecode
-        ]);
-        */
-
         $data1='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>
         <h5>Refresh Jika temperature belum terupdate</h5>
@@ -1236,7 +1159,10 @@ class ProspectController extends Controller
                 'col_before'=>$pic1,
                 'col_after'=>$pic2,
                 'logdate'=>now(),
-                'request_by'=>$user
+                'request_by'=>$user,
+                'approve_date'=>now(),
+                'approve_by'=>$user,
+                'req_status'=>"system_generated"
             ]);
             $send=$send+1;
         }
@@ -1247,7 +1173,10 @@ class ProspectController extends Controller
                 'col_before'=>$dpt1,
                 'col_after'=>$dpt2,
                 'logdate'=>now(),
-                'request_by'=>$user
+                'request_by'=>$user,
+                'approve_date'=>now(),
+                'approve_by'=>$user,
+                'req_status'=>"system_generated"
             ]);
             $send=$send+1;
         }
@@ -1258,14 +1187,18 @@ class ProspectController extends Controller
                 'col_before'=>$c,
                 'col_after'=>$d,
                 'logdate'=>now(),
-                'request_by'=>$user
+                'request_by'=>$user,
+                'approve_date'=>now(),
+                'approve_by'=>$user,
+                'req_status'=>"system_generated"
             ]);
             $send=$send+1;
         }
 
-                
+        
+        
         $data='<div class="alert alert-success" role="alert">
-        <h4 class="alert-heading">Update Info Berhasil di Request</h4>
+        <h4 class="alert-heading">Berhasil Update Data</h4>
           <p>Silahkan Hubungi NSM anda untuk Proses Lebih Lanjut</p>
           <hr>
           <p class="mb-0">Jangan Lupa untuk update review Prospect.</p>
@@ -1284,6 +1217,7 @@ class ProspectController extends Controller
         
         
         if($send>0){
+          $this->infoupdate($request,$prospect);
         return response()->json(['success' => true, 'message' => $data]);}
         else{
             return response()->json(['success' => true,'message' => $data2]); 
