@@ -87,7 +87,7 @@
 
 
 
-   
+
     <!-- Earnings (Annual) Card Example   //number_format($prp->config->price_include_ppn, 0, ',-', '.')-->
     <div class="col-xl-3 col-md-6 mb-4">
       <div class="card border-left-success shadow h-100 py-2">
@@ -291,8 +291,8 @@
 
           <div class="col-sm-12">
             <label for="Harga" class="col-sm-3 col-form-label font-weight-bold">Harga :</label>
-           
-            <label for="Harga" style="color:black" class="col-sm-6 col-form-label font-weight-bold">Rp  {{ number_format($prospect->submitted_price, 0, ',-', '.') }}</label>
+
+            <label for="Harga" style="color:black" class="col-sm-6 col-form-label font-weight-bold">Rp {{ number_format($prospect->submitted_price, 0, ',-', '.') }}</label>
           </div>
           @can('admin')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Request Update Produk</a>
@@ -573,7 +573,7 @@
           <form id="reviewForm">
             <div class="form-group">
               <label for="user_status">User Status</label>
-             <input type="hidden" required="" id="data" name="data" class="form-control">
+              <input type="hidden" required="" id="data" name="data" class="form-control">
 
               <select id="user_status" name="user_status" class="form-control">
               </select>
@@ -722,7 +722,6 @@
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2')}}/vendor/sweetalert/sweetalert.all.js"></script>
 <script type="text/javascript">
-
   $(document).ready(function() {
     // Retrieve the alert message from local storage
     var alertMessage = localStorage.getItem("alertMessage");
@@ -731,18 +730,18 @@
     localStorage.removeItem("alertMessage");
     // Check if the alert message exists and display it
     if (alertMessage) {
-        $("#thealert").html(alertMessage);
-        $("#thealert").focus();
-        
-        // Scroll to the alert message
-        $('html, body').animate({
-            scrollTop: $("#nopros").offset().top
-        }, 1000); // Adjust the duration as needed (1000ms = 1 second)
+      $("#thealert").html(alertMessage);
+      $("#thealert").focus();
+
+      // Scroll to the alert message
+      $('html, body').animate({
+        scrollTop: $("#nopros").offset().top
+      }, 1000); // Adjust the duration as needed (1000ms = 1 second)
     }
-  
+
     function getLastSegment() {
-        var pathArray = window.location.pathname.split('/'); // Split the path by '/'
-        return pathArray[pathArray.length - 1]; // Get the last segment
+      var pathArray = window.location.pathname.split('/'); // Split the path by '/'
+      return pathArray[pathArray.length - 1]; // Get the last segment
     }
 
     // Extracted parameter
@@ -764,451 +763,454 @@
 
 
 
-  $('body').on("click", ".btn-edit", function() {
-    //var id = $(this).attr("id")
+    $('body').on("click", ".btn-edit", function() {
+      //var id = $(this).attr("id")
 
-    $.ajax({
-      url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
-      method: "GET",
-      success: function(response) {
+      $.ajax({
+        url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
+        method: "GET",
+        success: function(response) {
 
+          $("#edit-modal").modal("show");
+          $("#submiteddate").val(response.valdate);
+          $("#data").val(response.prospect.id);
+          $("#creatorname").val(response.prospect.creator.name);
+          $("#sourceedit").val(response.prospect.prospect_source);
+          $("#provinceedit").val(response.prospect.province.name);
+          $("#hospitalname").val(response.prospect.hospital.name);
 
+          var deptSelect = $("#departmentname");
+          populateSelectFromDatalist('departmentname', response.depopt, "Pilih Departemen");
 
+          var opsdept = $("<option>").val(response.prospect.department_id).text(response.prospect.department.name).attr("selected", true);
+          deptSelect.prepend(opsdept);
+          //provinceSelect.empty(); // Clear existing options
 
-        $("#edit-modal").modal("show");
-        $("#submiteddate").val(response.valdate);
-        $("#data").val(response.prospect.id);
-        $("#creatorname").val(response.prospect.creator.name);
-        $("#sourceedit").val(response.prospect.prospect_source);
-        $("#provinceedit").val(response.prospect.province.name);
-        $("#hospitalname").val(response.prospect.hospital.name);
+          var picSelect = $("#personincharge");
+          // Populate dropdown options
+          picSelect.empty();
+          response.prospect.piclist.forEach(function(pivc) {
 
-        var deptSelect = $("#departmentname");
-        populateSelectFromDatalist('departmentname', response.depopt, "Pilih Departemen");
-
-        var opsdept = $("<option>").val(response.prospect.department_id).text(response.prospect.department.name).attr("selected", true);
-        deptSelect.prepend(opsdept);
-        //provinceSelect.empty(); // Clear existing options
-
-        var picSelect = $("#personincharge");
-        // Populate dropdown options
-        picSelect.empty();
-        response.prospect.piclist.forEach(function(pivc) {
-
-          var option = $("<option>").val(pivc.user_id).text(pivc.name)
-          if (response.prospect.pic_user_id === pivc.user_id) {
-            option.attr("selected", true);
-            picSelect.prepend(option);
-          } else {
-            picSelect.append(option);
-          }
-        });
-
-
-        var picSelect = $("#personincharge");
-
-        $("#addinfo").val(response.prospect.lateinfo);
-
-
-      }
-    })
-  });
-
-  $("#editForm").on("submit", function(e) {
-    e.preventDefault()
-    var prospect = $("#data").val()
-
-    $.ajax({
-      url: "{{ route('admin.prospect.infoupdaterequest', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
-      method: "PATCH",
-      data: $(this).serialize(),
-      success: function(response) {
-        $("#edit-modal").modal("hide");
-        $("#thealert").html(response.message);
-        $('html, body').animate({
-          scrollTop: 0
-        }, 'slow');
-      }
-    })
-  });
-
-  //produk
-
-  $('body').on("click", ".btn-updateproduk", function() {
-    //var id = $(this).attr("id")
-
-    $.ajax({
-      url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
-      method: "GET",
-      success: function(response) {
-
-        $("#produk-modal").modal("show");
-        $("#data").val(response.prospect.id);
-
-
-
-        var unitselect = $("#editunit");
-        var firstunit = $("<option>").val(response.prospect.unit_id).text(response.prospect.unit.name).attr("selected", true);
-        unitselect.prepend(firstunit);
-
-        var catSelect = $("#editcategory");
-        var idcat = response.prospect.config.category_id;
-        populateSelectFromDatalist('editcategory', response.catopt, "Pilih Kategori Produk");
-        var unitdata = response.prospect.unit_id;
-
-        function catdata(unitId) {
-          // Make an AJAX call to retrieve the category name based on unitId
-          $.ajax({
-            url: "{{ route('admin.getCatname', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
-            method: "GET",
-            success: function(response) {
-              var catname = response.catdat.name;
-              var catid = response.catdat.id;
-
-              // console.log(catname);
-              // Call the callback function with the retrieved category name
-              var ncatSelect = $("#editcategory");
-              // For example, update an input field with the category name
-              var firstCategory = $("<option>").val(catid).text(catname).attr('selected', true);
-              ncatSelect.append(firstCategory);
-
-            },
-
-          });
-        }
-
-        catdata(idcat);
-
-        function fetchcat2(unitId) {
-          // Make an AJAX call to retrieve hospitals based on provinceId
-          $.ajax({
-            url: "{{ route('admin.getCategoriesByUnit', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
-            method: "GET",
-            success: function(response) {
-              populateSelectFromDatalist('editcategory', response.catopt, "Pilih Kategori Produk");
+            var option = $("<option>").val(pivc.user_id).text(pivc.name)
+            if (response.prospect.pic_user_id === pivc.user_id) {
+              option.attr("selected", true);
+              picSelect.prepend(option);
+            } else {
+              picSelect.append(option);
             }
           });
+
+
+          var picSelect = $("#personincharge");
+
+          $("#addinfo").val(response.prospect.lateinfo);
+
+
         }
+      })
+    });
+
+    $("#editForm").on("submit", function(e) {
+      e.preventDefault()
+      var prospect = $("#data").val()
+
+      $.ajax({
+        url: "{{ route('admin.prospect.infoupdaterequest', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
+        method: "PATCH",
+        data: $(this).serialize(),
+        success: function(response) {
+          $("#edit-modal").modal("hide");
+          localStorage.setItem("alertMessage", response.message);
+          
+          $('html, body').animate({
+            scrollTop: 0
+          }, 'slow');
+          location.reload();
+        }
+      })
+    });
+
+    //produk
+
+    $('body').on("click", ".btn-updateproduk", function() {
+      //var id = $(this).attr("id")
+
+      $.ajax({
+        url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
+        method: "GET",
+        success: function(response) {
+
+          $("#produk-modal").modal("show");
+          $("#data").val(response.prospect.id);
 
 
-        //var selectedunitId = $(this).val();
-        fetchcat2(unitdata);
 
+          var unitselect = $("#editunit");
+          var firstunit = $("<option>").val(response.prospect.unit_id).text(response.prospect.unit.name).attr("selected", true);
+          unitselect.prepend(firstunit);
 
-        var prodSelect = $("#productlist");
-        prodSelect.empty();
-        populateSelectFromDatalist('productlist', response.configlist, "Pilih Produk");
-        var firstconf = $("<option>").val(response.prospect.config_id).text(response.prospect.config.name).attr('selected', true);
-        prodSelect.prepend(firstconf);
+          var catSelect = $("#editcategory");
+          var idcat = response.prospect.config.category_id;
+          populateSelectFromDatalist('editcategory', response.catopt, "Pilih Kategori Produk");
+          var unitdata = response.prospect.unit_id;
 
-        $("#editunit, #editcategory").on("change", function() {
-          var selectedBusinessUnitId = $("#editunit").val();
-          var selectedCategoryId = $("#editcategory").val();
-          var selectformId = "productlist";
+          function catdata(unitId) {
+            // Make an AJAX call to retrieve the category name based on unitId
+            $.ajax({
+              url: "{{ route('admin.getCatname', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
+              method: "GET",
+              success: function(response) {
+                var catname = response.catdat.name;
+                var catid = response.catdat.id;
 
-          if (selectedBusinessUnitId && selectedCategoryId) {
-            populateProductSelect(selectedBusinessUnitId, selectedCategoryId, selectformId);
-          } else {
+                // console.log(catname);
+                // Call the callback function with the retrieved category name
+                var ncatSelect = $("#editcategory");
+                // For example, update an input field with the category name
+                var firstCategory = $("<option>").val(catid).text(catname).attr('selected', true);
+                ncatSelect.append(firstCategory);
 
-            var productSelect = $("#productlist");
-            productSelect.empty();
-            productSelect.append('<option value="">- Pilih Produk -</option>');
+              },
+
+            });
           }
-        });
 
-
-
-
-
-
-        $("#qtyitem").val(response.prospect.qty);
-
-
-
-      }
-    })
-  });
-
-  $("#produkForm").on("submit", function(e) {
-    e.preventDefault()
-    var prospect = $("#data").val()
-
-    $.ajax({
-      url: "{{ route('admin.prospect.produpdaterequest', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
-      method: "PATCH",
-      data: $(this).serialize(),
-      success: function(response) {
-        
-        $("#produk-modal").modal("hide");
-        $("#thealert").html(response.message).focus();
-
-
-
-
-      }
-    })
-  });
-
-
-
-  $('body').on("click", ".btn-updatepromosi", function() {
- 
-
-    $.ajax({
-      url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
-      method: "GET",
-      success: function(response) {
-
-        $("#promosi-modal").modal("show");
-        $("#data").val(response.prospect.id);
-        $("#first").val(response.prospect.review.first_offer_date);
-        $("#last").val(response.prospect.review.last_offer_date);
-        $("#presentation").val(response.prospect.review.presentation_date);
-        $("#demo").val(response.prospect.review.demo_date);
-
-      }
-    })
-  });
-
-  $("#promosiForm").on("submit", function(e) {
-    e.preventDefault();
-    var prospect = $("#data").val();
-    var update =1;
-    //console.log(id);
-    $.ajax({
-      url: "{{ route('admin.prospect.promoteupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
-      method: "PATCH",
-      data: $(this).serialize(),
-      success: function(response) {
-        localStorage.setItem("alertMessage", response.message);
-        $("#promosi-modal").modal("hide");
-
-        $.ajax({
-                    url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id) ,
-                    type: 'GET',
-                    data: { update: update },
-                    success: function(response) {
-                        console.log("success");
-                             
-                        location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('There was an error in temper update!', error);
-                    }
-                });
-      
-                location.reload();
-                location.reload();
-            
-
-      },
-      error: function(xhr, status, error) {
-    console.error('There was an error in promote update!', error);
-                    
-
-
-
-    
-        
-
-
-
-      }
-    })
-  });
-
-
-
-
-  $('body').on("click", ".btn-updatereview", function() {
-    var id = $(this).attr("id");
-    
-    $.ajax({
-      url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
-      method: "GET",
-      success: function(response) {
-        //console.log(response.prospect.id);
-        $("#review-modal").modal("show");
-        $("#data").val(response.prospect.id);
-        var userSelect = $("#user_status");
-        userSelect.empty();
-        var optionuser = $("<option>").val(response.prospect.review.user_status).text(response.prospect.review.user_status);
-        userSelect.append(optionuser);
-
-        response.sourceoption.state.forEach(function(usersts) {
-          var option = $("<option>").val(usersts.name).text(usersts.name);
-          userSelect.append(option);
-        });
-
-        var purchasingSelect = $("#purchasing_status");
-        purchasingSelect.empty();
-
-        var optionpurchasing = $("<option>").val(response.prospect.review.purchasing_status).text(response.prospect.review.purchasing_status);
-        purchasingSelect.append(optionpurchasing);
-
-        response.sourceoption.state.forEach(function(purchasingsts) {
-          var option = $("<option>").val(purchasingsts.name).text(purchasingsts.name);
-          purchasingSelect.append(option);
-        });
-
-        var direksiSelect = $("#direksi_status");
-        direksiSelect.empty();
-
-        var optiondireksi = $("<option>").val(response.prospect.review.direksi_status).text(response.prospect.review.direksi_status);
-        direksiSelect.append(optiondireksi);
-
-        response.sourceoption.state.forEach(function(direksists) {
-          var option = $("<option>").val(direksists.name).text(direksists.name);
-          direksiSelect.append(option);
-        });
-
-
-        var anggaranSelect = $("#anggaran_status");
-        anggaranSelect.empty();
-
-        var option1 = $("<option>").val(response.prospect.review.anggaran_status).text(response.prospect.review.anggaran_status);
-        anggaranSelect.append(option1);
-
-        response.sourceoption.anggaran.review.forEach(function(anggaransts) {
-          var option = $("<option>").val(anggaransts.name).text(anggaransts.name);
-          anggaranSelect.append(option);
-        });
-
-        var jenisanggaranSelect = $("#jenis_anggaran");
-        jenisanggaranSelect.empty();
-
-        var optionjns = $("<option>").val(response.prospect.review.jenis_anggaran).text(response.prospect.review.jenis_anggaran);
-        jenisanggaranSelect.append(optionjns);
-
-        response.sourceoption.anggaran.Jenis.forEach(function(jenisanggaransts) {
-          var option = $("<option>").val(jenisanggaransts.name).text(jenisanggaransts.name);
-          jenisanggaranSelect.append(option);
-        });
-
-        var today = new Date();
-        // Calculate the date after 30 days from today
-        var thirtyDaysFromToday = new Date(today);
-        thirtyDaysFromToday.setDate(today.getDate() + 30);
-        var todayFormatted = today.toISOString().split('T')[0];
-        var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
-
-        $("#etapodate").val(response.prospect.eta_po_date).attr('min', thirtyDaysFromTodayFormatted);;
-
-
-      }
-    })
-  });
-
-  $("#reviewForm").on("submit", function(e) {
-    e.preventDefault();
-    var prospect = $("#data").val()
-    var update =1;
-    console.log(id);
-    $.ajax({
-      url: "{{ route('admin.prospect.reviewupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
-      method: "PATCH",
-      data: $(this).serialize(),
-      success: function(response) {
-        localStorage.setItem("alertMessage", response.message);
-        $("#review-modal").modal("hide");
-        
-              $.ajax({
-                          url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id) ,
-                          type: 'GET',
-                          data: { update: update },
-                          success: function(response) {
-                              console.log("success");
-                                  
-                              location.reload();
-                          },
-                          error: function(xhr, status, error) {
-                              console.error('There was an error in temper update!', error);
-                          }
-                      });
-            
-                      location.reload();
-                      location.reload();
-                  
-
-            },
-            error: function(xhr, status, error) {
-          console.error('There was an error in promote update!', error);
-     
-        }
-    })
-  });
-
-
-
-
-  $('body').on("click", ".btn-updatechance", function() {
-    var id = $(this).attr("id")
-
-    $.ajax({
-      url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
-      method: "GET",
-      success: function(response) {
-
-        $("#chc-modal").modal("show");
-        $("#data").val(response.prospect.id);
-
-        var userstats = response.prospect.review.user_status;
-        var purchasingstats = response.prospect.review.purchasing_status;
-        var direksistats = response.prospect.review.direksi_status;
-
-
-
-        var anggarancek = response.prospect.review.anggaran_status;
-        var etapodatecek = response.prospect.eta_po_date;
-        var penawaranpertama = response.prospect.review.first_offer_date;
-
-        var today = new Date();
-        // Calculate the date after 30 days from today
-        var thirtyDaysFromToday = new Date(today);
-        thirtyDaysFromToday.setDate(today.getDate() + 30);
-        var todayFormatted = today.toISOString().split('T')[0];
-        var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
-
-        //$("#etapodate").val(response.prospect.eta_po_date).attr('min', thirtyDaysFromTodayFormatted);;
-        //$("#chance").val(response.prospect.review.chance);
-        var chanceSelect = $("#chance");
-        chanceSelect.empty();
-        var chancenow = response.prospect.review.chance * 100;
-
-        var originalOptionsChance = [];
-
-        // Store the original chance value
-        var originalChance = response.prospect.review.chance;
-
-        function rolchance() {
-          var optionchance = $("<option>").val(response.prospect.review.chance).text(chancenow + "%");
-          chanceSelect.append(optionchance);
-
-          response.sourceoption.chance.forEach(function(chancests) {
-            var option = $("<option>").val(chancests.data).text(chancests.name);
-            originalOptionsChance.push(option);
-            chanceSelect.append(option);
+          catdata(idcat);
+
+          function fetchcat2(unitId) {
+            // Make an AJAX call to retrieve hospitals based on provinceId
+            $.ajax({
+              url: "{{ route('admin.getCategoriesByUnit', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
+              method: "GET",
+              success: function(response) {
+                populateSelectFromDatalist('editcategory', response.catopt, "Pilih Kategori Produk");
+              }
+            });
+          }
+
+
+          //var selectedunitId = $(this).val();
+          fetchcat2(unitdata);
+
+
+          var prodSelect = $("#productlist");
+          prodSelect.empty();
+          populateSelectFromDatalist('productlist', response.configlist, "Pilih Produk");
+          var firstconf = $("<option>").val(response.prospect.config_id).text(response.prospect.config.name).attr('selected', true);
+          prodSelect.prepend(firstconf);
+
+          $("#editunit, #editcategory").on("change", function() {
+            var selectedBusinessUnitId = $("#editunit").val();
+            var selectedCategoryId = $("#editcategory").val();
+            var selectformId = "productlist";
+
+            if (selectedBusinessUnitId && selectedCategoryId) {
+              populateProductSelect(selectedBusinessUnitId, selectedCategoryId, selectformId);
+            } else {
+
+              var productSelect = $("#productlist");
+              productSelect.empty();
+              productSelect.append('<option value="">- Pilih Produk -</option>');
+            }
           });
 
-          //console.log(originalOptionsChance);
+
+
+
+
+
+          $("#qtyitem").val(response.prospect.qty);
+
+
+
         }
-        rolchance();
+      })
+    });
 
-        $("#chance").change(function() {
-          var selectedChance = $("#chance").val();
+    $("#produkForm").on("submit", function(e) {
+      e.preventDefault()
+      var prospect = $("#data").val()
+
+      $.ajax({
+        url: "{{ route('admin.prospect.produpdaterequest', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
+        method: "PATCH",
+        data: $(this).serialize(),
+        success: function(response) {
+
+          $("#produk-modal").modal("hide");
+          $("#thealert").html(response.message).focus();
 
 
-          var oneightyDaysFromToday = new Date(today);
-          oneightyDaysFromToday.setDate(today.getDate() + 180);
-          var oneightyDaysFromTodayFormatted = oneightyDaysFromToday.toISOString().split('T')[0];
-          var onefiftyDaysFromToday = new Date(today);
-          onefiftyDaysFromToday.setDate(today.getDate() + 150);
-          var onefiftyDaysFromTodayFormatted = onefiftyDaysFromToday.toISOString().split('T')[0];
 
-          //console.log(anggarancek);
-          console.log(etapodatecek < onefiftyDaysFromTodayFormatted);
-          console.log(penawaranpertama);
-          /*if (penawaranpertama == null) {
+
+        }
+      })
+    });
+
+
+
+    $('body').on("click", ".btn-updatepromosi", function() {
+
+
+      $.ajax({
+        url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
+        method: "GET",
+        success: function(response) {
+
+          $("#promosi-modal").modal("show");
+          $("#data").val(response.prospect.id);
+          $("#first").val(response.prospect.review.first_offer_date);
+          $("#last").val(response.prospect.review.last_offer_date);
+          $("#presentation").val(response.prospect.review.presentation_date);
+          $("#demo").val(response.prospect.review.demo_date);
+
+        }
+      })
+    });
+
+    $("#promosiForm").on("submit", function(e) {
+      e.preventDefault();
+      var prospect = $("#data").val();
+      var update = 1;
+      //console.log(id);
+      $.ajax({
+        url: "{{ route('admin.prospect.promoteupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
+        method: "PATCH",
+        data: $(this).serialize(),
+        success: function(response) {
+          localStorage.setItem("alertMessage", response.message);
+          $("#promosi-modal").modal("hide");
+
+          $.ajax({
+            url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id),
+            type: 'GET',
+            data: {
+              update: update
+            },
+            success: function(response) {
+              console.log("success");
+
+              location.reload();
+            },
+            error: function(xhr, status, error) {
+              console.error('There was an error in temper update!', error);
+            }
+          });
+
+          location.reload();
+          location.reload();
+
+
+        },
+        error: function(xhr, status, error) {
+          console.error('There was an error in promote update!', error);
+
+
+
+
+
+
+
+
+
+        }
+      })
+    });
+
+
+
+
+    $('body').on("click", ".btn-updatereview", function() {
+      var id = $(this).attr("id");
+
+      $.ajax({
+        url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
+        method: "GET",
+        success: function(response) {
+          //console.log(response.prospect.id);
+          $("#review-modal").modal("show");
+          $("#data").val(response.prospect.id);
+          var userSelect = $("#user_status");
+          userSelect.empty();
+          var optionuser = $("<option>").val(response.prospect.review.user_status).text(response.prospect.review.user_status);
+          userSelect.append(optionuser);
+
+          response.sourceoption.state.forEach(function(usersts) {
+            var option = $("<option>").val(usersts.name).text(usersts.name);
+            userSelect.append(option);
+          });
+
+          var purchasingSelect = $("#purchasing_status");
+          purchasingSelect.empty();
+
+          var optionpurchasing = $("<option>").val(response.prospect.review.purchasing_status).text(response.prospect.review.purchasing_status);
+          purchasingSelect.append(optionpurchasing);
+
+          response.sourceoption.state.forEach(function(purchasingsts) {
+            var option = $("<option>").val(purchasingsts.name).text(purchasingsts.name);
+            purchasingSelect.append(option);
+          });
+
+          var direksiSelect = $("#direksi_status");
+          direksiSelect.empty();
+
+          var optiondireksi = $("<option>").val(response.prospect.review.direksi_status).text(response.prospect.review.direksi_status);
+          direksiSelect.append(optiondireksi);
+
+          response.sourceoption.state.forEach(function(direksists) {
+            var option = $("<option>").val(direksists.name).text(direksists.name);
+            direksiSelect.append(option);
+          });
+
+
+          var anggaranSelect = $("#anggaran_status");
+          anggaranSelect.empty();
+
+          var option1 = $("<option>").val(response.prospect.review.anggaran_status).text(response.prospect.review.anggaran_status);
+          anggaranSelect.append(option1);
+
+          response.sourceoption.anggaran.review.forEach(function(anggaransts) {
+            var option = $("<option>").val(anggaransts.name).text(anggaransts.name);
+            anggaranSelect.append(option);
+          });
+
+          var jenisanggaranSelect = $("#jenis_anggaran");
+          jenisanggaranSelect.empty();
+
+          var optionjns = $("<option>").val(response.prospect.review.jenis_anggaran).text(response.prospect.review.jenis_anggaran);
+          jenisanggaranSelect.append(optionjns);
+
+          response.sourceoption.anggaran.Jenis.forEach(function(jenisanggaransts) {
+            var option = $("<option>").val(jenisanggaransts.name).text(jenisanggaransts.name);
+            jenisanggaranSelect.append(option);
+          });
+
+          var today = new Date();
+          // Calculate the date after 30 days from today
+          var thirtyDaysFromToday = new Date(today);
+          thirtyDaysFromToday.setDate(today.getDate() + 30);
+          var todayFormatted = today.toISOString().split('T')[0];
+          var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+
+          $("#etapodate").val(response.prospect.eta_po_date).attr('min', thirtyDaysFromTodayFormatted);;
+
+
+        }
+      })
+    });
+
+    $("#reviewForm").on("submit", function(e) {
+      e.preventDefault();
+      var prospect = $("#data").val()
+      var update = 1;
+      console.log(id);
+      $.ajax({
+        url: "{{ route('admin.prospect.reviewupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
+        method: "PATCH",
+        data: $(this).serialize(),
+        success: function(response) {
+          localStorage.setItem("alertMessage", response.message);
+          $("#review-modal").modal("hide");
+
+          $.ajax({
+            url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id),
+            type: 'GET',
+            data: {
+              update: update
+            },
+            success: function(response) {
+              console.log("success");
+
+              location.reload();
+            },
+            error: function(xhr, status, error) {
+              console.error('There was an error in temper update!', error);
+            }
+          });
+
+          location.reload();
+          location.reload();
+
+
+        },
+        error: function(xhr, status, error) {
+          console.error('There was an error in promote update!', error);
+
+        }
+      })
+    });
+
+
+
+
+    $('body').on("click", ".btn-updatechance", function() {
+      var id = $(this).attr("id")
+
+      $.ajax({
+        url: "{{ route('admin.prospectedit', ['prospect' => ':id']) }}".replace(':id', id),
+        method: "GET",
+        success: function(response) {
+
+          $("#chc-modal").modal("show");
+          $("#data").val(response.prospect.id);
+
+          var userstats = response.prospect.review.user_status;
+          var purchasingstats = response.prospect.review.purchasing_status;
+          var direksistats = response.prospect.review.direksi_status;
+
+
+
+          var anggarancek = response.prospect.review.anggaran_status;
+          var etapodatecek = response.prospect.eta_po_date;
+          var penawaranpertama = response.prospect.review.first_offer_date;
+
+          var today = new Date();
+          // Calculate the date after 30 days from today
+          var thirtyDaysFromToday = new Date(today);
+          thirtyDaysFromToday.setDate(today.getDate() + 30);
+          var todayFormatted = today.toISOString().split('T')[0];
+          var thirtyDaysFromTodayFormatted = thirtyDaysFromToday.toISOString().split('T')[0];
+
+          //$("#etapodate").val(response.prospect.eta_po_date).attr('min', thirtyDaysFromTodayFormatted);;
+          //$("#chance").val(response.prospect.review.chance);
+          var chanceSelect = $("#chance");
+          chanceSelect.empty();
+          var chancenow = response.prospect.review.chance * 100;
+
+          var originalOptionsChance = [];
+
+          // Store the original chance value
+          var originalChance = response.prospect.review.chance;
+
+          function rolchance() {
+            var optionchance = $("<option>").val(response.prospect.review.chance).text(chancenow + "%");
+            chanceSelect.append(optionchance);
+
+            response.sourceoption.chance.forEach(function(chancests) {
+              var option = $("<option>").val(chancests.data).text(chancests.name);
+              originalOptionsChance.push(option);
+              chanceSelect.append(option);
+            });
+
+            //console.log(originalOptionsChance);
+          }
+          rolchance();
+
+          $("#chance").change(function() {
+            var selectedChance = $("#chance").val();
+
+
+            var oneightyDaysFromToday = new Date(today);
+            oneightyDaysFromToday.setDate(today.getDate() + 180);
+            var oneightyDaysFromTodayFormatted = oneightyDaysFromToday.toISOString().split('T')[0];
+            var onefiftyDaysFromToday = new Date(today);
+            onefiftyDaysFromToday.setDate(today.getDate() + 150);
+            var onefiftyDaysFromTodayFormatted = onefiftyDaysFromToday.toISOString().split('T')[0];
+
+            //console.log(anggarancek);
+            console.log(etapodatecek < onefiftyDaysFromTodayFormatted);
+            console.log(penawaranpertama);
+            /*if (penawaranpertama == null) {
             if (selectedChance > 0.2) {
               alert("Warning: Silahkaan Update Tanggal First Offer !!");
               chanceSelect.empty();
@@ -1260,73 +1262,68 @@
         }
         */
 
-        var next_actionSelect = $("#next_action");
-        next_actionSelect.empty();
+            var next_actionSelect = $("#next_action");
+            next_actionSelect.empty();
 
-        var optionnext_action = $("<option>").val(response.prospect.review.next_action).text(response.prospect.review.next_action);
-        next_actionSelect.append(optionnext_action);
+            var optionnext_action = $("<option>").val(response.prospect.review.next_action).text(response.prospect.review.next_action);
+            next_actionSelect.append(optionnext_action);
 
-        response.sourceoption.naction.forEach(function(next_actionsts) {
-          var option = $("<option>").val(next_actionsts.name).text(next_actionsts.name);
-          next_actionSelect.append(option);
-        });
+            response.sourceoption.naction.forEach(function(next_actionsts) {
+              var option = $("<option>").val(next_actionsts.name).text(next_actionsts.name);
+              next_actionSelect.append(option);
+            });
 
 
+
+
+          })
+        }
+      });
+    });
+
+
+
+
+
+    $("#chcForm").on("submit", function(e) {
+      e.preventDefault()
+      var prospect = $("#data").val()
+      var update = 1;
+      console.log(id);
+      $.ajax({
+        url: "{{ route('admin.prospect.chcupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
+        method: "PATCH",
+        data: $(this).serialize(),
+        success: function(response) {
+          localStorage.setItem("alertMessage", response.message);
+          $("#chcForm").modal("hide");
+
+          $.ajax({
+            url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id),
+            type: 'GET',
+            data: {
+              update: update
+            },
+            success: function(response) {
+              console.log("success");
+              location.reload();
+            },
+            error: function(xhr, status, error) {
+              console.error('There was an error in temper update!', error);
+            }
+          });
+          location.reload();
+          location.reload();
+        },
+        error: function(xhr, status, error) {
+          console.error('There was an error in promote update!', error);
+        }
 
 
       })
-    }
+    });
+
+
   });
-});
-
-
-
-
-
-  $("#chcForm").on("submit", function(e) {
-    e.preventDefault()
-    var prospect = $("#data").val()
-    var update =1;
-    console.log(id);
-    $.ajax({
-      url: "{{ route('admin.prospect.chcupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
-      method: "PATCH",
-      data: $(this).serialize(),
-      success: function(response) {
-        localStorage.setItem("alertMessage", response.message);
-        $("#chcForm").modal("hide");
-        
-              $.ajax({
-                          url: "{{ route('temperupdate', ['id' => ':id']) }}".replace(':id', id) ,
-                          type: 'GET',
-                          data: { update: update },
-                          success: function(response) {
-                              console.log("success");
-                                  
-                              location.reload();
-                          },
-                          error: function(xhr, status, error) {
-                              console.error('There was an error in temper update!', error);
-                          }
-                      });
-            
-                      location.reload();
-                      location.reload();
-                  
-
-            },
-            error: function(xhr, status, error) {
-          console.error('There was an error in promote update!', error);
-     
-        }
-       
-      
-    })
-  });
-
-
-});
-
-
 </script>
 @endpush
