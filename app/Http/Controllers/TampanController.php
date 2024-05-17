@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\tampan;
+use App\Models\Prospect;
+use App\Models\prospectTemperature as temper;
+use App\Models\Review;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 //use Illuminate\Support\ServiceProvider;
@@ -10,6 +14,10 @@ use Illuminate\Support\Facades\Storage;
 
 class TampanController extends Controller
 {
+
+    
+
+
 
     /*
     private function token(){
@@ -40,6 +48,33 @@ class TampanController extends Controller
     public function index()
     {
         //
+    }
+
+    public function fixmissingitem(){
+
+        $prospectmiss = Prospect::with('temperature','review')->where('pic_user_id',NULL)->orderBy('id','asc')->get();
+        //dd($prospectmiss);
+        foreach($prospectmiss as $miss){
+            if($miss->temperature==NULL){
+                temper::create([
+                    'prospect_id'=>$miss->id,
+                    'tempName'=>'LEAD',
+                    'tempCodeName'=>1
+                ]);
+            }
+            if($miss->review==NULL){
+                Review::create([
+                    'prospect_id'=>$miss->id,
+                    'anggaran_status'=>'Belum Tahu',
+                    'jenis_anggaran'=>'Belum Ada',
+                    'comment'=>'ISSBISS APP DEFAULT COMMENT',
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true]);
+
+
     }
 
     /**
