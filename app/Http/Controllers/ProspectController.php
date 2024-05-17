@@ -589,7 +589,7 @@ class ProspectController extends Controller
         $lateinfo=$prospect->review->comment?$prospect->review->comment:"Silahkan Update info";
         $validationTime = Carbon::parse($prospect->validation_time);
         $formattedDate = $validationTime->format('d-m-Y');
-
+        $proscat=Category::where('id',$prospect->config->category_id)->first();
         $valdate = $formattedDate;
 
 
@@ -619,7 +619,7 @@ class ProspectController extends Controller
                     //dd($prospect->config->category_id);
                     //$peric=$prospect->personInCharge->name;
                     return response()->json([
-                    
+                    'proscat'=>$proscat,
                     'prospect'=>$prospect,
                         'event'=>$event,
                         'catopt' => $cat,
@@ -750,6 +750,22 @@ class ProspectController extends Controller
         $prospect->update([
             "pic_user_id"=>$request->personincharge,
             "departmentname"=>$request->department_id,
+        ]);
+        return "done";
+    }
+
+    public function produpdate($request, $prospect)
+    {
+
+        $newconfig=Config::where('id',$request->productlist)->first();
+        
+       // dd($request);
+        $nilai = ($newconfig->price_include_ppn)*(intval($request->qtyitem));
+        
+        $prospect->update([
+            "config_id"=>$newconfig->id,
+            "qty"=>intval($request->qtyitem),
+            "submitted_price"=>$nilai
         ]);
         return "done";
     }
@@ -1228,12 +1244,12 @@ class ProspectController extends Controller
      public function produpdaterequest(Request $request, Prospect $prospect)
     {
         $user=Auth::id();
+        //dd($request);
+    
+
         $prospect->load("creator","hospital","review","province","department","unit","config");
        $cek=0;
        
-      // $prod=Config::where("id",$request->productlist)->first();
-       
-
         $a=$prospect->unit_id; $b=$request->editunit;
 
         $c=$prospect->config_id;$d=$request->productlist;
@@ -1247,7 +1263,11 @@ class ProspectController extends Controller
                 'col_before'=>$c,
                 'col_after'=>$d,
                 'logdate'=>now(),
-                'request_by'=>$user
+                'request_by'=>$user,
+                'approve_date'=>now(),
+                'approve_by'=>$user,
+                'req_status'=>"system_generated"
+                
             ]);
             $cek=$cek+1;
         }
@@ -1259,7 +1279,10 @@ class ProspectController extends Controller
                 'col_before'=>$a,
                 'col_after'=>$b,
                 'logdate'=>now(),
-                'request_by'=>$user
+                'request_by'=>$user,
+                'approve_date'=>now(),
+                'approve_by'=>$user,
+                'req_status'=>"system_generated"
             ]);
             $cek=$cek+1;
         }
@@ -1271,15 +1294,17 @@ class ProspectController extends Controller
                 'col_before'=>$e,
                 'col_after'=>$f,
                 'logdate'=>now(),
-                'request_by'=>$user
+                'request_by'=>$user,
+                'approve_date'=>now(),
+                'approve_by'=>$user,
+                'req_status'=>"system_generated"
             ]);
             $cek=$cek+1;
         }
 
                 
         $data='<div class="alert alert-success" role="alert">
-        <h4 class="alert-heading">Update Info Berhasil di Request</h4>
-          <p>Silahkan Hubungi NSM anda untuk Proses Lebih Lanjut</p>
+        <h4 class="alert-heading">Update Berhasil</h4>
           <hr>
           <p class="mb-0">Jangan Lupa untuk update review Prospect.</p>
           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -1297,6 +1322,7 @@ class ProspectController extends Controller
        //return response()->json($data2);
         
         if($cek>0){
+            $this->produpdate($request,$prospect);
         return response()->json(['success' => true, 'message' => $data]);}
         else{
             return response()->json(['success' => true,'message' => $data2]); 

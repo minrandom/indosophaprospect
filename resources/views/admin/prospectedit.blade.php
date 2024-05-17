@@ -850,40 +850,17 @@
           unitselect.prepend(firstunit);
 
           var catSelect = $("#editcategory");
-          var idcat = response.prospect.config.category_id;
-          populateSelectFromDatalist('editcategory', response.catopt, "Pilih Kategori Produk");
           var unitdata = response.prospect.unit_id;
-
-          function catdata(unitId) {
-            // Make an AJAX call to retrieve the category name based on unitId
-            $.ajax({
-              url: "{{ route('admin.getCatname', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
-              method: "GET",
-              success: function(response) {
-                var catname = response.catdat.name;
-                var catid = response.catdat.id;
-
-                // console.log(catname);
-                // Call the callback function with the retrieved category name
-                var ncatSelect = $("#editcategory");
-                // For example, update an input field with the category name
-                var firstCategory = $("<option>").val(catid).text(catname).attr('selected', true);
-                ncatSelect.append(firstCategory);
-
-              },
-
-            });
-          }
-
-          catdata(idcat);
 
           function fetchcat2(unitId) {
             // Make an AJAX call to retrieve hospitals based on provinceId
             $.ajax({
               url: "{{ route('admin.getCategoriesByUnit', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
               method: "GET",
-              success: function(response) {
-                populateSelectFromDatalist('editcategory', response.catopt, "Pilih Kategori Produk");
+              success: function(data) {
+                //catSelect.empty();
+                populateSelectFromDatalist('editcategory', data.catopt, "Pilih Kategori Produk");
+                
               }
             });
           }
@@ -891,6 +868,8 @@
 
           //var selectedunitId = $(this).val();
           fetchcat2(unitdata);
+          var firstCategory = $("<option>").val(response.proscat.id).text(response.proscat.name).attr('selected', true);
+                  catSelect.prepend(firstCategory);
 
 
           var prodSelect = $("#productlist");
@@ -936,9 +915,13 @@
         method: "PATCH",
         data: $(this).serialize(),
         success: function(response) {
-
+     
           $("#produk-modal").modal("hide");
-          $("#thealert").html(response.message).focus();
+          localStorage.setItem("alertMessage", response.message);
+          $('html, body').animate({
+            scrollTop: 0
+          }, 'slow');
+          location.reload();
 
 
 
