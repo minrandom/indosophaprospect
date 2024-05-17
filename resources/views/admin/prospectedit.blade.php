@@ -295,13 +295,13 @@
             <label for="Harga" style="color:black" class="col-sm-6 col-form-label font-weight-bold">Rp {{ number_format($prospect->submitted_price, 0, ',-', '.') }}</label>
           </div>
           @can('admin')
-          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Request Update Produk</a>
+          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
           @endcan
           @can('am')
-          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Request Update Produk</a>
+          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
           @endcan
           @can('nsm')
-          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Request Update Produk</a>
+          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
           @endcan
 
 
@@ -502,7 +502,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary btn-update">Request Update</button>
+          <button type="submit" class="btn btn-primary btn-update">Update</button>
           </form>
         </div>
       </div>
@@ -552,7 +552,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary btn-update">Request Update</button>
+          <button type="submit" class="btn btn-primary btn-update">Update</button>
           </form>
         </div>
       </div>
