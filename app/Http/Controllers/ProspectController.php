@@ -579,7 +579,7 @@ class ProspectController extends Controller
     public function edit(Prospect $prospect)
     {
         //
-        $wil=substr($prospect->province->iss_area_code,0,1);
+        
         $prospect->load("creator","hospital","review","province","department","unit","config");
         $provOpt= Province::all();
         $bunit=Unit::all();
@@ -596,7 +596,7 @@ class ProspectController extends Controller
         $today = now();
         $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
 
-            $employees = Employee::where('area', $prospect->province->iss_area_code)->orWhere('area',$wil)->orWhere('area',"PRJ")->get();  
+            $employees = Employee::where('area', $prospect->province->prov_order_no)->orWhere('area', $prospect->province->wilayah)->orWhere('area', 'LIKE', '%' . $prospect->province->iss_area_code. '%' )->get();  
                     $employees->load("user");
 
                 $piclist = $employees->map(function($employee){
