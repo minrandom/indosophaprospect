@@ -150,7 +150,13 @@
               <div class="h5 mb-0 font-weight-bold text-gray-800">{{$prospect->prospect_no}}</div></br>
               <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                 Last Review At</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800">{{date('d-M-Y', strtotime($prospect->review->updated_at))}}</div></br>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">
+                @if($reviewdata)
+                    {{ date('d-M-Y', strtotime($reviewdata->created_at)) }}
+                @else
+                    GoogleSheet
+                @endif
+              </div></br>
               <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                 Last Column Update</div>
               <div class="h5 mb-0 font-weight-bold text-gray-800">{{$colUpdate}}</div>

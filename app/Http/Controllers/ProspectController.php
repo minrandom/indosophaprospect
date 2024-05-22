@@ -751,6 +751,7 @@ class ProspectController extends Controller
             "pic_user_id"=>$request->personincharge,
             "departmentname"=>$request->department_id,
         ]);
+
         return "done";
     }
 
@@ -1234,6 +1235,14 @@ class ProspectController extends Controller
         
         if($send>0){
           $this->infoupdate($request,$prospect);
+          ReviewLog::create([
+            'review_id'=>$prospect->review->id,
+            'log_date'=>now(),
+            'col_update'=>"Change PIC / Dept",
+            'col_before'=>'cekupdatelog',
+            'col_after'=>'cekupdatelog',
+            'updated_by'=>$user
+        ]);
         return response()->json(['success' => true, 'message' => $data]);}
         else{
             return response()->json(['success' => true,'message' => $data2]); 
@@ -1323,6 +1332,14 @@ class ProspectController extends Controller
         
         if($cek>0){
             $this->produpdate($request,$prospect);
+            ReviewLog::create([
+                'review_id'=>$prospect->review->id,
+                'log_date'=>now(),
+                'col_update'=>"update product data",
+                'col_before'=>'cekupdatelog',
+                'col_after'=>'cekupdatelog',
+                'updated_by'=>$user
+            ]);
         return response()->json(['success' => true, 'message' => $data]);}
         else{
             return response()->json(['success' => true,'message' => $data2]); 

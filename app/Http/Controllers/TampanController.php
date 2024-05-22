@@ -65,8 +65,8 @@ class TampanController extends Controller
             if($miss->review==NULL){
                 Review::create([
                     'prospect_id'=>$miss->id,
-                    'anggaran_status'=>'Belum Tahu',
-                    'jenis_anggaran'=>'Belum Ada',
+                    'anggaran_status'=>'Belum Ada',
+                    'jenis_anggaran'=>'Belum Tahu',
                     'comment'=>'ISSBISS APP DEFAULT COMMENT',
                 ]);
             }
