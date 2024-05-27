@@ -100,7 +100,26 @@
         
     </li>
     
-    
+    <hr class="sidebar-divider">
+
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHospital"
+            aria-expanded="true" aria-controls="collapseHospital">
+            <i class="fas fa-fw fa-hospital"></i>
+            <span>HOSPITAL</span>
+        </a>
+        <div id="collapseHospital" class="collapse" aria-labelledby="headingHospital" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Hospital Menu:</h6>
+                <a class="collapse-item" href="{{ route('admin.deptvalidation') }}"><i class="fas fa-fw fa-tasks"></i><span> Department Validation</span></a>
+                </div>
+        </div>
+
+        
+
+
+        
+    </li>
 
     <!--
     @can('admin')

@@ -1366,16 +1366,13 @@ class ProspectController extends Controller
         foreach($options->anggaran->review as $aggr){
             if($aggr->id==$request->anggaranedit){
                 $anggaransts=$aggr->name;
-            }
+            }else $anggaransts=$request->anggaranedit;
         }
         foreach($options->anggaran->Jenis as $agjn){
             if($agjn->id==$request->jenisanggaranedit){
                 $anggaranjns=$agjn->name;
-            }
+            }else $anggaranjns=$request->jenisanggaranedit;
         }
-
-
-
 
         $source = intval($request->sourceedit);
         $n=$source+0;

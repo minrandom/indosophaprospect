@@ -29,6 +29,8 @@ use App\Http\Controllers\User\ProfileController;
 
 use App\Http\Controllers\Admin\PrincipalBrandController;
 use App\Http\Controllers\Admin\DataCompileController;
+use App\Http\Controllers\DeptValidController;
+
 
 //use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
 
@@ -87,7 +89,9 @@ Route::get('/kehadiran', 'JojoController@kehadiran')->name('kehadiran')->middlew
 Route::get('/check-out', 'JojoController@indx')->name('check-out')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin'],function(){
 	Route::get('/',[AdminController::class,'index'])->name('admin')->middleware(['can:admin']);
-	
+	Route::get('/deptvalidation',[DeptValidController::class,'create'])->name('admin.deptvalidation')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+	Route::get('/deptvalidationc',[DeptValidController::class,'creation'])->name('admin.deptvalidationc')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+
 	Route::get('/hospital',[HospitalController::class,'index'])->name('admin.hospital')->middleware(['can:admin']);
 	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['can:admin']);
 	Route::PATCH('/prospectupdate/{prospect}',[ProspectController::class,'update'])->name('admin.prospectupdate')->middleware(['auth', 'role:admin,am,nsm']);
@@ -115,6 +119,9 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/prospectcreation',[ProspectController::class,'creation'])->name('admin.prospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospecteventcreation',[ProspectController::class,'eventcreation'])->name('admin.prospecteventcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/hospital/{provinceId}/hospital',[HospitalController::class,'getHospitalsByProvince'])->name('admin.getHospitalsByProvince')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/hospital2/{provinceId}/hospital2',[HospitalController::class,'getHospitalsByProvince2'])->name('admin.getHospitalsByProvince2')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/dept/{hospitalId}/dept',[DeptValidController::class,'getDeptValid'])->name('admin.getDeptValid')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::POST('/deptvalid',[DeptValidController::class,'store'])->name('admin.deptvalid')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/category/{unitId}/category',[CategoryController::class,'getCategoriesByUnit'])->name('admin.getCategoriesByUnit')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/categorydata/{unitId}/category',[CategoryController::class,'getCatname'])->name('admin.getCatname')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/config/get-products', [ConfigController::class, 'getProducts'])->name('product.getProducts');

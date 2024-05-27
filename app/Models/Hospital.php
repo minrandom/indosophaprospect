@@ -25,5 +25,8 @@ class Hospital extends Model
     public function schedules(){
         return $this->hasMany(schedule::class);
     }
+    public function validDept(){
+        return $this->hasOne(DeptValidation::class);
+    }
 
 }

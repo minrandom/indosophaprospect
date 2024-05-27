@@ -26,6 +26,20 @@ class HospitalController extends Controller
        
     return response()->json(['hosopt' => $hospitals]);
     }
+
+    public function getHospitalsByProvince2($provinceId)
+    {
+    // Retrieve hospitals based on the province ID
+    //dd($provinceId);
+    $hospitals = Hospital::with('validDept')->where('province_id', $provinceId)->get();
+        $rs=$hospitals->filter(function($hos) {
+            return $hos->validDept === null;
+        })->map(function($hos) {
+            return ['id' => $hos->id, 'name' => $hos->name];
+        })->values();
+        //dd($rs);
+    return response()->json(['hosopt' => $rs]);
+    }
     /**
      * Show the form for creating a new resource.
      *
