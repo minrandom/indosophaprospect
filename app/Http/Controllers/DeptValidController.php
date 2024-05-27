@@ -67,7 +67,7 @@ class DeptValidController extends Controller
        
        // return response()->json($data);
 
-        return view('admin.deptvalidation', ['username' => $user]);
+        return view('admin.deptValidation', ['username' => $user]);
     }
     public function creation()
     {
