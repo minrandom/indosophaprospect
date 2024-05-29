@@ -7,6 +7,7 @@ use App\Models\Province;
 use App\Models\Hospital;
 use App\Models\Department;
 use App\Models\User;
+use Google\Service\AnalyticsData\OrderBy;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class DeptValidController extends Controller
     // Retrieve hospitals based on the province ID
     //dd($provinceId);
     
-    $deptvalid = DeptValidation::where('hospital_id', $hospitalid)->first();
+    $deptvalid = DeptValidation::where('hospital_id', $hospitalid)->orderBy("id", 'DESC')->first();
     //dd($deptvalid);
     if($deptvalid!=null){
     $listdept = $deptvalid->dept_valid;
