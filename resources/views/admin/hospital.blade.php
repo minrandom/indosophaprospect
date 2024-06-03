@@ -23,7 +23,6 @@
                 <table class="table table-bordered data-table">
                     <thead>
                         <tr>
-                            <th>No</th>
                             <th>Kode RS</th>
                             <th>Nama RS</th>
                             <th>Province</th>
@@ -31,11 +30,11 @@
                             <th>Category</th>
                             <th>City</th>
                             <th>Alamat RS</th>
-                            <th>Swasta / Negri</th>
                             <th>Kepemilikan</th>
+                            <th>Tipe</th>
                             <th>Class</th>
                             <th>Akreditasi</th>
-                            <th>Target</th>
+                            <th>Sasaran</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -60,12 +59,20 @@
       <div class="modal-body">
         <form id="createForm">
         <div class="form-group">
-            <label for="n">Name</label>
-            <input type="" required="" id="n" name="name" class="form-control">
+            <label for="name">Nama Rumah Sakit</label>
+            <input type="" required placeholder="ABCDE , RS" id="name" name="name" class="form-control">
         </div>
         <div class="form-group">
-            <label for="pon">Prov Order No</label>
-            <input type="" required="" id="pon" name="prov_order_no" class="form-control">
+            <label for="province">Pilih Provinsi</label>
+            <select id="province" name="province" class="form-control" required="">
+
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="city">Pilih Kota/Kabupaten</label>
+            <select id="city" name="city" class="form-control" required="">
+
+            </select>
         </div>
         <div class="form-group">
             <label for="prc">Prov Region Code</label>
@@ -151,7 +158,6 @@
         serverSide: true,
         ajax: "{{ route('data.hospital') }}",
         columns: [
-            {data: 'id' , name: 'id'},
             {data: 'code' , name: 'code'},
             {data: 'name', name: 'name'},
            {data: 'provname', name: 'provname'},

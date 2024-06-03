@@ -61,12 +61,12 @@
     
 
     <div class="col-md-3">
-      <div class="form-group">
+      <!--<div class="form-group">
         <label for="sumberinfofilter">Sumber Prospect :</label>
         <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required="">
           <option value="0" selected>Show All</option>
         </select>
-      </div>
+      </div>-->
       <div class="form-group">
         <label for="sasaran">Target RS :</label>
         <select id="sasaran" name="sasaran" class="form-control dropdown" required="">

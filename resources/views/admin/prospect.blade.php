@@ -497,9 +497,20 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
      console.log(dataprospect);
 
+     function formatDate(dateString) {
+        if(dateString){
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = date.toLocaleString('default', { month: 'long' });
+        const year = date.getFullYear();
+        return `${day}-${month}-${year}`;}
+        else return "";
+      }
+
+
     var prospectsheet = newData.map(function(datz) {
       return {
-        TanggalSubmit: datz.validation_time,
+        TanggalSubmit: formatDate(datz.validation_time),
         Creator: datz.creator.name,
         ProspectNo: datz.prospect_no,
         Province: datz.province.name,
@@ -509,6 +520,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         City: datz.city,
         Hospital: datz.hospital.name,
         Department: datz.department.name,
+        BusinessUnit:datz.unit,
         ProductCategory: datz.category,
         Brand: datz.brand,
         ConfigName: datz.config.name,
@@ -517,10 +529,10 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         Qty: datz.qty,
         uom: datz.uom,
         Value: datz.submitted_price * datz.qty,
-        FirstOffer: datz.review.first_offer_date,
-        Demo: datz.review.demo_date,
-        Presentation: datz.review.presentation_date,
-        Lastoffer: datz.review.last_offer_date,
+        FirstOffer: formatDate(datz.review.first_offer_date),
+        Demo: formatDate(datz.review.demo_date),
+        Presentation: formatDate(datz.review.presentation_date),
+        Lastoffer: formatDate(datz.review.last_offer_date),
         UserStatus: datz.review.user_status,
         PurchasingStatus: datz.review.purchasing_status,
         Direksi: datz.review.direksi_status,
@@ -528,8 +540,8 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         JenisAnggaran: datz.review.jenis_anggaran,
         InformasiTambahan: datz.review.comment,
         Chance: (datz.review.chance * 100).toFixed(0) + ' %',
-        EtaPoDate: datz.eta_po_date,
-        Temperature: datz.temperaturebtn,
+        EtaPoDate: formatDate(datz.eta_po_date),
+        Temperature: datz.temperature.tempName,
         NextAction: datz.review.next_action
       }
 
@@ -537,7 +549,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
 
     console.log(prospectsheet);
-    console.log(dataprospect);
+    //console.log(dataprospect);
     initialProspectTable(dataprospect);
     $('#dlexcel').on('click', function() {
       downloadExcel(prospectsheet);
