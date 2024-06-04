@@ -72,7 +72,37 @@ class HospitalController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $province = Province::where('prov_region_code',$request->province)->first();
+        $hospital = Hospital::orderBy('id','desc')->first();
+        $inputString = "RS03405";
+        // Extract the non-numeric part (e.g., "RS")
+        $prefix = preg_replace("/[0-9]/", "", $inputString);
+        // Extract the numeric part (e.g., "03405")
+        $number = preg_replace("/[^0-9]/", "", $inputString);
+        // Increment the numeric part by one
+        $newNumber = intval($number) + 1;
+        // Pad the new number with leading zeros to match the length of the original number
+        $newNumberPadded = str_pad($newNumber, strlen($number), '0', STR_PAD_LEFT);
+        // Concatenate the non-numeric part with the new padded number
+        $newcode = $prefix . $newNumberPadded;
+        //dd($reu)
+        Hospital::create([
+            "code"=>$newcode,
+            "name"=>$request->name,
+            "prov_id"=>$province->id,
+            "city"=>$request->cityname,
+            "city_order_no"=>$request->city,
+            "category"=>$request->category,
+            "address"=>$request->Alamat,
+            "ownership"=>$request->swasta,
+            "owned_by"=>$request->tipe,
+            "class"=>$request->class,
+            "akreditas"=>$request->akreditas,
+            "target"=>$request->target,
+
+        ]);
+        
+
     }
 
     /**

@@ -369,6 +369,7 @@
 
   var jsonData;
   var ids;
+  var prospectsheet;
 
   $.busyLoadFull("show",{spinner: "cubes",
       text: "Please Wait, Loading the Data...",
@@ -410,9 +411,12 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
    ids = dataLine.map(function(item) {
         return item.id;
     });
-    console.log(ids);
+    
     //console.log(jsonData);
   }
+
+
+ 
 
   //console.log(jsonData);
   function updateData(jsonData, params) {
@@ -495,7 +499,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
       dataprospect.sort((a,b)=>customOrder[a.temperid] - customOrder[b.temperid]);
 
-     console.log(dataprospect);
+     //console.log(dataprospect);
 
      function formatDate(dateString) {
         if(dateString){
@@ -508,7 +512,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       }
 
 
-    var prospectsheet = newData.map(function(datz) {
+    prospectsheet = newData.map(function(datz) {
       return {
         TanggalSubmit: formatDate(datz.validation_time),
         Creator: datz.creator.name,
@@ -548,10 +552,18 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     });
 
 
-   //console.log(prospectsheet);
+  // 
     //console.log(dataprospect);
     initialProspectTable(dataprospect);
-   $('#dlexcel').on('click', async function() {
+    
+
+  
+  };
+
+
+  //console.log(prospectsheet);
+
+  $('#dlexcel').on('click', async function() {
         // Show the loading screen
         $.busyLoadFull("show", { text: "Please wait..." });
 
@@ -571,10 +583,8 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         }
     });
 
+
   
-  };
-
-
 
 
   // Handle the case when the filter dropdown is cleared

@@ -93,6 +93,20 @@
                     <option val='D'>D</option>
             </select>
         </div>
+        <div class="form-group">
+            <label for="akreditas">Tipe</label>
+            <select id="akreditas" name="akreditas" class="form-control" required="">
+                    <option val='Belum Ditetapkan'>Belum Ditetapkan</option> 
+                    <option val='Tingkat Paripurna'>Tingkat Paripurna</option>
+                    <option val='Tingkat Utama'>Tingkat Utama</option>
+                    <option val='Lulus Perdana'>Lulus Perdana</option>
+                    <option val='Tingkat Madya'>Tingkat Madya</option>
+                    <option val='Tingkat Dasar'>Tingkat Dasar</option>
+                    <option val='Pemkot'>Pemkot</option>
+                   
+         
+            </select>
+        </div>
       </br>
     </br>
   </div>
@@ -186,7 +200,10 @@
     // Create 
     function submitForm(url, successMessage) {
         var formData = $("#createForm").serialize();
-
+        var cityId = $("#city").val(); // Assuming you have a dropdown with the ID "city-dropdown"
+        //var prov_reg_code = $("#province").val()
+        var cityData = citydata().find(city => city.id === cityId);
+        formData += "&cityname="+cityData.name;
         $.ajax({
             url: url,
             method: "POST",

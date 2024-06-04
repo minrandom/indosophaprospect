@@ -9,7 +9,7 @@ class Hospital extends Model
 {
     use HasFactory;
     protected $fillable=[
-        "code","name","prov_id","city","city_order_no","category","address","ownership","owned_by","class","akreditas"
+        "code","name","prov_id","city","city_order_no","category","address","ownership","owned_by","class","akreditas","target"
 
     ];
 
