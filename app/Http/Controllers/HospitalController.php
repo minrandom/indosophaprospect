@@ -74,7 +74,7 @@ class HospitalController extends Controller
     {
         $province = Province::where('prov_region_code',$request->province)->first();
         $hospital = Hospital::orderBy('id','desc')->first();
-        $inputString = "RS03405";
+        $inputString = $hospital->code;
         // Extract the non-numeric part (e.g., "RS")
         $prefix = preg_replace("/[0-9]/", "", $inputString);
         // Extract the numeric part (e.g., "03405")
@@ -89,19 +89,19 @@ class HospitalController extends Controller
         Hospital::create([
             "code"=>$newcode,
             "name"=>$request->name,
-            "prov_id"=>$province->id,
+            "province_id"=>$province->id,
             "city"=>$request->cityname,
             "city_order_no"=>$request->city,
             "category"=>$request->category,
             "address"=>$request->Alamat,
-            "ownership"=>$request->swasta,
-            "owned_by"=>$request->tipe,
+            "ownership"=>$request->owner,
+            "owned_by"=>$request->type,
             "class"=>$request->class,
             "akreditas"=>$request->akreditas,
             "target"=>$request->target,
 
         ]);
-        
+        return response()->json(['success'=>true,'messages'=>"Input RS Berhasil"]);
 
     }
 

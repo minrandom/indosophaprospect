@@ -707,7 +707,6 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
   function initialProspectTable(dataprospect) {
     //console.log(dataprospect);
-
     if (dataprospect && dataprospect.length > 0) {
       
       var existingTable = $('.data-table').DataTable();

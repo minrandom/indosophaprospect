@@ -94,7 +94,7 @@
             </select>
         </div>
         <div class="form-group">
-            <label for="akreditas">Tipe</label>
+            <label for="akreditas">Akreditas</label>
             <select id="akreditas" name="akreditas" class="form-control" required="">
                     <option val='Belum Ditetapkan'>Belum Ditetapkan</option> 
                     <option val='Tingkat Paripurna'>Tingkat Paripurna</option>
@@ -103,6 +103,18 @@
                     <option val='Tingkat Madya'>Tingkat Madya</option>
                     <option val='Tingkat Dasar'>Tingkat Dasar</option>
                     <option val='Pemkot'>Pemkot</option>
+                   
+         
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="target">Target</label>
+            <select id="target" name="target" class="form-control" required="">
+                    <option val='Need Review'>Need Review</option> 
+                    <option val='Potensial'>Potensial</option>
+                    <option val='Key Account'>Key Account</option>
+                    <option val='Prioritas'>Prioritas</option>
+               
                    
          
             </select>
