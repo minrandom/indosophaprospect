@@ -13,9 +13,9 @@
 <div class="card">
     <div class="card-header">
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-modal">
+        <a type="button" class="btn btn-primary" href="{{ route('admin.configcreate')}}">
           Tambah Data
-        </button>
+        </a>
     </div>
     
         <div class="card-body">
@@ -24,12 +24,15 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Bussiness Unit</th>
-                            <th>Brand</th>
-                            <th>Nama</th>
                             <th>Kode Config</th>
+                            <th>Nama</th>
+                            <th>Bussiness Unit</th>
                             <th>Kategori</th>
                             <th>Jenis</th>
+                            <th>Brand</th>
+                            <th>Tipe</th>
+                            <th>UOM</th>
+                            <th>Consist Of</th>
                             <th>Harga +PPn (IDR)</th>
                             <th>Action</th>
                          
@@ -43,41 +46,6 @@
     
 </div>
 
-<!-- Modal Create -->
-<div class="modal fade" id="create-modal" tabindex="-1" role="dialog" aria-labelledby="create-modalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="create-modalLabel">Create Data</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form id="createForm">
-        <div class="form-group">
-            <label for="n">Name</label>
-            <input type="" required="" id="n" name="name" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="pon">Prov Order No</label>
-            <input type="" required="" id="pon" name="prov_order_no" class="form-control">
-        </div>
-        <div class="form-group">
-            <label for="prc">Prov Region Code</label>
-            <input type="" required="" id="prc" name="prov_region_code" class="form-control">
-        </div>
-        
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary btn-store">Simpan</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Modal Create -->
 
 <!-- Modal Edit -->
 <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="edit-modalLabel" aria-hidden="true">
@@ -151,12 +119,15 @@
         ajax: "{{ route('data.config') }}",
         columns: [
             {data: 'id' , name: 'id'},
-            {data: 'bu' , name: 'bu'},
-            {data: 'brand' , name: 'brand'},
-            {data: 'name' , name: 'name'},
             {data: 'config_code' , name: 'config_code'},
-            {data: 'category' , name: 'category'},
+            {data: 'name' , name: 'name'},
+            {data: 'bu' , name: 'bu'},
+            {data: 'category.name' , name: 'category'},
             {data: 'genre' , name: 'genre'},
+            {data: 'brand.name' , name: 'brand'},
+            {data: 'type' , name: 'type'},
+            {data: 'uom' , name: 'uom'},
+            {data: 'consist_of' , name: 'consist_of'},
             {data: 'pformat' , name: 'pformat'},
    
            
@@ -166,31 +137,6 @@
   });
 
 
-    // Reset Form
-        function resetForm(){
-            $("[name='name']").val("")
-            $("[name='prov_order_no']").val("")
-            $("[name='prov_region_code']").val("")
-        }
-    //
-
-    // Create 
-
-    $("#createForm").on("submit",function(e){
-        e.preventDefault()
-
-        $.ajax({
-            url: "/admin/province",
-            method: "POST",
-            data: $(this).serialize(),
-            success:function(){
-                $("#create-modal").modal("hide")
-                $('.data-table').DataTable().ajax.reload();
-                flash("success","Data berhasil ditambah")
-                resetForm()
-            }
-        })
-    })
 
     // Create
 

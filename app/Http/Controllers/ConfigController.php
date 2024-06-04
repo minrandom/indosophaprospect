@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Config;
 use App\Models\Category;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 
 class ConfigController extends Controller
@@ -23,9 +25,16 @@ class ConfigController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function createconfdata()
+    {
+        $unit = Unit::all();
+        $brand = Brand::all();
+        return response()->json(['unit'=>$unit,'brand'=>$brand]);
+
+    }
     public function create()
     {
-        //
+        return view('admin.configcreate');  
     }
 
     public function getProducts(Request $request)
@@ -53,6 +62,22 @@ class ConfigController extends Controller
     public function store(Request $request)
     {
         //
+        Config::create([
+            'name'=>$request->name,
+            'unit_id'=>$request->unit,
+            'config_code'=>$request->code,
+            'brand_id'=>$request->brand,
+            'category_id'=>$request->category,
+            'genre'=>$request->Jenis,
+            'type'=>$request->tipe,
+            'uom'=>$request->uom,
+            'consist_of'=>$request->consist,
+            'price_include_ppn'=>$request->price,
+        ]);
+        
+        return response()->json(['success'=>true,'messages'=>"Input Config Berhasil"]);
+
+
     }
 
     /**

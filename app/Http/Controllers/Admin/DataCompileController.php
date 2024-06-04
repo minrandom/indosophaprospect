@@ -188,7 +188,7 @@ class DataCompileController extends Controller
     public function ConfigData()
     {
 
-        $cnf = Config::with('unit', 'brand')->get();
+        $cnf = Config::with('unit', 'brand','category')->get();
 
         return DataTables::of($cnf)
 
@@ -203,12 +203,12 @@ class DataCompileController extends Controller
             ->addColumn('bu', function ($cfg) {
                 return $cfg->unit->name;
             })
-            ->addColumn('brand', function ($cfg) {
+           /* ->addColumn('brand', function ($cfg) {
                 return $cfg->brand->name;
             })
             ->addColumn('brandcountry', function ($cfg) {
                 return $cfg->brand->country;
-            })
+            })*/
             ->addColumn('pformat', function ($cfg) {
                 $pformat = number_format($cfg->price_include_ppn);
                 return $pformat;

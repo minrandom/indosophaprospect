@@ -33,6 +33,27 @@
     <!-- Divider -->
     <hr class="sidebar-divider">
 
+    @can('dba')
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSetup"
+            aria-expanded="true" aria-controls="collapseSetup">
+            <i class="fas fa-fw fa-toolbox"></i>
+            <span>SETUP DATA</span>
+        </a>
+        <div id="collapseSetup" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Setup Hospital Menu</h6>
+                <a class="collapse-item" href="{{ route('admin.hospital') }}">
+            <i class="fas fa-fw fa-hospital"></i>
+            <span>Hospital List</span></a>
+             
+        <a class="collapse-item" href="{{ route('admin.hospitalcreate') }}">
+            <i class="fas fa fa-plus-square"></i>
+            <span>Create Hospital</span></a>
+            </div>
+        </div>
+    </li>
+    @endcan
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseJadwal"
             aria-expanded="true" aria-controls="collapseJadwal">

@@ -10,7 +10,7 @@ class Config extends Model
     use HasFactory;
     
     protected $fillable=[
-        "name","config_code","category","unit_id","genre","brand_id","type","uom","consist_of","price_include_ppn"
+        "name","config_code","category_id","unit_id","genre","brand_id","type","uom","consist_of","price_include_ppn"
     ];
 
     public function unit(){

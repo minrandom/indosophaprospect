@@ -91,12 +91,15 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/',[AdminController::class,'index'])->name('admin')->middleware(['can:admin']);
 	Route::get('/deptvalidation',[DeptValidController::class,'create'])->name('admin.deptvalidation')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 	Route::get('/deptvalidationc',[DeptValidController::class,'creation'])->name('admin.deptvalidationc')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+	Route::get('/configcreatedata',[ConfigController::class,'createconfdata'])->name('admin.createconfdata')->middleware(['auth', 'role:admin,dba']);
 
 	Route::get('/hospital',[HospitalController::class,'index'])->name('admin.hospital')->middleware(['auth', 'role:admin,dba']);
 	Route::get('/hospitalcreate',[HospitalController::class,'create'])->name('admin.hospitalcreate')->middleware(['auth', 'role:admin,dba']);
 	Route::get('/hospitalcreatedata',[HospitalController::class,'createhosdata'])->name('admin.createhosdata')->middleware(['auth', 'role:admin,dba']);
 	Route::POST('/hospitaladd',[HospitalController::class,'store'])->name('admin.hospitalstore')->middleware(['auth', 'role:admin,dba']);
-	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['can:admin']);
+	Route::POST('/configadd',[ConfigController::class,'store'])->name('admin.configstore')->middleware(['auth', 'role:admin,dba']);
+	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['auth', 'role:admin,dba']);
+	Route::get('/configcreate',[ConfigController::class,'create'])->name('admin.configcreate')->middleware(['auth', 'role:admin,dba']);
 	Route::PATCH('/prospectupdate/{prospect}',[ProspectController::class,'update'])->name('admin.prospectupdate')->middleware(['auth', 'role:admin,am,nsm']);
 	Route::PATCH('/prospectinfoupdate/{prospect}',[ProspectController::class,'infoupdate'])->name('admin.prospectinfoupdate')->middleware(['can:admin']);
 	Route::PATCH('/prospectinfoupdaterequest/{prospect}',[ProspectController::class,'infoupdaterequest'])->name('admin.prospect.infoupdaterequest')->middleware(['auth', 'role:admin,am,nsm,bu']);

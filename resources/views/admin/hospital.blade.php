@@ -188,22 +188,6 @@
 
     // Create 
 
-    $("#createForm").on("submit",function(e){
-        e.preventDefault()
-
-        $.ajax({
-            url: "/admin/province",
-            method: "POST",
-            data: $(this).serialize(),
-            success:function(){
-                $("#create-modal").modal("hide")
-                $('.data-table').DataTable().ajax.reload();
-                flash("success","Data berhasil ditambah")
-                resetForm()
-            }
-        })
-    })
-
     // Create
 
     // Edit & Update
@@ -214,7 +198,7 @@
             url: "/admin/province/"+id+"/edit",
             method: "GET",
             success:function(response){
-                $("#edit-modal").modal("show")
+                //$("#edit-modal").modal("show")
                 $("#id").val(response.id)
                 $("#name").val(response.name)
                 $("#prov_order_no").val(response.prov_order_no)
@@ -243,7 +227,7 @@
     $('body').on("click",".btn-delete",function(){
         var id = $(this).attr("id")
         $(".btn-destroy").attr("id",id)
-        $("#destroy-modal").modal("show")
+        //$("#destroy-modal").modal("show")
     });
 
     $(".btn-destroy").on("click",function(){
