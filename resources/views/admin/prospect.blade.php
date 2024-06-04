@@ -551,12 +551,27 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
    //console.log(prospectsheet);
     //console.log(dataprospect);
     initialProspectTable(dataprospect);
-    $('#dlexcel').on('click', function() {
-      downloadExcel(prospectsheet);
+   $('#dlexcel').on('click', async function() {
+        // Show the loading screen
+        $.busyLoadFull("show", { text: "Please wait..." });
 
+        // Disable the download button to prevent multiple clicks
+        $(this).prop('disabled', true);
 
+        try {
+            await downloadExcel(prospectsheet);
+        } catch (error) {
+            console.error('Error downloading Excel:', error);
+        } finally {
+            // Hide the loading screen
+            $.busyLoadFull("hide");
+
+            // Re-enable the download button
+            $('#dlexcel').prop('disabled', false);
+        }
     });
 
+  
   };
 
 
@@ -619,7 +634,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
 
 //function to download to excel
-  function downloadExcel(data) {
+ async function downloadExcel(data) {
     // Create a new Excel workbook
     var workbook = XLSX.utils.book_new();
 
@@ -628,9 +643,31 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
     // Add the worksheet to the workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Prospects');
+    // Get the current date and time
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        var day = String(now.getDate()).padStart(2, '0');
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var seconds = String(now.getSeconds()).padStart(2, '0');
 
-    // Save the workbook as an Excel file
-    XLSX.writeFile(workbook, 'Prospects.xlsx');
+        // Format the date and time string
+        var dateTimeString = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+
+        // Create the file name
+        var fileName = `Prospect_${dateTimeString}.xlsx`;
+
+        // Save the workbook as an Excel file
+        XLSX.writeFile(workbook, fileName);
+
+    return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, 2000);
+        });
+
+
   }
 
 
