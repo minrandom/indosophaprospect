@@ -162,7 +162,7 @@
         var id = $("#id").val()
 
         $.ajax({
-            url: "/admin/province/"+id,
+            url: "{{}}",
             method: "PATCH",
             data: $(this).serialize(),
             success:function(){
