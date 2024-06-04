@@ -51,6 +51,18 @@
             <i class="fas fa fa-plus-square"></i>
             <span>Create Hospital</span></a>
             </div>
+        
+        
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Setup Config Menu</h6>
+                <a class="collapse-item" href="{{ route('admin.config') }}">
+            <i class="fas fa-fw fa-cogs"></i>
+            <span>Config List</span></a>
+             
+        <a class="collapse-item" href="{{ route('admin.configcreate') }}">
+            <i class="fas fa fa-plus-square"></i>
+            <span>Create Config</span></a>
+            </div>
         </div>
     </li>
     @endcan
