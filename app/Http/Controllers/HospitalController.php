@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hospital;
+use App\Models\Province;
 use Illuminate\Http\Request;
 
 class HospitalController extends Controller
@@ -40,14 +41,27 @@ class HospitalController extends Controller
         //dd($rs);
     return response()->json(['hosopt' => $rs]);
     }
+
     /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function createhosdata()
+    {
+        $provinces = Province::all();
+        return response()->json(['prov'=>$provinces]);
+
+    }
+
     public function create()
     {
         //
+
+   
+
+        return view('admin.hospitalcreate');
     }
 
     /**

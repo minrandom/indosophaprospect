@@ -18,6 +18,28 @@ function populateSelectFromDatalist(selectId, data,keterangan,) {
       width: '100%' // Adjust the width to fit the container
     });
   }
+
+
+  function populateProvinceFromDatalist(selectId, data,keterangan,) {
+    var selectElement = $("#" + selectId);
+    selectElement.empty();
+  
+    // Add placeholder option
+    var placeholderOption = new Option(keterangan, '', true, true);
+    selectElement.append(placeholderOption);
+  
+    // Populate options from data
+    data.forEach(function (source) {
+      var option = new Option(source.name, source.prov_region_code);
+      selectElement.append(option);
+    });
+  
+    // Initialize Select2
+    selectElement.select2({
+      placeholder: keterangan,
+      width: '100%' // Adjust the width to fit the container
+    });
+  }
   
   
 
@@ -108,3 +130,7 @@ function datarem(){
     $(document).on("mouseup", function(){
       mx = 0;
     });
+
+
+
+    

@@ -1,6 +1,6 @@
 @extends('layout.backend.app',[
-    'title' => 'Hospital',
-    'pageTitle' =>'Hospital',
+    'title' => 'RS',
+    'pageTitle' =>'Rumah Sakit',
 ])
 
 @push('css')
@@ -13,9 +13,10 @@
 <div class="card">
     <div class="card-header">
         <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-modal">
+        <a type="button" class="btn btn-primary" href="{{ route('admin.hospitalcreate')}}">
           Tambah Data
-        </button>
+</a>
+        
     </div>
     
         <div class="card-body">
@@ -46,7 +47,7 @@
     
 </div>
 
-<!-- Modal Create -->
+<!-- Modal Create
 <div class="modal fade" id="create-modal" tabindex="-1" role="dialog" aria-labelledby="create-modalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -87,7 +88,7 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 <!-- Modal Create -->
 
 <!-- Modal Edit -->

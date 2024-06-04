@@ -548,7 +548,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     });
 
 
-    console.log(prospectsheet);
+   //console.log(prospectsheet);
     //console.log(dataprospect);
     initialProspectTable(dataprospect);
     $('#dlexcel').on('click', function() {
@@ -835,7 +835,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     console.log(id);
     var remarksData = $(this).data("remarks");
 //var remarksArray = JSON.parse(remarksData);
-console.log(remarksData);
+//console.log(remarksData);
     $('#prospectid').val(id);
     populateSelectFromDatalist('cr8type',datarem.tiperem,'Pilih Tipe Remarks');
     populateSelectFromDatalist('cr8colupdate',datarem.column,'Pilih Kolom yang diUpdate');
