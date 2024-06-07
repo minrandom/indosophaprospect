@@ -81,7 +81,7 @@ class ProspectController extends Controller
         'area' => $employee?$employee->area:"No data "
         ];});
         
-        $dept=Department::all();
+        $dept=Department::where('id','>=',"2")->orderBy('alt_name',"asc")->get();
         $today = now();
        $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
         
@@ -125,7 +125,7 @@ class ProspectController extends Controller
        //dd($provOrderNos);
         
         //$rumahsakit=Hospital::all();
-        $dept=Department::all();
+        $dept=Department::where('id','>=',"2")->orderBy('alt_name',"asc")->get();
         $today = now();
        $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
        // $produk=Config::all();
@@ -611,7 +611,7 @@ class ProspectController extends Controller
                 $prospect->piclist=$piclist;
                 $prospect->lateinfo=$lateinfo;
 
-                    $depopt=Department::all();
+                    $depopt=Department::where('id','>=',"2")->orderBy('alt_name',"asc")->get();
                     $configlist=Config::where('unit_id', $prospect->unit->id)
                     ->where('category_id', $prospect->config->category_id)
                     ->get();
