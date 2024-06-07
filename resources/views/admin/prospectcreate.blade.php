@@ -378,7 +378,7 @@
     };
 
 
-
+/*
     $('#createForm').on('submit', function(e) {
         e.preventDefault();
         var clickedButton = $(document.activeElement);
@@ -390,9 +390,23 @@
         }
     });
 
-    
+    */
   
+    $('#btn-store').on('click', function(e) {
+        $(this).focus();
+        e.preventDefault();
+       $(document.activeElement);
+       submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
+      });
 
+   $('#btn-draft').on('click', function(e) {    
+         $(this).focus();
+        e.preventDefault();
+       $(document.activeElement);
+            submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
+        
+    });
+  
 
 
     //delete

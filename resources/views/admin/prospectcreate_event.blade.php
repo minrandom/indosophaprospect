@@ -379,7 +379,7 @@
 
 
 
-    $('#createForm').on('submit', function(e) {
+   /* $('#createForm').on('submit', function(e) {
         e.preventDefault();
         var clickedButton = $(document.activeElement);
 
@@ -388,10 +388,21 @@
         } else if (clickedButton.is('#btn-draft')) {
             submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
         }
-    });
+    });*/
 
-    $('#createForm button').on('click', function() {
+    $('#btn-store').on('click', function(e) {
         $(this).focus();
+        e.preventDefault();
+       $(document.activeElement);
+       submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
+      });
+
+   $('#btn-draft').on('click', function(e) {    
+         $(this).focus();
+        e.preventDefault();
+       $(document.activeElement);
+            submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
+        
     });
   
 
