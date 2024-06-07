@@ -36,7 +36,7 @@ class DeptValidController extends Controller
     $validDeptIds = $deptvalid->pluck('id')->toArray();
     } else $validDeptIds=[0];
     
-    $alldept =Department::all();
+    $alldept =Department::orderBy('alt_name','asc')->get();
  
     
    
