@@ -390,7 +390,9 @@
         }
     });
 
-    
+    $('#createForm button').on('click', function() {
+        $(this).focus();
+    });
   
 
 
