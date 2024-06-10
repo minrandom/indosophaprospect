@@ -233,12 +233,11 @@
 
 
   $('#btn-store').on('click', function(e) {
+     $(this).focus();
         e.preventDefault();
-        var clickedButton = $(document.activeElement);
-
-        if (clickedButton.is('#btn-store')) {
-            submitForm("{{ route('admin.deptvalid') }}", "Data berhasil divalidasi");
-        } 
+       $(document.activeElement);
+        submitForm("{{ route('admin.deptvalid') }}", "Data berhasil divalidasi");
+        
     });
 
 
