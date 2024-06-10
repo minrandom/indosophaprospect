@@ -104,7 +104,7 @@
 <script type="text/javascript">
   $(function() {
     var id = $(this).attr("id")
-    
+    $('[data-toggle="tooltip"]').tooltip();  
     $.ajax({
       url: "{{ route('admin.deptvalidationc') }}",
       method: "GET",
@@ -221,7 +221,7 @@
       success: function() {
         //$("#create-modal").modal("hide");
         //$('.data-table').DataTable().ajax.reload();
-        //$("#deptValidForm")[0].reset();
+        $("#deptValidForm")[0].reset();
         flash("success", successMessage);
         document.querySelector(".notify").scrollIntoView({
           behavior: "smooth",
@@ -233,7 +233,7 @@
 
 
   $('#btn-store').on('click', function(e) {
-     $(this).focus();
+        $(this).focus();
         e.preventDefault();
        $(document.activeElement);
         submitForm("{{ route('admin.deptvalid') }}", "Data berhasil divalidasi");
