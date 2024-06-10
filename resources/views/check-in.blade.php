@@ -38,7 +38,7 @@
             <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
             <button id="click-photo" class="btn btn-primary mt-2" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: none;"><i class="fas fa-camera"></i> Click Photo</button>
         </div>
-        <button id="toggle-camera" class="btn btn-primary"><i class='fas fa-street-view'></i> Start Checkin</button>
+        <button id="toggle-camera" class="btn btn-primary" style="bottom: 10px; left: 50%;position:relative"><i class='fas fa-street-view'></i> Start Checkin</button>
 
 
     </div>
