@@ -6,22 +6,20 @@
     @push('css')
     <link rel="stylesheet" href="{{ asset('openlayers/ol.css') }}">
     <style>
-        #map {
+     #map {
             width: 100%;
             height: 400px;
         }
-        /* Adjust button styles */
-#click-photo {
-    z-index: 1; /* Ensure button is above video */
-}
-
-/* Additional styles for the video container */
-#video-container {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    position: relative;
-}
+        #video-container {
+            position: relative;
+        }
+        #video {
+            display: none;
+        }
+        #click-photo {
+     
+            display: none;
+        }
 
     </style>
     <script src="{{ asset('openlayers/dist/ol.js') }}"></script>
@@ -33,11 +31,12 @@
 
     <!-- Check-in Card -->
     <div class="card-body">
-        <div id="video-container" style="position: relative;">
-            <video id="video" width="320" height="240" style="display: none;" autoplay></video>
-            <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
-            <button id="click-photo" class="btn btn-primary mt-2" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: none;"><i class="fas fa-camera"></i> Click Photo</button>
-        </div>
+    <div id="video-container">
+        <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+        <video id="video" width="320" height="240" autoplay playsinline></video>
+        
+        <button id="click-photo" class="btn btn-primary mt-2"><i class="fas fa-camera"></i>Check Out Now</button>
+    </div>
         <button id="toggle-camera" class="btn btn-primary"><i class='fas fa-street-view'></i> Checkout</button>
 
 
@@ -62,19 +61,18 @@
     <script src="{{ asset('template/backend/sb-admin-2')}}/vendor/sweetalert/sweetalert.all.js"></script>
     <script type="text/javascript">
         
-    let toggle_button = document.querySelector("#toggle-camera");
-    let video = document.querySelector("#video");
-                //let click_button = document.querySelector("#click-photo");
-    let canvas = document.querySelector("#canvas");
-    let image_data_url;
+        let toggle_button = document.querySelector("#toggle-camera");
+        let video = document.querySelector("#video");
+        let click_button = document.querySelector("#click-photo");
+        let canvas = document.querySelector("#canvas");
+        let image_data_url;
 
 
     toggle_button.addEventListener('click', function() {
-        if (toggle_button.innerText === " Checkout") {
-            startCamera();
-        } else {
+        startCamera()});
+       
+    click_button.addEventListener('click', function(e) {
             capturePhoto();
-        }
     });
 
    async function startCamera() {
@@ -83,7 +81,8 @@
         let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 video.srcObject = stream;
                 video.style.display = "block";
-                toggle_button.innerHTML = '<i class="fas fa-camera"></i> Photo Check-Out';
+                click_button.style.display = "block";
+                toggle_button.style.display='none';
             }catch(err){
                 console.error('Error accessing camera:', err);
                 Swal.fire({
@@ -97,12 +96,11 @@
 
 
     function capturePhoto() {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        image_data_url = canvas.toDataURL('image/jpeg');
-        stopCamera();
-        getLocationAndCheckIn(image_data_url);
+        canvas.style.display = "block";
+            image_data_url = canvas.toDataURL('image/jpeg');
+            stopCamera();
+            getLocationAndCheckIn(image_data_url);
     }
 
     function stopCamera() {
@@ -113,8 +111,9 @@
             });
             video.srcObject = null;
             video.style.display = "none";
-            toggle_button.innerHTML = "<i class='fas fa-location-check'></i> Start Checkin";
-        }
+            click_button.style.display = "none";
+            toggle_button.style.display = "block";
+         }
 
 
     function getLocationAndCheckIn(photoData) {
