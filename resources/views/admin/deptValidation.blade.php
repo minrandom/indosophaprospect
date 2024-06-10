@@ -232,7 +232,7 @@
   };
 
 
-  $('#deptValidForm').on('submit', function(e) {
+  $('#btn-store').on('click', function(e) {
         e.preventDefault();
         var clickedButton = $(document.activeElement);
 

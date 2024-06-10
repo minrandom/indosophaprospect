@@ -67,26 +67,44 @@
         }
     });
 
-    function startCamera() {
+    async function startCamera() {
+        try {
         $("#sidebarToggle").trigger('click');
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-            .then(function(stream) {
+        let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 video.srcObject = stream;
                 video.style.display = "block";
                 toggle_button.innerHTML = '<i class="fas fa-camera"></i> Photo Check-In';
-            })
-            .catch(function(err) {
+            }catch(err){
                 console.error('Error accessing camera:', err);
-                alert('Error accessing camera. Please make sure you have granted access.');
-            });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Camera Error',
+                    text: 'Error accessing camera. Please make sure you have granted access.',
+                    confirmButtonText: 'OK'
+                });
+            }
     }
 
 
     function capturePhoto() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         image_data_url = canvas.toDataURL('image/jpeg');
+        stopCamera();
         getLocationAndCheckIn(image_data_url);
     }
+
+    function stopCamera() {
+            let stream = video.srcObject;
+            let tracks = stream.getTracks();
+            tracks.forEach(function(track) {
+                track.stop();
+            });
+            video.srcObject = null;
+            video.style.display = "none";
+            toggle_button.innerHTML = "<i class='fas fa-location-check'></i> Start Checkin";
+        }
 
     function getLocationAndCheckIn(photoData) {
         if (navigator.geolocation) {
@@ -114,9 +132,7 @@
                 var placeName = data.display_name.split(',')[0];
                 var address = data.address.road + ', ' + data.address.city + ', ' + data.address.country;
                 var checkInAt = placeName;
-                
-
-
+              
                 Swal.fire({
                     icon: 'success',
                     title: 'Location Found',
@@ -169,20 +185,7 @@
             });
         }
 
-    function stopCamera() {
-        let stream = video.srcObject;
-        let tracks = stream.getTracks();
-        
-        tracks.forEach(function(track) {
-            track.stop();
-        });
-        video.srcObject = null;
-        video.style.display = "none";
-        $("#sidebarToggle").trigger('click');
-        click_button.style.display = "none";
-        toggle_button.innerHTML = "<i class='fas fa-location-check'></i> Start Checkin";
-        $("#click-photo").hide();
-    }
+
 
     
     }
