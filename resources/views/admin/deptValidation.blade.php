@@ -4,6 +4,9 @@
 ])
 
 @push('css')
+
+<link href="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
 <style>
   .tooltip-inner {
     max-width: 300px;
