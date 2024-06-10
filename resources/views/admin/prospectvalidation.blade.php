@@ -221,7 +221,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary btn-update">Update</button>
+        <button type="submit" class="btn btn-primary btn-update" id="validasibtn">Update</button>
         </form>
       </div>
     </div>
@@ -326,7 +326,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary btn-update">Update</button>
+        <button type="submit" class="btn btn-primary btn-update" id='updatebutton'>Update</button>
         </form>
       </div>
     </div>
@@ -529,7 +529,7 @@
     })
   });
 
-  $("#validationForm").on("submit", function(e) {
+  $("#validasibtn").on("click", function(e) {
     e.preventDefault()
 
     // Display alert message to confirm submission
@@ -762,7 +762,7 @@
     })
   });
 
-  $("#editForm").on("submit", function(e) {
+  $("#updatebutton").on("click", function(e) {
     e.preventDefault()
     var prospect = $("#data").val()
 

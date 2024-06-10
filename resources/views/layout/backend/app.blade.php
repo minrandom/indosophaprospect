@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Indosopha | {{ $title ?? 'Dashboard' }}</title>
+    <title>ISBIS | {{ $title ?? 'Dashboard' }}</title>
 
     <style>
     

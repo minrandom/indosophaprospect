@@ -1,5 +1,5 @@
 @extends('layout.auth.app',[
-    'title' => 'Indosopha Web App'
+    'title' => 'ISBIS APP'
 ])
 @section('content')
 
