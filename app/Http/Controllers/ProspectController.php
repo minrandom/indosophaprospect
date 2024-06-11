@@ -516,8 +516,6 @@ class ProspectController extends Controller
                 
                     );
                 $dataoption['chance'] = array(
-                   ['id'=>0,
-                    "name" => "0%","data"=>0],
                    [ 'id'=>1,
                     "name" => "20%","data"=>0.2
                      ],
@@ -530,9 +528,7 @@ class ProspectController extends Controller
                    [ 'id'=>4,
                     "name" =>     "80%","data"=>0.8
                      ],   
-                   [ 'id'=>5,
-                    "name" =>     "100%","data"=>1
-                     ],   
+                  
                 
                     );
                 $dataoption['validation'] = array(
