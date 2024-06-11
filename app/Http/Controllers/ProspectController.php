@@ -283,11 +283,13 @@ class ProspectController extends Controller
                 $anggaranopt=$anggaransts->name;
             }
         }
-
+       
         foreach ($options->anggaran->Jenis as $anggaranjns) {
+            if(isset($request->jenisanggarancr8)){
             if ($anggaranjns->id == $request->jenisanggarancr8) {
                 $anggaranjnsopt=$anggaranjns->name;
             }
+            }else $anggaranjnsopt="Belum Tahu";
         }
         
         $request->validate([

@@ -347,9 +347,9 @@
                     confSelect.append(draftconfig).select2({width: '100%'});
                   }          
 
-       
+                  if(response.eta_po_date){
                 $('#etapodatecr8').val(response.draft.eta_po_date);
-                
+                  }
               
             }
         })
@@ -403,7 +403,7 @@
          $(this).focus();
         e.preventDefault();
        $(document.activeElement);
-            submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
+        submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
         
     });
   
