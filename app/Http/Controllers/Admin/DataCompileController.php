@@ -192,7 +192,6 @@ class DataCompileController extends Controller
 
         return DataTables::of($cnf)
 
-
             ->addColumn('action', function ($cfg) {
                 $btn = '<div class="row"><a href="javascript:void(0)" id="' . $cfg->id . '" class="btn btn-primary btn-sm ml-2 btn-edit">Edit</a>';
                 $btn .= '<a href="javascript:void(0)" id="' . $cfg->id . '" class="btn btn-danger btn-sm ml-2 btn-delete">Delete</a></div>';
@@ -203,17 +202,11 @@ class DataCompileController extends Controller
             ->addColumn('bu', function ($cfg) {
                 return $cfg->unit->name;
             })
-           /* ->addColumn('brand', function ($cfg) {
-                return $cfg->brand->name;
-            })
-            ->addColumn('brandcountry', function ($cfg) {
-                return $cfg->brand->country;
-            })*/
+     
             ->addColumn('pformat', function ($cfg) {
                 $pformat = number_format($cfg->price_include_ppn);
                 return $pformat;
             })
-            //->only(['id','code','name','action','category','city','address','ownership','owned_by','class','akreditas','target', 'provname', 'prov_orderno'])
             ->rawColumns(['action'])
             ->toJson();
     }

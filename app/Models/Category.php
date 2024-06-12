@@ -10,7 +10,7 @@ class Category extends Model
     use HasFactory;
     
     
-    public function config(){
+    public function configs(){
         return $this->hasMany(Config::class);
     }
 
