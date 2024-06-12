@@ -121,7 +121,7 @@
             {data: 'id' , name: 'id'},
             {data: 'config_code' , name: 'config_code'},
             {data: 'name' , name: 'name'},
-            {data: 'bu' , name: 'bu'},
+            {data: 'unit.name' , name: 'bu'},
             {data: 'category.name' , name: 'category'},
             {data: 'genre' , name: 'genre'},
             {data: 'brand.name' , name: 'brand'},
