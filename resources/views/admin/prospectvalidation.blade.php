@@ -773,10 +773,10 @@
       method: "PATCH",
       data: $("#editForm").serialize(),
       success: function() {
-        //$('.data-table').DataTable().ajax.reload();
-       // $("#edit-modal").modal("hide");
-       // flash("success", "Data berhasil diupdate");
-      //  $('.notify').focus()
+      $('.data-table').DataTable().ajax.reload();
+      $("#edit-modal").modal("hide");
+       flash("success", "Data berhasil diupdate");
+       $('.notify').focus()
 
       },
       error: function(xhr, status, error) {
