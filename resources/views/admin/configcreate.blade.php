@@ -33,7 +33,7 @@
                   <form id="createForm">
                         @csrf
 
-                  <div class="form-group">
+        <div class="form-group">
             <label for="name">Nama Config</label>
             <input type="" required placeholder="" id="name" name="name" class="form-control">
         </div>

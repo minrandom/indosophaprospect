@@ -99,6 +99,8 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::POST('/hospitaladd',[HospitalController::class,'store'])->name('admin.hospitalstore')->middleware(['auth', 'role:admin,dba']);
 	Route::POST('/configadd',[ConfigController::class,'store'])->name('admin.configstore')->middleware(['auth', 'role:admin,dba']);
 	Route::get('/config',[ConfigController::class,'index'])->name('admin.config')->middleware(['auth', 'role:admin,dba']);
+	Route::PATCH('/config/{config}',[ConfigController::class,'update'])->name('admin.configupdate')->middleware(['auth', 'role:admin,dba']);
+	Route::get('/config/{config}/edit',[ConfigController::class,'show'])->name('admin.configdetail')->middleware(['auth', 'role:admin,dba']);
 	Route::get('/configcreate',[ConfigController::class,'create'])->name('admin.configcreate')->middleware(['auth', 'role:admin,dba']);
 	Route::PATCH('/prospectupdate/{prospect}',[ProspectController::class,'update'])->name('admin.prospectupdate')->middleware(['auth', 'role:admin,am,nsm']);
 	Route::PATCH('/prospectinfoupdate/{prospect}',[ProspectController::class,'infoupdate'])->name('admin.prospectinfoupdate')->middleware(['can:admin']);

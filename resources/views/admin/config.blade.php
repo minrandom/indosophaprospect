@@ -60,19 +60,61 @@
       <div class="modal-body">
         <form id="editForm">
         <div class="form-group">
-            <label for="name">Name</label>
-            <input type="hidden" required="" id="id" name="id" class="form-control">
-            <input type="" required="" id="name" name="name" class="form-control">
+        <input type="hidden" required="" id="data" name="data" class="form-control">
+            <label for="name">Nama Config</label>
+            <input type="" required placeholder="" id="name" name="name" class="form-control">
         </div>
         <div class="form-group">
-            <label for="prov_order_no">Province Order No</label>
-            <input type="" required="" id="prov_order_no" name="prov_order_no" class="form-control">
+            <label for="code">Kode Config</label>
+            <input type="" required  id="code" name="code" class="form-control">
         </div>
-       
-      </div>
+        <div class="form-group">
+            <label for="unit">Business Unit</label>
+            <select id="unit" name="unit" class="form-control" required="">
+
+            </select>
+        </div>
+      
+        <div class="form-group">
+            <label for="category">Product Category</label>
+            <select id="category" name="category" class="form-control" required="">
+
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="Jenis">Jenis</label>
+            <select id="Jenis" name="Jenis" class="form-control" required="">
+               
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="brand">Brand</label>
+            <select id="brand" name="brand" class="form-control">
+              
+            </select>
+        </div>
+        <div class="form-group">
+          <label for="type">Tipe</label>
+          <input type="" required placeholder="Input Tipe Alat" id="type" name="type" class="form-control" >
+        </div>
+        <div class="form-group">
+            <label for="uom">UOM</label>
+            <select id="uom" name="uom" class="form-control" required="">
+                  
+              
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="consist">Consist Of</label>
+            <input type="" id="consist" name="consist" class="form-control">
+        </div>
+        <div class="form-group">
+        <label for="price">Harga</label>
+            <input type="number" id="price" name="price" class="form-control">
+        </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary btn-update">Update</button>
+        <button type="submit" class="btn btn-primary btn-update" id="btn-update">Update</button>
         </form>
       </div>
     </div>
@@ -105,7 +147,7 @@
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/datatables-demo.js"></script>
-
+<script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
 <script type="text/javascript">
 
 
@@ -143,33 +185,102 @@
     // Edit & Update
     $('body').on("click",".btn-edit",function(){
         var id = $(this).attr("id")
-        
+        var dataedit = configeditdata();
         $.ajax({
-            url: "/admin/province/"+id+"/edit",
+            url: "{{ route('admin.configdetail', ['config' => ':id']) }}".replace(':id', id),
             method: "GET",
             success:function(response){
-                $("#edit-modal").modal("show")
-                $("#id").val(response.id)
-                $("#name").val(response.name)
-                $("#prov_order_no").val(response.prov_order_no)
+                $("#edit-modal").modal("show");
+                $("#data").val(response.config.id);
+                
+                $("#name").val(response.config.name);
+                $("#code").val(response.config.config_code);
+                $("#type").val(response.config.type);
+                $("#consist").val(response.config.consist_of);
+                $("#price").val(response.config.price_include_ppn);
+
+                units = response.config.unit_id
+                var unitselect = $('#unit');
+                editConfPopulateSelect(unitselect, response.unit, units, {width: '100%'});
+
+                brands = response.config.brand_id
+                var brandselect = $('#brand');
+                editConfPopulateSelect(brandselect, response.brand, brands, {width: '100%'});
+
+
+                brands = response.config.brand_id
+                var brandselect = $('#brand');
+                editConfPopulateSelect(brandselect, response.brand, brands, {width: '100%'});
+
+                genre= response.config.genre
+                var Jenisselect = $('#Jenis');
+                editHosPopulateSelect(Jenisselect, dataedit.jenis, genre, {width: '100%'});
+                
+                uom= response.config.uom
+                var uomselect = $('#uom');
+                editHosPopulateSelect(uomselect, dataedit.uom, uom, {width: '100%'});
+
+                categoryData= response.categoryData;
+
+                var filteredCats = categoryData.filter(function(cats) {
+                        return cats.unit_id == units;
+                    });
+                    var catSelect = $('#category');
+                
+                    $.each(filteredCats, function(index, cats) {
+                if(response.config.category_id == cats.id){
+                  catSelect.append('<option value="' + cats.id + '"selected>' + cats.name + '</option>');
+                }else{
+                   catSelect.append('<option value="' + cats.id + '">' + cats.name + '</option>');
+                }
+               });
+               catSelect.select2({width: '100%'});
+
+               $('#unit').change(function() {
+                    var unitId = $(this).val();
+                    //console.log(provinceId);
+                    
+                    catSelect.empty(); // Clear existing options
+                    catSelect.select2({
+                        placeholder: "pilih category",
+                        width: '100%' // Adjust the width to fit the container
+                        });
+                    // Filter cities based on the selected province
+                    var filteredcat = categoryData.filter(function(cat) {
+                        return cat.unit_id == unitId;
+                    });
+                    // Populate the city dropdown with the filtered cities
+                    $.each(filteredcat, function(index, cate) {
+                        catSelect.append('<option value="' + cate.id + '">' + cate.name + '</option>');
+                    });
+                  
+                });
                 
             }
         })
     });
 
-    $("#editForm").on("submit",function(e){
-        e.preventDefault()
-        var id = $("#id").val()
 
+  $("#btn-update").on("click", function(e) {
+        e.preventDefault()
+        var data= $("#data").val();
+        console.log(data);
+        var formData = $("#editForm").serialize();
         $.ajax({
-            url: "{{}}",
+            url: "{{ route('admin.configupdate', ['config' => ':config']) }}".replace(':config', data),
             method: "PATCH",
-            data: $(this).serialize(),
+            data: formData,
             success:function(){
                 $('.data-table').DataTable().ajax.reload();
-                $("#edit-modal").modal("hide")
-                flash("success","Data berhasil diupdate")
-            }
+                $("#edit-modal").modal("hide");
+                flash("success","Data berhasil diupdate");
+                $('.notify').focus();
+            },
+            error: function(xhr, status, error) {
+            // Handle any errors that occurred during the request
+            console.error('Error updating data:', error);
+            flash("error", "An error occurred while updating the data.");
+        }
         })
     })
     //Edit & Update

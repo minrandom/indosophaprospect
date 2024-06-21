@@ -89,6 +89,12 @@ class ConfigController extends Controller
     public function show(Config $config)
     {
         //
+        $config->load('unit','brand','category');
+        $unit = Unit::all();
+        $brand = Brand::all();
+        $category = Category::all();
+        return response()->json(['success'=>true,'config'=>$config,'unit'=>$unit,'brand'=>$brand,'categoryData'=>$category]);
+        //dd($config);
     }
 
     /**
@@ -112,6 +118,20 @@ class ConfigController extends Controller
     public function update(Request $request, Config $config)
     {
         //
+        $config->update([
+            'name'=>$request->name,
+            'unit_id'=>$request->unit,
+            'config_code'=>$request->code,
+            'brand_id'=>$request->brand,
+            'category_id'=>$request->category,
+            'genre'=>$request->Jenis,
+            'type'=>$request->type,
+            'uom'=>$request->uom,
+            'consist_of'=>$request->consist,
+            'price_include_ppn'=>$request->price,
+        ]);
+
+        return response()->json(['success'=>true,'config'=>$config]);
     }
 
     /**
