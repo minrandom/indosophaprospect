@@ -26,9 +26,9 @@
         </button>-->
         
         <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
-       
+        <form id="filterForm">
         @include('dropdownfilter._filter_review_admin')
-    
+        </form>
   </div>
 </div>
 </div>

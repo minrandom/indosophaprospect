@@ -41,7 +41,7 @@ function populateSelectFromDatalist(selectId, data,keterangan,) {
     });
   }
   
-  
+
 
 
 
@@ -69,6 +69,74 @@ function datarem(){
     return {
         tiperem: tiperem,
         column: column
+    };   
+    
+};
+
+
+
+function editHosPopulateSelect(selectElement, data, selectedValue, select2Options) {
+  selectElement.empty();
+  selectElement.select2(select2Options);
+  $.each(data, function(index, item) {
+      if (selectedValue == item.name) {
+          selectElement.append('<option value="' + item.name + '" selected>' + item.name + '</option>');
+      } else {
+          selectElement.append('<option value="' + item.name + '">' + item.name + '</option>');
+      }
+  });
+}
+
+
+
+function hoseditdata(){
+  var HosCat = [
+    { id: 1, name: "SMALL" },
+    { id: 2, name: "MEDIUM" },
+    { id: 3, name: "LARGE" },
+    { id: 4, name: "MAJOR" },
+      ];
+    var tipe = [
+      { id:1,name:'Swasta'},
+      { id:2,name:'Swasta-Group'},
+      { id:3,name:'Kementerian Kesehatan'},
+      { id:4,name:'TNI / POLRI'},
+      { id:5,name:'Yayasan / Organisasi'},
+      { id:6,name:'Pemerintah'},
+      { id:7,name:'Pendidikan'},
+      { id:8,name:'Kementerian Lain'},
+      { id:9,name:'Negeri'}
+      ];
+    var kelas = [
+      { id:1,name:'A'},
+      { id:2,name:'B'},
+      { id:3,name:'C'},
+      { id:4,name:'D'},
+      { id:4,name:'Belum ditetapkan'},
+    
+      ];
+
+    var akreditas=[
+      {id:1,name:'Belum Ditetapkan'  }   ,
+      {id:2,name:'Tingkat Paripurna' }  ,      
+      {id:3,name:'Tingkat Utama'   }   ,    
+      {id:4,name:'Lulus Perdana'  }  ,     
+      {id:5,name:'Tingkat Madya'  }  ,      
+      {id:6,name:'Tingkat Dasar' }  ,    
+    ];
+    var sasaran=[
+      {id:1,name:'Need Review' }    ,
+      {id:2,name:'Potensial'    }  ,  
+      {id:3,name:'Key Account'  }  ,   
+      {id:4,name:'Prioritas'    },
+    ]
+    return {
+        HosCat: HosCat,
+        tipe: tipe,
+        kelas: kelas,
+        akreditas: akreditas,
+        sasaran: sasaran,
+ 
     };   
     
 };

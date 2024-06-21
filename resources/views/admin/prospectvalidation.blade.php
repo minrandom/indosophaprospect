@@ -762,6 +762,8 @@
     })
   });
 
+
+
   $("#updatebutton").on("click", function(e) {
     e.preventDefault()
     var prospect = $("#data").val()
@@ -769,14 +771,19 @@
     $.ajax({
       url: "{{ route('admin.prospectupdate', ['prospect' => ':prospect']) }}".replace(':prospect', prospect),
       method: "PATCH",
-      data: $(this).serialize(),
+      data: $("#editForm").serialize(),
       success: function() {
-        $('.data-table').DataTable().ajax.reload();
-        $("#edit-modal").modal("hide");
-        flash("success", "Data berhasil diupdate");
-        $('.notify').focus()
+        //$('.data-table').DataTable().ajax.reload();
+       // $("#edit-modal").modal("hide");
+       // flash("success", "Data berhasil diupdate");
+      //  $('.notify').focus()
 
-      }
+      },
+      error: function(xhr, status, error) {
+            // Handle any errors that occurred during the request
+            console.error('Error updating data:', error);
+            flash("error", "An error occurred while updating the data.");
+        }
     })
   })
   //Edit & Update

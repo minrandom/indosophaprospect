@@ -66,7 +66,7 @@
         <div class="form-group">
             <label for="type">Tipe</label>
             <select id="type" name="type" class="form-control" required="">
-                    <option val=''>Pilih Kategori</option> 
+                    <option val=''>Pilih Tipe</option> 
                     <option val='Swasta'>Swasta</option>
                     <option val='Swasta-Group'>Swasta-Group</option>
                     <option val='Kementerian Kesehatan'>Kementerian Kesehatan</option>
@@ -102,13 +102,13 @@
                     <option val='Lulus Perdana'>Lulus Perdana</option>
                     <option val='Tingkat Madya'>Tingkat Madya</option>
                     <option val='Tingkat Dasar'>Tingkat Dasar</option>
-                    <option val='Pemkot'>Pemkot</option>
+                  
                    
          
             </select>
         </div>
         <div class="form-group">
-            <label for="target">Target</label>
+            <label for="target">Sasaran</label>
             <select id="target" name="target" class="form-control" required="">
                     <option val='Need Review'>Need Review</option> 
                     <option val='Potensial'>Potensial</option>
@@ -168,7 +168,7 @@
             success: function(data) {
                 var $provinceSelect = $('#province');
                 $provinceSelect.empty(); // Clear existing options
-                populateProvinceFromDatalist('province', data.prov,"Pilih Sumber Informasi");
+                populateProvinceFromDatalist('province', data.prov,"Pilih Provinsi");
 
                 $('#province').change(function() {
                     

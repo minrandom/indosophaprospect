@@ -111,6 +111,12 @@ class HospitalController extends Controller
     public function show(Hospital $hospital)
     {
         //
+        $provinces = Province::all();
+        $provselected = Province::where('id',$hospital->province_id)->first();
+        $hospital['provselected']= $provselected;
+        return response()->json(["success"=>true,'hospital'=>$hospital,'provinceopt'=>$provinces]);
+        
+
     }
 
     /**
@@ -134,6 +140,24 @@ class HospitalController extends Controller
     public function update(Request $request, Hospital $hospital)
     {
         //
+        $province = Province::where('prov_region_code',$request->province)->first();
+
+        $hospital->update([
+            "name"=>$request->name,
+            "province_id"=>$province->id,
+            "city"=>$request->cityname,
+            "city_order_no"=>$request->city,
+            "category"=>$request->category,
+            "address"=>$request->Alamat,
+            "ownership"=>$request->owner,
+            "owned_by"=>$request->type,
+            "class"=>$request->class,
+            "akreditas"=>$request->akreditas,
+            "target"=>$request->target,
+        ]);
+
+        return response()->json(["success"=>true,'hospital'=>$hospital,'message'=>"Update Berhasil"]);
+
     }
 
     /**

@@ -125,6 +125,8 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/prospectcreation',[ProspectController::class,'creation'])->name('admin.prospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospecteventcreation',[ProspectController::class,'eventcreation'])->name('admin.prospecteventcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/hospital/{provinceId}/hospital',[HospitalController::class,'getHospitalsByProvince'])->name('admin.getHospitalsByProvince')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/hospital/{hospital}/edit',[HospitalController::class,'show'])->name('admin.hospitaldetail')->middleware(['auth', 'role:admin,dba']);
+	Route::PATCH('/hospital/{hospital}',[HospitalController::class,'update'])->name('admin.hospitalupdate')->middleware(['auth', 'role:admin,dba']);
 	Route::get('/hospital2/{provinceId}/hospital2',[HospitalController::class,'getHospitalsByProvince2'])->name('admin.getHospitalsByProvince2')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/dept/{hospitalId}/dept',[DeptValidController::class,'getDeptValid'])->name('admin.getDeptValid')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::POST('/deptvalid',[DeptValidController::class,'store'])->name('admin.deptvalid')->middleware(['auth', 'role:admin,fs,am,nsm,bu,dba']);
