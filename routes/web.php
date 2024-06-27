@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\LoginController;
 //Namespace Admin
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\prospectRemarksController;
+use App\Http\Controllers\prospectFiltersController;
 
 use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\ConfigController;
@@ -30,7 +31,7 @@ use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\Admin\PrincipalBrandController;
 use App\Http\Controllers\Admin\DataCompileController;
 use App\Http\Controllers\DeptValidController;
-
+use App\Models\prospectFilters;
 
 //use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
 
@@ -79,6 +80,7 @@ Route::post('/remarks', [prospectRemarksController::class,'store'])->name('remar
 Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::post('/sequencedata', [sequenceController::class,'upload'])->name('sequence.up')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
+Route::post('/prospectFilterSave', [prospectFiltersController::class,'upload'])->name('prospectfiltersave')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/temperupdate/{id}', [JojoController::class, 'temperupdate'])->name('temperupdate')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);
 Route::get('/fixmiss', [TampanController::class, 'fixmissingitem'])->name('fixmiss')->middleware(['auth', 'role:admin,am,nsm,bu,fs']);

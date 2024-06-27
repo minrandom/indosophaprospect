@@ -45,6 +45,40 @@ function populateProvinceFromDatalist(selectId, data, keterangan,) {
 
 
 
+
+function filter(){
+  var etapo=[
+    {id:1,name:"1 Bulan Ke depan"},
+    {id:3,name:"3 Bulan Ke depan"},
+    {id:6,name:"6 Bulan Ke depan"},
+  ];
+
+  var sasaran=[
+    {id:1,name:"Key Account / Prioritas"},
+
+  ];
+
+  var temper=[
+    
+    {id:1,name:"LEAD"},
+    {id:2,name:"PROSPECT"},
+    {id:3,name:"FUNNEL"},
+    {id:4,name:"HOT PROSPECT"},
+    {id:5,name:"SUCCESS"},
+    {id:-1,name:"MISSED"}
+  ]
+  
+  return{
+    etafilter:etapo,
+    temper :temper,
+    sasaran : sasaran
+  };
+
+}
+
+
+
+
 function datarem() {
   var tiperem = [
     { id: 1, name: "Request Update" },
@@ -87,7 +121,20 @@ function editHosPopulateSelect(selectElement, data, selectedValue, select2Option
   });
 }
 
+function CatPopulateSelect(selectElement, data, selectedValue, select2Options) {
+  selectElement.empty();
+  selectElement.select2(select2Options);
+  $.each(data, function (index, item) {
+    if (selectedValue == item.id) {
+      selectElement.append('<option value="' + item.id + '" selected>' + item.name + '</option>');
+    } else {
+      selectElement.append('<option value="' + item.id + '">' + item.name + '</option>');
+    }
+  });
+}
+
 function editConfPopulateSelect(selectElement, data, selectedValue, select2Options) {
+  console.log(selectedValue);
   selectElement.empty();
   selectElement.select2(select2Options);
   $.each(data, function (index, item) {

@@ -597,8 +597,8 @@ class DataCompileController extends Controller
 
                 return $prp->unit ? $prp->unit->name : 'data BU Error';
             })
-            ->addColumn('category', function ($prp) {
-                return $prp->config->category;
+            ->addColumn('categoryId', function ($prp) {
+                return $prp->config->category_id;
             })
             ->addColumn('uom', function ($prp) {
                 return $prp->config->uom;

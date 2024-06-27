@@ -11,12 +11,14 @@ use App\Models\ReviewLog;
 use App\Models\Alert as AlertData;
 use App\Http\Controllers\AlertController as Alert;
 use App\Http\Controllers\sequenceController as seq;
+
 use App\Models\Category;
 use App\Models\Config;
 use App\Models\Unit;
 use App\Models\Event;
 use App\Models\tmpProspectInput;
 use App\Models\prospectTemperature;
+use App\Models\prospectFilters;
 use App\Models\User;
 use App\Models\Brand;
 use App\Models\Employee;
@@ -103,12 +105,22 @@ class ProspectController extends Controller
     public function create(Prospect $prospect)
     {
         //
-
+       
         $sourceoption = $this->optiondata()->getData();
         $usid=Auth::user()->id;
         $user=User::with('employee')->where('id',$usid)->first();
         $role=$user->role;
-        
+        $filter = prospectFilters::where('filterUser',$usid)->first();
+        $a = trim($filter->filterData, "[]");
+        $arrayfilter = explode(',', $a);
+    
+        // Replace occurrences of ""0"" with null
+    
+    
+        // Debug the processed array
+   // Remove square brackets
+  
+
         $area=$user->employee->area;
         $pos=$user->employee->position;
         if($area=="HO" ){
@@ -214,7 +226,7 @@ class ProspectController extends Controller
         $data['province'] = $provincelist;
         $data['draft']=$draft;
         $data['pic']=$piclist;
-       
+       $data['filter']=$arrayfilter;
        // $data['rumahsakit'] = $rumahsakit;
         $data['dept'] = $dept;
         $data['event'] = $event;

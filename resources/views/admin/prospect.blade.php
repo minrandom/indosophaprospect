@@ -220,8 +220,8 @@
     background: "rgba(0, 114, 255, 0.86)",
     
     }); 
-
-/*
+    var filteropt = filter();
+/*  
     $.ajaxSetup({
       beforeSend: function() {
         
@@ -236,51 +236,73 @@
       url: "{{ route('admin.prospectcreate') }}",
       method: "GET",
       success: function(response) {
-        var eventSelect = $("#sumberinfofilter");
-        populateSelectFromDatalist('sumberinfofilter', response.source.source, "Filter Sumber Informasi");
-        //populate from event database
-        response.event.forEach(function(event) {
-          var option = $("<option>").val(event.id).text(event.name);
-          eventSelect.append(option);
-        });
-
-        var showall = $("<option>").val(0).text("Show All").attr('selected', true);
-        eventSelect.prepend(showall);
-
+   
         var tempselect = $("#tempefilter");
-        var keterangantempe = "Filter Temperature";
-        var placeholderTempeOption = new Option(keterangantempe, '', true, true);
-        tempselect.append(placeholderTempeOption);
-        //var tempall = $("<option>").val(0).text("Show All").attr('selected', true);
-        // tempselect.prepend(tempall);
+       
 
-        tempselect.select2({
-          placeholder: keterangantempe,
-          width: '100%' // Adjust the width to fit the container
-        });
 
         var provfilter = $("#provincefilter");
-        populateSelectFromDatalist('provincefilter', response.province, "Filter Provinsi");
-        var provall = $("<option>").val(0).text("Show All").attr('selected', true);
-        provfilter.prepend(provall);
+        //populateSelectFromDatalist('provincefilter', response.province, "Filter Provinsi");
+                     //console.log(response.filter);
+      function processFilterData(filterData) {
+        return filterData.map(value => {
+          // Remove surrounding quotes, if any
+          value = value.replace(/"/g, '');
+          
+          if (value === "null") {
+            return null;
+          } else if (!isNaN(value)) {
+            return +value; // Convert to number if it is numeric
+          } else {
+            return value;} // Return 
+        });
+      }
+      let filterArr = processFilterData(response.filter);
+      console.log(filterArr);
+
+      if(filterArr[1] >0){
+      editConfPopulateSelect(tempselect ,filteropt.temper, filterArr[1], {width: '100%'});
+      tempAll=$("<option>").val(0).text("Show All");
+      tempselect.prepend(tempAll);
+      }else{
+        populateSelectFromDatalist('tempefilter', filteropt.temper, "Pilih Filter");
+        tempAll=$("<option>").val(0).text("Show All").attr('selected', true);
+        tempselect.prepend(tempAll);
+      }
+
+
+      if(filterArr[2] >0){
+      editConfPopulateSelect(provfilter, response.province, filterArr[2], {width: '100%'});
+      provAll=$("<option>").val(0).text("Show All");
+      provfilter.prepend(provAll);
+      }else{
+        populateSelectFromDatalist('provincefilter', response.province, "Pilih Business Unit");
+        provAll=$("<option>").val(0).text("Show All").attr('selected', true);
+        provfilter.prepend(provAll);
+      }
+      
 
         var keteranganpic = "Pilih Provinsi untuk Memunculkan PIC"
         var picfilter = $("#picfilter");
-        picfilter.select2({
-          placeholder: keteranganpic,
-          width: '100%' // Adjust the width to fit the container
-        });
+       
+        if(filterArr[3] >0){
+        populatePicFilter(filterArr[2],filterArr[3]);
+        var picall = $("<option>").val(0).text("Show All");
+        picfilter.prepend(picall);}
+        else {
+          populatePicFilter(filterArr[2],0);
+          var picall = $("<option>").val(0).text("Show All").attr('selected', true);
+          picfilter.prepend(picall);
+        }
+        
 
-
-        function populatePicFilter(provinceId) {
-            // Clear existing options
-            console.log(provinceId);
+        function populatePicFilter(provinceId,picId) {
             picfilter.empty();
-            
-            // Add placeholder option
-            picfilter.append(new Option(keteranganpic, ''));
-            
-            // Find the selected province object based on provinceId
+            picfilter.select2({
+            placeholder: keteranganpic,
+            width: '100%' // Adjust the width to fit the container
+            });
+     
             var selectedProvince = response.province.find(function(province) {
                 return province.id == provinceId;
             });
@@ -291,11 +313,26 @@
                     // Assuming pic has properties representing the area it belongs to (e.g., pic.area)
                     return pic.area == selectedProvince.wilayah || pic.area == selectedProvince.iss_area_code || pic.area == selectedProvince.prov_order_no;
                 });
-                
-                // Populate picfilter with filtered options
-                filteredPics.forEach(function(pic) {
-                    picfilter.append(new Option(pic.name, pic.user_id));
-                });
+    
+                console.log(picId);
+                if(picId >0){
+                  filteredPics.forEach(function(pic) {
+                    console.log(pic.user_id);
+                    if (picId == pic.user_id) {
+                        picfilter.append('<option value=' + pic.user_id + ' selected >' + pic.name + '</option>');
+                      } else {
+                        picfilter.append('<option value=' + pic.user_id + '>' +  pic.name + '</option>');
+                      }
+                  });
+
+                 }else{
+
+                  filteredPics.forEach(function(data) {
+                    picfilter.append(new Option(data.name, data.user_id));
+                  });
+                  }
+
+
             } else {
                 console.error('Province not found for ID:', provinceId);
             }
@@ -303,61 +340,126 @@
 
         provfilter.on('change', function() {
           var selectedProvinceId = $(this).val();
-          populatePicFilter(selectedProvinceId);
+          populatePicFilter(selectedProvinceId,0);
+          var picall = $("<option>").val(0).text("Show All").attr('selected', true);
+          picfilter.prepend(picall);
         });
 
+        var unitSelect = $("#BUfilter");
+        var catfilter=$("#catfilter");
+
+
+        if(filterArr[4] >0){
+      editConfPopulateSelect(unitSelect, response.bunit, filterArr[4], {width: '100%'});
+      buAll=$("<option>").val(0).text("Show All");
+      unitSelect.prepend(buAll);
+      }else{
+        populateSelectFromDatalist('BUfilter', response.bunit, "Pilih Business Unit");
+        buAll=$("<option>").val(0).text("Show All").attr('selected', true);
+        unitSelect.prepend(buAll);
+      }
 
       
-        var placeholderPicOption = new Option(keteranganpic, '', true, true);
-        picfilter.append(placeholderPicOption);
-        var picall = $("<option>").val(0).text("Show All").attr('selected', true);
-        picfilter.prepend(picall);
+   
+    
 
-        var unitSelect = $("#BUfilter");
-        populateSelectFromDatalist('BUfilter', response.bunit, "Pilih Business Unit");
-        var catSelect = $("#catfilter");
-        var catall = $("<option>").val(0).text("Show All").attr('selected', true);
 
-        function fetchcat(unitId) {
+        function fetchcat(unitId,catId) {
           // Make an AJAX call to retrieve hospitals based on provinceId
           $.ajax({
             url: "{{ route('admin.getCategoriesByUnit', ['unitId' => ':unitId']) }}".replace(':unitId', unitId),
             method: "GET",
             success: function(response) {
-              populateSelectFromDatalist('catfilter', response.catopt, "Filter Category");
-              $("#catfilter").prepend(catall);
+              //console.log(catId);
+              if(catId==0){
+                populateSelectFromDatalist('catfilter', response.catopt, "Pilih Category");
+              catAll=$("<option>").val(0).text("Show All").attr('selected', true);
+              catfilter.prepend(catAll);}
+              else{
+                CatPopulateSelect(catfilter, response.catopt, catId, {width: '100%'});
+                catAll=$("<option>").val(0).text("Show All");
+              catfilter.prepend(catAll);
+              }
+     
             }
           });
         }
-        var unitall = $("<option>").val(0).text("Show All").attr('selected', true);
-        unitSelect.prepend(unitall)
+       
+     
+        fetchcat(filterArr[4],filterArr[5])
 
-        catSelect.select2({
-          width: '100%' // Adjust the width to fit the container
-        });
-
-        catSelect.prepend(catall);
         unitSelect.on("change", function() {
           var selectedunitId = $(this).val();
-          fetchcat(selectedunitId);
-
+          fetchcat(selectedunitId,0);
         });
 
-
+        //console.log(filteropt);
 
         var etafilter = $("#etafilter");
-        etafilter.select2({
+        if(filterArr[6] >0){
+          editConfPopulateSelect(etafilter, filteropt.etafilter, filterArr[6], {width: '100%'});
+          provAll=$("<option>").val(0).text("Show All");
+          etafilter.prepend(provAll);
+          }else{
+            populateSelectFromDatalist('etafilter', filteropt.etafilter, "Pilih Estimasi PO ");
+            provAll=$("<option>").val(0).text("Show All").attr('selected', true);
+            etafilter.prepend(provAll);
+          }
 
-          width: '100%' // Adjust the width to fit the container
-        });
+
+
 
         var sasaran = $("#sasaran");
-        sasaran.select2({
+        if(filterArr[7] >0){
+          editConfPopulateSelect(sasaran, filteropt.sasaran, filterArr[7], {width: '100%'});
+          provAll=$("<option>").val(0).text("Show All");
+          sasaran.prepend(provAll);
+          }else{
+            populateSelectFromDatalist('sasaran', filteropt.sasaran, "Pilih Sasaran ");
+            provAll=$("<option>").val(0).text("Show All").attr('selected', true);
+            sasaran.prepend(provAll);
+          }
 
-          width: '100%' // Adjust the width to fit the container
-        });
+
+          $('#clear-filter').on('click', async function() {
+            //setback temper
+            populateSelectFromDatalist('tempefilter', filteropt.temper, "Pilih Filter");
+                tempAll=$("<option>").val(0).text("Show All").attr('selected', true);
+                tempselect.prepend(tempAll);
+            // setback province
+            populateSelectFromDatalist('provincefilter', response.province, "Pilih Business Unit");
+            provAll=$("<option>").val(0).text("Show All").attr('selected', true);
+            provfilter.prepend(provAll);
+            // setback pic
+            populatePicFilter(0,0);
+            var picall = $("<option>").val(0).text("Show All").attr('selected', true);
+            picfilter.prepend(picall);
+            //setback bu
+            populateSelectFromDatalist('BUfilter', response.bunit, "Pilih Business Unit");
+            buAll=$("<option>").val(0).text("Show All").attr('selected', true);
+            unitSelect.prepend(buAll);
+            //setback prodcat
+            fetchcat(0,0);
+            catAll=$("<option>").val(0).text("Show All");
+            catfilter.prepend(catAll);
+            //setback eta
+            populateSelectFromDatalist('etafilter', filteropt.etafilter, "Pilih Estimasi PO ");
+            provAll=$("<option>").val(0).text("Show All").attr('selected', true);
+            etafilter.prepend(provAll);
+            //setback sasaran
+            populateSelectFromDatalist('sasaran', filteropt.sasaran, "Pilih Sasaran ");
+            provAll=$("<option>").val(0).text("Show All").attr('selected', true);
+            sasaran.prepend(provAll);
+
+            var filterkirim = [0,0,0,0,0,0,0,0];
+      
+
+            updateData(jsonData, filterkirim);
 
 
+
+
+           }); 
 
 
       }
@@ -390,8 +492,13 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       var cek = $('#tempefilter').val();
       if (cek == '') {
         cek = '0';
-      }      //console.log(cek);
-      var filterkirim = [$('#sumberinfofilter').val(), cek, $('#provincefilter').val(), $('#picfilter').val(), $('#BUfilter').val(),$('#catfilter').val()];
+      }     
+
+      catfilterdata=$('#catfilter').val();
+      
+
+      console.log($('#picfilter').val());
+      var filterkirim = [$('#sumberinfofilter').val(), cek, $('#provincefilter').val(), $('#picfilter').val(), $('#BUfilter').val(),catfilterdata,$('#etafilter').val()];
       //var infoFilter = ;
       //console.log(filterkirim);
       updateData(jsonData, filterkirim);
@@ -422,7 +529,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
   function updateData(jsonData, params) {
     
    // console.log(jsonData);
-   
+   console.log(params);
     var filteredData = jsonData; // Make a copy of the original data
     var newData = jsonData;
     //console.log(filteredData);
@@ -432,12 +539,13 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     for (var i = 0; i < params.length; i++) {
       if (params[i] != '0') {
         x = x + 1;
-        console.log(params[i]);
-        console.log(i);
+        //console.log(params[i]);
+        //console.log(i);
       }
- 
-    }
     
+    }
+   
+    console.log(x);
 
 
     if (x > 0) {
@@ -454,13 +562,13 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
               case 1:
                 return item.temperid == params[i];
             case 2:
-               return item.province.name === params[i];
+               return item.province.id == params[i];
               case 3:
                 return item.pic_user_id == params[i];
               case 4:
                 return item.unit_id == params[i];
               case 5:
-                return item.category == params[i];
+                return item.categoryId == params[i];
               case 6:
             // Calculate the date 'params[i]' months from now
         var targetDate = new Date();
@@ -551,7 +659,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
     });
 
-
+    storeFilterData(params);
   // 
     //console.log(dataprospect);
     initialProspectTable(dataprospect);
@@ -563,7 +671,10 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
   //console.log(prospectsheet);
 
-  $('#dlexcel').on('click', async function() {
+
+
+  
+    $('#dlexcel').on('click', async function() {
         // Show the loading screen
         $.busyLoadFull("show", { text: "Please wait..." });
 
@@ -582,7 +693,6 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
             $('#dlexcel').prop('disabled', false);
         }
     });
-
 
   
 
@@ -607,6 +717,8 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     var picValue = $('#picfilter').val();
     var picText = $('#picfilter').find('option:selected').text();
 
+
+
     var buValue = $('#BUfilter').val();
     var buText = $('#BUfilter').find('option:selected').text();
 
@@ -626,15 +738,14 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       selectedValue = selectedText
     }
    
-    if (provValue != 0) {
-      provValue = provText
-    }
-    if (catValue != 0) {
-      catValue = catText
-    }
+    //if (provValue != 0) {
+   //   provValue = provText
+   // }
+   
     //console.log(jsonData)
     // selectedValue=$(this).text();
 
+    console.log(picValue);
 
     var filterupdate = [selectedValue, tempValue, provValue, picValue, buValue,catValue,etaValue,sasaranValue];
 
@@ -908,7 +1019,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       if (cek == '') {
         cek = '0';
       }
-        var filterkirim = [$('#sumberinfofilter').val(), cek, $('#provincefilter').val(), $('#picfilter').val(), $('#BUfilter').val(),$('#catfilter').val()];
+        var filterkirim = [$('#sumberinfofilter').val(), cek, $('#provincefilter').val(), $('#picfilter').val(), $('#BUfilter').val(),$('#catfilter').val(),$('#etafilter').val(),$('#tempefilter').val(),$('#sasaran').val()];
       //var infoFilter = ;
       //console.log(filterkirim);
     
@@ -1066,6 +1177,23 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
             type: 'POST',
             data: {
                 sequenceData: JSON.stringify(ids) // Convert JSON data to a string before sending
+            },
+            success: function(response) {
+                // Handle success response from the server
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                // Handle error response from the server
+                console.error(xhr.responseText);
+            }
+        });
+    }
+  function storeFilterData(filterData) {
+        $.ajax({
+            url: '{{ route("prospectfiltersave") }}', // Replace 'store.sequence.data' with your actual route name
+            type: 'POST',
+            data: {
+                filterData: JSON.stringify(filterData) // Convert JSON data to a string before sending
             },
             success: function(response) {
                 // Handle success response from the server
