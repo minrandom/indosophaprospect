@@ -1250,7 +1250,7 @@
 
         }
         */
-
+      })
             var next_actionSelect = $("#next_action");
             next_actionSelect.empty();
 
@@ -1265,7 +1265,7 @@
 
 
 
-          })
+          
         }
       });
     });
