@@ -580,6 +580,12 @@ class DataCompileController extends Controller
                     $newdata = $newprov . "</br>Tidak ada AM/NSM";
                 return $newdata;
             })
+            ->addColumn('ProvOrderNo', function ($prp) {
+
+                $newprov = $prp->province ? $prp->province->prov_order_no : 'No Province detected';
+                return $newprov;
+           
+            })
             ->addColumn('AMNSM', function ($prp) {
                 $AM = getareaman($prp->province->iss_area_code, $prp->province->wilayah);
                 if ($AM['am'] != "0") {

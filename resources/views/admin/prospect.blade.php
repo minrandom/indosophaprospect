@@ -45,6 +45,7 @@
           <th>PIC</th>
           <th>Prospect No</th>
           <th>Province</th>
+          <th>Prov Order No</th>
           <th>Rumah Sakit + Department</th>
           <th>Nama Produk + Qty</th>
           <th>Value (IDR)</th>
@@ -591,7 +592,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
       }
 
-      console.log(filteredData);
+      //console.log(filteredData);
       DataLine(filteredData);
       // Show message if filteredData is empty
       if (filteredData.length === 0) {
@@ -604,6 +605,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     } else
       var dataprospect = jsonData;
       const customOrder = { 4: 1, 1: 2, 2: 3, 3: 4, 5: "-1", '-1': 6};
+
 
       dataprospect.sort((a,b)=>customOrder[a.temperid] - customOrder[b.temperid]);
 
@@ -626,6 +628,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         Creator: datz.creator.name,
         ProspectNo: datz.prospect_no,
         Province: datz.province.name,
+        ProvOrderNo: datz.province.prov_order_no,
         SumberInfoProspect: datz.prospect_source,
         PIC: datz.personInCharge,
         AM: datz.AMNSM,
@@ -661,7 +664,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
     storeFilterData(params);
   // 
-    //console.log(dataprospect);
+    console.log(dataprospect);
     initialProspectTable(dataprospect);
     
 
@@ -888,6 +891,12 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
           {
             data: 'provincedata',
             name: 'provincedata',
+            responsivePriority: 12,
+            targets: 12
+          },
+          {
+            data: 'ProvOrderNo',
+            name: 'provorderno',
             responsivePriority: 12,
             targets: 12
           },
