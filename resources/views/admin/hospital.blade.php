@@ -337,7 +337,10 @@
         var cityId = $("#city").val(); // Assuming you have a dropdown with the ID "city-dropdown"
         //var prov_reg_code = $("#province").val()
         var cityData = citydata().find(city => city.id === cityId);
+        var provName = $("#province option:selected").text();
+        console.log(provName);
         formData += "&cityname="+cityData.name;
+        formData += "&provName="+provName;
 
     $.ajax({
         url: "{{ route('admin.hospitalupdate', ['hospital' => ':hospital']) }}".replace(':hospital', hospital),

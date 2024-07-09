@@ -140,7 +140,7 @@ class HospitalController extends Controller
     public function update(Request $request, Hospital $hospital)
     {
         //
-        $province = Province::where('prov_region_code',$request->province)->first();
+        $province = Province::where('name',$request->provName)->first();
 
         $hospital->update([
             "name"=>$request->name,
