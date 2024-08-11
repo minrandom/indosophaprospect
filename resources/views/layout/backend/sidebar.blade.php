@@ -142,22 +142,22 @@
                 </div>
                 @elsecan('fs')
                 <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Validation Prospect :</h6>
+                <h6 class="collapse-header">Review Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>My Prospect</span></a>
                 </div>
                 @elsecan('am')
                 <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Validation Prospect :</h6>
+                <h6 class="collapse-header">Review Prospect :</h6>
                  <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Area Prospect Review</span></a>
                 </div>
                 @elsecan('nsm')
                 <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Validation Prospect :</h6>
+                <h6 class="collapse-header">Review Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Region Prospect Review</span></a>
                 </div>
                 @elsecan('bu')
                 <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Validation Prospect :</h6>
+                <h6 class="collapse-header">Review Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>BU Prospect Review</span></a>
                 <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
                 </div>
