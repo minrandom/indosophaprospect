@@ -102,7 +102,9 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Create Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospectcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create New Prospect</span></a>
+                @can('admin')
                 <a class="collapse-item" href="{{ route('admin.consprospectcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create Consumables</span></a>
+                @endcan
                 <a class="collapse-item" href="{{ route('admin.prospecteventcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create Event Prospect</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospectcheckview') }}"><i class="fas fa-fw fa-tasks"></i><span> Prospect Check</span></a>
                
