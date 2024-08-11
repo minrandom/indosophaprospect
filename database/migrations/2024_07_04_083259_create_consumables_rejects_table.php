@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAlertsTable extends Migration
+class CreateConsumablesRejectsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,11 @@ class CreateAlertsTable extends Migration
      */
     public function up()
     {
-        Schema::create('alerts', function (Blueprint $table) {
+        Schema::create('consumables_rejects', function (Blueprint $table) {
             $table->id();
-            $table->string('type');
-            $table->unsignedBigInteger('prospect_id');
-            $table->unsignedBigInteger('user_id');
-            $table->integer('status')->default(0);
+            $table->unsignedBigInteger('consumables_prospects_id');
+            $table->unsignedBigInteger('rejected_by');
+            $table->text('reason');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ class CreateAlertsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('alerts');
+        Schema::dropIfExists('consumables_rejects');
     }
 }

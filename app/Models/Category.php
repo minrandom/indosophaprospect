@@ -13,5 +13,8 @@ class Category extends Model
     public function configs(){
         return $this->hasMany(Config::class);
     }
+    public function consumablesProspects(){
+        return $this->hasMany(consumablesProspect::class);
+    }
 
 }

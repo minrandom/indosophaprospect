@@ -17,6 +17,7 @@ class rejectLog extends Model
         return $this->belongsTo(Prospect::class);
     }
 
+
     public function validator(){
         return $this->belongsTo(User::class,'rejected_by');
     }

@@ -236,6 +236,39 @@ function hoseditdata() {
 
 };
 
+
+function populateConsProductSelect(businessUnitId, categoryId, selectElementId) {
+  var productDataElement = document.getElementById('productData');
+  var getProductsUrl = productDataElement.getAttribute('data-url');
+  $.ajax({
+      url: getProductsUrl,
+      type: 'GET',
+      data: {
+        businessUnitId: businessUnitId,
+        categoryId: categoryId
+      },
+      success: function(response) {
+          var productSelect = $(selectElementId);
+          productSelect.empty();
+          productSelect.append('<option value="">- Pilih Produk -</option>');
+
+          response.products.forEach(function(product) {
+              var option = $("<option>").val(product.id).text(product.name);
+              productSelect.append(option);
+          });
+
+        
+          productSelect.select2();
+      }
+  });
+}
+
+function populateAllConsProductSelects(businessUnitId, categoryId) {
+  $('.cr8product').each(function() {
+      populateConsProductSelect(businessUnitId, categoryId, this);
+  });
+}
+
 function populateProductSelect(businessUnitId, categoryId, formId) {
   var productDataElement = document.getElementById('productData');
   var getProductsUrl = productDataElement.getAttribute('data-url');

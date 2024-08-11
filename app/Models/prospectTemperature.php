@@ -17,5 +17,6 @@ class prospectTemperature extends Model
         return $this->belongsTo(Prospect::class,"prospect_id");
     }
 
+
     
 }

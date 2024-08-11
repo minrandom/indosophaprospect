@@ -30,6 +30,7 @@ use App\Http\Controllers\User\ProfileController;
 
 use App\Http\Controllers\Admin\PrincipalBrandController;
 use App\Http\Controllers\Admin\DataCompileController;
+use App\Http\Controllers\ConsumablesProspectController;
 use App\Http\Controllers\DeptValidController;
 use App\Models\prospectFilters;
 
@@ -112,20 +113,33 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::PATCH('/reviewupdate/{prospect}',[ProspectController::class,'reviewupdate'])->name('admin.prospect.reviewupdate')->middleware(['auth', 'role:admin,am,nsm,bu']);
 	Route::PATCH('/chcupdate/{prospect}',[ProspectController::class,'chcupdate'])->name('admin.prospect.chcupdate')->middleware(['auth', 'role:admin,am,nsm,bu']);
 	Route::get('/prospect/{prospect}/edit',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['auth', 'role:admin,am,nsm,bu']);
+	Route::get('/consprospect/{consumablesProspect}/edit',[ConsumablesProspectController::class,'edit'])->name('admin.consprospectedit')->middleware(['auth', 'role:admin,am,nsm,bu']);
 	
 	//Route::get('/province',[ProvinceController::class,'index'])->name('province')->middleware(['can:admin']);
 	//Route Rescource
 	//Route::resource('/prospect',ProspectController::class)->middleware(['can:admin']);
 	Route::get('/prospecteditz/{prospect}',[ProspectController::class,'show'])->name('admin.prospecteditdata')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/cnprospectdetail/{consumablesProspect}',[ConsumablesProspectController::class,'show'])->name('admin.cnprospecteditdata')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospectvalidation',[ProspectController::class,'validationprospect'])->name('admin.prospectvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospectcheck',[ProspectController::class,'creationcheck'])->name('admin.prospectcheckview')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::PATCH('/prospectvalidation/{prospect}',[ProspectController::class,'validationupdate'])->name('admin.prospectvalidationupdate')->middleware(['auth', 'role:admin,am,nsm']);
 	Route::get('/prospectvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['auth', 'role:admin,am,nsm']);
+	
+	Route::get('/consprospectvalidation',[ConsumablesProspectController::class,'validationprospect'])->name('admin.consprospectvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	//Route::get('/prospectcheck',[ProspectController::class,'creationcheck'])->name('admin.prospectcheckview')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::PATCH('/consprospectvalidation/{consumablesProspect}',[ConsumablesProspectController::class,'validationupdate'])->name('admin.consprospectvalidationupdate')->middleware(['auth', 'role:admin,am,nsm']);
+	Route::get('/consprospectvalidation/{consumablesProspect}/validation',[ConsumablesProspectController::class,'validation'])->name('admin.consprospectvalidation')->middleware(['auth', 'role:admin,am,nsm']);
+	Route::get('/cpdetailtvalidation/{consumablesProspect}',[ConsumablesProspectController::class,'validationproddetail'])->name('admin.cpvalidationdetail')->middleware(['auth', 'role:admin,am,nsm']);
+	
 	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect.index')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	
+	Route::POST('/consprospect',[ConsumablesProspectController::class,'store'])->name('admin.consprospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::POST('/prospect',[ProspectController::class,'store'])->name('admin.prospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospectcreate',[ProspectController::class,'create'])->name('admin.prospectcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/consprospectcreate',[ConsumablesProspectController::class,'create'])->name('admin.consprospectcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospecteventcreate',[ProspectController::class,'eventcreate'])->name('admin.prospecteventcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::POST('/draft',[ProspectController::class,'savedraft'])->name('admin.prospect.saveDraft')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+	Route::get('/consprospectcreation',[ConsumablesProspectController::class,'creation'])->name('admin.consprospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospectcreation',[ProspectController::class,'creation'])->name('admin.prospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/prospecteventcreation',[ProspectController::class,'eventcreation'])->name('admin.prospecteventcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
 	Route::get('/hospital/{provinceId}/hospital',[HospitalController::class,'getHospitalsByProvince'])->name('admin.getHospitalsByProvince')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
@@ -145,17 +159,25 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('datacon','DataCompileController@ConfigData')->name('data.config');
 	Route::get('createddata','DataCompileController@CreatedData')->name('data.createdcheck');
 	Route::post('data3','DataCompileController@ProspectData')->name('data.prospect');
+	Route::post('dataconsum','DataCompileController@ConsumablesProspectData')->name('data.consprospect');
 	Route::post('/get-product-details','DataCompileController@getProductDetail')->name('data.proddetail');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');
 	Route::get('/dataa',[PrincipalBrandController::class,'index'])->name('dataa')->middleware(['can:admin']);
 	Route::view('/jadwal','admin.scheduling')->name('schedule');
+
+
+	//consumables prospect
+	Route::get('/consprospect',[ConsumablesProspectController::class,'index'])->name('admin.consprospects')->middleware(['auth', 'role:admin,fs,am,nsm,bu']);
+
+
+
 	
 	//Route stay for example check
 	Route::get('/load-tab-content', 'TabController@loadTabContent')->name('load-tab-content');
 	Route::view('/404-page','admin.404-page')->name('404-page');
 	Route::view('/blank-page','admin.blank-page')->name('blank-page');
 	Route::view('/buttons','admin.buttons')->name('buttons');
-	Route::view('/prospectDetail/{prospect}/edit','admin.prospectedit')->name('prp.detail');
+	//Route::view('/prospectDetail/{prospect}/edit','admin.prospectedit')->name('prp.detail');
 	Route::view('/cards','admin.cards')->name('cards');
 	Route::view('/utilities-colors','admin.utilities-color')->name('utilities-colors');
 	Route::view('/utilities-borders','admin.utilities-border')->name('utilities-borders');

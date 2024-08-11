@@ -1,6 +1,6 @@
 @extends('layout.backend.app',[
-    'title' => 'Create New Prospect',
-    'pageTitle' =>'Create New Prospect',
+    'title' => 'Create New Consumables Prospect',
+    'pageTitle' =>'Create New Consumables Prospect',
 ])
 
 @push('css')
@@ -20,14 +20,14 @@
 <div class="notify"></div>
 
 <div class="card">
-    
+ 
         <div class="card-body">
            
         <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Create Prospect</div>
+                <div class="card-header">Create Consumables Prospect</div>
 
                 <div class="card-body">
                     <form id="createForm">
@@ -40,14 +40,14 @@
 
           <div class="form-group">
             <label for="thecreators">Created By</label>
-            <input type="hidden" required="" id="creatorid" name="creatorid" class="form-control" value="{{Auth::user()->id}}">
-            <input readonly type="" required="" id="thecreators" name="thecreators" value="{{ Auth::user()->name }}" class="form-control">
+            <input type="hidden" required id="creatorid" name="creatorid" class="form-control" value="{{Auth::user()->id}}">
+            <input readonly type="" required id="thecreators" name="thecreators" value="{{ Auth::user()->name }}" class="form-control">
           </div>
           
           <div class="form-group">
           <label for="cr8source">Sumber Info</label>
           
-          <select id="cr8source" name="cr8source" class="form-control " required="" >
+          <select required id="cr8source" name="cr8source" class="form-control " required="" >
           </select>
           <input type="" placeholder="Input Nama Event Disini" style="display: none;" id="eventname" name="eventname" class="form-control">
 
@@ -55,12 +55,12 @@
 
           <div class="form-group">
             <label for="cr8infoextra">Informasi Tambahan</label>
-             <input type='' placeholder='Misal : " Kebutuhan untuk ruang OK baru " , " Kebutuhan Banyak Ventilator ", dsb' id="cr8infoextra" name="cr8infoextra" class="form-control" required  data-toggle="tooltip"
+             <input required type='' placeholder='Misal : " Kebutuhan untuk ruang OK baru " , " Kebutuhan Banyak Ventilator ", dsb' id="cr8infoextra" name="cr8infoextra" class="form-control" required  data-toggle="tooltip"
            title="Misal: 'Kebutuhan untuk ruang OK baru', 'Kebutuhan Banyak Ventilator', 'Permintaan dari dr.ABC'." data-placement="top" >
           </div>
            <div class="form-group">
             <label for="cr8province">Provinsi</label>
-             <select id="cr8province" name="cr8province" class="form-control" required=""  >
+             <select required='' id="cr8province" name="cr8province" class="form-control" >
             
           </select>
         </div>
@@ -68,60 +68,77 @@
         <div class="form-group">
             <label for="cr8hospital">Rumah Sakit</label>
              
-            <select id="cr8hospital" name="cr8hospital" class="form-control" required=""  >
+            <select id="cr8hospital" name="cr8hospital" class="form-control" required=  >
 
             </select>
           </div>
         <div class="form-group">
             <label for="cr8department">Departement</label>
-            <select required="" id="cr8department" name="cr8department" class="form-control"  onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
+            <select required id="cr8department" name="cr8department" class="form-control"  onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
             </select>
         </div>
 
         <div class="form-group">
             <label for="cr8bunit">Business Unit</label>
-            <select required="" id="cr8bunit" name="cr8bunit" class="form-control">
+            <select required id="cr8bunit" name="cr8bunit" class="form-control">
             </select>
         </div>
         <div class="form-group">
             <label for="cr8category">Category</label>
-            <select required="" id="cr8category" name="cr8category" class="form-control">
+            <select required id="cr8category" name="cr8category" class="form-control">
             </select>
         </div>
-        <div class="form-group">
-            <label for="cr8product">Produk</label>
-            <select required="" id="cr8product" name="cr8product" class="form-control">
-            </select>
+        
+        @foreach (['Q1', 'Q2', 'Q3', 'Q4'] as $quarter)
+    <hr style="height:1px;border:none;color:#333;background-color:#333;">
+    <div class="form-group">
+        <label for="products_{{ $quarter }}">Products for {{ $quarter }}</label>
+        <div id="productInputs_{{ $quarter }}">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">Product</div>
+                </div>
+                <select required name="product_id_{{ $quarter }}[]" class="form-control cr8product" data-quarter="{{ $quarter }}">
+                    <option value="">- Pilih Produk -</option>
+                    <!-- Populate this select with products -->
+                </select>
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <div class="input-group-text">Qty</div>
+                </div>
+                <input type="number" required name="qty_{{ $quarter }}[]" min="0" class="form-control" placeholder="Quantity" value="0">
+                <div class="input-group-append">
+                    <button class="btn btn-success add-product" type="button" data-quarter="{{ $quarter }}">+</button>
+                </div>
+            </div>
         </div>
+    </div>
+@endforeach
 
-        <div class="form-group">
-            <label for="qtyinput">Quantity</label>
-            <input type="number" required="" id="qtyinput" name="qtyinput" min='1' class="form-control" oninput="validateQuantity()">
-            <p id="quantityWarning" style="color: red; display: none;">Quantity Minimal angka 1</p>
-        </div>
-
+                                <hr style="height:1px;border:none;color:#333;background-color:#333;">
         <div class="form-group">
             <label for="anggarancr8">Anggaran</label>
-            <select type="" required="" id="anggarancr8" name="anggarancr8" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
+            <select type="" required id="anggarancr8" name="anggarancr8" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
             </select>
           </div>
           
         <div class="form-group">
             <label for="jenisanggarancr8">Jenis Anggaran</label>
-            <select  required="" id="jenisanggarancr8" name="jenisanggarancr8" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
+            <select  required id="jenisanggarancr8" name="jenisanggarancr8" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
             </select>
           </div>
 
-        <div class="form-group">
+        <!-- <div class="form-group">
             <label for="etapodatecr8">Estimasi PO Date</label>
             <input type="date" required="" id="etapodatecr8" name="etapodatecr8" class="form-control" >
            
-          </div>
+          </div> -->
           </br>
           </br>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-info btn-draft" id="btn-draft" >Simpan Draft</button>
+        <!-- <button type="submit" class="btn btn-info btn-draft" id="btn-draft" >Simpan Draft</button> -->
         <button type="submit" class="btn btn-primary btn-store" id="btn-store" >Kirim Untuk divalidasi</button>
         </form>
       </div>
@@ -157,7 +174,7 @@
  var id = $(this).attr("id")
  $('[data-toggle="tooltip"]').tooltip(); 
         $.ajax({
-            url: "{{ route('admin.prospectcreate') }}",
+            url: "{{ route('admin.consprospectcreate') }}",
             method: "GET",
             success:function(response){
               
@@ -234,23 +251,20 @@
                   fetchcat(selectedunitId);
                 });
                 
-                $("#cr8bunit, #cr8category").on("change", function () {
+                $("#cr8category").on("change", function () {
                   var selectedBusinessUnitId = $("#cr8bunit").val();
                   var selectedCategoryId = $("#cr8category").val();
-                  var selectformId="cr8product";
-
+                  
                   if (selectedBusinessUnitId && selectedCategoryId) {
-                    populateProductSelect(selectedBusinessUnitId, selectedCategoryId,selectformId);
-                  } else {
-                
-                    var productSelect = $("#cr8product");
-                    productSelect.empty();
-                    
-                    productSelect.append('<option value="">- Pilih Produk -</option>');
-                    var draftconfig=$("<option>").val(response.configdraft.id).text(response.configdraft.name);
-                  draftconfig.attr("selected",true);
-                  productSelect.append(draftconfig).select2();
-                  }
+                        populateAllConsProductSelects(selectedBusinessUnitId, selectedCategoryId);
+                    } else {
+                        $('.cr8product').each(function() {
+                            var productSelect = $(this);
+                            productSelect.empty();
+                            productSelect.append('<option value="">- Pilih Produk -</option>');
+                          
+                        });
+                    }
                 });
 /*
 */              var anggaranSelect = $("#anggarancr8");
@@ -271,89 +285,56 @@
                   }
                 });
 
+                
+                $('.add-product').click(function() {
+                  var selectedBusinessUnitId = $("#cr8bunit").val();
+                  var selectedCategoryId = $("#cr8category").val();
+                    var quarter = $(this).data('quarter');
+                    var newProductInput = `
+                    <div class="prod-group">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">Product</div>
+                    </div>
+                    <select required name="product_id_${quarter}[]" class="form-control cr8product" data-quarter="${quarter}">
+                        <option value="">- Pilih Produk -</option>
+                        <!-- Populate this select with products -->
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">Qty</div>
+                    </div>
+                    <input type="number" required name="qty_${quarter}[]" min="0" class="form-control" placeholder="Quantity" value="0">
+                    <div class="input-group-append">
+                        <button class="btn btn-danger remove-product" type="button">-</button>
+                    </div>
+                </div>
+            </div>`;
+                  $('#productInputs_' + quarter).append(newProductInput);
+
+                  if (selectedBusinessUnitId && selectedCategoryId) {
+                   populateConsProductSelect(selectedBusinessUnitId, selectedCategoryId, $('#productInputs_' + quarter + ' .cr8product').last());
+                   }
+
+                });
+
 
                 // Draft Item Populate
-                if (response.draft) {
-                  
-                  response.source.source.forEach(function (draftd) {
-                    
-                    var draftsource=$("<option>").val(draftd.id).text(draftd.name);
-                    if(draftd.id === response.draft.source){
-                      draftsource.attr("selected",true);
-                     eventSelect.prepend(draftsource);
-                    }
-                  });
-  
-                  response.province.forEach(function (draftp) {
-                    
-                    var draftprov=$("<option>").val(draftp.id).text(draftp.name);
-                    if(draftp.id === response.draft.province_id){
-                      draftprov.attr("selected",true);
-                     provinceSelect.prepend(draftprov);
-                    }
-                  });
-  
-                  response.dept.forEach(function (draftdpt) {
-                  var draftdept=$("<option>").val(draftdpt.id).text(draftdpt.name);
-                    if(draftdpt.id === response.draft.department_id){
-                      draftdept.attr("selected",true);
-                     deptSelect.prepend(draftdept);
-                    }
-                  });
-  
-                  response.bunit.forEach(function (draftbu) {
-                  var draftbunit=$("<option>").val(draftbu.id).text(draftbu.name);
-                    if(draftbu.id === response.draft.unit_id){
-                      draftbunit.attr("selected",true);
-                     unitSelect.prepend(draftbunit);
-                    }
-                  });
-  
-                  response.source.anggaran.review.forEach(function (draftangg) {
-                  var draftanggaran=$("<option>").val(draftangg.id).text(draftangg.name);
-                    if(draftangg.id === response.draft.review_anggaran){
-                      draftanggaran.attr("selected",true);
-                     anggaranSelect.prepend(draftanggaran);
-                    }
-                  });
-  
-                  response.source.anggaran.Jenis.forEach(function (draftanggj) {
-                  var draftanggaranj=$("<option>").val(draftanggj.id).text(draftanggj.name);
-                    if(draftanggj.id === response.draft.jns_aggr){
-                      draftanggaranj.attr("selected",true);
-                     anggartpSelect.prepend(draftanggaranj);
-                    }
-                  });
-  
-                }
-  
-                if (response.hodraft) {
-                    var drafthos=$("<option>").val(response.hodraft.id).text(response.hodraft.name);
-                    drafthos.attr("selected",true);
-                    hosinput.append(drafthos).select2({width: '100%'});
-                 }
-  
-                
-                if (response.catdraft) {
-                  var draftcat=$("<option>").val(response.catdraft.id).text(response.catdraft.name);
-                    draftcat.attr("selected",true);
-                    catSelect.append(draftcat).select2({width: '100%'});
-                }
-  
-                if(response.configdraft){
-                  confSelect=$("#cr8product");
-                  var draftconfig=$("<option>").val(response.configdraft.id).text(response.configdraft.name);
-                    draftconfig.attr("selected",true);
-                    confSelect.append(draftconfig).select2({width: '100%'});
-                  }          
+           
 
-                  if(response.eta_po_date){
-                $('#etapodatecr8').val(response.draft.eta_po_date);
-                  }
+
+
+            $(document).on('click', '.remove-product', function() {
+                $(this).closest('.prod-group').remove();
+            });
               
             }
+            
         })
     });
+
+    
 
 
     // Create 
@@ -373,18 +354,16 @@
                 behavior: "smooth",
                 block: "start"
                 });
-                
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log('AJAX Error:', textStatus, errorThrown);
                 
-                flash("danger", "Tolong diisi bagian yang masih kosong!!");
+                flash("danger", "Tolong Isi Bagian yang masih kosong!!");
                 document.querySelector(".notify").scrollIntoView({
                 behavior: "smooth",
                 block: "start"
                 });
             }
-            
         });
     };
 
@@ -407,7 +386,7 @@
         $(this).focus();
         e.preventDefault();
        $(document.activeElement);
-       submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
+       submitForm("{{ route('admin.consprospect.store') }}", "Data berhasil dikirim untuk divalidasi");
       });
 
    $('#btn-draft').on('click', function(e) {    

@@ -23,7 +23,7 @@ class CreateUpdatelogsTable extends Migration
             $table->unsignedBigInteger('request_by');
             $table->date('approve_date');
             $table->unsignedBigInteger('approve_by');
-            $table->string('request_status');
+            $table->string('req_status');
             $table->timestamps();
         });
     }

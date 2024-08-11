@@ -26,6 +26,7 @@ class CreateHospitalsTable extends Migration
             $table->string('owned_by')->nullable();; //PT,yayasan, TNI ad dll
             $table->string('class')->nullable();;//A/b/C
             $table->string('akreditas')->nullable();;//tingkat utama, paripurna dll
+            $table->string('target')->nullable();;//prioritas/keyacc
             $table->timestamps();
 
           

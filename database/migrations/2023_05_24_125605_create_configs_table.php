@@ -25,7 +25,7 @@ class CreateConfigsTable extends Migration
             $table->string('uom');//set,box,package
             $table->string('consist_of')->nullable();
             
-            $table->integer('price_include_ppn');
+            $table->unsignedBigInteger('price_include_ppn');
             $table->timestamps();
 
            // $table->foreign('unit_id')->references('id')->on('unit');

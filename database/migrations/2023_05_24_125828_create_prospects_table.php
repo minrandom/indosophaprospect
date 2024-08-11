@@ -25,7 +25,7 @@ class CreateProspectsTable extends Migration
             $table->unsignedBigInteger('unit_id');//bussiness unit id
             $table->unsignedBigInteger('config_id');
             $table->integer('qty');
-            $table->integer('submitted_price');
+            $table->unsignedBigInteger('submitted_price');
             $table->date('eta_po_date');
             $table->integer('status');
             $table->dateTime('validation_time');

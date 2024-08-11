@@ -318,7 +318,7 @@ class ProspectController extends Controller
             }
 
         if($sourceoption==="Event"){
-        $sourceoption.=" ".$request->eventname;}
+        $sourceoption.="".$request->eventname;}
 
         $n=Prospect::create([
             'user_creator'=>$request->creatorid,
@@ -326,8 +326,8 @@ class ProspectController extends Controller
             'province_id'=>$request->cr8province,
             'hospital_id'=>$request->cr8hospital,
             'department_id'=>$request->cr8department,
-            'config_id'=>$config->id,
-            'unit_id'=>$config->unit->id,
+            'config_id'=>$request->cr8product,
+            'unit_id'=>$request->cr8bunit,
             'submitted_price'=>$config->price_include_ppn,
             'qty'=>$request->qtyinput,
              'eta_po_date'=>$request->etapodatecr8 

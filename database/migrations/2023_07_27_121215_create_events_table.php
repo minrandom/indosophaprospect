@@ -18,6 +18,8 @@ class CreateEventsTable extends Migration
             $table->string('name');
             $table->date('tgl_acara');
             $table->date('lama_event');
+            $table->date('akhir_input')->nullable();
+            $table->date('awal_input')->nullable();
             $table->timestamps();
         });
     }
