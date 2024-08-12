@@ -762,7 +762,7 @@ class ConsumablesProspectController extends Controller
                     
                     //dd($prospect->config->category_id);
                     //$peric=$prospect->personInCharge->name;
-                    return response()->json([
+                    return response()->json([ 
                     'proscat'=>$proscat,
                     'prospect'=>$consumablesProspect,
                         'event'=>$event,
