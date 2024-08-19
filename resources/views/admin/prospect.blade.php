@@ -620,6 +620,13 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         return `${day}-${month}-${year}`;}
         else return "";
       }
+      function formatEtaPoDate(dateString) {
+        var date = new Date(dateString);
+        var month = (date.getMonth() + 1).toString().padStart(2, '0'); // Add 1 because months are 0-indexed
+        var day = date.getDate().toString().padStart(2, '0');
+        var year = date.getFullYear();
+        return `${month}/${day}/${year}`;
+      }
 
 
     prospectsheet = newData.map(function(datz) {
@@ -655,7 +662,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         JenisAnggaran: datz.review.jenis_anggaran,
         InformasiTambahan: datz.review.comment,
         Chance: (datz.review.chance * 100).toFixed(0) + ' %',
-        EtaPoDate: formatDate(datz.eta_po_date),
+        EtaPoDate: formatEtaPoDate(datz.eta_po_date),
         Temperature: datz.temperature.tempName,
         NextAction: datz.review.next_action
       }
