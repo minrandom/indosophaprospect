@@ -621,15 +621,14 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         else return "";
       }
       function formatEtaPoDate(dateString) {
-        var date = new Date(dateString);
-        var month = (date.getMonth() + 1).toString().padStart(2, '0'); // Add 1 because months are 0-indexed
-        var day = date.getDate().toString().padStart(2, '0');
-        var year = date.getFullYear();
-        return `${month}/${day}/${year}`;
-      }
+    var date = new Date(dateString);
+    return date.toISOString().split('T')[0];  // ISO format, returns only the date part in yyyy-mm-dd
+}
+
 
 
     prospectsheet = newData.map(function(datz) {
+      var etapo = { v: formatEtaPoDate(datz.eta_po_date), t: 'd' };
       return {
         TanggalSubmit: formatDate(datz.validation_time),
         Creator: datz.creator.name,
@@ -662,7 +661,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         JenisAnggaran: datz.review.jenis_anggaran,
         InformasiTambahan: datz.review.comment,
         Chance: (datz.review.chance * 100).toFixed(0) + ' %',
-        EtaPoDate: formatEtaPoDate(datz.eta_po_date),
+        EtaPoDate: etapo,
         Temperature: datz.temperature.tempName,
         NextAction: datz.review.next_action
       }
@@ -766,12 +765,12 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
 //function to download to excel
  async function downloadExcel(data) {
-    // Create a new Excel workbook
-    var workbook = XLSX.utils.book_new();
+  
+   
 
     // Convert data to worksheet
     var worksheet = XLSX.utils.json_to_sheet(data);
-
+    var workbook = XLSX.utils.book_new();
     // Add the worksheet to the workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Prospects');
     // Get the current date and time
