@@ -41,6 +41,7 @@
           <div class="form-group">
             <label for="thecreators">Created By</label>
             <input type="hidden" required="" id="creatorid" name="creatorid" class="form-control" value="{{Auth::user()->id}}">
+            <input type="hidden" required="" id="theroles" name="theroles" class="form-control" value="{{Auth::user()->role}}">
             <input readonly type="" required="" id="thecreators" name="thecreators" value="{{ Auth::user()->name }}" class="form-control">
           </div>
           
@@ -165,7 +166,7 @@
                 $("#cr8product").val("");
                 //$("#eventname").val("");
                 $("#qtyinput").val("1");
-        
+                var userrole = $("#theroles").val()
                 var today = new Date();
 
               // Calculate the date after 30 days from today
@@ -194,6 +195,7 @@
                         
                 function fetchHospitals2(provinceId) {
                   // Make an AJAX call to retrieve hospitals based on provinceId
+                  if(userrole!="project"){
                   $.ajax({
                     url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
                     method: "GET",
@@ -202,7 +204,23 @@
                         populateSelectFromDatalist('cr8hospital', response.hosopt,"Pilih Rumah Sakit");
                       
                     }
+                  });}
+                  else {
+                    $.ajax({
+                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
+                    method: "GET",
+                    success: function (response) {
+                            var filteredHospitals = response.hosopt.filter(function(hospital) {
+                                // Replace 'desired_owner' with the actual owner value you want to filter by
+                                return hospital.owned_by === 'TNI / POLRI';
+                            });
+
+                            // Use the filtered hospitals list to populate the select element
+                            populateSelectFromDatalist('cr8hospital', filteredHospitals, "Pilih Rumah Sakit");
+                      
+                    }
                   });
+                  }
                 }
                
                 provinceSelect.on("change", function () {
@@ -258,6 +276,9 @@
 
                var anggartpSelect = $("#jenisanggarancr8");
                 populateSelectFromDatalist('jenisanggarancr8', response.source.anggaran.Jenis,"Pilih Jenis Anggaran");
+                if(userrole=="prj"){
+                var optionprj = $("<option>").val("10").text("MABES AD / AL / AU");
+                    anggartpSelect.append(optionprj);}
              
                 anggaranSelect.on("change", function () {
                   var anggarselecte = $(this).val();
@@ -266,8 +287,10 @@
                     anggartpSelect.append(option); // Set the value of anggartpSelect to 9 (or any desired value) when anggaranSelect is 0
                     anggartpSelect.prop("disabled", true); // Disable the anggartpSelect element
                   } else {
-                    anggartpSelect.prop("disabled", false);
                     populateSelectFromDatalist('jenisanggarancr8', response.source.anggaran.Jenis,"Pilih Jenis Anggaran");
+                    if(userrole=="prj"){
+                      var optionprj = $("<option>").val("10").text("MABES AD / AL / AU");
+                    anggartpSelect.append(optionprj);}
                   }
                 });
 

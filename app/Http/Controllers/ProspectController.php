@@ -300,6 +300,8 @@ class ProspectController extends Controller
             if(isset($request->jenisanggarancr8)){
             if ($anggaranjns->id == $request->jenisanggarancr8) {
                 $anggaranjnsopt=$anggaranjns->name;
+            }if(10 == $request->jenisanggarancr8){
+                $anggaranjnsopt="MABES AD / AL / AU";
             }
             }else $anggaranjnsopt="Belum Tahu";
         }
@@ -1422,6 +1424,8 @@ class ProspectController extends Controller
     public function validationupdate(Request $request, Prospect $prospect)
     {
         //
+        $role= Auth::user()->role;
+       
         $cek=$request->input('validation', 99);
         switch($cek){
             case 404:
@@ -1448,10 +1452,15 @@ class ProspectController extends Controller
                 $codedate = $year . $month . $day;
                 $rand3=rand(100,999);
 
-
-
+           
                 $prospect_no="ISSP-";
+
+                if($role!="prj"){
                 $prospect_no.=$request->provcode;
+                }
+                else{
+                    $prospect_no.='88';  
+                }
                 $prospect_no.="-".$codedate."-".$rand3;
                 
                 $prospect->update([

@@ -457,12 +457,29 @@ class DataCompileController extends Controller
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
                     break;
+                case "prj":
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
+                    ->where("status", $status)
+                    ->whereHas('temperature', function ($query) {
+                        $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                    })
+                    ->whereHas('review', function ($query) {
+                        $query->where('jenis_anggaran', 'LiKE', 'MABES AD / AL / AU');
+                    })
+                    
+                    ->orderBy('status', 'ASC')
+                    ->orderBy("prospects.id", 'DESC')
+                    ->get();
+                    break;
 
                 case "bu":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)->where('unit_id', $data['buid'])
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                        })
+                        ->whereHas('review', function ($query) {
+                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
                         })
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
@@ -475,6 +492,9 @@ class DataCompileController extends Controller
                         ->where("status", $status)->where('pic_user_id', $data['usid'])
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                        })
+                        ->whereHas('review', function ($query) {
+                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
                         })
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
@@ -489,6 +509,9 @@ class DataCompileController extends Controller
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
+                        ->whereHas('review', function ($query) {
+                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
+                        })
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
@@ -501,6 +524,9 @@ class DataCompileController extends Controller
                         })
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                        })
+                        ->whereHas('review', function ($query) {
+                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
                         })
 
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
@@ -519,9 +545,27 @@ class DataCompileController extends Controller
                     ->get();
 
                     break;
+                case "prj":
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
+                   
+                        ->where("status", '!=', 1)
+                        ->whereHas('review', function ($query) {
+                            $query->where('jenis_anggaran', 'LIKE', 'MABES AD / AL / AU');
+                        })
+                
+                        ->orderBy('status', 'ASC')
+                    ->orderBy("prospects.id", 'DESC')
+                    ->get();
+
+                    break;
+
+     
 
                 case "fs":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
+                    ->whereHas('review', function ($query) {
+                        $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
+                    })
                         ->where("status", '!=', 1)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
@@ -532,6 +576,9 @@ class DataCompileController extends Controller
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
                         })
+                        ->whereHas('review', function ($query) {
+                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
+                        })
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
@@ -541,6 +588,9 @@ class DataCompileController extends Controller
                         ->where("status", '!=', 1)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('wilayah', $area);
+                        })
+                        ->whereHas('review', function ($query) {
+                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
                         })
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
@@ -1510,6 +1560,7 @@ class DataCompileController extends Controller
 
             ->addColumn('action', function ($prp) use ($url) {
                 $routesdetail ="#";
+                $theroutes = route('admin.cnprospectdetail', ['consumablesProspect' => $prp->id]);
                 switch ($prp->status) {
                     case -1:
                     case 1:
@@ -1532,7 +1583,7 @@ class DataCompileController extends Controller
                     default:
 
                         $btn = '<div class="row"><a href="javascript:void(0)" id="' . $prp->id . '" class="btn aksi btnaksi btn-warning btn-sm ml-2 btn-validasi">Approval</a></div>';
-                        $btn .= '<div class="row mt-1 mr-1"><a href="javascript:void(0)" id="' . $prp->id . '" class="btn aksi btnaksi btn-primary btn-sm ml-2  btn-edit">Edit</a></div>';
+                        $btn .= '<div class="row mt-1 mr-1"><a href='.$theroutes.' class="btn aksi btnaksi btn-primary btn-sm ml-2  btn-edt">Edit</a></div>';
 
                         return $btn;
                 }

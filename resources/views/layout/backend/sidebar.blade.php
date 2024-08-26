@@ -88,6 +88,39 @@
             </div>
         </div>
     </li>
+    <hr class="sidebar-divider">
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsenewentry"
+            aria-expanded="true" aria-controls="collapsenewentry">
+            <i class="fas fa-fw fa-pen-fancy"></i>
+            <span>New Entry</span>
+        </a>
+        <div id="collapsenewentry" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+              
+                <a class="collapse-item" href="{{ route('admin.prospectcreation') }}">
+            <i class="fas fa-fw fa-file"></i>
+            <span>New Prospect</span></a>  
+                          
+        <a class="collapse-item" href="#">
+            <i class="fas fa fa-calendar-plus"></i>
+            <span style="color:orange">Event Report(UnderDev)</span></a>
+
+        <a class="collapse-item" href="#">
+            <i class="fas fa fa-wrench"></i>
+            <span style="color:orange">Instalation Report </br>(UnderDev)</span></a>
+
+        <a class="collapse-item" href="#">
+            <i class="fas fa fa-hospital"></i>
+            <span style="color:orange">Hospital Mapping </br>(UnderDev)</span></a>
+
+        <a class="collapse-item" href="#">
+            <i class="fas fa fa-users"></i>
+            <span style="color:orange">User Data Entry </br>(UnderDev)</span></a>
+
+            </div>
+        </div>
+    </li>
     
     <!-- Divider -->
     <hr class="sidebar-divider">
@@ -128,10 +161,16 @@
                 <h6 class="collapse-header">Validation Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
                 </div>
+                @elsecan('prj')
+                <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Validation Prospect :</h6>
+                <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
+                </div>
+            
 
+                
                 @endcan
-           
-
+                
             <!-- review submenu-->
                 @can('admin')  
                 <div class="bg-white py-2 collapse-inner rounded">
@@ -163,6 +202,12 @@
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>BU Prospect Review</span></a>
                 <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
                 </div>
+                @elsecan('prj')
+                <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Review Prospect :</h6>
+                <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Project Prospect Review</span></a>
+                <!-- <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a> -->
+                </div>
 
                 @endcan
            
@@ -173,6 +218,28 @@
 
         
     </li>
+
+
+    <hr class="sidebar-divider">
+
+        <!-- Heading -->
+        <div class="sidebar-heading">
+        Marketing Tools
+        </div>
+
+        <li class="nav-item">
+                <a class="nav-link" href="">
+                    <i class="fas fa-fw fa-archive"></i>
+                    <span>Market Data and Query (Under Development)</span></a>
+                
+        </li>
+        <li class="nav-item">
+                <a class="nav-link" href="">
+                    <i class="fas fa-fw fa-tools"></i>
+                    <span>Marketing Tools (Under Development)</span></a>
+        </li>
+
+
     
     <hr class="sidebar-divider">
 
@@ -233,48 +300,12 @@
     </li>
 -->
 
-<hr class="sidebar-divider">
-
-<!-- Heading -->
-<div class="sidebar-heading">
-   Mapping
-</div>
-
-<li class="nav-item">
-        <a class="nav-link" href="">
-            <i class="fas fa-fw fa-sitemap"></i>
-            <span>Department </br>(Under Development)</span></a>
-        
-</li>
-
-<li class="nav-item">
-        <a class="nav-link" href="">
-            <i class="fas fa-fw fa-user-md"></i>
-            <span>Doctor </br>(Under Development)</span></a>
-        
-</li>
 
 
 
 
-<hr class="sidebar-divider">
 
-<!-- Heading -->
-<div class="sidebar-heading">
-   Tools
-</div>
 
-<li class="nav-item">
-        <a class="nav-link" href="">
-            <i class="fas fa-fw fa-archive"></i>
-            <span>Market Data and Query (Under Development)</span></a>
-        
-</li>
-<li class="nav-item">
-        <a class="nav-link" href="">
-            <i class="fas fa-fw fa-tools"></i>
-            <span>Marketing Tools (Under Development)</span></a>
-</li>
 
 
 

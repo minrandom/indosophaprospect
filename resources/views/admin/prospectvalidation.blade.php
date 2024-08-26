@@ -504,8 +504,18 @@
         $("#etapodate").val(response.eta_po_date);
         $("#quan").val(response.qty);
         var picSelect = $("#personincharge");
-        // Populate dropdown options
+        // Populate dropdown options\
         picSelect.empty();
+        if(response.review.jenis_anggaran==="MABES AD / AL / AU"){
+          response.piclist.forEach(function(pivc) {
+            var option = $("<option>").val(pivc.user_id).text(pivc.name);
+            picSelect.append(option);
+         
+        });
+
+
+        }else
+        {
         response.piclist.forEach(function(pivc) {
           if (
             pivc.area == response.province.prov_order_no ||
@@ -516,6 +526,7 @@
             picSelect.append(option);
           }
         });
+        }
 
         picSelect.select2({
 

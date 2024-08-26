@@ -46,6 +46,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('nsm',function($user){
             return $user->role == 'nsm';
         });
+        Gate::define('prj',function($user){
+            return $user->role == 'prj';
+        });
         Gate::define('bu',function($user){
             return $user->role == 'bu';
         });
