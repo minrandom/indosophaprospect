@@ -275,6 +275,7 @@ class ProspectController extends Controller
     public function store(Request $request)
     {
        $data="done";
+       $role = Auth::user()->role;
         //$hosid=Hospital::where('name',$request->cr8hospital)->first();
         $config=Config::with('unit','brand')->where('id',$request->cr8product)->first();
         $ss = Event::where('id',$request->cr8source)->first();
@@ -321,6 +322,12 @@ class ProspectController extends Controller
 
         if($sourceoption==="Event"){
         $sourceoption.="".$request->eventname;}
+            $project=0;
+            if($role ='prj'){
+                $project = 1;
+            }
+
+
 
         $n=Prospect::create([
             'user_creator'=>$request->creatorid,
@@ -330,6 +337,7 @@ class ProspectController extends Controller
             'department_id'=>$request->cr8department,
             'config_id'=>$request->cr8product,
             'unit_id'=>$request->cr8bunit,
+            'is_project'=>$project,
             'submitted_price'=>$config->price_include_ppn,
             'qty'=>$request->qtyinput,
              'eta_po_date'=>$request->etapodatecr8 

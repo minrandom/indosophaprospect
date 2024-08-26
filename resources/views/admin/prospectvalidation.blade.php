@@ -506,7 +506,7 @@
         var picSelect = $("#personincharge");
         // Populate dropdown options\
         picSelect.empty();
-        if(response.review.jenis_anggaran==="MABES AD / AL / AU"){
+        if(response.is_project=== 1){
           response.piclist.forEach(function(pivc) {
             var option = $("<option>").val(pivc.user_id).text(pivc.name);
             picSelect.append(option);

@@ -463,10 +463,8 @@ class DataCompileController extends Controller
                     ->whereHas('temperature', function ($query) {
                         $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                     })
-                    ->whereHas('review', function ($query) {
-                        $query->where('jenis_anggaran', 'LiKE', 'MABES AD / AL / AU');
-                    })
-                    
+                    ->where ("is_project",1)
+                 
                     ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
@@ -481,6 +479,7 @@ class DataCompileController extends Controller
                         ->whereHas('review', function ($query) {
                             $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
                         })
+                        ->where ("is_project",0)
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
                         ->get();
@@ -493,9 +492,8 @@ class DataCompileController extends Controller
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
-                        ->whereHas('review', function ($query) {
-                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
-                        })
+                     
+                        ->where ("is_project",0)
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
@@ -509,9 +507,7 @@ class DataCompileController extends Controller
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
-                        ->whereHas('review', function ($query) {
-                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
-                        })
+                        ->where ("is_project",0)
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
@@ -525,9 +521,7 @@ class DataCompileController extends Controller
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
-                        ->whereHas('review', function ($query) {
-                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
-                        })
+                        ->where ("is_project",0)
 
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
@@ -549,9 +543,7 @@ class DataCompileController extends Controller
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                    
                         ->where("status", '!=', 1)
-                        ->whereHas('review', function ($query) {
-                            $query->where('jenis_anggaran', 'LIKE', 'MABES AD / AL / AU');
-                        })
+                       ->where ("is_project",1)
                 
                         ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
@@ -566,6 +558,7 @@ class DataCompileController extends Controller
                     ->whereHas('review', function ($query) {
                         $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
                     })
+                    ->where ("is_project",0)
                         ->where("status", '!=', 1)->where('pic_user_id', $data['usid'])->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
@@ -576,9 +569,7 @@ class DataCompileController extends Controller
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
                         })
-                        ->whereHas('review', function ($query) {
-                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
-                        })
+                        ->where ("is_project",0)
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;
@@ -589,9 +580,7 @@ class DataCompileController extends Controller
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('wilayah', $area);
                         })
-                        ->whereHas('review', function ($query) {
-                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
-                        })
+                        ->where ("is_project",0)
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
                     break;

@@ -17,6 +17,7 @@ class Prospect extends Model
         "hospital_id",
         "department_id",
         "unit_id",
+        "is_project",
         "config_id",
         "qty",
         "submitted_price",

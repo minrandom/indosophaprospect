@@ -414,44 +414,45 @@
   <!-- Modal Review -->
 
 
-  <!--Modal Chc-->
-  <div class="modal fade" id="chc-modal" tabindex="-1" role="dialog" aria-labelledby="chc-modalLabel" aria-hidden="true">
+  <!--Modal sts-->
+  <div class="modal fade" id="sts-modal" tabindex="-1" role="dialog" aria-labelledby="sts-modalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="chc-modalLabel">Edit Review</h5>
+          <h5 class="modal-title" id="sts-modalLabel">Edit Status</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <form id="chcForm">
+          <form id="stsForm">
 
 
             <div class="form-group">
-              <label for="chance">Chance</label>
-              <select id="chance" name="chance" class="form-control">
+              <label for="status">Status</label>
+              <select id="status" name="status" class="form-control">
               </select>
+              <input type="hidden" required="" id="datasts" name="datasts" class="form-control">
+              
             </div>
-            <div class="form-group">
-              <label for="next_action">Next Action</label>
-              <select id="next_action" name="next_action" class="form-control">
-              </select>
+           
+            <div class="form-group" id="dateconsignGroup" style="display: none;">
+              <label for="dateconsign">Consign Date</label>
+              <input type="date" id="dateconsign" name="dateconsign" class="form-control">
             </div>
-
 
 
 
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary btn-update">Update</button>
+          <button type="submit" class="btn btn-primary btn-updatests">Update</button>
           </form>
         </div>
       </div>
     </div>
   </div>
-  <!-- End modal chc-->
+  <!-- End modal sts-->
 
 
 
@@ -528,6 +529,75 @@
     console.log(core);
     console.log(cek);
     
+    $('body').on("click", ".btn-sts", function() {
+      var dataid = $(this).attr("id");
+      console.log(dataid)
+      $.ajax({
+        url: "{{ route('admin.consprospectedit', ['consumablesProspect' => ':id']) }}".replace(':id', dataid),
+        method: "GET",
+        success: function(response) {
+          $("#sts-modal").modal("show");
+          $("#datasts").val(response.prospect.id);
+          var statusselect = $("#status");
+          CatPopulateSelect(statusselect, response.sourceoption.conStatus, response.prospect.status, {width: '100%'});
+
+          statusselect.on("change", function() {
+          var selectedstatus = $(this).val();
+          if (selectedstatus == '2') {
+              dateconsignGroup.style.display = 'block';
+          } else {
+              dateconsignGroup.style.display = 'none';
+          }
+          
+          
+        });
+    
+        }
+      
+      
+      })
+    })
+
+    $('.btn-updatests').on('click', function(e) {
+        e.preventDefault()
+        var prospect = $("#datasts").val()
+        var formData = $("#stsForm").serialize();
+        console.log(formData);
+      $.ajax({
+          url: "{{ route('admin.consprospectupdatests', ['consumablesProspect' => ':prospect']) }}".replace(':prospect', prospect),
+          method: "PATCH",
+          data: formData,
+       success: function() {
+            Swal.fire({
+                      icon: 'success',
+                      title: 'Success',
+                      text: 'Data successfully updated!',
+                      confirmButtonText: 'OK'
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          // Hide the modal
+                          $('#edit-modal').modal('hide');
+                          // Optionally reload the page or perform other actions
+                          location.reload(); // Uncomment if you want to reload the page
+                      }
+                  });
+                    },
+    //   error: function(jqXHR, textStatus, errorThrown) {
+    //     Swal.fire({
+    //             icon: 'error',
+    //             title: 'Error',
+    //             text: 'An error occurred while updating the data. Please try again.',
+    //             confirmButtonText: 'OK'
+    //         });
+    //         console.log('AJAX Error:', textStatus, errorThrown);
+        
+
+
+    // }
+  });
+
+
+});
 
 
 

@@ -278,7 +278,11 @@
                 populateSelectFromDatalist('jenisanggarancr8', response.source.anggaran.Jenis,"Pilih Jenis Anggaran");
                 if(userrole=="prj"){
                 var optionprj = $("<option>").val("10").text("MABES AD / AL / AU");
-                    anggartpSelect.append(optionprj);}
+                    anggartpSelect.append(optionprj);
+                    var optionprj2 = $("<option>").val("11").text("KEMHAN");
+                    anggartpSelect.append(optionprj2);
+                  
+                  }
              
                 anggaranSelect.on("change", function () {
                   var anggarselecte = $(this).val();
@@ -290,7 +294,9 @@
                     populateSelectFromDatalist('jenisanggarancr8', response.source.anggaran.Jenis,"Pilih Jenis Anggaran");
                     if(userrole=="prj"){
                       var optionprj = $("<option>").val("10").text("MABES AD / AL / AU");
-                    anggartpSelect.append(optionprj);}
+                    anggartpSelect.append(optionprj);
+                    var optionprj2 = $("<option>").val("11").text("KEMHAN");
+                    anggartpSelect.append(optionprj2);}
                   }
                 });
 
