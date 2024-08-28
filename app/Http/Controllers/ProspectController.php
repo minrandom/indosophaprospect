@@ -320,7 +320,7 @@ class ProspectController extends Controller
                 $draft->delete();
             }
 
-            dd($role);
+            //dd($role);
 
         if($sourceoption==="Event"){
         $sourceoption.="".$request->eventname;}
