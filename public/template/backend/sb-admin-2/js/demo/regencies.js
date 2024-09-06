@@ -2139,7 +2139,7 @@ function citydata(){
   },
   {
     "id": "3603",
-    "province_id": "36",
+    "province_id": "31",
     "name": "KABUPATEN TANGERANG",
     "alt_name": "KABUPATEN TANGERANG",
     "latitude": -6.2,
@@ -2155,7 +2155,7 @@ function citydata(){
   },
   {
     "id": "3671",
-    "province_id": "36",
+    "province_id": "31",
     "name": "KOTA TANGERANG",
     "alt_name": "KOTA TANGERANG",
     "latitude": -6.17944,
@@ -2179,7 +2179,7 @@ function citydata(){
   },
   {
     "id": "3674",
-    "province_id": "36",
+    "province_id": "31",
     "name": "KOTA TANGERANG SELATAN",
     "alt_name": "KOTA TANGERANG SELATAN",
     "latitude": -6.29373,
