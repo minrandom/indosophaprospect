@@ -1283,7 +1283,7 @@ function citydata(){
   },
   {
     "id": "3201",
-    "province_id": "32",
+    "province_id": "31",
     "name": "KABUPATEN BOGOR",
     "alt_name": "KABUPATEN BOGOR",
     "latitude": -6.58333,
@@ -1403,7 +1403,7 @@ function citydata(){
   },
   {
     "id": "3216",
-    "province_id": "32",
+    "province_id": "31",
     "name": "KABUPATEN BEKASI",
     "alt_name": "KABUPATEN BEKASI",
     "latitude": -6.24667,
@@ -1427,7 +1427,7 @@ function citydata(){
   },
   {
     "id": "3271",
-    "province_id": "32",
+    "province_id": "31",
     "name": "KOTA BOGOR",
     "alt_name": "KOTA BOGOR",
     "latitude": -6.59167,
@@ -1459,7 +1459,7 @@ function citydata(){
   },
   {
     "id": "3275",
-    "province_id": "32",
+    "province_id": "31",
     "name": "KOTA BEKASI",
     "alt_name": "KOTA BEKASI",
     "latitude": -6.28333,
