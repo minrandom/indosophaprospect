@@ -1467,7 +1467,7 @@ function citydata(){
   },
   {
     "id": "3276",
-    "province_id": "32",
+    "province_id": "31",
     "name": "KOTA DEPOK",
     "alt_name": "KOTA DEPOK",
     "latitude": -6.4,
