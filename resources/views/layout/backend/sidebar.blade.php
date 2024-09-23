@@ -33,7 +33,7 @@
     <!-- Divider -->
     <hr class="sidebar-divider">
 
-    @can('dba')
+    @can('admin')
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSetup"
             aria-expanded="true" aria-controls="collapseSetup">
