@@ -663,7 +663,8 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         Chance: (datz.review.chance * 100).toFixed(0) + ' %',
         EtaPoDate: etapo,
         Temperature: datz.temperature.tempName,
-        NextAction: datz.review.next_action
+        NextAction: datz.review.next_action,
+        LastUpdate: datz.lastupdate
       }
 
     });

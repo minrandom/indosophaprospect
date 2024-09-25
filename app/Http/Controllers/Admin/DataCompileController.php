@@ -15,6 +15,7 @@ use App\Models\Prospect;
 use App\Models\ConsumablesProspect;
 use App\Models\Alert;
 use App\Models\Brand;
+use App\Models\ReviewLog;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -699,6 +700,16 @@ class DataCompileController extends Controller
                 if ($diff < 0) {
                     return "Tanggal PO sudah Lewat";
                 } else return $podate;
+            })
+            
+            ->addColumn('lastupdate', function ($prp) {
+             
+
+                $reviewdata=ReviewLog::with('UpdatedBy')->where('review_id',$prp->review->id)->orderBy('updated_at','desc')->orderBy('id','desc')->first();
+                $colUpdate = $reviewdata->created_at ?? "Update Terakhir di GoogleSheet";
+                //dd($colUpdate);
+
+                return $colUpdate;
             })
 
             /*
