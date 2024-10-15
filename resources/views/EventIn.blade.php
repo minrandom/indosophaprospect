@@ -1,5 +1,5 @@
 @extends('layout.backend.app',[
-    'title' => 'Attendance Event',
+    'title' => 'Attendance Event HOSPEX 2024',
     'pageTitle' =>'Attendance Event',
     ])
     

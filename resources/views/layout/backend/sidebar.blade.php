@@ -63,6 +63,16 @@
             <i class="fas fa fa-plus-square"></i>
             <span>Create Config</span></a>
             </div>
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Setup Event Menu</h6>
+                <a class="collapse-item" href="{{ route('admin.config') }}">
+            <i class="fas fa-fw fa-cogs"></i>
+            <span>Event List</span></a>
+             
+        <a class="collapse-item" href="{{ route('admin.configcreate') }}">
+            <i class="fas fa fa-plus-square"></i>
+            <span>Create Event</span></a>
+            </div>
         </div>
     </li>
     @endcan
@@ -85,6 +95,29 @@
         <a class="collapse-item" href="{{ route('kehadiran') }}">
             <i class="fas fa fa-address-card"></i>
             <span>Kehadiran</span></a>
+            </div>
+        </div>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseJadwal"
+            aria-expanded="true" aria-controls="collapseJadwal">
+            <i class="fas fa-fw fa-calendar"></i>
+            <span>Event</span>
+        </a>
+        <div id="collapseJadwal" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Event Menu</h6>
+                <a class="collapse-item" href="#">
+            <i class="fas fa-fw fa-calendar"></i>
+            <span style="color:orange">Event Terdekat(UnderDev)</span></a>
+            <a class="collapse-item" href="#">
+            <i class="fas fa fa-calendar-plus"></i>
+            <span style="color:orange">Event Report(UnderDev)</span></a>
+             
+                
+        <a class="collapse-item" href="{{ route('kehadiran HOSPEX') }}">
+            <i class="fas fa fa-address-card"></i>
+            <span>Kehadiran Event</span></a>
             </div>
         </div>
     </li>
