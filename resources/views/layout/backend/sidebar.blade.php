@@ -115,9 +115,9 @@
             <span style="color:orange">Event Report(UnderDev)</span></a>
              
                 
-        <a class="collapse-item" href="{{ route('kehadiran HOSPEX') }}">
+        <a class="collapse-item" href="{{ route('kehadiranevent') }}">
             <i class="fas fa fa-address-card"></i>
-            <span>Kehadiran Event</span></a>
+            <span>Kehadiran Event Hospex</span></a>
             </div>
         </div>
     </li>
