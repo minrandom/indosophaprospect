@@ -6,6 +6,9 @@ use App\Models\jojo;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
 use App\Models\AttendanceOut;
+use App\Models\attendance_event_in;
+use App\Models\attendance_event_out;
+
 use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
 use League\Flysystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
@@ -30,6 +33,23 @@ class JojoController extends Controller
 
     public function indx(){
         return view('check-out');
+    }
+
+    public function kehadiranevent(){
+        $usid=Auth::user()->id;
+        $hariini=attendance_event_in::where('user_id',$usid)->whereDate("created_at",today())->doesntHave('out')->first();
+
+
+        if(isset($hariini)){
+            $hariini->created_at = $hariini->created_at->addHours(7);
+            $urlphoto =str_replace("https://drive.google.com/uc?id=", "https://drive.google.com/thumbnail?id=", $hariini->photo_data);
+            $urlphotoshow =str_replace("&export=media", "",$urlphoto);
+
+            return view('EventOut',compact(['hariini','urlphotoshow']));
+        }
+        return view('EventIn');
+
+
     }
 
     public function kehadiran(){
