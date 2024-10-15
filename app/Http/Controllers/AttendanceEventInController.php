@@ -80,7 +80,7 @@ class AttendanceEventInController extends Controller
            'photo_data' => $photoUrl,
        ]);
    
-       dd($attendanceEventsIn);
+ 
        // Save the Attendance instance to the database
 
 
