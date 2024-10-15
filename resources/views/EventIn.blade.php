@@ -1,6 +1,6 @@
 @extends('layout.backend.app',[
-    'title' => 'Attendance',
-    'pageTitle' =>'Attendance',
+    'title' => 'Attendance Event',
+    'pageTitle' =>'Attendance Event',
     ])
     
     @push('css')

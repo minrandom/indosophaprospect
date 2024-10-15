@@ -6,6 +6,9 @@ use App\Models\jojo;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
 use App\Models\AttendanceOut;
+use App\Models\attendance_event_in;
+use App\Models\attendance_event_out;
+
 use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
 use League\Flysystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
@@ -51,7 +54,7 @@ class JojoController extends Controller
 
     public function kehadiranevent(){
         $usid=Auth::user()->id;
-        $hariini=Attendance::where('user_id',$usid)->whereDate("created_at",today())->doesntHave('out')->first();
+        $hariini=attendance_event_in::where('user_id',$usid)->whereDate("created_at",today())->doesntHave('out')->first();
 
 
         if(isset($hariini)){
