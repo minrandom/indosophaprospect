@@ -448,6 +448,81 @@ class ConsumablesProspectController extends Controller
                 if ($n == $prospect->po_target) {
                     $showdata[$i] = $this->tableQuarter($prospect->qty, $prospect->config_id);
                     $found = true;
+                    
+                    switch($prospect->status)
+                    {
+                        case -1 :
+                            $statusdata[$i]='<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-secondary">MISSED</span></a></h5>';
+                            break;
+                        case 0 :
+                            $statusdata[$i] = '<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-info">WAIT APPROVAL</span></a></h5>';
+                            break;
+                        case 1 :
+                            $statusdata[$i] = '<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-primary">NEW</span></a></h5>';
+                            break;
+                        case 2 :
+                            $statusdata[$i] = '<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-warning">CONSIGN</span></a> | '.Carbon::parse($prospect->consignDrop)->format('d M Y').'</h5>';
+                            break;
+                        case 3 :
+                            $statusdata[$i] = '<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-info">READY STOCK</span></a></h5>';
+                            break;
+                        case 4 :
+                            $statusdata[$i] = '<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-secondary">WAIT STOCK / ORDERING STOCK</span></a></h5>';
+                            break;
+                        case 404 :
+                            $statusdata[$i] = '<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-danger">REJECT</span></a></h5>';
+                            break;
+                        case 99 :
+                            $statusdata[$i] = '<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-dark">EXPIRED</span></a></h5>';
+                            break;
+                        case 77 :
+                            $statusdata[$i] = '<h5><a href="javascript:void(0)" id="' . $prospect->id . '" class="btn-sts"><span class="badge badge-succes">DONE / SUCCESS</span></a></h5>';
+                            break;
+                    }
+
+                    break; // Exit the loop once the data for the quarter is found
+                }
+            }
+        
+            if (!$found) {
+                $showdata[$i] = "Tidak Ada Prospect di Quarter Ini";
+                $statusdata[$i]= "";
+            }
+
+        }
+
+
+
+        $coredata=['hospital'=>$allp[0]->hospital->name,
+                    'creator'=>$allp[0]->creator->name,  
+                    'department'=>$allp[0]->department->name,  
+                    'personInCharge'=>$allp[0]->personInCharge->name,  
+                    'unit'=>$allp[0]->unit->name,  
+                    'category'=>$allp[0]->category->name,  
+                      
+    ];
+       
+        return view('admin.prospectdetail',compact(['allp','coredata','showdata','statusdata']));
+    }
+
+    public function detaildata(consumablesProspect $consumablesProspect)
+    {
+        //
+        $nop= $consumablesProspect -> tempCode;
+        
+        $allp = consumablesProspect::with('province','hospital','creator','personInCharge','department','unit','category')->where("tempCode",$nop)->orderBy('po_target',"asc")->get();
+        
+        //dd($allp[0]);
+
+        for ($i = 0; $i < 4; $i++) {
+            $x = $i + 1;
+            $n = "Q" . $x;
+            $found = false;
+        
+            foreach ($allp as $prospect) {
+                if ($n == $prospect->po_target) {
+                    $showdata[$i] = $this->tableQuarter($prospect->qty, $prospect->config_id);
+                    $found = true;
                     switch($prospect->status)
                     {
                         case -1 :
@@ -478,14 +553,19 @@ class ConsumablesProspectController extends Controller
                             $statusdata[$i] = "<h5><span class='badge badge-succes'>DONE / SUCCESS</span></h5>";
                             break;
                     }
-
+                    $actiondata[$i]=  '<a href="javascript:void(0)" id="' . $prospect->id . '" class="btn aksi btnaksi btn-primary btn-sm ml-2  btn-edit">Edit Product</a>' ;
+                    $actiondata[$i].=  '<a href="javascript:void(0)" id="' . $prospect->id . '" class="btn aksi btnaksi btn-warning btn-sm ml-2  btn-chq">Pindah Quarter</a>' ;
+                    $actiondata[$i].=  '<a href="javascript:void(0)" id="' . $prospect->id . '" class="btn aksi btnaksi btn-danger btn-sm ml-2  btn-delete">Hapus Product</a>' ;
+                    
                     break; // Exit the loop once the data for the quarter is found
                 }
             }
-        
+            
             if (!$found) {
                 $showdata[$i] = "Tidak Ada Prospect di Quarter Ini";
                 $statusdata[$i]= "";
+                $actiondata[$i]=  '<a href="javascript:void(0)" id="' . $prospect->id . '" class="btn aksi btnaksi btn-primary btn-sm ml-2  btn-addP">Tambah Product</a>' ;
+               
             }
 
         }
@@ -495,13 +575,14 @@ class ConsumablesProspectController extends Controller
         $coredata=['hospital'=>$allp[0]->hospital->name,
                     'creator'=>$allp[0]->creator->name,  
                     'department'=>$allp[0]->department->name,  
-                    'personInCharge'=>$allp[0]->personInCharge->name,  
+                    //'personInCharge'=>$allp[0]->personInCharge->name,  
+                    'dataid'=>$allp[0]->id,
                     'unit'=>$allp[0]->unit->name,  
                     'category'=>$allp[0]->category->name,  
                       
     ];
        
-        return view('admin.prospectdetail',compact(['allp','coredata','showdata','statusdata']));
+        return view('admin.prospectdetail2',compact(['allp','coredata','showdata','statusdata','actiondata']));
     }
 
 
@@ -784,9 +865,66 @@ class ConsumablesProspectController extends Controller
      * @param  \App\Models\consumablesProspect  $consumablesProspect
      * @return \Illuminate\Http\Response
      */
+    
+    public function updatests(Request $request, consumablesProspect $consumablesProspect)
+    {
+        $consumablesProspect->update([
+            'status'=>$request->input('status'),
+            'consignDrop'=>$request->input('dateconsign')    
+        ]);
+        return "done";
+    }   
+
     public function update(Request $request, consumablesProspect $consumablesProspect)
     {
-        //
+         
+    
+        function calculateTotalValues($product_ids, $quantities) {
+            $config = Config::with('unit', 'brand')->whereIn('id', $product_ids)->get();
+            $price_include_ppn = [];
+            $values = [];
+        
+            foreach ($config as $index => $config1) {
+                $price_include_ppn[$index] = $config1->price_include_ppn;
+                $values[$index] = $price_include_ppn[$index] * $quantities[$index];
+            }
+        
+            return $values;
+        }
+        $product_ids =implode(',', $request->input('product_id'));
+        $quantities = implode(',', $request->input('qty'));
+        $value = calculateTotalValues($request->input('product_id'), $request->input('qty'));
+        $strvalue = implode(',', $value);
+        $sumvalue=array_sum($value);
+
+        $consumablesProspect->update([
+            
+            'config_id'=>$product_ids,       
+            'submitted_total_price'=>$sumvalue,
+            'qty'=>$quantities,
+        ]);
+
+        return "done";
+
+
+
+    }
+
+    public function rsupdate(Request $request, consumablesProspect $consumablesProspect)
+    {
+        
+        $data = consumablesProspect::where('tempCode',$consumablesProspect->tempCode)->get();
+        //dd($data);
+        foreach ($data as $cpros ) {
+            $cpros->update([
+                'hospital_id'=>$request->RS,
+                'department_id'=>$request->dept,
+            ]); 
+        
+        };
+
+        return "done";
+
     }
 
     /**
@@ -900,6 +1038,22 @@ class ConsumablesProspectController extends Controller
                      ],
                    [ 'id'=>0,
                     "name" =>   "NEW",
+                     ],
+                   
+                    
+                    );
+                $dataoption['conStatus'] = array(
+                   ['id'=>1,
+                    "name" => "New",],
+                   ['id'=>2,
+                    "name" => "Consign",],
+                   ['id'=>3,
+                    "name" => "Ready Stock",],
+                   ['id'=>4,
+                    "name" => "Wait Stock",],
+                   
+                   [ 'id'=>77,
+                    "name" =>   "Success",
                      ],
                    
                     
