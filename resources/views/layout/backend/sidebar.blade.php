@@ -98,13 +98,14 @@
             </div>
         </div>
     </li>
+
     <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseJadwal"
-            aria-expanded="true" aria-controls="collapseJadwal">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseEventIss"
+            aria-expanded="true" aria-controls="collapseEventIss">
             <i class="fas fa-fw fa-calendar"></i>
             <span>Event</span>
         </a>
-        <div id="collapseJadwal" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="collapseEventIss" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Event Menu</h6>
                 <a class="collapse-item" href="#">

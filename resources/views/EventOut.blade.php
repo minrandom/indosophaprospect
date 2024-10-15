@@ -27,7 +27,7 @@
     @section('content')
     @csrf
     <div class="card">
-    <h1 class="h3 mb-4 text-gray-800">Check-OUT Event</h1>
+    <h1 class="h3 mb-4 text-gray-800">Check-OUT HOSPEX 2024</h1>
 
     <!-- Check-in Card -->
     <div class="card-body">
