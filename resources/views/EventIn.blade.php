@@ -1,6 +1,6 @@
 @extends('layout.backend.app',[
-    'title' => 'Attendance Event HOSPEX 2024',
-    'pageTitle' =>'Attendance Event',
+    'title' => 'Attendance Event ',
+    'pageTitle' =>'Attendance HOSPEX 2024',
     ])
     
     @push('css')
@@ -28,7 +28,7 @@
     @section('content')
     @csrf
     <div class="card">
-    <h1 class="h3 mb-4 text-gray-800">Check-in Event</h1>
+    <h1 class="h3 mb-4 text-gray-800">Check-in HospEx 2024</h1>
 
     <!-- Check-in Card -->
     <div class="card-body">
