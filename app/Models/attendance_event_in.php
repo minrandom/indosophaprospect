@@ -9,8 +9,6 @@ class attendance_event_in extends Model
 {
     use HasFactory;
 
-    protected $table = 'attendances';
-
     protected $fillable = [
         'user_id',
         'event_id',
@@ -30,10 +28,10 @@ class attendance_event_in extends Model
         return $this->belongsTo(User::class,"user_id");
     }
     public function event(){
-        return $this->belongsTo(User::class,"event_id");
+        return $this->belongsTo(Event::class,"event_id");
     }
 
     public function out(){
-        return $this->hasOne(AttendanceOut::class,'checkin_id');
+        return $this->hasOne(attendance_event_out::class,'checkin_id');
     }
 }

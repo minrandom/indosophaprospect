@@ -31,11 +31,11 @@ class attendance_event_out extends Model
     }
 
     public function event(){
-        return $this->belongsTo(User::class,"event_id");
+        return $this->belongsTo(Event::class,"event_id");
     }
 
     public function attendance(){
-        return $this->belongsTo(Attendance::class,'checkin_id');
+        return $this->belongsTo(attendance_event_in::class,'checkin_id');
     }
 
 

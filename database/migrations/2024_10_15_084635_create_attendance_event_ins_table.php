@@ -14,7 +14,7 @@ class CreateAttendanceEventInsTable extends Migration
     public function up()
     {
         Schema::create('attendance_event_ins', function (Blueprint $table) {
-            Schema::create('attendance', function (Blueprint $table) {
+            
                 $table->id();
                 $table->unsignedBigInteger('user_id');
                 $table->unsignedBigInteger('event_id');
@@ -23,7 +23,7 @@ class CreateAttendanceEventInsTable extends Migration
                 $table->longText('check_in_loc')->nullable();
                 $table->longText('photo_data')->nullable();
                 $table->timestamps();
-            });
+          
         });
     }
 

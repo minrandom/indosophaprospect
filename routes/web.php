@@ -22,8 +22,8 @@ use App\Http\Controllers\JojoController;
 use App\Http\Controllers\TampanController;
 
 
-use App\Http\Controllers\AttendanceEvenInController;
-use App\Http\Controllers\AttendanceEvenOutController;
+use App\Http\Controllers\AttendanceEventInController;
+use App\Http\Controllers\AttendanceEventOutController;
 
 
  
@@ -89,10 +89,10 @@ Route::get('/check-out', 'JojoController@indx')->name('check-out')->middleware([
 
 
 //attendance event
-Route::post('/EventIn', 'AttendanceEventIn@store')->name('EventIn.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
-Route::post('/EventOut', 'AttendanceEventOut@outstore')->name('EventOut.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
-Route::get('/EventIn', 'AttendanceEventIn@index')->name('EventIn')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
-Route::get('/EventOut', 'AttendanceEventOut@indx')->name('EventOut')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::post('/EventIn', [AttendanceEventInController::class,'store'])->name('EventIn.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::post('/EventOut', [AttendanceEventOutController::class,'outstore'])->name('EventOut.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/EventIn', 'AttendanceEventOutController@index')->name('EventIn')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/EventOut', 'AttendanceEventOutController@index')->name('EventOut')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
 
 
