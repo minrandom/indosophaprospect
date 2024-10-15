@@ -49,6 +49,23 @@ class JojoController extends Controller
 
     }
 
+    public function kehadiranevent(){
+        $usid=Auth::user()->id;
+        $hariini=Attendance::where('user_id',$usid)->whereDate("created_at",today())->doesntHave('out')->first();
+
+
+        if(isset($hariini)){
+            $hariini->created_at = $hariini->created_at->addHours(7);
+            $urlphoto =str_replace("https://drive.google.com/uc?id=", "https://drive.google.com/thumbnail?id=", $hariini->photo_data);
+            $urlphotoshow =str_replace("&export=media", "",$urlphoto);
+
+            return view('EventOut',compact(['hariini','urlphotoshow']));
+        }
+        return view('EventIn');
+
+
+    }
+
 
     /**
      * Show the form for creating a new resource.
