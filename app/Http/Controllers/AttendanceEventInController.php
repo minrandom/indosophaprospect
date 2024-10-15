@@ -45,7 +45,7 @@ class AttendanceEventInController extends Controller
     public function store(Request $request)
     {
         //
-        dd($request);
+        //dd($request);
         //$attendance = new Attendance();
         //$attendance->place_name = $request->input('place_name');
         //$attendance->address = $request->input('address');
