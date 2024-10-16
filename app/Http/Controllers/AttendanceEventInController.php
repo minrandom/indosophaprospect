@@ -8,7 +8,7 @@ use App\Models\attendance_event_in;
 use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
 use League\Flysystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
-
+use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -36,6 +36,35 @@ class AttendanceEventInController extends Controller
             return view('check-out',compact(['hariini','urlphotoshow']));
         }
         return view('check-in');
+
+
+    }
+
+    public function list(){
+        $att = attendance_event_in::with("user","event","out")
+        ->orderBy("id", 'DESC')
+        ->get();
+
+       
+        
+
+        $attdata = DataTables::of($att)->addIndexColumn() 
+        ->addColumn('jamci', function ($att) {
+           return $att->created_at->addHours(7);
+        })
+        ->addColumn('jamco', function ($att) {
+           return $att->out?$att->out->created_at->addHours(7):'Belum Checkout';
+        })
+        ->addColumn('coloc', function ($att) {
+           return $att->out?$att->out->check_out_loc:'Belum Checkout';
+        })
+        ->addColumn('photo_out', function ($att) {
+           return $att->out?$att->out->photo_data:'Belum Checkout';
+        })
+        ->toJson([]);
+        $data = $attdata->original;
+
+        return response()->json($data);
 
 
     }

@@ -52,7 +52,6 @@
             <span>Create Hospital</span></a>
             </div>
         
-        
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Setup Config Menu</h6>
                 <a class="collapse-item" href="{{ route('admin.config') }}">
@@ -106,7 +105,7 @@
             <span>Event</span>
         </a>
         <div id="collapseEventIss" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-            <div class="bg-white py-2 collapse-inner rounded">
+        <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Event Menu</h6>
                 <a class="collapse-item" href="#">
             <i class="fas fa-fw fa-calendar"></i>
@@ -116,10 +115,15 @@
             <span style="color:orange">Event Report(UnderDev)</span></a>
              
                 
-        <a class="collapse-item" href="{{ route('kehadiranevent') }}">
+            <a class="collapse-item" href="{{ route('AttList') }}">
+            <i class="fas fa fa-address-card"></i>
+            <span>List Kehadiran Event </span></a>
+
+            <a class="collapse-item" href="{{ route('kehadiranevent') }}">
             <i class="fas fa fa-address-card"></i>
             <span>Kehadiran Event Hospex</span></a>
-            </div>
+
+        </div>
         </div>
     </li>
     <hr class="sidebar-divider">

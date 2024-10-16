@@ -92,8 +92,9 @@ Route::get('/check-out', 'JojoController@indx')->name('check-out')->middleware([
 Route::post('/EventIn', [AttendanceEventInController::class,'store'])->name('EventIn.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::post('/EventOut', [AttendanceEventOutController::class,'outstore'])->name('EventOut.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::get('/EventIn', 'AttendanceEventOutController@index')->name('EventIn')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/ListAtt', 'AttendanceEventInController@list')->name('ListAtt')->middleware(['auth', 'role:admin']);
 Route::get('/EventOut', 'AttendanceEventOutController@index')->name('EventOut')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
-
+Route::view('/AttendanceList','admin.EventAttendance')->name('AttList')->middleware(['auth', 'role:admin']);
 
 
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
