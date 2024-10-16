@@ -114,11 +114,11 @@
             <i class="fas fa fa-calendar-plus"></i>
             <span style="color:orange">Event Report(UnderDev)</span></a>
              
-                
+            @can('admin')    
             <a class="collapse-item" href="{{ route('AttList') }}">
             <i class="fas fa fa-address-card"></i>
             <span>List Kehadiran Event </span></a>
-
+            @endcan
             <a class="collapse-item" href="{{ route('kehadiranevent') }}">
             <i class="fas fa fa-address-card"></i>
             <span>Kehadiran Event Hospex</span></a>
