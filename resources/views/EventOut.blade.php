@@ -29,9 +29,11 @@
     <div class="card">
     <h1 class="h3 mb-4 text-gray-800">Check-OUT HOSPEX 2024</h1>
 
-    <!-- Check-in Card -->
-    <div class="card-body">
-    <div id="video-container">
+    <!--Card -->
+    <div class="card-body d-flex flex-column align-items-center " style="min-height: 100vh;">
+    <div id="map" style="width: 100%; height: 300px;"></div>
+
+    <div id="video-container" class="mt-4 d-flex flex-column align-items-center">
         <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
         <video id="video" width="320" height="240" autoplay playsinline></video>
         
@@ -65,8 +67,15 @@
         let video = document.querySelector("#video");
         let click_button = document.querySelector("#click-photo");
         let canvas = document.querySelector("#canvas");
+        let mapElement = document.querySelector('#map');
         let image_data_url;
 
+
+
+     // Load map and location when the page/menu is opened
+     document.addEventListener('DOMContentLoaded', function() {
+        initMapAndLocation();
+    });
 
     toggle_button.addEventListener('click', function() {
         startCamera()});
@@ -115,6 +124,62 @@
             toggle_button.style.display = "block";
          }
 
+
+
+         function initMapAndLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+
+                var map = new ol.Map({
+                    target: 'map',
+                    layers: [
+                        new ol.layer.Tile({
+                            source: new ol.source.OSM()
+                        })
+                    ],
+                    view: new ol.View({
+                        center: ol.proj.fromLonLat([longitude, latitude]),
+                        zoom: 17
+                    })
+                });
+
+                var marker = new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([longitude, latitude]))
+                });
+
+                // Define a style for the marker (optional, can customize icon here)
+                var markerStyle = new ol.style.Style({
+                    image: new ol.style.Icon({
+                        anchor: [0.5, 1],  // Position the icon appropriately
+                        src: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' , // Use an external or custom icon
+                        scale: 0.1  // Adjust the scale to fit the map
+                    })
+                });
+                marker.setStyle(markerStyle);
+
+
+                var vectorSource = new ol.source.Vector({
+                    features: [marker]
+                });
+
+                var markerVectorLayer = new ol.layer.Vector({
+                    source: vectorSource
+                });
+
+                map.addLayer(markerVectorLayer);
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Geolocation Error',
+                text: 'Geolocation is not supported by this browser.',
+                confirmButtonText: 'OK'
+            });
+        }
+    }
+         
 
     function getLocationAndCheckIn(photoData) {
         if (navigator.geolocation) {

@@ -4,11 +4,15 @@
     ])
     
     @push('css')
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ol3/3.20.1/ol.js"></script> -->
+
     <link rel="stylesheet" href="{{ asset('openlayers/ol.css') }}">
     <style>
        #map {
             width: 100%;
             height: 400px;
+           
         }
         #video-container {
             position: relative;
@@ -31,8 +35,10 @@
     <h1 class="h3 mb-4 text-gray-800">Check-in</h1>
 
     <!-- Check-in Card -->
-    <div class="card-body">
-    <div id="video-container">
+    <div class="card-body d-flex flex-column align-items-center " style="min-height: 100vh;"">
+    <div id="map" style="width: 100%; height: 300px;"></div>
+
+    <div id="video-container" class="mt-4 d-flex flex-column align-items-center">
         <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
         <video id="video" width="320" height="240" autoplay playsinline></video>
         
@@ -56,9 +62,14 @@
         let video = document.querySelector("#video");
         let click_button = document.querySelector("#click-photo");
         let canvas = document.querySelector("#canvas");
+        let mapElement = document.querySelector('#map');
         let image_data_url;
 
-        
+    
+     // Load map and location when the page/menu is opened
+    document.addEventListener('DOMContentLoaded', function() {
+        initMapAndLocation();
+    });
 
     toggle_button.addEventListener('click', function() {
         startCamera()});
@@ -69,13 +80,12 @@
 
     async function startCamera() {
         try {
-        $("#sidebarToggle").trigger('click');
-        let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                $("#sidebarToggle").trigger('click');
+                let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 video.srcObject = stream;
                 video.style.display = "block";
                 click_button.style.display = "block";
-                toggle_button.style.display='none';
-                
+                toggle_button.style.display='none';         
             }catch(err){
                 console.error('Error accessing camera:', err);
                 Swal.fire({
@@ -91,9 +101,9 @@
     function capturePhoto() {
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
         canvas.style.display = "block";
-            image_data_url = canvas.toDataURL('image/jpeg');
-            stopCamera();
-            getLocationAndCheckIn(image_data_url);
+        image_data_url = canvas.toDataURL('image/jpeg');
+        stopCamera();
+        getLocationAndCheckIn(image_data_url);
     }
 
     function stopCamera() {
@@ -106,8 +116,64 @@
             video.style.display = "none";
             click_button.style.display = "none";
             toggle_button.style.display = "block";
+     
            
         }
+
+        // Initialize the map and show user's location
+    function initMapAndLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+
+                var map = new ol.Map({
+                    target: 'map',
+                    layers: [
+                        new ol.layer.Tile({
+                            source: new ol.source.OSM()
+                        })
+                    ],
+                    view: new ol.View({
+                        center: ol.proj.fromLonLat([longitude, latitude]),
+                        zoom: 15
+                    })
+                });
+
+                var marker = new ol.Feature({
+                    geometry: new ol.geom.Point(ol.proj.fromLonLat([longitude, latitude]))
+                });
+
+                // Define a style for the marker (optional, can customize icon here)
+                var markerStyle = new ol.style.Style({
+                    image: new ol.style.Icon({
+                        anchor: [0.5, 1],  // Position the icon appropriately
+                        src: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' , // Use an external or custom icon
+                        scale: 0.1  // Adjust the scale to fit the map
+                    })
+                });
+                marker.setStyle(markerStyle);
+
+
+                var vectorSource = new ol.source.Vector({
+                    features: [marker]
+                });
+
+                var markerVectorLayer = new ol.layer.Vector({
+                    source: vectorSource
+                });
+
+                map.addLayer(markerVectorLayer);
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Geolocation Error',
+                text: 'Geolocation is not supported by this browser.',
+                confirmButtonText: 'OK'
+            });
+        }
+    }
 
     function getLocationAndCheckIn(photoData) {
         if (navigator.geolocation) {
@@ -176,17 +242,17 @@
                     photo_data: photoData
                 },
                  success: function (response) {
-            console.log('Data saved successfully:', response);
-   
-            window.location.reload(true);
-            // You can add additional checks or logs here
-        },
-        error: function (error) {
-            console.error('Error saving data:', error);
-            // You can add additional error handling here
-        }
-            });
-        }
+                    console.log('Data saved successfully:', response);
+        
+                    window.location.reload(true);
+                    // You can add additional checks or logs here
+                },
+                error: function (error) {
+                    console.error('Error saving data:', error);
+                    // You can add additional error handling here
+                }
+                    });
+                }
 
 
 
