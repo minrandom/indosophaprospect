@@ -28,6 +28,7 @@ class consumablesProspect extends Model
         "po_target",
         "eta_po_date",
         "status",//can be change to quetioner_id later
+        "consignDrop",//can be change to quetioner_id later
         "validation_time",
         "validation_by",
     ];

@@ -31,6 +31,7 @@ class CreateConsumablesProspectsTable extends Migration
             $table->string('po_target');
             $table->date('eta_po_date')->nullable();
             $table->integer('status')->default(0);
+            $table->dateTime('consignDrop')->nullable();
             $table->dateTime('validation_time')->nullable();
             $table->integer('validation_by')->nullable();
             

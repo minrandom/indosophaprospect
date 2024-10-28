@@ -72,6 +72,7 @@ class HospitalController extends Controller
         $province = Province::where('prov_region_code',$request->province)->first();
         $hospital = Hospital::orderBy('id','desc')->first();
         $inputString = $hospital->code;
+        dd($hospital->code);
         // Extract the non-numeric part (e.g., "RS")
         $prefix = preg_replace("/[0-9]/", "", $inputString);
         // Extract the numeric part (e.g., "03405")
