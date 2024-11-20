@@ -19,5 +19,8 @@ class Department extends Model
     public function schedules(){
         return $this->hasMany(schedule::class);
     }
+    public function vendor(){
+        return $this->hasMany(deptVendorList::class);
+    }
 
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateConsumablesRejectsTable extends Migration
+class CreateDeptVendorListsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,13 +12,13 @@ class CreateConsumablesRejectsTable extends Migration
      * @return void
      */
     public function up()
-    {   
-        if (!Schema::hasTable('consumables_rejects')) {
-            Schema::create('consumables_rejects', function (Blueprint $table) {
+    {
+        if (!Schema::hasTable('dept_vendor_lists')) {
+            Schema::create('dept_vendor_lists', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('consumables_prospects_id');
-                $table->unsignedBigInteger('rejected_by');
-                $table->text('reason');
+                $table->unsignedBigInteger('hospital_id');
+                $table->unsignedBigInteger('department_id');
+                $table->date('last_transaction_date');
                 $table->timestamps();
             });
         }
@@ -31,6 +31,6 @@ class CreateConsumablesRejectsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('consumables_rejects');
+        Schema::dropIfExists('dept_vendor_lists');
     }
 }

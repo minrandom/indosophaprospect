@@ -171,84 +171,61 @@
         </a>
         <div id="collapseProspect" class="collapse" aria-labelledby="headingProspect" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Create Prospect :</h6>
+                <h6 class="collapse-header">Main Unit Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospectcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create New Prospect</span></a>
-                @can('admin')
-                <a class="collapse-item" href="{{ route('admin.consprospectcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create Consumables</span></a>
-                @endcan
                 <a class="collapse-item" href="{{ route('admin.prospecteventcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create Event Prospect</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospectcheckview') }}"><i class="fas fa-fw fa-tasks"></i><span> Prospect Check</span></a>
-               
-
-            </div>
-            
-            <!--Validation Submenu-->
-                @can('admin')  
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Validation Prospect :</h6>
-                <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span> Prospect Validation</span></a>
-                <a class="collapse-item" href="{{ route('admin.consprospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span> Consumables Validation</span></a>
-                </div>
+                <hr></hr>
+               @can('admin') 
+                <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
                @elsecan('am')
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Validation Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
-               </div>
                 @elsecan('nsm')
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Validation Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
-                </div>
                 @elsecan('prj')
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Validation Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
-                </div>
-            
-
-                
+       
                 @endcan
-                
-            <!-- review submenu-->
-                @can('admin')  
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Review Prospect :</h6>
-               <a class="collapse-item" href="{{ route('admin.consprospects') }}"><i class="fas fa-fw fa-briefcase"></i><span> Consumables Review</span></a>
+                <hr></hr>
+                @can('admin') 
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-briefcase"></i><span> Prospect Review</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-handshake-slash"></i><span> Drop Request</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-pen"></i><span> Update Request</span></a>
                 <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
-                </div>
                 @elsecan('fs')
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Review Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>My Prospect</span></a>
                 </div>
                 @elsecan('am')
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Review Prospect :</h6>
                  <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Area Prospect Review</span></a>
-                </div>
                 @elsecan('nsm')
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Review Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Region Prospect Review</span></a>
-                </div>
                 @elsecan('bu')
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Review Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>BU Prospect Review</span></a>
                 <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
-                </div>
                 @elsecan('prj')
-                <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Review Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Project Prospect Review</span></a>
                 <!-- <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a> -->
-                </div>
-
                 @endcan
+            </div>
+            
+            <!--Validation Submenu-->
+          
+
+                
            
+                
+            <!-- review submenu-->
+   
+           
+                @can('admin')
+                <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Consumables Prospect :</h6>
+                <a class="collapse-item" href="{{ route('admin.consprospectcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create Consumables</span></a>
+               
+
+                
+            </div>
+                @endcan
 
             
         </div>

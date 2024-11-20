@@ -37,6 +37,8 @@ use App\Http\Controllers\Admin\PrincipalBrandController;
 use App\Http\Controllers\Admin\DataCompileController;
 use App\Http\Controllers\ConsumablesProspectController;
 use App\Http\Controllers\DeptValidController;
+use App\Http\Controllers\deptVendorListController;
+use App\Models\deptVendorList;
 use App\Models\prospectFilters;
 
 //use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
@@ -162,6 +164,8 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::POST('/consprospect',[ConsumablesProspectController::class,'store'])->name('admin.consprospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj,prj']);
 	Route::POST('/prospect',[ProspectController::class,'store'])->name('admin.prospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/prospectcreate',[ProspectController::class,'create'])->name('admin.prospectcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+	Route::get('/buyerforecast/{deptVendorList}',[deptVendorListController::class,'Forecast'])->name('buyerforecast')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+	Route::POST('/buyerforecastdata',[deptVendorListController::class,'ForecastData'])->name('buyerforecastdata')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/consprospectcreate',[ConsumablesProspectController::class,'create'])->name('admin.consprospectcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/prospecteventcreate',[ProspectController::class,'eventcreate'])->name('admin.prospecteventcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::POST('/draft',[ProspectController::class,'savedraft'])->name('admin.prospect.saveDraft')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
@@ -194,7 +198,11 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 
 	//consumables prospect
 	Route::get('/consprospect',[ConsumablesProspectController::class,'index'])->name('admin.consprospects')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
-
+	
+	
+	Route::get('/BuyerList',[deptVendorListController::class,'index'])->name('admin.buyerList')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+	Route::get('/BuyerListdata',[deptVendorListController::class,'data'])->name('databuyerList')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+;
 
 
 	

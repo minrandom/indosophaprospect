@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateConsumablesProspectsTable extends Migration
+class CreateVendorForecastsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,15 +12,13 @@ class CreateConsumablesProspectsTable extends Migration
      * @return void
      */
     public function up()
-    {   
-        if (!Schema::hasTable('consumables_prospects')) {
-            Schema::create('consumables_prospects', function (Blueprint $table) {
+    {
+        Schema::create('vendor_forecasts', function (Blueprint $table) {
+      
                 $table->id();
                 $table->unsignedBigInteger('user_creator');
-                $table->unsignedBigInteger('pic_user_id')->nullable();
-                $table->string('prospect_no')->nullable();//number triggered
-                $table->string('tempCode');//number triggered
-                $table->string('prospect_source');
+                $table->string('forecast_no')->nullable();//number triggered
+                $table->string('tempCode');//number triggered          
                 $table->unsignedBigInteger('province_id');
                 $table->unsignedBigInteger('hospital_id');
                 $table->unsignedBigInteger('department_id');
@@ -30,15 +28,14 @@ class CreateConsumablesProspectsTable extends Migration
                 $table->text('qty');
                 $table->unsignedBigInteger('submitted_total_price');
                 $table->string('po_target');
-                $table->date('eta_po_date')->nullable();
+                $table->string('payment_method');
                 $table->integer('status')->default(0);
-                $table->dateTime('consignDrop')->nullable();
-                $table->dateTime('validation_time')->nullable();
-                $table->integer('validation_by')->nullable();
-                
+                $table->text('comment')->nullable();
+                $table->unsignedBigInteger('result_id')->nullable();
+   
                 $table->timestamps();
-            });
-        }
+        });
+       
     }
 
     /**
@@ -48,6 +45,6 @@ class CreateConsumablesProspectsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('consumables_prospects');
+        Schema::dropIfExists('vendor_forecasts');
     }
 }

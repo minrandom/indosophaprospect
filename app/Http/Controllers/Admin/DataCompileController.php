@@ -1560,7 +1560,7 @@ class DataCompileController extends Controller
 
             ->addColumn('action', function ($prp) use ($url) {
                 $routesdetail ="#";
-                $theroutes = route('admin.cnprospectdetail', ['consumablesProspect' => $prp->id]);
+                $theroutes = route('buyerforecast', ['deptVendorList' => $prp->id]);
                 switch ($prp->status) {
                     case -1:
                     case 1:

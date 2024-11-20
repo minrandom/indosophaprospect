@@ -28,5 +28,8 @@ class Hospital extends Model
     public function validDept(){
         return $this->hasOne(DeptValidation::class);
     }
+    public function vendor(){
+        return $this->hasMany(deptVendorList::class);
+    }
 
 }

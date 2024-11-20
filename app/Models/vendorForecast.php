@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class consumablesProspect extends Model
+class vendorForecast extends Model
 {
     use HasFactory;
 
@@ -13,10 +13,8 @@ class consumablesProspect extends Model
     use HasFactory;
     protected $fillable=[
         "user_creator",
-        "pic_user_id",
-        "prospect_no",
+        "forecast_no",
         "tempCode",
-        "prospect_source",
         "province_id",
         "hospital_id",
         "department_id",
@@ -26,20 +24,13 @@ class consumablesProspect extends Model
         "qty",
         "submitted_total_price",
         "po_target",
-        "eta_po_date",
-        "status",
         "payment_method",
-        "validation_time",
-        "validation_by",
+        "status",
+        "result_id",
     ];
-
-
+    
     public function creator(){
         return $this->belongsTo(User::class,'user_creator');
-    }
-
-    public function personInCharge(){
-        return $this->belongsTo(User::class,'pic_user_id');
     }
 
     public function hospital(){
@@ -59,20 +50,8 @@ class consumablesProspect extends Model
     public function unit(){
         return $this->belongsTo(Unit::class);
     }
-
-
-    public function rejection(){
-        return $this->belongsTo(consumablesReject::class,'prospect_no');
+    public function result(){
+        return $this->hasOne(vendorForecastResult::class.'result_id');
     }
-    public function review(){
-        return $this->belongsTo(consumablesReview::class);
-    }
-    
-    public function category(){
-        return $this->belongsTo(Category::class);
-    }
-
-
-
 
 }

@@ -54,15 +54,7 @@ class ConsumablesProspectController extends Controller
         ///$filter = prospectFilters::where('filterUser',$usid)->first();
         //$a = trim($filter->filterData, "[]");
         //$arrayfilter = explode(',', $a);
-    
-        // Replace occurrences of ""0"" with null
-    
-    
-        // Debug the processed array
-   // Remove square brackets
-  
-
-        $area=$user->employee->area;
+       $area=$user->employee->area;
         $pos=$user->employee->position;
         if($area=="HO" ){
         $provincelist=Province::all();
