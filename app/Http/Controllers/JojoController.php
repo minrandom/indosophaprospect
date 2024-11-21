@@ -296,7 +296,11 @@ class JojoController extends Controller
         if($diff>0){var_dump("PAST");}
 
 
-        
+        if ($diff>0) {
+            $tempename = 'MISSED';
+            $tempecode = '-1';
+        } else
+        {
 
             if ($review->chance == 1) {
                 $tempename = 'SUCCESS';
@@ -313,11 +317,7 @@ class JojoController extends Controller
                         $tempecode = '4';
                     } else
                     {
-                        if ($diff>0) {
-                            $tempename = 'MISSED';
-                            $tempecode = '-1';
-                        } else
-                        {
+                        
                             if (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
                                 $tempename = 'LEAD';
                                 $tempecode = '1';
