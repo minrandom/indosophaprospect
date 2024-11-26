@@ -21,7 +21,7 @@
             <span>Dashboard</span></a>
     </li>
     @endcan
--->
+    -->
    
     <li class="nav-item">
         <a class="nav-link" href="{{ route('user') }}">
@@ -194,7 +194,7 @@
                 <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
                 @elsecan('fs')
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>My Prospect</span></a>
-                </div>
+            
                 @elsecan('am')
                  <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Area Prospect Review</span></a>
                 @elsecan('nsm')
@@ -236,7 +236,7 @@
 
 
     <hr class="sidebar-divider">
-
+    <li class="nav-item">
         <!-- Heading -->
         <div class="sidebar-heading">
         Marketing Tools
@@ -254,7 +254,7 @@
                     <span>Marketing Tools (Under Development)</span></a>
         </li>
 
-
+    </li>
     
     <hr class="sidebar-divider">
 
@@ -313,7 +313,7 @@
             </div>
         </div>
     </li>
--->
+    -->
 
 
 
@@ -325,7 +325,7 @@
 
 
 
-<!-- Divider -->
+    <!-- Divider -->
     <hr class="sidebar-divider">
 
     <!-- Heading -->
@@ -353,7 +353,7 @@
             </div>
         </div>
     </li>
-Nav Item - Pages Collapse Menu -->
+    Nav Item - Pages Collapse Menu -->
 
 
 
