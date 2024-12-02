@@ -493,7 +493,6 @@ class DataCompileController extends Controller
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
-                     
                         ->where ("is_project",0)
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
                         ->get();
@@ -504,6 +503,21 @@ class DataCompileController extends Controller
                         ->where("status", $status)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
+                        })
+                        ->whereHas('temperature', function ($query) {
+                            $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
+                        })
+                        ->where ("is_project",0)
+                        ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
+                        ->get();
+                    break;
+
+                case "amx":
+                    $areaArray = explode(',', $area);
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
+                        ->where("status", $status)
+                        ->whereHas('province', function ($query) use ($areaArray) {
+                            $query->whereIn('iss_area_code', $areaArray);
                         })
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
@@ -569,6 +583,18 @@ class DataCompileController extends Controller
                         ->where("status", '!=', 1)
                         ->whereHas('province', function ($query) use ($area) {
                             $query->where('iss_area_code', $area);
+                        })
+                        ->where ("is_project",0)
+                        ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
+                        ->get();
+                    break;
+
+                case "amx":
+                    $areaArray = explode(',', $area);
+                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
+                        ->where("status", '!=', 1)
+                         ->whereHas('province', function ($query) use ($areaArray) {
+                            $query->whereIn('iss_area_code', $areaArray);
                         })
                         ->where ("is_project",0)
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
@@ -752,34 +778,41 @@ class DataCompileController extends Controller
                 $tempCode=$prp->temperature->tempCodeName;
                 $ch = $prp->review->chance;
                 $chs = number_format($ch * 100, 0);
+                if($ch <0.4){
+                    $chv="
+                    <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>
+                    <h5><a href='javascript:void(0)' id='".$prp->id."'  datacode='".$prp->prospect_no."' class='badge tmpe bg-secondary text-light  btn-drop'>Request Drop</a></h5>";
+                }elseif($ch>0.7){
+                    $chv="
+                    <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>
+                    <h5><a href='javascript:void(0)' id='".$prp->id."' datacode='".$prp->prospect_no."' class='badge tmpe bg-success text-light  btn-finish'>Set Success</a></h5>";
+                }else{
+                    $chv="
+                    <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                }
+
+
                 switch ($tempCode){
                     case (-1);
-                    return "<h4><span class='badge tmpe bg-secondary text-light'>MISSED</span></h4>
-                    <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                    return "<h4><span class='badge tmpe bg-secondary text-light'>MISSED</span></h4>".$chv;
                     break;
                     case 0:
-                        return "<h4><span class='badge tmpe bg-dark text-light'>DROP</span></h4>
-                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        return "<h4><span class='badge tmpe bg-dark text-light'>DROP</span></h4>".$chv;
                         break;
                     case 1:
-                        return "<h4><span class='badge tmpe text-light' style='background-color:CornflowerBlue'>LEAD</span></h4>
-                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        return "<h4><span class='badge tmpe text-light' style='background-color:CornflowerBlue'>LEAD</span></h4>".$chv;
                         break;
                     case 2:
-                        return "<h4><span class='badge tmpe text-light' style='background-color:MediumOrchid'>PROSPECT</span></h4>
-                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        return "<h4><span class='badge tmpe text-light' style='background-color:MediumOrchid'>PROSPECT</span></h4>".$chv;
                         break;
                     case 3:
-                        return "<h4><span class='badge tmpe text-light' style='background-color:Salmon'>FUNNEL</span></h4>
-                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        return "<h4><span class='badge tmpe text-light' style='background-color:Salmon'>FUNNEL</span></h4>".$chv;
                         break;
                     case 4:
-                        return "<h4><span class='badge tmpe bg-danger text-light'>HOT PROSPECT</span></h4>
-                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        return "<h4><span class='badge tmpe bg-danger text-light'>HOT PROSPECT</span></h4>".$chv;
                         break;
                     case 5:
-                        return "<h4><span class='badge tmpe bg-success text-light'>SUCCESS</span></h4>
-                        <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>";
+                        return "<h4><span class='badge tmpe bg-success text-light'>SUCCESS</span></h4>".$ch;
                         break;
                 }
                 //return $data;
