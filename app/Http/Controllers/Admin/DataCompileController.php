@@ -499,10 +499,11 @@ class DataCompileController extends Controller
                     break;
 
                 case "am":
+                    $areaArray = explode(',', $area);
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)
-                        ->whereHas('province', function ($query) use ($area) {
-                            $query->where('iss_area_code', $area);
+                        ->whereHas('province', function ($query) use ($areaArray) {
+                            $query->whereIn('iss_area_code', $areaArray);
                         })
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
@@ -579,10 +580,11 @@ class DataCompileController extends Controller
                     break;
 
                 case "am":
+                    $areaArray = explode(',', $area);
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", '!=', 1)
-                        ->whereHas('province', function ($query) use ($area) {
-                            $query->where('iss_area_code', $area);
+                        ->whereHas('province', function ($query) use ($areaArray) {
+                            $query->whereIn('iss_area_code', $areaArray);
                         })
                         ->where ("is_project",0)
                         ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
