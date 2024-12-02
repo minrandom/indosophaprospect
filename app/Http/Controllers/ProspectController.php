@@ -130,7 +130,8 @@ class ProspectController extends Controller
          }else if($role==="fs"){
          $provincelist=Province::with('area')->where('prov_order_no',$area)->orWhere('iss_area_code',$area)->get();
         }else if($role==="am"){
-        $provincelist=Province::with('area')->where('iss_area_code',$area)->get();}       
+        $areaArray = explode(',', $area);
+        $provincelist=Province::with('area')->whereIn('iss_area_code', $areaArray)->get();}       
      
     
         $provOrderNos = $provincelist->pluck('prov_order_no')->toArray();
