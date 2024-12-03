@@ -2,32 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\successReq;
 use App\Models\Department;
 use App\Models\Config;
-use App\Models\DropRequest;
+
 use App\Models\User;
 use App\Models\Hospital;
 use App\Models\prospectTemperature;
 use App\Models\Review;
-use Illuminate\Http\Request;
 use DataTables;
+use Illuminate\Http\Request;
 
-class DropRequestController extends Controller
+class SuccessReqController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+   
     public function index()
     {
         //
-        return view('admin.dropRequest');
+        return view('admin.successrequest');
     }
 
     public function data()
     {
-        $prv = DropRequest::with('prospect','validation','request')->get();
+        $prv = successReq::with('prospect','validation','request')->get();
 
 
         return DataTables::of($prv)
@@ -56,7 +53,7 @@ class DropRequestController extends Controller
                     return "Belum di Approve";
                 }
             })
-
+          
             ->addColumn('bunoted',function($drop){
                 if($drop->isBuNoted < 1){
                 $show = "TIM BU Belum Mengetahui";
@@ -77,19 +74,22 @@ class DropRequestController extends Controller
                 $data ="";
                 switch ($drop->request_reason){
                     case 1: 
-                        $data = 'Double Input';
+                        $data = 'Price and Budget';
                     break;
                     case 2:
-                        $data ='Losing Tender';
+                        $data ='Quality';
                     break;
                     case 3:
-                        $data ='Price and Budget';
+                        $data ='Doctor Choice';
                     break;
                     case 4:
-                        $data ='TKDN';
+                        $data ='Management Trust';
                     break;
                     case 5:
-                        $data ='Competitor or Any External Issue';
+                        $data ='Key Person';
+                    break;
+                    case 6:
+                        $data ='Good Data';
                     break;
                     default: $data = "NO REASON DATA";
                 }
@@ -107,7 +107,7 @@ class DropRequestController extends Controller
                 $show = $data->name;
                 return $show;
             })
-             ->addColumn('prospect_no', function ($drop) {
+            ->addColumn('prospect_no', function ($drop) {
                 $btn = '<div class="row"><a href="'.route('admin.prospecteditdata', $drop->prospect->id).'" class="btn btn-primary btn-sm ml-2 btn-edit">'.$drop->prospect->prospect_no.'</a></div>';
                 return $btn;
             })
@@ -116,27 +116,15 @@ class DropRequestController extends Controller
             ->toJson();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
-        //
-
-        DropRequest::create([
+        successReq::create([
             "prospect_id"=>$request->idprospect,
             "request_by"=>$request->creatorid,
             "request_date"=>$request->createddate,
@@ -145,93 +133,85 @@ class DropRequestController extends Controller
         ]);
         return response()->json(['message' => 'Success Request']);
 
-
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\DropRequest  $dropRequest
-     * @return \Illuminate\Http\Response
-     */
-    public function show(DropRequest $dropRequest)
+    public function show(successReq $successReq)
     {
-       $data=$dropRequest;
-       $config = Config::where('id',$dropRequest->prospect->config_id)->first();
-        $data['config']=$config->name;
-       
-        $requester = User::with('employee')->where('id',$dropRequest->request_by)->first();
-       $data['request']= $requester->name;
+        //
 
-       $hos = Hospital::with('province')->where('id',$dropRequest->prospect->hospital_id)->first();
-        $hos->name;
-        $data['hospital']=$hos->name;
-
-        switch ($dropRequest->request_reason){
-            case 1: 
-                $data['reason'] = 'Double Input';
-            break;
-            case 2:
-                $data['reason'] ='Losing Tender';
-            break;
-            case 3:
-                $data['reason'] ='Price and Budget';
-            break;
-            case 4:
-                $data['reason'] ='TKDN';
-            break;
-            case 5:
-                $data['reason'] ='Competitor or Any External Issue';
-            break;
-            default: $data['reason'] = "NO REASON DATA";
-        }
-
-
-
-        return response()->json(['message' => 'Success Request','data'=>$data]);
-
-
+        $data=$successReq;
+        $config = Config::where('id',$successReq->prospect->config_id)->first();
+         $data['config']=$config->name;
+        
+         $requester = User::with('employee')->where('id',$successReq->request_by)->first();
+        $data['request']= $requester->name;
+ 
+        $hos = Hospital::with('province')->where('id',$successReq->prospect->hospital_id)->first();
+         $hos->name;
+         $data['hospital']=$hos->name;
+ 
+         switch ($successReq->request_reason){
+             case 1: 
+                 $data['reason'] = 'Price and Budget';
+             break;
+             case 2:
+                 $data['reason'] ='Quality';
+             break;
+             case 3:
+                 $data['reason'] ='Doctor Choice';
+             break;
+             case 4:
+                 $data['reason'] ='Management Trust';
+             break;
+             case 5:
+                 $data['reason'] ='Key Person';
+             break;
+             case 6:
+                 $data['reason'] ='Good Data';
+             break;
+             default: $data['reason'] = "NO REASON DATA";
+         }
+ 
+ 
+ 
+         return response()->json(['message' => 'Success Request','data'=>$data]);
+ 
+ 
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\DropRequest  $dropRequest
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(DropRequest $dropRequest)
+    public function edit(successReq $successReq)
     {
         //
     }
 
-    public function update(Request $request, DropRequest $dropRequest)
+
+    public function update(Request $request, successReq $successReq)
     {
-        $dropRequest->update([
+        //
+
+        $successReq->update([
             "validation_status"=>$request->updateTo,
             "validation_time"=>now()->format('Y-m-d'),
             "validation_by"=>$request->creatorid
         ]);
 
-        $prospectrev = Review::where('prospect_id',$dropRequest->prospect_id)->first();
+        $prospectrev = Review::where('prospect_id',$successReq->prospect_id)->first();
 
         $prospectrev->update([
-            'chance'=>0,
+            'chance'=>1,
         ]);
 
-        $temp = prospectTemperature::where('prospect_id',$dropRequest->prospect_id)->first();
-        $temp->update(['tempName'=>"DROP",'tempCodeName'=>0]);
+        $temp = prospectTemperature::where('prospect_id',$successReq->prospect_id)->first();
+        $temp->update(['tempName'=>"SUCCESS",'tempCodeName'=>5]);
 
 
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\DropRequest  $dropRequest
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(DropRequest $dropRequest)
+
+    public function destroy(successReq $successReq)
     {
         //
     }
+
+
 }

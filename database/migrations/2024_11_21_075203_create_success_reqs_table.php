@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDropRequestsTable extends Migration
+class CreateSuccessReqsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateDropRequestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('drop_requests', function (Blueprint $table) {
+        Schema::create('success_reqs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('prospect_id');
             $table->unsignedBigInteger('request_by');
@@ -26,11 +26,6 @@ class CreateDropRequestsTable extends Migration
             $table->string('bu_noted_at')->nullable();
             $table->unsignedBigInteger('validation_by')->nullable();
             $table->timestamps();
-
-           // $table->foreign('prospect_id')->references('id')->on('prospect');
-           // $table->foreign('request_by')->references('id')->on('user');
-           // $table->foreign('validation_by')->references('id')->on('user');
-
         });
     }
 
@@ -41,6 +36,6 @@ class CreateDropRequestsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('drop_requests');
+        Schema::dropIfExists('success_reqs');
     }
 }

@@ -296,7 +296,7 @@ class JojoController extends Controller
         if($diff>0){var_dump("PAST");}
 
 
-        if ($diff>0) {
+        if ($diff>0 and $review->chance != 0) {
             $tempename = 'MISSED';
             $tempecode = '-1';
         } else

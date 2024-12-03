@@ -76,6 +76,29 @@ function filter(){
 
 }
 
+function dropsuccess(){
+  var dropreason =[
+    {id:1,name:'Double Input'},
+    {id:2,name:'Losing Tender'},
+    {id:3,name:"Price and Budget"},
+    {id:4,name:"TKDN"},
+    {id:5,name:"Competitor or Any External Issue"}
+  ];
+
+  var successreason=[ 
+    {id:1,name:'Price and Budget'},
+    {id:2,name:'Quality'},
+    {id:3,name:"Doctor Choice"},
+    {id:4,name:"Management Trust"},
+    {id:5,name:"Key Person"},
+    {id:6,name:"Good Data"}];
+
+    return {
+      dropreason:dropreason,
+      successreason:successreason
+    };
+}
+
 
 
 

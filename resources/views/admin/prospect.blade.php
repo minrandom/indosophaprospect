@@ -73,6 +73,7 @@
 
 
 @include('modal._createprospectremarks_modal')
+@include('modal._prospectdropsuccess_modal')
 
 <div id="productData" data-url="{{ route('product.getProducts') }}"></div>
 
@@ -1021,6 +1022,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     $("#prospectremarks-modal").modal("show");
   });
 
+
   $("#createRemForm").on("submit", function(e) {
     e.preventDefault()
 
@@ -1046,6 +1048,102 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       }
     })
   })
+
+
+  var dropsuccess=dropsuccess();
+
+  $('body').on("click",".btn-drop",function(){
+    var id = $(this).attr("id");
+    var datacode = $(this).attr("datacode");
+    console.log(datacode);
+    $('#updateTo').val('DROP');
+    //var remarksArray = JSON.parse(remarksData);
+    //console.log(remarksData);
+    $('#prospectCode').val(datacode);
+    $('#idprospect').val(id);
+    populateSelectFromDatalist('cr8reason',dropsuccess.dropreason,'Pilih Alasan Drop Prospect');
+
+
+
+    $("#dropsuccess-modal").modal("show");
+
+
+  })
+
+
+  $('body').on("click",".btn-finish",function(){
+    var id = $(this).attr("id");
+    var datacode = $(this).attr("datacode");
+    console.log(id);
+    $('#updateTo').val('SUCCESS');
+    //var remarksArray = JSON.parse(remarksData);
+    //console.log(remarksData);
+    $('#prospectCode').val(datacode);
+    $('#idprospect').val(id);
+    //populateSelectFromDatalist('cr8colupdate',datarem.column,'Pilih Kolom yang diUpdate');
+
+    populateSelectFromDatalist('cr8reason',dropsuccess.successreason,'Pilih Kenapa Prospect Success');
+
+    $("#dropsuccess-modal").modal("show");
+
+
+  })
+
+  function submitRequest(successMessage) {
+    
+    var form = $('#requestDropSuccessForm');
+    
+    // Serialize the form data
+    var formData = form.serialize();
+    
+    // Get the updateTo value from the form
+    var updateTo = form.find('#updateTo').val();
+
+
+    if(updateTo== "DROP"){
+      var url = "{{ route('admin.prospect.dropreq') }}";
+  
+    }else {
+      var url ="{{ route('admin.prospect.successreq') }}";
+     
+    }
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: formData,
+            success: function() {
+                //$("#create-modal").modal("hide");
+                //$('.data-table').DataTable().ajax.reload();
+                $("#requestDropSuccessForm")[0].reset();
+                flash("success", successMessage);
+                document.querySelector(".notify").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+                });
+                
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('AJAX Error:', textStatus, errorThrown);
+                
+                flash("Danger", "Tolong diisi bagian yang masih kosong!!");
+                document.querySelector(".notify").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+                });
+            }
+            
+        });
+    };
+
+
+  $('#btn-request').on('click', function(e) {
+        $(this).focus();
+        e.preventDefault();
+       $(document.activeElement);
+       submitRequest("Request Update sudah dikirim, Silahkan Hubungi NSM dan Kabari Bussiness Unit yang bersangkutan.");
+       $("#dropsuccess-modal").modal("hide");
+    });
+  
 
 
   $('body').on("click", ".btn-cr8", function() {

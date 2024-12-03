@@ -780,7 +780,7 @@ class DataCompileController extends Controller
                 $tempCode=$prp->temperature->tempCodeName;
                 $ch = $prp->review->chance;
                 $chs = number_format($ch * 100, 0);
-                if($ch <0.4){
+                if($ch <0.4 and $ch >0){
                     $chv="
                     <h5><span class='badge tmpe bg-info text-light'>Chance </br>$chs %</span></h5>
                     <h5><a href='javascript:void(0)' id='".$prp->id."'  datacode='".$prp->prospect_no."' class='badge tmpe bg-secondary text-light  btn-drop'>Request Drop</a></h5>";

@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DropRequest extends Model
+class successReq extends Model
 {
     use HasFactory;
     protected $fillable=[
-        "prospect_id","request_date","request_reason","keterangan","request_by","validation_time","validation_by","validation_status","isBuNoted","bu_noted_at"
+        "prospect_id","request_date","request_reason","keterangan","request_by","validation_time","validation_by","validation_status","isBuNoted",'bu_noted_at'
     ];
 
     public function prospect(){
@@ -22,4 +22,5 @@ class DropRequest extends Model
     public function request(){
         return $this->belongsTo(User::class, 'request_by');
     }
+
 }

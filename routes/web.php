@@ -38,7 +38,10 @@ use App\Http\Controllers\Admin\DataCompileController;
 use App\Http\Controllers\ConsumablesProspectController;
 use App\Http\Controllers\DeptValidController;
 use App\Http\Controllers\deptVendorListController;
+use App\Http\Controllers\DropRequestController;
+use App\Http\Controllers\SuccessReqController;
 use App\Models\deptVendorList;
+use App\Models\DropRequest;
 use App\Models\prospectFilters;
 
 //use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
@@ -148,6 +151,17 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/prospectcheck',[ProspectController::class,'creationcheck'])->name('admin.prospectcheckview')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::PATCH('/prospectvalidation/{prospect}',[ProspectController::class,'validationupdate'])->name('admin.prospectvalidationupdate')->middleware(['auth', 'role:admin,am,nsm,prj']);
 	Route::get('/prospectvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['auth', 'role:admin,am,nsm,prj']);
+	Route::POST('/prospect/droprequest',[DropRequestController::class,'store'])->name('admin.prospect.dropreq')->middleware(['auth', 'role:admin,am,nsm,prj']);
+	Route::get('/prospect/droprequest',[DropRequestController::class,'index'])->name('admin.prospect.droplist')->middleware(['auth', 'role:admin,am,nsm,prj']);
+	Route::get('/prospect/droprequestdata',[DropRequestController::class,'data'])->name('admin.prospect.droplistdata')->middleware(['auth', 'role:admin,am,nsm,prj']);
+	Route::get('/prospect/droprequestdata/{dropRequest}',[DropRequestController::class,'show'])->name('admin.prospect.dropdata')->middleware(['auth', 'role:admin,nsm,prj']);
+	Route::PATCH('/prospect/droprequestdata/{dropRequest}/update',[DropRequestController::class,'update'])->name('admin.prospect.dropupdate')->middleware(['auth', 'role:admin,nsm']);
+	Route::POST('/prospect/successrequest',[SuccessReqController::class,'store'])->name('admin.prospect.successreq')->middleware(['auth', 'role:admin,am,nsm,prj']);
+	Route::get('/prospect/successrequest',[SuccessReqController::class,'index'])->name('admin.prospect.successlist')->middleware(['auth', 'role:admin,am,nsm,prj']);
+	Route::get('/prospect/successrequestdata',[SuccessReqController::class,'data'])->name('admin.prospect.successlistdata')->middleware(['auth', 'role:admin,am,nsm,prj']);
+	Route::get('/prospect/successrequestdata/{successReq}',[SuccessReqController::class,'show'])->name('admin.prospect.successdata')->middleware(['auth', 'role:admin,nsm,prj']);
+	Route::PATCH('/prospect/successrequestdata/{successReq}/update',[SuccessReqController::class,'update'])->name('admin.prospect.successupdate')->middleware(['auth', 'role:admin,nsm']);
+	
 	
 	Route::get('/consprospectvalidation',[ConsumablesProspectController::class,'validationprospect'])->name('admin.consprospectvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/consprospect/{consumablesProspect}/edit',[ConsumablesProspectController::class,'edit'])->name('admin.consprospectedit')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
