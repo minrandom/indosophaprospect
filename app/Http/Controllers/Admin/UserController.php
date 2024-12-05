@@ -9,14 +9,15 @@ use DataTables;
 use Hash;
 
 use App\Models\User;
-
+use App\Models\Employee;
+use App\Models\Province;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = User::select('*')->orderBy('created_at','DESC');
+            $data = User::with('employee')->orderBy('created_at','DESC');
             return DataTables::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
@@ -25,7 +26,43 @@ class UserController extends Controller
 
                             return $btn;
                     })
-                    ->rawColumns(['action'])
+                    ->addColumn('Area',function($row){
+                        $areacode = $row->employee->area;
+                        $role = $row->employee->position;
+                        $areaArray = explode(',', $areacode);
+                        if($areacode!='HO'){
+                            switch($role){
+                                case "NSM":
+                                    if($areacode !="T")
+                                    {$show = "Timur";} else{$show ="Barat";}; 
+                                    break;
+                                case "AM":
+                                    $data = Province::whereIn('iss_area_code', $areaArray)->get();
+                                    $show = $data->pluck('name')->implode(', ');
+                                break;
+                                case "FS":
+                                    $data = Province ::where('prov_order_no',$areacode)->first();
+                                    $show = $data->name;
+                                break;
+                                case "FSX":
+                                    $data = Province::whereIn('iss_area_code', $areaArray)->get();
+                                    $show = $data->pluck('name')->implode(', ');
+                                break;
+                            }
+                        }else {
+                        $show = "HEAD OFFFICE";}
+                        return $show;
+
+                    })
+                    ->addColumn('status', function($row){
+                        $role = $row->role;
+                        $cek = substr($role,0,2);
+                        if($cek!='ex'){$show = "<h4><span class='badge badge-info'>ACTIVE</span></h4>";}else {$show = "<h4><span class='badge badge-secondary'>INACTIVE</span></h4>";}
+                        return $show;
+
+                 })
+                    
+                    ->rawColumns(['action','status'])
                     ->make(true);
         }
         
@@ -39,8 +76,51 @@ class UserController extends Controller
 
     public function store(Request $request)
     {   
+
+        switch($request->role){
+            case 'admin':
+                $pos = 'ADMIN';
+                $area = 'HO';
+                break;
+            case 'bu':
+                $pos = $request->bu??"NOT ISS BU";
+                $area = 'HO';
+                break;
+            case 'am':
+                $pos = 'AM';
+                $area = $request->area;
+                break;
+            case 'nsm':
+                $pos = 'NSM';
+                $area = $request->area;
+                break;
+            case 'fs':
+                $pos = 'FS';
+                $area = $request->area;
+                break;
+            default: $pos = 'ADMIN';
+        }
+
+
+        $employ = Employee::create([
+            'longname'=>$request->longname,
+            'sex'=>$request->gender,
+            'position'=>$pos,
+            'area'=>$area,
+        ]);
+
+
+
         $request->request->add(['password' => Hash::make($request->password)]);
-        User::create($request->all());
+        
+        User::create([
+            'employee_id'=>$employ->id,
+            'name'=>$request->name,
+            'email'=>$request->email,
+            'password'=>$request->password,
+            'role'=>$request->role,
+
+        ]);
     }
 
     public function show($id)

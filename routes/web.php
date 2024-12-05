@@ -195,8 +195,28 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/category/{unitId}/category',[CategoryController::class,'getCategoriesByUnit'])->name('admin.getCategoriesByUnit')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj,dba']);
 	Route::get('/categorydata/{unitId}/category',[CategoryController::class,'getCatname'])->name('admin.getCatname')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/config/get-products', [ConfigController::class, 'getProducts'])->name('product.getProducts');
-	Route::resource('/user','UserController')->middleware(['can:admin']);
-	Route::resource('/province','ProvinceController')->middleware(['can:admin']);
+	Route::resource('/user','UserController')->middleware(['can:admin'])
+	->middleware(['can:admin'])
+	->names([
+		'index'   => 'admin.user.index',
+		'create'  => 'admin.user.create',
+		'store'   => 'admin.user.store',
+		'show'    => 'admin.user.show',
+		'edit'    => 'admin.user.edit',
+		'update'  => 'admin.user.update',
+		'destroy' => 'admin.user.destroy'
+	]);;
+	Route::resource('/province', 'ProvinceController')
+     ->middleware(['can:admin'])
+     ->names([
+         'index'   => 'admin.province.index',
+         'create'  => 'admin.province.create',
+         'store'   => 'admin.province.store',
+         'show'    => 'admin.province.show',
+         'edit'    => 'admin.province.edit',
+         'update'  => 'admin.province.update',
+         'destroy' => 'admin.province.destroy'
+     ]);
 	Route::resource('/principle','PrincipalController')->middleware(['can:admin']);
 	Route::get('data1','DataCompileController@getData')->name('data.compile');
 	Route::get('data2','DataCompileController@HospitalData')->name('data.hospital');
