@@ -256,6 +256,9 @@
             @can('nsm')
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit PIC dan Info</a>
             @endcan
+            @can('prj')
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-edit">Edit PIC dan Info</a>
+            @endcan
           </div>
 
 
@@ -307,6 +310,9 @@
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
           @endcan
           @can('nsm')
+          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
+          @endcan
+          @can('prj')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updateproduk">Update Produk</a>
           @endcan
 
@@ -376,6 +382,14 @@
 
           </div>
           @endcan
+          @can('prj')
+          <div class="col-sm-12">
+
+            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tanggal</a>
+
+
+          </div>
+          @endcan
 
 
 
@@ -430,6 +444,10 @@
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
           @endcan
           @can('nsm')
+          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
+          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
+          @endcan
+          @can('prj')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
           @endcan
