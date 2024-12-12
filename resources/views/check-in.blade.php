@@ -55,6 +55,10 @@
     let canvas = document.querySelector("#canvas");
     let mapElement = document.querySelector('#map');
     let image_data_url;
+    let mapScreenshot; // To store the map screenshot
+    let latLng = {}; // To store latitude and longitude
+    let checkInAt;
+    let checkinid = Date.now(); // Unique ID for the check-in
 
     document.addEventListener('DOMContentLoaded', function () {
         initMapAndLocation();
@@ -92,7 +96,7 @@
         canvas.style.display = "block";
         image_data_url = canvas.toDataURL('image/jpeg');
         stopCamera();
-        getLocationAndCheckIn(image_data_url);
+        saveMapScreenshot(); // Capture the map screenshot
     }
 
     function stopCamera() {
@@ -112,8 +116,9 @@
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function (position) {
-                    var latitude = position.coords.latitude;
-                    var longitude = position.coords.longitude;
+                    latLng.latitude = position.coords.latitude;
+                    latLng.longitude = position.coords.longitude;
+                    checkInAt = `${latLng.latitude}, ${latLng.longitude}`;
 
                     var map = new ol.Map({
                         target: 'map',
@@ -123,13 +128,13 @@
                             })
                         ],
                         view: new ol.View({
-                            center: ol.proj.fromLonLat([longitude, latitude]),
-                            zoom: 15
+                            center: ol.proj.fromLonLat([latLng.longitude, latLng.latitude]),
+                            zoom: 17
                         })
                     });
 
                     var marker = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([longitude, latitude]))
+                        geometry: new ol.geom.Point(ol.proj.fromLonLat([latLng.longitude, latLng.latitude]))
                     });
 
                     var markerStyle = new ol.style.Style({
@@ -150,6 +155,9 @@
                     });
 
                     map.addLayer(markerVectorLayer);
+
+                    // Save map instance for later screenshot
+                    window.mapInstance = map;
                 },
                 function (error) {
                     handleGeolocationError(error);
@@ -166,118 +174,58 @@
         }
     }
 
-    function handleGeolocationError(error) {
-        let message = '';
-        switch (error.code) {
-            case error.PERMISSION_DENIED:
-                message = 'User denied the request for Geolocation.';
-                break;
-            case error.POSITION_UNAVAILABLE:
-                message = 'Location information is unavailable.';
-                break;
-            case error.TIMEOUT:
-                message = 'The request to get user location timed out.';
-                break;
-            case error.UNKNOWN_ERROR:
-                message = 'An unknown error occurred.';
-                break;
-        }
-        Swal.fire({
-            icon: 'error',
-            title: 'Geolocation Error',
-            text: message,
-            confirmButtonText: 'OK'
+    function saveMapScreenshot() {
+        const mapCanvas = document.createElement('canvas');
+        const mapSize = window.mapInstance.getSize();
+        mapCanvas.width = mapSize[0];
+        mapCanvas.height = mapSize[1];
+        const mapContext = mapCanvas.getContext('2d');
+
+        const mapRenderer = new ol.render.canvas.Map(window.mapInstance.getRenderer());
+        mapRenderer.renderFrame(mapSize, mapContext);
+        mapScreenshot = mapCanvas.toDataURL('image/png');
+        getLocationAndCheckIn(); // Send the data via AJAX
+    }
+
+    function getLocationAndCheckIn() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
         });
-    }
 
-    function getLocationAndCheckIn(photoData) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    showPosition(position, photoData);
-                },
-                function (error) {
-                    handleGeolocationError(error);
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-            );
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Geolocation Error',
-                text: 'Geolocation is not supported by this browser.',
-                confirmButtonText: 'OK'
-            });
-        }
-
-        function showPosition(position, photoData) {
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
-
-            var url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    var placeName = data.display_name.split(',')[0];
-                    var address = `${data.address.road || ''}, ${data.address.city || ''}, ${data.address.country || ''}`;
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Location Found',
-                        html: `<p>Place Name: ${placeName}</p><p>Address: ${address}</p><img src="${photoData}" width="200">`,
-                        confirmButtonText: 'OK',
-                        allowOutsideClick: false,
-                        didClose: function () {
-                            saveCheckInData(placeName, address, placeName, photoData);
-                        }
-                    });
-                })
-                .catch(error => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Location Error',
-                        text: 'Failed to retrieve location information.',
-                        confirmButtonText: 'OK'
-                    });
+        $.ajax({
+            url: '{{ route("check-in.store") }}',
+            method: 'POST',
+            data: {
+                checkinid: checkinid,
+                place_name: checkInAt,
+                address: "Dynamic Address Placeholder", // Replace with actual address
+                check_in_loc: checkInAt,
+                photo_data: image_data_url,
+                map_screenshot: mapScreenshot,
+                latitude: latLng.latitude,
+                longitude: latLng.longitude
+            },
+            success: function (response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Check-In Successful',
+                    text: 'Your check-in has been saved.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.reload();
                 });
-        }
-
-        function saveCheckInData(placeName, address, checkInAt, photoData) {
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
-
-            $.ajax({
-              
-                url: '{{ route("check-in.store") }}',
-                method: 'POST',
-                data: {
-                    place_name: placeName,
-                    address: address,
-                    check_in_loc: checkInAt,
-                    photo_data: photoData
-                },
-                success: function (response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Check-In Successful',
-                        text: 'Your check-in has been saved.',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        window.location.reload();
-                    });
-                },
-                error: function (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Check-In Error',
-                        text: 'Failed to save check-in data.',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
-        }
+            },
+            error: function (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Check-In Error',
+                    text: 'Failed to save check-in data.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
     }
 </script>
 @endpush

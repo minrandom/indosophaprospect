@@ -149,46 +149,69 @@ class JojoController extends Controller
      }
 
 
-    public function store(Request $request)
+     public function store(Request $request)
     {
-        //
-        //$attendance = new Attendance();
-        //$attendance->place_name = $request->input('place_name');
-        //$attendance->address = $request->input('address');
-        //$attendance->check_in_at = now();
-       // $attendance->save();
-       $photoData = $request->input('photo_data');
-       $photoFilename= uniqid() . '.png';
-       $photoPath = 'photos/' . $photoFilename; // Unique filename, adjust as needed
-       $photoPaths=public_path($photoPath);
-       //echo $photoPath;
-       
-       list($type, $data) = explode(';', $photoData);
-       list(, $data)      = explode(',', $data);
-       $data = base64_decode($data);
-       
-       //file_put_contents('test.jpg', $data);
-       
-       Storage::disk('google')->put($photoFilename, $data);
-       //file_put_contents($photoPaths,$data);
-       $photoUrl = Storage::disk('google')->url($photoFilename);
-        //dd($photoUrl);
+        $validated = $request->validate([
+            'place_name' => 'required|string',
+            'address' => 'required|string',
+            'check_in_loc' => 'required|string',
+            'photo_data' => 'required|string',
+            'map_screenshot' => 'required|string',
+        ]);
 
-        $usid=Auth::user()->id;
-       // Create a new Attendance instance with the data
-       $attendance = new Attendance([
-            'user_id' =>$usid,
-           'place_name' => $request->input('place_name'),
-           'address' => $request->input('address'),
-           'check_in_loc'=>$request->input('check_in_loc'),
-           'photo_data' => $photoUrl,
-       ]);
-   
-       // Save the Attendance instance to the database
-       $attendance->save();
+        try {
+            // Process the photo_data (base64-encoded image)
+            $photoData = $request->input('photo_data');
+            $photoFilename = uniqid() . '.png';
+            $photoPath = 'photos/' . $photoFilename; // Local storage path
+            $photoAbsolutePath = public_path($photoPath);
 
-        return response()->json(['success' => true]);
+            // Decode and save photo
+            list($type, $data) = explode(';', $photoData);
+            list(, $data) = explode(',', $data);
+            $data = base64_decode($data);
 
+            // Save photo to Google Drive
+            Storage::disk('google')->put($photoFilename, $data);
+            $photoUrl = Storage::disk('google')->url($photoFilename);
+
+            // Process the map_screenshot (base64-encoded map image)
+            $mapScreenshot = $request->input('map_screenshot');
+            $mapFilename = uniqid() . '_map.png';
+            $mapPath = 'photos/' . $mapFilename; // Local storage path
+            $mapAbsolutePath = public_path($mapPath);
+
+            // Decode and save map screenshot
+            list($type, $mapData) = explode(';', $mapScreenshot);
+            list(, $mapData) = explode(',', $mapData);
+            $mapData = base64_decode($mapData);
+
+            // Save map screenshot to Google Drive
+            Storage::disk('google')->put($mapFilename, $mapData);
+            $mapUrl = Storage::disk('google')->url($mapFilename);
+
+            // Get user ID from Auth
+            $userId = Auth::user()->id;
+
+            // Create a new Attendance instance with the data
+            $attendance = new Attendance([
+                'user_id' => $userId,
+                'place_name' => $request->input('place_name'),
+                'address' => $request->input('address'),
+                'check_in_loc' => $request->input('check_in_loc'),
+                'photo_data' => $photoUrl, // Photo URL from Google Drive
+                'map_screenshot' => $mapUrl, // Map screenshot URL from Google Drive
+            ]);
+
+            // Save the Attendance instance to the database
+            $attendance->save();
+
+            // Return success response
+            return response()->json(['success' => true, 'message' => 'Check-in saved successfully.']);
+        } catch (\Exception $e) {
+            // Handle errors
+            return response()->json(['success' => false, 'message' => 'Error saving check-in: ' . $e->getMessage()], 500);
+        }
     }
 
     public function outstore(Request $request)
