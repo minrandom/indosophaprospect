@@ -13,10 +13,11 @@ class Attendance extends Model
 
     protected $fillable = [
         'user_id',
-        'place_name',
-        'address',
-        'check_in_loc',
-        'photo_data',
+                'place_name',
+                'address',
+                'check_in_loc',
+                'photo_data',
+                'map_screenshot',
     ];
 
     protected $dates = [

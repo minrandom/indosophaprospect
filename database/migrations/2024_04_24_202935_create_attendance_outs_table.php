@@ -21,6 +21,7 @@ class CreateAttendanceOutsTable extends Migration
             $table->string('address');
             $table->longText('check_out_loc')->nullable();
             $table->longText('photo_data')->nullable();
+            $table->longText('map_screenshot')->nullable();
             $table->timestamps();
         });
     }

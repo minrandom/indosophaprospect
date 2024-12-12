@@ -175,17 +175,57 @@
     }
 
     function saveMapScreenshot() {
+        try {
+        // Get the canvas element from the map
         const mapCanvas = document.createElement('canvas');
-        const mapSize = window.mapInstance.getSize();
-        mapCanvas.width = mapSize[0];
-        mapCanvas.height = mapSize[1];
+        const size = window.mapInstance.getSize();
+        mapCanvas.width = size[0];
+        mapCanvas.height = size[1];
         const mapContext = mapCanvas.getContext('2d');
 
-        const mapRenderer = new ol.render.canvas.Map(window.mapInstance.getRenderer());
-        mapRenderer.renderFrame(mapSize, mapContext);
-        mapScreenshot = mapCanvas.toDataURL('image/png');
-        getLocationAndCheckIn(); // Send the data via AJAX
+        // Get the layers of the map and render them onto the canvas
+        const layers = window.mapInstance.getLayers().getArray();
+        const viewResolution = window.mapInstance.getView().getResolution();
+        const viewProjection = window.mapInstance.getView().getProjection();
+
+        layers.forEach((layer) => {
+            if (layer instanceof ol.layer.Tile) {
+                const source = layer.getSource();
+                const tileGrid = source.getTileGrid();
+                const tileRange = tileGrid.getTileRangeForExtentAndResolution(
+                    window.mapInstance.getView().calculateExtent(),
+                    viewResolution
+                );
+                tileRange.forEachTileCoord((tileCoord) => {
+                    const tile = source.getTile(tileCoord[0], tileCoord[1], tileCoord[2], viewProjection);
+                    if (tile.getImage()) {
+                        const tileImage = tile.getImage();
+                        mapContext.drawImage(
+                            tileImage,
+                            tileCoord[1] * tileGrid.getTileSize(),
+                            tileCoord[2] * tileGrid.getTileSize()
+                        );
+                    }
+                });
+            }
+        });
+
+            // Convert the map canvas to a base64 image
+            mapScreenshot = mapCanvas.toDataURL('image/png');
+
+            // Proceed to send the mapScreenshot along with other data
+            getLocationAndCheckIn();
+        } catch (error) {
+            console.error('Error capturing map screenshot:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Map Screenshot Error',
+                text: 'Failed to capture the map screenshot. Please try again.',
+                confirmButtonText: 'OK',
+            });
+        }
     }
+
 
     function getLocationAndCheckIn() {
         $.ajaxSetup({
