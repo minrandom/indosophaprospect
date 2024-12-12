@@ -175,56 +175,43 @@
     }
 
     function saveMapScreenshot() {
-        try {
-        // Get the canvas element from the map
+    try {
+        // Capture the map using OpenLayers' export functionality
         const mapCanvas = document.createElement('canvas');
         const size = window.mapInstance.getSize();
         mapCanvas.width = size[0];
         mapCanvas.height = size[1];
         const mapContext = mapCanvas.getContext('2d');
 
-        // Get the layers of the map and render them onto the canvas
-        const layers = window.mapInstance.getLayers().getArray();
-        const viewResolution = window.mapInstance.getView().getResolution();
-        const viewProjection = window.mapInstance.getView().getProjection();
-
-        layers.forEach((layer) => {
-            if (layer instanceof ol.layer.Tile) {
-                const source = layer.getSource();
-                const tileGrid = source.getTileGrid();
-                const tileRange = tileGrid.getTileRangeForExtentAndResolution(
-                    window.mapInstance.getView().calculateExtent(),
-                    viewResolution
-                );
-                tileRange.forEachTileCoord((tileCoord) => {
-                    const tile = source.getTile(tileCoord[0], tileCoord[1], tileCoord[2], viewProjection);
-                    if (tile.getImage()) {
-                        const tileImage = tile.getImage();
-                        mapContext.drawImage(
-                            tileImage,
-                            tileCoord[1] * tileGrid.getTileSize(),
-                            tileCoord[2] * tileGrid.getTileSize()
-                        );
-                    }
-                });
+        Array.prototype.forEach.call(document.querySelectorAll('.ol-layer canvas'), function (canvas) {
+            if (canvas.width > 0) {
+                const opacity = canvas.parentNode.style.opacity || 1;
+                mapContext.globalAlpha = opacity;
+                const transform = canvas.style.transform;
+                const matrix = transform
+                    .match(/^matrix\(([^(]*)\)$/)[1]
+                    .split(',')
+                    .map(Number);
+                mapContext.setTransform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
+                mapContext.drawImage(canvas, 0, 0);
             }
         });
 
-            // Convert the map canvas to a base64 image
-            mapScreenshot = mapCanvas.toDataURL('image/png');
+        // Convert the canvas to a base64 image
+        mapScreenshot = mapCanvas.toDataURL('image/png');
 
-            // Proceed to send the mapScreenshot along with other data
-            getLocationAndCheckIn();
-        } catch (error) {
-            console.error('Error capturing map screenshot:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Map Screenshot Error',
-                text: 'Failed to capture the map screenshot. Please try again.',
-                confirmButtonText: 'OK',
-            });
-        }
+        // Send the screenshot and other data via AJAX
+        getLocationAndCheckIn();
+    } catch (error) {
+        console.error('Error capturing map screenshot:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Map Screenshot Error',
+            text: 'Failed to capture the map screenshot. Please try again.',
+            confirmButtonText: 'OK',
+        });
     }
+}
 
 
     function getLocationAndCheckIn() {
