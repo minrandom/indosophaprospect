@@ -17,7 +17,8 @@ class Attendance extends Model
                 'address',
                 'check_in_loc',
                 'photo_data',
-                'map_screenshot',
+                'longitude',
+                'latitude'
     ];
 
     protected $dates = [
