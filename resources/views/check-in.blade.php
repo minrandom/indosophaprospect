@@ -123,8 +123,11 @@
                     var map = new ol.Map({
                         target: 'map',
                         layers: [
-                            new ol.layer.Tile({
-                                source: new ol.source.OSM()
+                                new ol.layer.Tile({
+                                source: new ol.source.XYZ({
+                                    url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    crossOrigin: 'anonymous', // This is required for CORS
+                                })
                             })
                         ],
                         view: new ol.View({
