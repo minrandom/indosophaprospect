@@ -140,7 +140,7 @@
                                 ],
                                 view: new ol.View({
                                     center: ol.proj.fromLonLat([latLng.longitude, latLng.latitude]),
-                                    zoom: 15,
+                                    zoom: 17,
                                 }),
                             });
 
