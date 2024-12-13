@@ -53,9 +53,8 @@
     let video = document.querySelector("#video");
     let click_button = document.querySelector("#click-photo");
     let canvas = document.querySelector("#canvas");
-    let mapElement = document.querySelector('#map');
-    let image_data_url;
     let latLng = {}; // To store latitude and longitude
+    let image_data_url; // To store captured photo
     let checkInAt;
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -94,7 +93,7 @@
         canvas.style.display = "block";
         image_data_url = canvas.toDataURL('image/jpeg');
         stopCamera();
-        getLocationAndCheckIn(); // Proceed to send latitude and longitude
+        getLocationAndCheckIn();
     }
 
     function stopCamera() {
@@ -109,53 +108,82 @@
         toggle_button.style.display = "block";
     }
 
-    // Initialize the map and show user's location
     function initMapAndLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 function (position) {
                     latLng.latitude = position.coords.latitude;
                     latLng.longitude = position.coords.longitude;
-                    checkInAt = `${latLng.latitude}, ${latLng.longitude}`;
 
-                    var map = new ol.Map({
-                        target: 'map',
-                        layers: [
-                            new ol.layer.Tile({
-                                source: new ol.source.OSM()
-                            })
-                        ],
-                        view: new ol.View({
-                            center: ol.proj.fromLonLat([latLng.longitude, latLng.latitude]),
-                            zoom: 17
+                    // Perform reverse geocoding using OpenStreetMap's Nominatim API
+                    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latLng.latitude}&lon=${latLng.longitude}`;
+
+                    fetch(url)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            // Extract place name and address from the response
+                            checkInAt = data.display_name; // Full display name
+                            const address = data.address.road
+                                ? `${data.address.road}, ${data.address.city || data.address.town || data.address.village}, ${data.address.country}`
+                                : checkInAt; // Fallback to full display name
+
+                            latLng.place_name = checkInAt;
+                            latLng.address = address;
+
+                            // Initialize OpenLayers map
+                            var map = new ol.Map({
+                                target: 'map',
+                                layers: [
+                                    new ol.layer.Tile({
+                                        source: new ol.source.OSM(),
+                                    }),
+                                ],
+                                view: new ol.View({
+                                    center: ol.proj.fromLonLat([latLng.longitude, latLng.latitude]),
+                                    zoom: 15,
+                                }),
+                            });
+
+                            var marker = new ol.Feature({
+                                geometry: new ol.geom.Point(ol.proj.fromLonLat([latLng.longitude, latLng.latitude])),
+                            });
+
+                            var markerStyle = new ol.style.Style({
+                                image: new ol.style.Icon({
+                                    anchor: [0.5, 1],
+                                    src: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                                    scale: 0.1,
+                                }),
+                            });
+                            marker.setStyle(markerStyle);
+
+                            var vectorSource = new ol.source.Vector({
+                                features: [marker],
+                            });
+
+                            var markerVectorLayer = new ol.layer.Vector({
+                                source: vectorSource,
+                            });
+
+                            map.addLayer(markerVectorLayer);
                         })
-                    });
-
-                    var marker = new ol.Feature({
-                        geometry: new ol.geom.Point(ol.proj.fromLonLat([latLng.longitude, latLng.latitude]))
-                    });
-
-                    var markerStyle = new ol.style.Style({
-                        image: new ol.style.Icon({
-                            anchor: [0.5, 1],
-                            src: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-                            scale: 0.1
-                        })
-                    });
-                    marker.setStyle(markerStyle);
-
-                    var vectorSource = new ol.source.Vector({
-                        features: [marker]
-                    });
-
-                    var markerVectorLayer = new ol.layer.Vector({
-                        source: vectorSource
-                    });
-
-                    map.addLayer(markerVectorLayer);
+                        .catch((error) => {
+                            console.error('Error fetching place name and address:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Reverse Geocoding Error',
+                                text: 'Failed to fetch the place name and address. Please try again.',
+                                confirmButtonText: 'OK',
+                            });
+                        });
                 },
                 function (error) {
-                    handleGeolocationError(error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Geolocation Error',
+                        text: 'Failed to get your location. Please allow location access and try again.',
+                        confirmButtonText: 'OK',
+                    });
                 },
                 { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
             );
@@ -164,7 +192,7 @@
                 icon: 'error',
                 title: 'Geolocation Error',
                 text: 'Geolocation is not supported by this browser.',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
             });
         }
     }
@@ -172,27 +200,27 @@
     function getLocationAndCheckIn() {
         $.ajaxSetup({
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
         });
 
         $.ajax({
             url: '{{ route("check-in.store") }}',
             method: 'POST',
             data: {
-                place_name: checkInAt, // Lat, Long combined
-                address: "Dynamic Address Placeholder", // Optional
-                check_in_loc: checkInAt,
-                photo_data: image_data_url,
+                place_name: latLng.place_name, // Place name fetched from Nominatim
+                address: latLng.address, // Address fetched from Nominatim
+                check_in_loc: latLng.place_name, // Check-in location
+                photo_data: image_data_url, // Captured photo
                 latitude: latLng.latitude,
-                longitude: latLng.longitude
+                longitude: latLng.longitude,
             },
             success: function (response) {
                 Swal.fire({
                     icon: 'success',
                     title: 'Check-In Successful',
                     text: 'Your check-in has been saved.',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
                 }).then(() => {
                     window.location.reload();
                 });
@@ -202,9 +230,9 @@
                     icon: 'error',
                     title: 'Check-In Error',
                     text: 'Failed to save check-in data.',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
                 });
-            }
+            },
         });
     }
 </script>

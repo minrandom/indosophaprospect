@@ -153,7 +153,7 @@ class JojoController extends Controller
     {
         $validated = $request->validate([
             'place_name' => 'required|string',
-            'address' => 'nullable|string',
+            'address' => 'required|string',
             'check_in_loc' => 'required|string',
             'photo_data' => 'required|string',
             'latitude' => 'required|numeric',
@@ -161,41 +161,26 @@ class JojoController extends Controller
         ]);
 
         try {
-            // Process the photo_data (base64-encoded image)
             $photoData = $request->input('photo_data');
             $photoFilename = uniqid() . '.png';
             $photoPath = 'photos/' . $photoFilename;
 
-            // Decode and save photo locally
+            // Decode and save the photo locally
             list($type, $data) = explode(';', $photoData);
             list(, $data) = explode(',', $data);
             $data = base64_decode($data);
+            file_put_contents(public_path($photoPath), $data);
 
-            $photoPaths=public_path($photoPath);
-            //echo $photoPath;
-        
-            //file_put_contents('test.jpg', $data);
-            
-            Storage::disk('google')->put($photoFilename, $data);
-            //file_put_contents($photoPaths,$data);
-            $photoUrl = Storage::disk('google')->url($photoFilename);
-             //dd($photoUrl);
-
-            // Get user ID from Auth
-            $userId = Auth::user()->id;
-
-            // Create a new Attendance instance with the data
             $attendance = new Attendance([
-                'user_id' => $userId,
+                'user_id' => Auth::user()->id,
                 'place_name' => $request->input('place_name'),
                 'address' => $request->input('address'),
                 'check_in_loc' => $request->input('check_in_loc'),
-                'photo_data' => $photoUrl, // Local photo path
+                'photo_data' => $photoPath,
                 'latitude' => $request->input('latitude'),
                 'longitude' => $request->input('longitude'),
             ]);
 
-            // Save the Attendance instance to the database
             $attendance->save();
 
             return response()->json(['success' => true, 'message' => 'Check-in saved successfully.']);
