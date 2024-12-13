@@ -16,6 +16,8 @@ class AttendanceOut extends Model
         'address',
         'check_out_loc',
         'photo_data',
+        'longitude',
+        'latitude',
     ];
 
     protected $dates = [

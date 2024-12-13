@@ -165,22 +165,26 @@ class JojoController extends Controller
             $photoFilename = uniqid() . '.png';
             $photoPath = 'photos/' . $photoFilename;
 
-            // Decode and save the photo locally
+            // Decode and save photo locally
             list($type, $data) = explode(';', $photoData);
-            list(, $data)      = explode(',', $data);
+            list(, $data) = explode(',', $data);
             $data = base64_decode($data);
-            
+
+            $photoPaths=public_path($photoPath);
+            //echo $photoPath;
+        
             //file_put_contents('test.jpg', $data);
             
             Storage::disk('google')->put($photoFilename, $data);
             //file_put_contents($photoPaths,$data);
             $photoUrl = Storage::disk('google')->url($photoFilename);
+
             $attendance = new Attendance([
                 'user_id' => Auth::user()->id,
                 'place_name' => $request->input('place_name'),
                 'address' => $request->input('address'),
                 'check_in_loc' => $request->input('check_in_loc'),
-                'photo_data' => $photoPath,
+                'photo_data' => $photoUrl,
                 'latitude' => $request->input('latitude'),
                 'longitude' => $request->input('longitude'),
             ]);
@@ -195,44 +199,48 @@ class JojoController extends Controller
 
     public function outstore(Request $request)
     {
-        //
-        //$attendance = new Attendance();
-        //$attendance->place_name = $request->input('place_name');
-        //$attendance->address = $request->input('address');
-        //$attendance->check_in_at = now();
-       // $attendance->save();
-       $photoData = $request->input('photo_data');
-       $photoFilename= uniqid() . '.png';
-       $photoPath = 'photos/' . $photoFilename; // Unique filename, adjust as needed
-       $photoPaths=public_path($photoPath);
-       //echo $photoPath;
-       
-       list($type, $data) = explode(';', $photoData);
-       list(, $data)      = explode(',', $data);
-       $data = base64_decode($data);
-       
-       //file_put_contents('test.jpg', $data);
-       
-       Storage::disk('google')->put($photoFilename, $data);
-       //file_put_contents($photoPaths,$data);
-       $photoUrl = Storage::disk('google')->url($photoFilename);
-        //dd($photoUrl);
+        $validated = $request->validate([
+            'checkinid' => 'required|exists:attendances,id', // Ensure the checkin_id exists in the database
+            'place_name' => 'required|string',
+            'address' => 'required|string',
+            'check_out_loc' => 'required|string',
+            'photo_data' => 'required|string',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
 
-        $usid=Auth::user()->id;
-       // Create a new Attendance instance with the data
-       $attendance = new AttendanceOut([
-            'user_id' =>$usid,
-            'checkin_id'=>$request->input('checkinid'),
-           'place_name' => $request->input('place_name'),
-           'address' => $request->input('address'),
-           'check_out_loc'=>$request->input('check_in_loc'),
-           'photo_data' => $photoUrl,
-       ]);
-   
-       // Save the Attendance instance to the database
-       $attendance->save();
+        try {
+            // Process the photo_data (base64-encoded image)
+            $photoData = $request->input('photo_data');
+            $photoFilename = uniqid() . '.png';
+            $photoPath = 'photos/' . $photoFilename;
 
-        return response()->json(['success' => true]);
+            // Decode and save the photo locally
+            list($type, $data) = explode(';', $photoData);
+            list(, $data) = explode(',', $data);
+            $data = base64_decode($data);
+   // Alternatively, save to Google Drive
+            $photoUrl = Storage::disk('google')->put($photoFilename, $data);
+            $photoUrl = Storage::disk('google')->url($photoFilename);
+
+            // Save Check-Out data
+            $attendance = new AttendanceOut([
+                'user_id' => Auth::user()->id,
+                'checkin_id' => $request->input('checkinid'), // Reference to the Check-In record
+                'place_name' => $request->input('place_name'),
+                'address' => $request->input('address'),
+                'check_out_loc' => $request->input('check_out_loc'),
+                'photo_data' => $photoUrl, // URL to the uploaded photo
+                'latitude' => $request->input('latitude'),
+                'longitude' => $request->input('longitude'),
+            ]);
+
+            $attendance->save();
+
+            return response()->json(['success' => true, 'message' => 'Check-Out saved successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error saving Check-Out: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
