@@ -167,10 +167,14 @@ class JojoController extends Controller
 
             // Decode and save the photo locally
             list($type, $data) = explode(';', $photoData);
-            list(, $data) = explode(',', $data);
+            list(, $data)      = explode(',', $data);
             $data = base64_decode($data);
-            file_put_contents(public_path($photoPath), $data);
-
+            
+            //file_put_contents('test.jpg', $data);
+            
+            Storage::disk('google')->put($photoFilename, $data);
+            //file_put_contents($photoPaths,$data);
+            $photoUrl = Storage::disk('google')->url($photoFilename);
             $attendance = new Attendance([
                 'user_id' => Auth::user()->id,
                 'place_name' => $request->input('place_name'),
