@@ -171,9 +171,15 @@ class JojoController extends Controller
             list(, $data) = explode(',', $data);
             $data = base64_decode($data);
 
-            // Save to local storage
-            $photoAbsolutePath = public_path($photoPath);
-            file_put_contents($photoAbsolutePath, $data);
+            $photoPaths=public_path($photoPath);
+            //echo $photoPath;
+        
+            //file_put_contents('test.jpg', $data);
+            
+            Storage::disk('google')->put($photoFilename, $data);
+            //file_put_contents($photoPaths,$data);
+            $photoUrl = Storage::disk('google')->url($photoFilename);
+             //dd($photoUrl);
 
             // Get user ID from Auth
             $userId = Auth::user()->id;
@@ -184,7 +190,7 @@ class JojoController extends Controller
                 'place_name' => $request->input('place_name'),
                 'address' => $request->input('address'),
                 'check_in_loc' => $request->input('check_in_loc'),
-                'photo_data' => $photoPath, // Local photo path
+                'photo_data' => $photoUrl, // Local photo path
                 'latitude' => $request->input('latitude'),
                 'longitude' => $request->input('longitude'),
             ]);
