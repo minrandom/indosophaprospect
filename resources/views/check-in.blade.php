@@ -55,10 +55,8 @@
     let canvas = document.querySelector("#canvas");
     let mapElement = document.querySelector('#map');
     let image_data_url;
-    let mapScreenshot; // To store the map screenshot
     let latLng = {}; // To store latitude and longitude
     let checkInAt;
-    let checkinid = Date.now(); // Unique ID for the check-in
 
     document.addEventListener('DOMContentLoaded', function () {
         initMapAndLocation();
@@ -96,7 +94,7 @@
         canvas.style.display = "block";
         image_data_url = canvas.toDataURL('image/jpeg');
         stopCamera();
-        saveMapScreenshot(); // Capture the map screenshot
+        getLocationAndCheckIn(); // Proceed to send latitude and longitude
     }
 
     function stopCamera() {
@@ -123,16 +121,13 @@
                     var map = new ol.Map({
                         target: 'map',
                         layers: [
-                                new ol.layer.Tile({
-                                source: new ol.source.XYZ({
-                                    url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                    crossOrigin: 'anonymous', // This is required for CORS
-                                })
+                            new ol.layer.Tile({
+                                source: new ol.source.OSM()
                             })
                         ],
                         view: new ol.View({
                             center: ol.proj.fromLonLat([latLng.longitude, latLng.latitude]),
-                            zoom: 17
+                            zoom: 15
                         })
                     });
 
@@ -158,9 +153,6 @@
                     });
 
                     map.addLayer(markerVectorLayer);
-
-                    // Save map instance for later screenshot
-                    window.mapInstance = map;
                 },
                 function (error) {
                     handleGeolocationError(error);
@@ -177,46 +169,6 @@
         }
     }
 
-    function saveMapScreenshot() {
-    try {
-        // Capture the map using OpenLayers' export functionality
-        const mapCanvas = document.createElement('canvas');
-        const size = window.mapInstance.getSize();
-        mapCanvas.width = size[0];
-        mapCanvas.height = size[1];
-        const mapContext = mapCanvas.getContext('2d');
-
-        Array.prototype.forEach.call(document.querySelectorAll('.ol-layer canvas'), function (canvas) {
-            if (canvas.width > 0) {
-                const opacity = canvas.parentNode.style.opacity || 1;
-                mapContext.globalAlpha = opacity;
-                const transform = canvas.style.transform;
-                const matrix = transform
-                    .match(/^matrix\(([^(]*)\)$/)[1]
-                    .split(',')
-                    .map(Number);
-                mapContext.setTransform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
-                mapContext.drawImage(canvas, 0, 0);
-            }
-        });
-
-        // Convert the canvas to a base64 image
-        mapScreenshot = mapCanvas.toDataURL('image/png');
-
-        // Send the screenshot and other data via AJAX
-        getLocationAndCheckIn();
-    } catch (error) {
-        console.error('Error capturing map screenshot:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Map Screenshot Error',
-            text: 'Failed to capture the map screenshot. Please try again.',
-            confirmButtonText: 'OK',
-        });
-    }
-}
-
-
     function getLocationAndCheckIn() {
         $.ajaxSetup({
             headers: {
@@ -228,12 +180,10 @@
             url: '{{ route("check-in.store") }}',
             method: 'POST',
             data: {
-                checkinid: checkinid,
-                place_name: checkInAt,
-                address: "Dynamic Address Placeholder", // Replace with actual address
+                place_name: checkInAt, // Lat, Long combined
+                address: "Dynamic Address Placeholder", // Optional
                 check_in_loc: checkInAt,
                 photo_data: image_data_url,
-                map_screenshot: mapScreenshot,
                 latitude: latLng.latitude,
                 longitude: latLng.longitude
             },

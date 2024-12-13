@@ -153,42 +153,27 @@ class JojoController extends Controller
     {
         $validated = $request->validate([
             'place_name' => 'required|string',
-            'address' => 'required|string',
+            'address' => 'nullable|string',
             'check_in_loc' => 'required|string',
             'photo_data' => 'required|string',
-            'map_screenshot' => 'required|string',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
         ]);
 
         try {
             // Process the photo_data (base64-encoded image)
             $photoData = $request->input('photo_data');
             $photoFilename = uniqid() . '.png';
-            $photoPath = 'photos/' . $photoFilename; // Local storage path
-            $photoAbsolutePath = public_path($photoPath);
+            $photoPath = 'photos/' . $photoFilename;
 
-            // Decode and save photo
+            // Decode and save photo locally
             list($type, $data) = explode(';', $photoData);
             list(, $data) = explode(',', $data);
             $data = base64_decode($data);
 
-            // Save photo to Google Drive
-            Storage::disk('google')->put($photoFilename, $data);
-            $photoUrl = Storage::disk('google')->url($photoFilename);
-
-            // Process the map_screenshot (base64-encoded map image)
-            $mapScreenshot = $request->input('map_screenshot');
-            $mapFilename = uniqid() . '_map.png';
-            $mapPath = 'photos/' . $mapFilename; // Local storage path
-            $mapAbsolutePath = public_path($mapPath);
-
-            // Decode and save map screenshot
-            list($type, $mapData) = explode(';', $mapScreenshot);
-            list(, $mapData) = explode(',', $mapData);
-            $mapData = base64_decode($mapData);
-
-            // Save map screenshot to Google Drive
-            Storage::disk('google')->put($mapFilename, $mapData);
-            $mapUrl = Storage::disk('google')->url($mapFilename);
+            // Save to local storage
+            $photoAbsolutePath = public_path($photoPath);
+            file_put_contents($photoAbsolutePath, $data);
 
             // Get user ID from Auth
             $userId = Auth::user()->id;
@@ -199,17 +184,16 @@ class JojoController extends Controller
                 'place_name' => $request->input('place_name'),
                 'address' => $request->input('address'),
                 'check_in_loc' => $request->input('check_in_loc'),
-                'photo_data' => $photoUrl, // Photo URL from Google Drive
-                'map_screenshot' => $mapUrl, // Map screenshot URL from Google Drive
+                'photo_data' => $photoPath, // Local photo path
+                'latitude' => $request->input('latitude'),
+                'longitude' => $request->input('longitude'),
             ]);
 
             // Save the Attendance instance to the database
             $attendance->save();
 
-            // Return success response
             return response()->json(['success' => true, 'message' => 'Check-in saved successfully.']);
         } catch (\Exception $e) {
-            // Handle errors
             return response()->json(['success' => false, 'message' => 'Error saving check-in: ' . $e->getMessage()], 500);
         }
     }

@@ -20,7 +20,8 @@ class CreateAttendanceTable extends Migration
             $table->string('address');
             $table->longText('check_in_loc')->nullable();
             $table->longText('photo_data')->nullable();
-            $table->longText('map_screenshot')->nullable();
+            $table->decimal('latitude', 10, 7);
+            $table->decimal('longitude', 10, 7);
             $table->timestamps();
         });
     }
