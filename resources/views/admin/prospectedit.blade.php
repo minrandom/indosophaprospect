@@ -154,7 +154,7 @@
                 @if($reviewdata)
                     {{ date('d-M-Y', strtotime($reviewdata->created_at)) }}
                 @else
-                    <span class='btn-danger'>Belum Pernah diUpdate</span>
+                    <span class='btn-danger'>Belum Pernah di Update</span>
                 @endif
               </div></br>
               <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
