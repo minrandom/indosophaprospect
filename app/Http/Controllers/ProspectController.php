@@ -419,7 +419,7 @@ class ProspectController extends Controller
         $anggaran=$prospect->review->anggaran_status;
         $podate=$prospect->eta_po_date;
         $reviewdata=ReviewLog::with('UpdatedBy')->where('review_id',$prospect->review->id)->orderBy('updated_at','desc')->orderBy('id','desc')->first();
-        $colUpdate = $reviewdata->col_update ?? "Update Terakhir di GoogleSheet";
+        $colUpdate = $reviewdata->col_update ?? "Belum Pernah Di Update";
 
         $temper = prospectTemperature::where('prospect_id',$prospect->id)->first();
         //dd($temper);

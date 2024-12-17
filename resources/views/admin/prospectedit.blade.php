@@ -154,7 +154,7 @@
                 @if($reviewdata)
                     {{ date('d-M-Y', strtotime($reviewdata->created_at)) }}
                 @else
-                    GoogleSheet
+                    <span class='btn-warning'>Belum Pernah diUpdate</span>
                 @endif
               </div></br>
               <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">

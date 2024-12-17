@@ -707,7 +707,7 @@ class DataCompileController extends Controller
              
 
                 $reviewdata=ReviewLog::with('UpdatedBy')->where('review_id',$prp->review->id)->orderBy('updated_at','desc')->orderBy('id','desc')->first();
-                $colUpdate = $reviewdata->created_at ?? "Update Terakhir di GoogleSheet";
+                $colUpdate = $reviewdata->created_at ?? "Belum Pernah Diupdate Sama Sekali";
                 //dd($colUpdate);
 
                 return $colUpdate;
