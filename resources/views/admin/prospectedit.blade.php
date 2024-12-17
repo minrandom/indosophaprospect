@@ -159,7 +159,7 @@
               </div></br>
               <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                 Last Column Update</div>
-              <div class="h5 mb-0 font-weight-bold text-gray-800">{{$colUpdate}}</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800">{{!! $colUpdate !!}}</div>
             </div>
             <div class="col-auto">
               <i class="fas fa-file-alt fa-2x text-gray-500"></i>
