@@ -229,6 +229,104 @@
 </div>
 <!-- Modal Validation -->
 
+
+<!-- Modal Remew -->
+<div class="modal fade" id="renew-modal" tabindex="-1" role="dialog" aria-labelledby="renew-modalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="Renew-modalLabel">Renew Expired Prospect</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="renewForm">
+          <div class="form-group">
+            <label for="submitdate">Tanggal Input Awal</label>
+            <input readonly type="" required="" id="rnsubmitdate" name="rnsubmitdate" class="form-control">
+
+          </div>
+          <div class="form-group">
+            <label for="creator">Created By</label>
+            <input readonly type="" required="" id="rncreator" name="rncreator" class="form-control">
+            <input readonly type="" class="form-control" value="Akan digantikan dengan siapa yang memperbaharui.">
+          </div>
+          <div class="form-group">
+            <label for="provinces">Provinsi</label>
+            <input type="hidden" required="" id="rnid" name="rnid" class="form-control">
+            <input type="hidden" required="" id="id" name="id" class="form-control">
+            <input type="hidden" required="" id="rnnewcreator" name="rnnewcreator" class="" value="{{ Auth::user()->id}}">
+            <input type="hidden" required="" id="rnvalidator" name="rnvalidator" class="" value="{{ Auth::user()->id}}">
+            <input type="hidden" required="" id="rnprovcode" name="rnprovcode" class="">
+            <input readonly type="" required="" id="rnprovinces" name="rnprovinces" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="rnhospital">Rumah Sakit</label>
+            <input readonly type="" required="" id="rnhospital" name="rnhospital" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="rndepartment">Departemen</label>
+            <input readonly type="" required="" id="rndepartment" name="rndepartment" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="rnbunit">Business Unit</label>
+            <input readonly type="" required="" id="rnbunit" name="rnbunit" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label for="rnproduct">Produk</label>
+            <input readonly type="" required="" id="rnproduct" name="rnproduct" class="form-control">
+          </div>
+          <div class="form-group">
+            <label for="rnetapodate">ETA PO DATE</label>
+            <input readonly type="" required="" id="rnetapodate" name="rnetapodate" class="form-control">
+          </div>
+
+
+
+          <div class="form-group">
+            <label for="rnquan">Quantity</label>
+            <input readonly type="" required="false" id="rnquan" name="rnquan" class="form-control">
+          </div>
+
+
+
+          <div class="form-group">
+            <label for="renewdata">Renew Prospect Status</label>
+
+            <select required="" name="renewdata" id="renewdata" class="form-control">
+              <option value="1">Renew + Approve</option>
+              <option value="404">REJECT</option>
+            </select>
+          </div>
+
+
+          <div class="form-group" style="display: none;" id="rnPIC">
+            <label for="rnpersonincharge">PIC</label>
+            <select required="" id="rnpersonincharge" name="rnpersonincharge" class="form-control">
+
+            </select>
+          </div>
+
+          <div id="rninfoinput" style="display: none;" class="label label-warning"><b>Silahkan Input PIC</b></div>
+
+
+          </br>
+          </br>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary btn-update" id="renewbtn">Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Renew -->
+
+
 <!-- Modal Edit -->
 <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="edit-modalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -800,6 +898,142 @@
   //Edit & Update
 
 
+
+
+  //renew button
+
+  $('body').on("click", ".btn-renew", function() {
+    var id = $(this).attr("id")
+
+    $("#renewdata").change(function() {
+      var selectedOption = $(this).val();
+      if (selectedOption === "1") {
+        $("#rnPIC").show();
+        $("#rninfoinput").show();
+      } else {
+        $("#rnPIC").hide();
+        $("#rninfoinput").hide();
+      }
+    });
+
+
+
+    $.ajax({
+      url: "{{ route('admin.prospectvalidation', ['prospect' => ':id']) }}".replace(':id', id),
+      method: "GET",
+      success: function(response) {
+        $("#rnPIC").hide();
+        $("#rninfoinput").hide();
+        $("#renew-modal").modal("show");
+        $("#rnid").val(response.id);
+        $("#id").val(response.id);
+        $("#rnprovinces").val(response.province.name);
+        $("#rnprovcode").val(response.province.prov_order_no);
+        $("#rncreator").val(response.creator.name);
+        $("#rnnewcreator").val(response.creator.id);
+        $("#rnvalidator").val(response.creator.id);
+        var submit = response.created_at.substr(0, 10);
+        $("#rnsubmitdate").val(submit);
+        $("#rnhospital").val(response.hospital.name);
+        $("#rndepartment").val(response.department.name);
+        $("#rnproduct").val(response.config.name);
+        $("#rnbunit").val(response.unit.name);
+
+        $("#rnetapodate").val(response.eta_po_date);
+        $("#rnquan").val(response.qty);
+        var picSelect = $("#rnpersonincharge");
+        // Populate dropdown options\
+        picSelect.empty();
+        if(response.is_project=== 1){
+          response.piclist.forEach(function(pivc) {
+            var option = $("<option>").val(pivc.user_id).text(pivc.name);
+            picSelect.append(option);
+         
+        });
+
+
+        }else
+        {
+        response.piclist.forEach(function(pivc) {
+          if (
+            pivc.area == response.province.prov_order_no ||
+            pivc.area === response.province.iss_area_code ||
+            pivc.area === response.province.wilayah
+          ) {
+            var option = $("<option>").val(pivc.user_id).text(pivc.name);
+            picSelect.append(option);
+          }
+        });
+        }
+
+        picSelect.select2({
+
+          width: '100%' // Adjust the width to fit the container
+        });
+
+
+        $("#renewdata").val(response.status).prop("selected", true);
+
+      }
+    })
+  });
+
+  $("#renewbtn").on("click", function(e) {
+    e.preventDefault()
+
+    // Display alert message to confirm submission
+    if (confirm("Yakin Update Status Prospect ?")) {
+      // Proceed with form submissionU
+
+      submitRn(id);
+      $("#renew-modal").modal("hide");
+      $('.data-table').DataTable().ajax.reload();
+    } else {
+      // Cancel form submission
+      $("#validasi-modal").modal("hide");
+      return false;
+    }
+
+  });
+  //Validtion & Update Validation
+
+  // function check is that any changes or not
+
+
+
+  function submitRn() {
+    var id = $("#id").val()
+    var status = $("#renewdata").val()
+    console.log(id);
+    if (status == 404) {
+      // Prompt the user to input the reason
+      var reason = prompt("Input Alasan Mereject");
+      if (reason === null) {
+        // User clicked cancel, abort the submission
+        return;
+      }
+      // Append the reason to the form data
+      $("#renewForm").append('<input type="hidden" name="reason" value="' + reason + '">');
+    }
+    $("#renewForm").append('<input type="hidden" name="renewshow" value="1">');
+    $.ajax({
+      url: "{{ route('admin.prospectvalidationupdate', ['prospect' => ':id']) }}".replace(':id', id),
+      method: "PATCH",
+      data: $("#renewForm").serialize(),
+      success: function(response) {
+        $('.data-table').DataTable().ajax.reload();
+        $("#renew-modal").modal("hide");
+        flash("success", response.message);
+        $('.notify').focus()
+      }
+    })
+  }
+
+
+
+
+
+  
 
 
   //delete

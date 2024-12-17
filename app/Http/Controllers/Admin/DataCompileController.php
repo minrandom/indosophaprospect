@@ -513,21 +513,6 @@ class DataCompileController extends Controller
                         ->get();
                     break;
 
-                case "amx":
-                    $areaArray = explode(',', $area);
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
-                        ->where("status", $status)
-                        ->whereHas('province', function ($query) use ($areaArray) {
-                            $query->whereIn('iss_area_code', $areaArray);
-                        })
-                        ->whereHas('temperature', function ($query) {
-                            $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
-                        })
-                        ->where ("is_project",0)
-                        ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
-                        ->get();
-                    break;
-
                 case "nsm":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", $status)
@@ -584,18 +569,6 @@ class DataCompileController extends Controller
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
                         ->where("status", '!=', 1)
                         ->whereHas('province', function ($query) use ($areaArray) {
-                            $query->whereIn('iss_area_code', $areaArray);
-                        })
-                        ->where ("is_project",0)
-                        ->orderBy('status', 'ASC')->orderBy("id", 'DESC')
-                        ->get();
-                    break;
-
-                case "amx":
-                    $areaArray = explode(',', $area);
-                    $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
-                        ->where("status", '!=', 1)
-                         ->whereHas('province', function ($query) use ($areaArray) {
                             $query->whereIn('iss_area_code', $areaArray);
                         })
                         ->where ("is_project",0)
@@ -995,7 +968,7 @@ class DataCompileController extends Controller
                         break;
 
                     case (99):
-                        $btn = '<div class="row"><a xid(0)" id="' . $prp->id . '" class="btn btnaksi btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
+                        $btn = '<div class="row"><a href="javascript:void(0)" id="' . $prp->id . '"" class="btn btnaksi btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
                         return $btn;
                         break;
                     case (404):

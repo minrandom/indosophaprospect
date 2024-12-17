@@ -1437,15 +1437,39 @@ class ProspectController extends Controller
     {
         //
         $role= Auth::user()->role;
-       
-        $cek=$request->input('validation', 99);
-        switch($cek){
+
+
+        if($request->renewshow){
+            $submitdate=$request->rnsubmitdate;
+            $creator=$request->rnnewcreator;
+            $validator=$request->rnvalidator;
+            $provcode=$request->rnprovcode;
+            $status=$request->renewdata;
+            $personincharge=$request->rnpersonincharge;
+            $id= $request->rnid;
+            if($request->rnreason){
+                $reason=$request->rnreason;
+            }
+        }else{
+            $id= $request->id;
+            $submitdate=$request->submitdate;
+            $creator=$request->creator;
+            $validator=$request->validator;         
+            $provcode=$request->provcode;
+            $status=$request->validation;
+            $personincharge=$request->rnpersonincharge;
+            if($request->reason){
+                $reason=$request->reason;
+            }
+        }
+
+        switch($status){
             case 404:
                 rejectLog::create([
-                    "prospect_id"=>$request->id,
+                    "prospect_id"=>$id,
                     
-                    "rejected_by"=>$request->validator,
-                    "reason"=>$request->reason
+                    "rejected_by"=>$validator,
+                    "reason"=>$reason
                 ]);
 
 
@@ -1453,7 +1477,7 @@ class ProspectController extends Controller
 
             case 1:
                 
-                $date = Carbon::createFromFormat('Y-m-d', $request->submitdate);
+                $date = Carbon::createFromFormat('Y-m-d', $submitdate);
 
                 // Extract the year, month, and day
                 $year = $date->format('y');
@@ -1468,48 +1492,64 @@ class ProspectController extends Controller
                 $prospect_no="ISSP-";
 
                 if($role!="prj"){
-                $prospect_no.=$request->provcode;
+                $prospect_no.=$provcode;
                 }
                 else{
                     $prospect_no.='88';  
                 }
                 $prospect_no.="-".$codedate."-".$rand3;
                 
+                if($request->renewshow){
+                $prospect->update([
+                    'creator'=>$creator,
+                    'validation_time'=>Carbon::now(),
+                    'eta_po_date'=>Carbon::now()->addDays(90),
+                    'validation_by'=>$validator,
+                    'prospect_no'=>$prospect_no,
+                    'pic_user_id'=>$personincharge
+                ]);
+
+                }else{
                 $prospect->update([
                     'validation_time'=>Carbon::now(),
-                    'validation_by'=>$request->validator,
+                    'validation_by'=>$validator,
                     'prospect_no'=>$prospect_no,
-                    'pic_user_id'=>$request->personincharge
+                    'pic_user_id'=>$personincharge
                 ]);
+              }
             break;
 
         }
         
         $prospect->update([
-            'status' => $cek
+            'status' => $status
         ]);
 
         //update alert
-        $latealert = AlertData::with('user')->where('prospect_id',$request->id)->whereIn('type',['V','V3','V7','V14'])->where('status',0)
+        $latealert = AlertData::with('user')->where('prospect_id',$id)->whereIn('type',['V','V3','V7','V14'])->where('status',0)
         ->update(['status'=>1]);
 
-        $data=Prospect::with("creator","province")->where('id',$request->id)->get();
+        $data=Prospect::with("creator","province")->where('id',$id)->get();
        
         Alert::generateAlerts($data,"R");
         AlertData::create([
             'type'=>"R",
-            'prospect_id'=>$request->id,
-            'user_id'=>$request->personincharge
+            'prospect_id'=>$id,
+            'user_id'=>$personincharge
         ]);
 
         
         
         
         
-        if($cek==404){
+        if($status==404){
             return response()->json(['message' => "Data Berhasil di Reject, Silahkan Input Prospect Baru"]);
-        }else{   
-            return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
+        }else{  
+            if($request->renewshow){
+                return response()->json(['message' => 'Berhasil Memperbaru dan Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
+            }else{
+                return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
+            }
         }
     }
 
