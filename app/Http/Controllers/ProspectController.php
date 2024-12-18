@@ -1457,7 +1457,7 @@ class ProspectController extends Controller
             $validator=$request->validator;         
             $provcode=$request->provcode;
             $status=$request->validation;
-            $personincharge=$request->rnpersonincharge;
+            $personincharge=$request->personincharge;
             if($request->reason){
                 $reason=$request->reason;
             }
