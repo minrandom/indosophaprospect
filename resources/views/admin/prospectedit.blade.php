@@ -429,23 +429,47 @@
           <div class="col-sm-12">
             <label for="Chance" class="col-sm-3 col-form-label font-weight-bold">Chance :</label>
             <label for="Chance" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ number_format($prospect->review->chance * 100, 0)}}%</label>
+            
+          <div class="success-button">
+          <h5><a href='javascript:void(0)' id='{{$prospect->id}}' datacode='{{$prospect->prospect_no}}' class='badge tmpe bg-success text-light  btn-finish'>Set Success</a></h5>
           </div>
+
+          <div class="drop-button">
+          <h5><a href='javascript:void(0)' id='{{$prospect->id}}'  datacode='{{$prospect->prospect_no}}' class='badge tmpe bg-secondary text-light  btn-drop'>Request Drop</a></h5>
+          </div>
+
+
+
+          </div>
+
+          
+
+
           <div class="col-sm-12">
             <label for="nextaction" class="col-sm-3 col-form-label font-weight-bold">Next Action :</label>
             <label for="nextaction" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ $prospect->review->next_action }}</label>
           </div>
 
+
+      
+
+          
+
+
           @can('admin')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
+          
           @endcan
           @can('am')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
+          <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
           @endcan
           @can('nsm')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
+          
           @endcan
           @can('prj')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
@@ -734,6 +758,7 @@
 </div>
 <!-- Modal Promosi -->
 
+@include('modal._prospectdropsuccess_modal')
 
 @stop
 
@@ -747,6 +772,21 @@
 <script src="{{ asset('template/backend/sb-admin-2')}}/vendor/sweetalert/sweetalert.all.js"></script>
 <script type="text/javascript">
   $(document).ready(function() {
+
+    $(".drop-button").hide();
+    $(".success-button").hide();
+
+    var chanceValue = {{ $prospect->review->chance }};
+    
+    if(chanceValue<0.3){
+      $(".drop-button").show();
+    }else 
+    if(chanceValue>0.7){
+      $(".success-button").show();
+    }
+
+    
+    console.log(chanceValue);
     // Retrieve the alert message from local storage
     var alertMessage = localStorage.getItem("alertMessage");
 
@@ -1331,6 +1371,114 @@
     });
 
 
+    
+
+
+
+
+
+
   });
+
+
+
+  var dropsuccess=dropsuccess();
+
+  $('body').on("click",".btn-drop",function(){
+    var id = $(this).attr("id");
+    var datacode = $(this).attr("datacode");
+    console.log(datacode);
+    $('#updateTo').val('DROP');
+    //var remarksArray = JSON.parse(remarksData);
+    //console.log(remarksData);
+    $('#prospectCode').val(datacode);
+    $('#idprospect').val(id);
+    populateSelectFromDatalist('cr8reason',dropsuccess.dropreason,'Pilih Alasan Drop Prospect');
+
+    $("#dropsuccess-modal").modal("show");
+
+
+  })
+
+
+  $('body').on("click",".btn-finish",function(){
+    var id = $(this).attr("id");
+    var datacode = $(this).attr("datacode");
+    console.log(id);
+    $('#updateTo').val('SUCCESS');
+    //var remarksArray = JSON.parse(remarksData);
+    //console.log(remarksData);
+    $('#prospectCode').val(datacode);
+    $('#idprospect').val(id);
+    //populateSelectFromDatalist('cr8colupdate',datarem.column,'Pilih Kolom yang diUpdate');
+
+    populateSelectFromDatalist('cr8reason',dropsuccess.successreason,'Pilih Kenapa Prospect Success');
+
+    $("#dropsuccess-modal").modal("show");
+
+
+  })
+
+  function submitRequest(successMessage) {
+    
+    var form = $('#requestDropSuccessForm');
+    
+    // Serialize the form data
+    var formData = form.serialize();
+    
+    // Get the updateTo value from the form
+    var updateTo = form.find('#updateTo').val();
+
+
+    if(updateTo== "DROP"){
+      var url = "{{ route('admin.prospect.dropreq') }}";
+  
+    }else {
+      var url ="{{ route('admin.prospect.successreq') }}";
+     
+    }
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: formData,
+            success: function() {
+                //$("#create-modal").modal("hide");
+                //$('.data-table').DataTable().ajax.reload();
+                $("#requestDropSuccessForm")[0].reset();
+                flash("success", successMessage);
+                document.querySelector(".notify").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+                });
+                
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('AJAX Error:', textStatus, errorThrown);
+                
+                flash("Danger", "Tolong diisi bagian yang masih kosong!!");
+                document.querySelector(".notify").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+                });
+            }
+            
+        });
+    };
+
+
+  $('#btn-request').on('click', function(e) {
+        $(this).focus();
+        e.preventDefault();
+       $(document.activeElement);
+       submitRequest("Request Update sudah dikirim, Silahkan Hubungi NSM dan Kabari Bussiness Unit yang bersangkutan.");
+       $("#dropsuccess-modal").modal("hide");
+    });
+
+
+
+
+
+
+  
 </script>
 @endpush
