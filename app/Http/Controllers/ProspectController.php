@@ -675,18 +675,16 @@ class ProspectController extends Controller
         
         $area=$user->employee->area;
         $pos=$user->employee->position;
-        if($area=="HO"){
-        $provincelist=Province::all();
-        }else if($role=="nsm"){
-        $provincelist=Province::with('area')->where('wilayah',$area)->orWhere('wilayah')->get();
-        }else if($role==="am"){
-        $provincelist=Province::with('area')->where('iss_area_code',$area)->get();       
-    
-        }else if($role==="fs")
-        $provincelist=Province::with('area')->where('prov_order_no',$area)->get();       
-    
-        $provOrderNos = $provincelist->pluck('prov_order_no')->toArray();
-       //dd($provOrderNos);
+        if($area=="HO" ){
+            $provincelist=Province::all();
+            }else if($role=="nsm"){
+            $provincelist=Province::with('area')->where('wilayah',$area)->get();
+             }else if($role==="fs"){
+             $provincelist=Province::with('area')->where('prov_order_no',$area)->orWhere('iss_area_code',$area)->get();
+            }else if($role==="am"){
+            $areaArray = explode(',', $area);
+            $provincelist=Province::with('area')->whereIn('iss_area_code', $areaArray)->get();}       
+            $provOrderNos = $provincelist->pluck('prov_order_no')->toArray();
 
 
 
@@ -723,7 +721,7 @@ class ProspectController extends Controller
           if($role=="am"){
                        
              //dd($provdata)
-            $employees = Employee::Where('area',$area)->orWhereIn('area',$provOrderNos)->get();
+            $employees = Employee::where('area', 'LIKE', '%' . $area . '%')->orWhereIn('area',$provOrderNos)->get();
             $employees->load("user");
             //for AM
             $amdata = $employees->map(function($employee){

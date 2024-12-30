@@ -615,14 +615,17 @@
         }else
         {
         response.piclist.forEach(function(pivc) {
-          if (
-            pivc.area == response.province.prov_order_no ||
-            pivc.area === response.province.iss_area_code ||
-            pivc.area === response.province.wilayah
-          ) {
+          var apic = pivc.area.split(',');
+          //console.log(apic);
+          // if (
+          //   pivc.area == response.province.prov_order_no ||
+          //   pivc.area.split(',').includes(response.province.iss_area_code) ||
+          //   pivc.area === response.province.wilayah
+          // ) {
+            console.log(apic);
             var option = $("<option>").val(pivc.user_id).text(pivc.name);
             picSelect.append(option);
-          }
+          // }
         });
         }
 
