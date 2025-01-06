@@ -477,10 +477,8 @@ class DataCompileController extends Controller
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
-                        ->whereHas('review', function ($query) {
-                            $query->where('jenis_anggaran', '<>', 'MABES AD / AL / AU');
-                        })
-                        ->where ("is_project",0)
+                
+                       
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
                         ->get();
