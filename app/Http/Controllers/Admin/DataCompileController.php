@@ -478,7 +478,6 @@ class DataCompileController extends Controller
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
                 
-                       
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
                         ->get();
