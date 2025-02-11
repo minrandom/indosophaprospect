@@ -306,7 +306,11 @@ class DataCompileController extends Controller
 
         function getareaman($isi, $isi2)
         {
-            $am = Employee::with('user')->where([['area', $isi], ['position', 'AM']])->get();
+            $am = Employee::with('user')->where([['area', $isi], ['position', 'AM']])
+                ->whereDoesntHave('user', function ($query) {
+                        $query->where('role', 'LIKE', '%ex%'); // Skip users where role contains "EX"
+                    })
+                ->get();
 
             $nsm = Employee::with('user')->where([['area', $isi2], ['position', 'NSM']])->get();
 
@@ -1126,7 +1130,7 @@ class DataCompileController extends Controller
         {
             $am = Employee::with('user')->where([['area', $isi], ['position', 'AM']])
                 ->whereDoesntHave('user', function ($query) {
-                        $query->where('role', 'LIKE', '%EX%'); // Skip users where role contains "EX"
+                        $query->where('role', 'LIKE', '%ex%'); // Skip users where role contains "EX"
                     })
                 ->get();
 

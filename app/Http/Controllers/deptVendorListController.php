@@ -169,7 +169,11 @@ class deptVendorListController extends Controller
 
         function getam($isi, $isi2)
         {
-            $am = Employee::with('user')->where([['area', $isi], ['position', 'AM']])->get();
+            $am = Employee::with('user')->where([['area', $isi], ['position', 'AM']])
+                ->whereDoesntHave('user', function ($query) {
+                        $query->where('role', 'LIKE', '%ex%'); // Skip users where role contains "EX"
+                    })
+                ->get();
 
             $nsm = Employee::with('user')->where([['area', $isi2], ['position', 'NSM']])->get();
 
