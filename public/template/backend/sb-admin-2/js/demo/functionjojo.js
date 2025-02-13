@@ -223,7 +223,8 @@ function hoseditdata() {
     { id: 6, name: 'Pemerintah' },
     { id: 7, name: 'Pendidikan' },
     { id: 8, name: 'Kementerian Lain' },
-    { id: 9, name: 'Negeri' }
+    { id: 9, name: 'Negeri' },
+    { id:10, name:'Group-Hospital'}
   ];
   var kelas = [
     { id: 1, name: 'A' },
