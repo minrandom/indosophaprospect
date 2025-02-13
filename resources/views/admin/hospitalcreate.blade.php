@@ -76,6 +76,7 @@
                     <option val='Pendidikan'>Pendidikan</option>
                     <option val='Kementerian Lain'>Kementerian Lain</option>
                     <option val='Negeri'>Negeri</option>
+                    <option val='Group-Hospital'>Group-Hospital</option>
          
             </select>
         </div>
