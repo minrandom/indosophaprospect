@@ -42,6 +42,7 @@
             <label for="thecreators">Created By</label>
             <input type="hidden" required="" id="creatorid" name="creatorid" class="form-control" value="{{Auth::user()->id}}">
             <input type="hidden" required="" id="theroles" name="theroles" class="form-control" value="{{Auth::user()->role}}">
+            <input type="hidden" required="" id="thepost" name="thepost" class="form-control" value="{{Auth::user()->employee->position}}">
             <input readonly type="" required="" id="thecreators" name="thecreators" value="{{ Auth::user()->name }}" class="form-control">
           </div>
           
@@ -167,6 +168,8 @@
                 //$("#eventname").val("");
                 $("#qtyinput").val("1");
                 var userrole = $("#theroles").val()
+                var userpost = $("#thepost").val()
+                console.log(userpost);
                 var today = new Date();
 
               // Calculate the date after 30 days from today

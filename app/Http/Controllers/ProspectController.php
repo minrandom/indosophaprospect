@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Support\Facades\DB;
 use App\Models\Province;
 use App\Models\Department;
 use App\Models\sequence;
@@ -124,14 +125,14 @@ class ProspectController extends Controller
         $area=$user->employee->area;
         $pos=$user->employee->position;
         if($area=="HO" ){
-        $provincelist=Province::all();
+        $provincelist=Province::orderBy(DB::raw('CAST(prov_order_no AS UNSIGNED)'))->get();
         }else if($role=="nsm"){
-        $provincelist=Province::with('area')->where('wilayah',$area)->get();
+        $provincelist=Province::with('area')->where('wilayah',$area)->orderBy(DB::raw('CAST(prov_order_no AS UNSIGNED)'))->get();
          }else if($role==="fs"){
-         $provincelist=Province::with('area')->where('prov_order_no',$area)->orWhere('iss_area_code',$area)->get();
+         $provincelist=Province::with('area')->where('prov_order_no',$area)->orWhere('iss_area_code',$area)->orderBy(DB::raw('CAST(prov_order_no AS UNSIGNED)'))->get();
         }else if($role==="am"){
         $areaArray = explode(',', $area);
-        $provincelist=Province::with('area')->whereIn('iss_area_code', $areaArray)->get();}       
+        $provincelist=Province::with('area')->whereIn('iss_area_code', $areaArray)->orderBy(DB::raw('CAST(prov_order_no AS UNSIGNED)'))->get();}       
      
     
         $provOrderNos = $provincelist->pluck('prov_order_no')->toArray();
