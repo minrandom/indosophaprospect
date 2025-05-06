@@ -25,6 +25,7 @@
                             <th>Kode Prospect</th>
                             <th>RS</th>
                             <th>Dept</th>
+                            <th>Business Unit</th>
                             <th>Config</th>
                             <th>Request By</th>
                             <th>Reason / Description</th>
@@ -55,23 +56,70 @@
 
   $(function () {
    
-    
+  $.ajax({
+      url: "{{ route('admin.prospect.successlistdata') }}", // Replace with your endpoint
+      dataType: 'json',
+      success: function(response) {
+        // Here we have the data returned as 'response'
+         // Log the response to see the data structure
+        // Filter data
+        var userRole = response.additionalData.roles;
+        var userArea= response.additionalData.area;
+        console.log(userArea);
+        var filteredData = response.data.filter(function(item) {
+          switch (userRole) {
+            case 'nsm':
+              if (item.wilayah == userArea) {
+                return true;}else 
+                return false // Include this item}
+              break;
+            case 'am':
+              if (item.issareacode == userArea ) {
+                return true;}else
+                return false
+              break;
+            case 'fs':
+              if (item.regioncode == userArea ) {
+                return true;}else 
+                return false
+              break;
+            case 'admin':
+              return true
+              break;
+            default:return false
+              
+          }
+
+        });
+
+        console.log(filteredData)
+       // Now we can pass the data to the DataTable
+
+        populateDataTable(filteredData);
+      },
+      error: function(xhr, status, error) {
+        console.log("Error fetching data: " + error);
+      }
+    });
+
+    function populateDataTable(data) {
     var table = $('.data-table').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: "{{ route('admin.prospect.successlistdata') }}",
+        data: data, // Pass the data to the DataTable
         columns: [
-          {data: 'prospect_no',name: 'prospect_no',},
-          {data: 'hospital',name: 'hospital',},
-          {data: 'dept',name: 'dept',},
-          {data: 'config',name: 'config',},
-          {data: 'requestData',name: 'requestData',},
-          {data: 'requestReason',name: 'requestReason',},
-          {data: 'validator',name: 'validator',},
-          {data: 'bunoted',name: 'bunoted',},
-          {data: 'statusreq',name: 'statusreq',},
+            { data: 'prospect_no', title: 'Prospect No' },
+            { data: 'hospital', title: 'Hospital' },
+            { data: 'dept', title: 'Department' },
+            { data: 'bunit', title: 'Bussiness Unit' },
+            { data: 'config', title: 'Config' },
+            { data: 'requestData', title: 'Request Data' },
+            { data: 'requestReason', title: 'Request Reason' },
+            { data: 'validator', title: 'Validator' },
+            { data: 'bunoted', title: 'BU Noted' },
+            { data: 'statusreq', title: 'Status' }
         ]
     });
+  }
+
   });
 
 
