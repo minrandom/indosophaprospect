@@ -64,6 +64,7 @@
         // Filter data
         var userRole = response.additionalData.roles;
         var userArea= response.additionalData.area;
+        var buname= response.additionalData.buname;
         console.log(userArea);
         var filteredData = response.data.filter(function(item) {
           switch (userRole) {
@@ -82,11 +83,15 @@
                 return true;}else 
                 return false
               break;
+            case 'bu':
+              if (item.bunit == buname ) {
+                return true;}else 
+                return false
+              break;
             case 'admin':
               return true
               break;
-            default:return false
-              
+            default:return false  
           }
 
         });
@@ -122,7 +127,6 @@
   });
 
 
-
   $('body').on("click", ".btn-validasi", function() {
     var id = $(this).attr("id");
 
@@ -147,12 +151,10 @@
 
         //populateSelectFromDatalist('cr8colupdate',datarem.column,'Pilih Kolom yang diUpdate');
 
-
       }
     })
 
   })
-
 
   function updateRequest(successMessage) {
     var form = $('#requestDropSuccessForm');

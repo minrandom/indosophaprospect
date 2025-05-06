@@ -65,6 +65,7 @@
         // Filter data
         var userRole = response.additionalData.roles;
         var userArea= response.additionalData.area;
+        var buname= response.additionalData.buname;
         console.log(userArea);
         var filteredData = response.data.filter(function(item) {
           switch (userRole) {
@@ -80,6 +81,11 @@
               break;
             case 'fs':
               if (item.regioncode == userArea ) {
+                return true;}else 
+                return false
+              break;
+            case 'bu':
+              if (item.bunit == buname ) {
                 return true;}else 
                 return false
               break;
