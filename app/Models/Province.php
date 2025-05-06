@@ -12,9 +12,6 @@ class Province extends Model
         "name","prov_order_no","prov_region_code","area_code"
     ];
 
-
-
-
     public function hospitals(){
         return $this->hasMany(Hospital::class);
     }
