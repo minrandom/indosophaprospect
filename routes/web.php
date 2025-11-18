@@ -26,7 +26,7 @@ use App\Http\Controllers\AttendanceEventInController;
 use App\Http\Controllers\AttendanceEventOutController;
 
 
- 
+
 //Namespace User
 use App\Http\Controllers\User\UserController;
 
@@ -40,6 +40,7 @@ use App\Http\Controllers\DeptValidController;
 use App\Http\Controllers\deptVendorListController;
 use App\Http\Controllers\DropRequestController;
 use App\Http\Controllers\SuccessReqController;
+use App\Http\Controllers\ActivityController;
 use App\Models\deptVendorList;
 use App\Models\DropRequest;
 use App\Models\prospectFilters;
@@ -140,7 +141,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::PATCH('/reviewupdate/{prospect}',[ProspectController::class,'reviewupdate'])->name('admin.prospect.reviewupdate')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
 	Route::PATCH('/chcupdate/{prospect}',[ProspectController::class,'chcupdate'])->name('admin.prospect.chcupdate')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
 	Route::get('/prospect/{prospect}/edit',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
-	
+
 	//Route::get('/province',[ProvinceController::class,'index'])->name('province')->middleware(['can:admin']);
 	//Route Rescource
 	//Route::resource('/prospect',ProspectController::class)->middleware(['can:admin']);
@@ -161,8 +162,8 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/prospect/successrequestdata',[SuccessReqController::class,'data'])->name('admin.prospect.successlistdata')->middleware(['auth', 'role:admin,am,nsm,prj,bu']);
 	Route::get('/prospect/successrequestdata/{successReq}',[SuccessReqController::class,'show'])->name('admin.prospect.successdata')->middleware(['auth', 'role:admin,nsm,prj,bu']);
 	Route::PATCH('/prospect/successrequestdata/{successReq}/update',[SuccessReqController::class,'update'])->name('admin.prospect.successupdate')->middleware(['auth', 'role:admin,nsm,bu']);
-	
-	
+
+
 	Route::get('/consprospectvalidation',[ConsumablesProspectController::class,'validationprospect'])->name('admin.consprospectvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/consprospect/{consumablesProspect}/edit',[ConsumablesProspectController::class,'edit'])->name('admin.consprospectedit')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
 	//Route::get('/prospectcheck',[ProspectController::class,'creationcheck'])->name('admin.prospectcheckview')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
@@ -172,9 +173,9 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::PATCH('/consprospectupdatests/{consumablesProspect}',[ConsumablesProspectController::class,'updatests'])->name('admin.consprospectupdatests')->middleware(['auth', 'role:admin,am,nsm']);
 	Route::get('/consprospectvalidation/{consumablesProspect}/validation',[ConsumablesProspectController::class,'validation'])->name('admin.consprospectvalidation')->middleware(['auth', 'role:admin,am,nsm']);
 	Route::get('/cpdetailtvalidation/{consumablesProspect}',[ConsumablesProspectController::class,'validationproddetail'])->name('admin.cpvalidationdetail')->middleware(['auth', 'role:admin,am,nsm']);
-	
+
 	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect.index')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
-	
+
 	Route::POST('/consprospect',[ConsumablesProspectController::class,'store'])->name('admin.consprospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj,prj']);
 	Route::POST('/prospect',[ProspectController::class,'store'])->name('admin.prospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/prospectcreate',[ProspectController::class,'create'])->name('admin.prospectcreate')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
@@ -227,19 +228,25 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::post('/get-product-details','DataCompileController@getProductDetail')->name('data.proddetail');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');
 	Route::get('/dataa',[PrincipalBrandController::class,'index'])->name('dataa')->middleware(['can:admin']);
-	Route::view('/jadwal','admin.scheduling')->name('schedule');
+	//Route::get('/jadwal','admin.scheduling')->name('schedule');
+
+
+    Route::get('/jadwal', [ActivityController::class, 'index'])->name('schedule');
+    Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
+    Route::get('/get-hospitals/{province}', [ActivityController::class, 'getHospitalsByProvince']);
+
 
 
 	//consumables prospect
 	Route::get('/consprospect',[ConsumablesProspectController::class,'index'])->name('admin.consprospects')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
-	
-	
+
+
 	Route::get('/BuyerList',[deptVendorListController::class,'index'])->name('admin.buyerList')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/BuyerListdata',[deptVendorListController::class,'data'])->name('databuyerList')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 ;
 
 
-	
+
 	//Route stay for example check
 	Route::get('/load-tab-content', 'TabController@loadTabContent')->name('load-tab-content');
 	Route::view('/404-page','admin.404-page')->name('404-page');
@@ -255,7 +262,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::view('/pchart','admin.prospectchart')->name('pchart');
 	Route::view('/tables','admin.tables')->name('tables');
 
-	
+
 });
 Route::get('/scheduledata','ScheduleController@index')->name('schedule.index');
 Route::PATCH('/scheduleupdate/{schedule}','ScheduleController@update')->name('events.update');
@@ -275,7 +282,7 @@ Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'user'],
 
 Route::group(['namespace' => 'Auth','middleware' => 'guest','prefix' => 'Auth'],function(){
 	Route::view('/login','auth.login')->name('login');
-	
+
 });
 
 // Other
