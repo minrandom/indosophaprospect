@@ -20,9 +20,9 @@
 <div class="notify"></div>
 
 <div class="card">
-    
+
         <div class="card-body">
-           
+
         <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -47,7 +47,7 @@
 
             </select>
         </div>
-      
+
         <div class="form-group">
             <label for="category">Product Category</label>
             <select id="category" name="category" class="form-control" required="">
@@ -57,7 +57,7 @@
         <div class="form-group">
             <label for="Jenis">Jenis</label>
             <select id="Jenis" name="Jenis" class="form-control" required="">
-                    <option val='Unit'>Unit</option> 
+                    <option val='Unit'>Unit</option>
                     <option val='Accessories'>Accesories</option>
                     <option val='Accessories/ Instrument'>Accesories/ Instrument</option>
                     <option val='Consumables'>Consumables</option>
@@ -67,14 +67,15 @@
                     <option val='Package'>Package</option>
                     <option val='Set'>Set</option>
                     <option val='Spareparts'>Spareparts</option>
-              
-               
+                    <option val='Service Package'>Service Package</option>
+
+
             </select>
         </div>
         <div class="form-group">
             <label for="brand">Brand</label>
             <select id="brand" name="brand" class="form-control">
-              
+
             </select>
         </div>
         <div class="form-group">
@@ -84,14 +85,14 @@
         <div class="form-group">
             <label for="uom">UOM</label>
             <select id="uom" name="uom" class="form-control" required="">
-                    <option val='Unit'>Unit</option> 
+                    <option val='Unit'>Unit</option>
                     <option val='Shock'>Shock</option>
                     <option val='Package'>Package</option>
                     <option val='Set'>Set</option>
                     <option val='Pcs'>Pcs</option>
                     <option val='Pack'>Pack</option>
                     <option val='Box'>Box</option>
-              
+
             </select>
         </div>
         <div class="form-group">
@@ -102,7 +103,7 @@
         <label for="price">Harga</label>
             <input type="number" id="price" name="price" class="form-control">
         </div>
-        
+
       </br>
     </br>
   </div>
@@ -119,7 +120,7 @@
 
           </div>
 
-    
+
 </div>
 <div id="productData" data-url="{{ route('product.getProducts') }}"></div>
 <!-- Modal Create -->
@@ -138,14 +139,14 @@
 <script type="text/javascript">
 
 
-                         
+
 
   $(function () {
     var regency = citydata();
     console.log(regency);
-  
+
  var id = $(this).attr("id")
- $('[data-toggle="tooltip"]').tooltip(); 
+ $('[data-toggle="tooltip"]').tooltip();
         $.ajax({
             url:"{{ route('admin.createconfdata') }}",
             method: 'GET',
@@ -164,7 +165,7 @@
                     }
                   });
                 }
-             
+
                 unitSelect.on("change", function () {
                   var selectedunitId = $(this).val();
                   fetchcat(selectedunitId);
@@ -183,10 +184,10 @@
     });
 
 
-    // Create 
+    // Create
     function submitForm(url, successMessage) {
         var formData = $("#createForm").serialize();
-   
+
         $.ajax({
             url: url,
             method: "POST",
@@ -212,11 +213,11 @@
 
         if (clickedButton.is('#btn-store')) {
             submitForm("{{ route('admin.configstore') }}", "Data Config Berhasil Ditambah");
-        } 
+        }
     });
 
-    
-  
+
+
 
 
 
