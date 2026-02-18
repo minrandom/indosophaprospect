@@ -59,7 +59,7 @@ function filter(){
   ];
 
   var temper=[
-    
+
     {id:1,name:"LEAD"},
     {id:2,name:"PROSPECT"},
     {id:3,name:"FUNNEL"},
@@ -67,7 +67,7 @@ function filter(){
     {id:5,name:"SUCCESS"},
     {id:-1,name:"MISSED"}
   ]
-  
+
   return{
     etafilter:etapo,
     temper :temper,
@@ -85,7 +85,7 @@ function dropsuccess(){
     {id:5,name:"Competitor or Any External Issue"}
   ];
 
-  var successreason=[ 
+  var successreason=[
     {id:1,name:'Price and Budget'},
     {id:2,name:'Quality'},
     {id:3,name:"Doctor Choice"},
@@ -182,7 +182,9 @@ function configeditdata() {
     { id: 7, name: 'Option/Accessories' },
     { id: 8, name: 'Package' },
     { id: 9, name: 'Set' },
-    { id: 10, name: 'Spareparts' }];
+    { id: 10, name: 'Spareparts' },
+    { id: 11, name: 'Service Package' },
+];
 
   var uom = [
     { id:1, name: 'Unit' },
@@ -196,8 +198,8 @@ function configeditdata() {
   return {
     jenis: jenis,
     uom: uom,
- 
-  
+
+
   };
 
 
@@ -281,7 +283,7 @@ function populateConsProductSelect(businessUnitId, categoryId, selectElementId) 
               productSelect.append(option);
           });
 
-        
+
           productSelect.select2();
       }
   });
