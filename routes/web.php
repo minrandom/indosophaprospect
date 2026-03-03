@@ -38,9 +38,14 @@ use App\Http\Controllers\Admin\DataCompileController;
 use App\Http\Controllers\ConsumablesProspectController;
 use App\Http\Controllers\DeptValidController;
 use App\Http\Controllers\deptVendorListController;
+use App\Http\Controllers\DeptDashboardController;
 use App\Http\Controllers\DropRequestController;
 use App\Http\Controllers\SuccessReqController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\MissionPoolController;
+use App\Http\Controllers\InstallbaseController;
+use App\Http\Controllers\MissionController;
+use App\Http\Controllers\MissionReportController;
 use App\Models\deptVendorList;
 use App\Models\DropRequest;
 use App\Models\prospectFilters;
@@ -87,6 +92,11 @@ Route::middleware('prevent-back')->group(function () {
     // Other routes...
 });
 
+Route::get('/dashboard', 'GendashController@index')->name('dashboard')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/hospital-dashboard/{hospital}','GendashController@hospitalDashboard')->name('hospital.dashboard');
+Route::get('/department-dashboard/{hospital}/{department}', [DeptDashboardController::class, 'index'])->name('dept.dashboard')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+
+
 //attendance normal
 Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::post('/check-out', 'JojoController@outstore')->name('check-out.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
@@ -101,6 +111,44 @@ Route::get('/EventIn', 'AttendanceEventOutController@index')->name('EventIn')->m
 Route::get('/ListAtt', 'AttendanceEventInController@list')->name('ListAtt')->middleware(['auth', 'role:admin']);
 Route::get('/EventOut', 'AttendanceEventOutController@index')->name('EventOut')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::view('/AttendanceList','admin.EventAttendance')->name('AttList')->middleware(['auth', 'role:admin']);
+
+//installbase
+Route::get('/Installbase',[InstallbaseController::class,'index'])->name('admin.installbase')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/InstallbaseData',[InstallbaseController::class,'IBData'])->name('data.installbase')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/InstallbaseUnderReviewData',[InstallbaseController::class,'ShowMissing'])->name('data.ibreview')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+//task generate
+Route::post('/missions/auto/installbase', [MissionController::class, 'autoFromInstallbase'])
+    ->name('missions.autoFromInstallbase')
+    ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::get('/missions/task-pool', [MissionController::class, 'taskPool'])
+    ->name('missions.taskPool')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/missions/task-pool/hospitals/{provinceId}', [MissionController::class, 'taskPoolHospitalsByProvince'])
+        ->name('missions.taskPoolHospitalsByProvince')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::post('/admin/missions/bulk-to-mission', [MissionController::class, 'bulkToMission'])
+    ->name('missions.bulkToMission')
+    ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::get('/mission-pool', [MissionPoolController::class, 'index'])->name('missions.pool')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::post('/mission-pool/schedule', [MissionPoolController::class, 'saveSchedule'])->name('missions.pool.schedule')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/missions/{mission}/detail', [MissionPoolController::class, 'detail'])
+  ->name('missions.detail')
+  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::post('/missions/{mission}/start', [MissionPoolController::class, 'start'])
+  ->name('missions.start')
+  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::get('/missions/{mission}/report', [MissionReportController::class, 'form'])
+  ->name('missions.report.form')
+  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::post('/missions/{mission}/report', [MissionReportController::class, 'submit'])
+  ->name('missions.report.submit')
+  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
 
 
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
@@ -142,6 +190,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::PATCH('/chcupdate/{prospect}',[ProspectController::class,'chcupdate'])->name('admin.prospect.chcupdate')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
 	Route::get('/prospect/{prospect}/edit',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
 
+    Route::get('/hospital-dashboard/{hospital}/pending-mission',[MissionController::class, 'pendingMission'])->name('hospital.pending.mission')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	//Route::get('/province',[ProvinceController::class,'index'])->name('province')->middleware(['can:admin']);
 	//Route Rescource
 	//Route::resource('/prospect',ProspectController::class)->middleware(['can:admin']);

@@ -11,11 +11,14 @@ class Principal extends Model
     protected $fillable=[
         "name","address","contact","EOD_Terms"
     ];
-  
+
     public function brands(){
         return $this->hasMany(Brand::class);
     }
     public function agreements(){
         return $this->hasMany(Agreement::class);
+    }
+    public function products(){
+        return $this->hasMany(Product::class);
     }
 }

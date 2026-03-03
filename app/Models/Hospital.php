@@ -19,6 +19,12 @@ class Hospital extends Model
     public function province(){
         return $this->belongsTo(Province::class);
     }
+    public function installbases(){
+        return $this->hasMany(installbase::class);
+    }
+    public function missions(){
+        return $this->hasMany(mission::class);
+    }
     public function mappings(){
         return $this->hasMany(Mapping::class);
     }

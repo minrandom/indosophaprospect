@@ -57,7 +57,20 @@ class User extends Authenticatable
         return $this->hasMany(Attendance::class,"user_id");
     }
 
+    public function missions(){
+        return $this->hasMany(mission::class,"pic_user_id");
+    }
+    public function missionsUpdated(){
+        return $this->hasMany(mission::class,"updated_by");
+    }
 
+    public function missionCreators(){
+        return $this->hasMany(MissionHistory::class,"actor_user_id");
+    }
+
+    public function missionHistories(){
+        return $this->hasMany(MissionHistory::class,"actor_user_id");
+    }
 
     protected $fillable = [
         'name', 'email', 'password','role','employee_id'
