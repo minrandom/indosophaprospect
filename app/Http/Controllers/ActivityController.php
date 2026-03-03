@@ -26,6 +26,8 @@ class ActivityController extends Controller
             'purpose' => 'required|string',
             'hospital_id' => 'required|exists:hospitals,id',
             'departement_id' => 'required|exists:departments,id',
+            'results' => 'required|exists:results,id',
+
         ]);
 
         $activity = Activity::create([
