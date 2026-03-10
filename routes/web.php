@@ -46,6 +46,7 @@ use App\Http\Controllers\MissionPoolController;
 use App\Http\Controllers\InstallbaseController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\MissionReportController;
+use App\Http\Controllers\MissionRunController;
 use App\Models\deptVendorList;
 use App\Models\DropRequest;
 use App\Models\prospectFilters;
@@ -133,23 +134,52 @@ Route::post('/admin/missions/bulk-to-mission', [MissionController::class, 'bulkT
 
 Route::get('/mission-pool', [MissionPoolController::class, 'index'])->name('missions.pool')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::post('/mission-pool/schedule', [MissionPoolController::class, 'saveSchedule'])->name('missions.pool.schedule')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
-Route::get('/missions/{mission}/detail', [MissionPoolController::class, 'detail'])
-  ->name('missions.detail')
-  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
-Route::post('/missions/{mission}/start', [MissionPoolController::class, 'start'])
-  ->name('missions.start')
-  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
-
-Route::get('/missions/{mission}/report', [MissionReportController::class, 'form'])
-  ->name('missions.report.form')
-  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
 Route::post('/missions/{mission}/report', [MissionReportController::class, 'submit'])
   ->name('missions.report.submit')
   ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
 
+// Create mission header
+Route::post('/mission-runs', [MissionRunController::class, 'store'])
+  ->name('missionruns.store')
+  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+// Get mission headers by hospital (for dropdown)
+Route::get('/mission-runs/by-hospital/{hospitalId}', [MissionRunController::class, 'byHospital'])
+  ->name('missionruns.byHospital')
+  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+// Bulk add tasks to mission header (same hospital only)
+Route::post('/missions/bulk-add-to-mission', [MissionRunController::class, 'bulkAddToMissionRun'])
+  ->name('missionruns.bulkAddToMissionRun')
+  ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::post('/missions/mission-run/schedule', [MissionRunController::class, 'scheduleMissionRun'])
+  ->name('missionrun.schedule')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+  Route::get('/missions/mission-run/{id}/tasks', [MissionRunController::class, 'tasks'])
+  ->name('missionRun.tasks')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs'])->group(function () {
+
+  // Start mission_run -> set status_run=3, then redirect to mission page
+  Route::post('/runs/{run}/start', [MissionRunController::class, 'start'])
+    ->name('runs.start');
+
+  // Mission X page (by run id)
+  Route::get('/runs/{run}', [MissionRunController::class, 'show'])
+    ->name('runs.show');
+
+
+});
+
+// routes/web.php
+Route::post('/missions/run/{run}/request-tasks', [MissionRunController::class, 'requestTasks'])
+  ->name('missionrun.requestTasks');
+Route::post('/missions/run/{run}/add-requested', [MissionRunController::class, 'addRequestedToMission'])
+        ->name('missionrun.addRequestedToMission');
 
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
 Route::post('/remarks', [prospectRemarksController::class,'store'])->name('remarks.store')->middleware(['auth', 'role:admin,bu,fs']);

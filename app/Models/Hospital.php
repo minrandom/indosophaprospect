@@ -37,5 +37,9 @@ class Hospital extends Model
     public function vendor(){
         return $this->hasMany(deptVendorList::class);
     }
+    public function missionRuns()
+    {
+        return $this->hasMany(MissionRun::class);
+    }
 
 }

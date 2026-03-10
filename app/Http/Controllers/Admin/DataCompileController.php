@@ -201,7 +201,7 @@ class DataCompileController extends Controller
                 return $btn;
             })
 
-     
+
             ->addColumn('pformat', function ($cfg) {
                 $pformat = number_format($cfg->price_include_ppn);
                 return $pformat;
@@ -469,7 +469,7 @@ class DataCompileController extends Controller
                         $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                     })
                     ->where ("is_project",1)
-                 
+
                     ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
@@ -481,7 +481,7 @@ class DataCompileController extends Controller
                         ->whereHas('temperature', function ($query) {
                             $query->where('tempCodeName', '<>', 0)->Where('tempCodeName', '<>', 5);
                         })
-                
+
                         ->orderBy('status', 'ASC')
                         ->orderBy("id", 'DESC')
                         ->get();
@@ -533,9 +533,9 @@ class DataCompileController extends Controller
             switch ($data['roles']) {
                 case "admin":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
-                   
+
                         ->where("status", '!=', 1)
-                
+
                         ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
@@ -543,17 +543,17 @@ class DataCompileController extends Controller
                     break;
                 case "prj":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
-                   
+
                         ->where("status", '!=', 1)
                        ->where ("is_project",1)
-                
+
                         ->orderBy('status', 'ASC')
                     ->orderBy("prospects.id", 'DESC')
                     ->get();
 
                     break;
 
-     
+
 
                 case "fs":
                     $prv = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection","remarks","temperature")
@@ -592,7 +592,7 @@ class DataCompileController extends Controller
         //->whereHas('config', function ($query) {
         //  $query->wherePivot('main', 1);
         // })
-    
+
 
        /* $test = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
         ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
@@ -616,7 +616,7 @@ class DataCompileController extends Controller
 
                 if ($AM['am'] != "0") {
                     $newdata = $newprov . "</br>" . $AM['am'];
-                } else 
+                } else
                 if ($AM['nsm'] != "0") {
                     $newdata = $newprov . "</br>" . $AM['nsm'];
                 } else
@@ -627,13 +627,13 @@ class DataCompileController extends Controller
 
                 $newprov = $prp->province ? $prp->province->prov_order_no : 'No Province detected';
                 return $newprov;
-           
+
             })
             ->addColumn('AMNSM', function ($prp) {
                 $AM = getareaman($prp->province->iss_area_code, $prp->province->wilayah);
                 if ($AM['am'] != "0") {
                     $newdata = $AM['am'];
-                } else 
+                } else
             if ($AM['nsm'] != "0") {
                     $newdata = $AM['nsm'];
                 } else
@@ -703,9 +703,9 @@ class DataCompileController extends Controller
                     return "Tanggal PO sudah Lewat";
                 } else return $podate;
             })
-            
+
             ->addColumn('lastupdate', function ($prp) {
-             
+
 
                 $reviewdata=ReviewLog::with('UpdatedBy')->where('review_id',$prp->review->id)->orderBy('updated_at','desc')->orderBy('id','desc')->first();
                 $colUpdate = $reviewdata->created_at ?? "Belum Pernah di Update Sama Sekali";
@@ -847,7 +847,7 @@ class DataCompileController extends Controller
             ->addColumn('propdetail', function ($prp) {
                 $no = $prp->prospect_no;
                 $theroutes = route('admin.prospecteditdata', ['prospect' => $prp->id]);
-                
+
 
                 $data = "<a href=$theroutes onclick='storeSequenceData()'><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a>";
                 /*$data.="<a class='nav-link dropdown-toggle' href='#' id='alertsDropdown'role='button'
@@ -857,9 +857,9 @@ class DataCompileController extends Controller
                 <span class='badge badge-danger badge-counter' id='remarksCount'>$remarksCount</span>
             </a>";*/
                 $data.="</br>$prp->prospect_source";
-                
-                
-                
+
+
+
                 return $data;
             })
 
@@ -867,9 +867,9 @@ class DataCompileController extends Controller
             ->addColumn('submitdate', function ($prp) {
                 $dt = $prp->created_at->format('d-M-Y');
                 $creator = $prp->creator->name ? $prp->creator->name :'missing data creator';
-            
+
                 $comdata = "(" . $creator . ")</br>" . $dt;
-               
+
                 return $comdata;
             })
 
@@ -887,13 +887,13 @@ class DataCompileController extends Controller
                 $dep = $prp->department->name;
                 $host = $prp->hospital->name;
                 $target = $prp->hospital->target;
-            
+
                 if($target=="Key Account" || $target =="Prioritas"){
                     $show="<div class='text-success'>".$target."</div>";
                     $muncul = $host . "</br>" . $show. "</br></br>" . $dep;
                 }else{
                 $muncul = $host . "</br>" . $target. "</br></br>" . $dep;}
-               
+
                 return $muncul;
             })
 
@@ -1006,7 +1006,7 @@ class DataCompileController extends Controller
                 return $show;
             })
 
-         
+
 
             //->only(['id','creator','personInCharge',"prospect_no"])
             ->rawColumns(['propdetail', 'action', 'promotion', "reviewStats", 'temperaturebtn', 'statsname', "submitdate", "provincedata", "anggaran", 'hospitaldata', 'validasi'])
@@ -1035,7 +1035,7 @@ class DataCompileController extends Controller
 
 
 
-    
+
     public function ConsumablesProspectData(Request $request)
     {
         function reviewcolorCons($isi)
@@ -1277,7 +1277,7 @@ class DataCompileController extends Controller
                 case "admin":
                     $prv = ConsumablesProspect::with("creator", "personInCharge", "hospital", "province", "department", "unit")
                     ->where("status","<>", 0)
-                  
+
                     ->get();
                     break;
 
@@ -1334,10 +1334,10 @@ class DataCompileController extends Controller
             switch ($data['roles']) {
                 case "admin":
                     $prv = ConsumablesProspect::with("creator","category", "personInCharge", "hospital", "province", "department", "unit")
-                   
+
                         ->where("status", '<', 1)
                         ->groupBy("tempCode")
-                   
+
                     ->get();
 
                     break;
@@ -1372,7 +1372,7 @@ class DataCompileController extends Controller
         //->whereHas('config', function ($query) {
         //  $query->wherePivot('main', 1);
         // })
-    
+
 
        /* $test = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
         ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
@@ -1390,9 +1390,9 @@ class DataCompileController extends Controller
             ->addColumn('creatorname', function ($prp) {
                 $dt = $prp->created_at->format('d-M-Y');
                 $creator = $prp->creator->name ? $prp->creator->name :'missing data creator';
-            
+
                 $comdata = "<i>" . $creator . "</i></br>" . $dt;
-               
+
                 return $comdata;
             })
             ->addColumn('personInCharge', function ($prp) {
@@ -1404,7 +1404,7 @@ class DataCompileController extends Controller
                 return $picdata;
             })
             ->addColumn('catdata', function ($prp) {
-                
+
                 $catdata = $prp->category->name;
 
                $data= '<div class="row mt-1 mr-1"><a href="javascript:void(0)" id="' . $prp->id . '" class="btn aksi btnaksi btn-primary btn-sm ml-2  btn-vdet">'.$catdata.'</a></div>';
@@ -1419,7 +1419,7 @@ class DataCompileController extends Controller
 
                 if ($AM['am'] != "0") {
                     $newdata = $newprov . "</br>" . $AM['am'];
-                } else 
+                } else
                 if ($AM['nsm'] != "0") {
                     $newdata = $newprov . "</br>" . $AM['nsm'];
                 } else
@@ -1430,20 +1430,20 @@ class DataCompileController extends Controller
                 $dep = $prp->department->name;
                 $host = $prp->hospital->name;
                 $target = $prp->hospital->target;
-            
+
                 if($target=="Key Account" || $target =="Prioritas"){
                     $show="<div class='text-success'>".$target."</div>";
                     $muncul = $host . "</br>" . $show. "</br></br>" . $dep;
                 }else{
                 $muncul = $host . "</br>" . $target. "</br></br>" . $dep;}
-               
+
                 return $muncul;
             })
             ->addColumn('ProvOrderNo', function ($prp) {
 
                 $newprov = $prp->province ? $prp->province->prov_order_no : 'No Province detected';
                 return $newprov;
-           
+
             })
             ->addColumn("Items",function($prp){
                 $item = $prp->config_id;
@@ -1454,24 +1454,24 @@ class DataCompileController extends Controller
                 $countitems = count($arrayitems);
                 // Generate a unique ID for the collapse component
                 $collapseId = "collapse_" . $prp->id;
-            
+
                 $data .= "<button class='btn btn-primary' type='button' data-toggle='collapse' data-target='#$collapseId' aria-expanded='false' aria-controls='$collapseId'>".$countitems." Produk</button>";
                 $data .= "<div class='collapse' id='$collapseId'><div class='card card-body'>";
-            
+
                 for ($i = 0; $i < count($arrayitems); $i++) {
                     $itemdata = Config::where("id", $arrayitems[$i])->first();
                     $data .= "<div>" . $itemdata->name ."</br>(".$arrayqty[$i]." ".$itemdata->uom. ")</div></br>";
                 }
-            
+
                 $data .= "</div></div>";
-            
+
                 return $data;
             })
 
             ->addColumn('valuetotal', function ($prp) {
-         
+
                 $price = $prp->submitted_total_price;
-             
+
                 $rupiah = number_format($price, 0, ',-', '.');
                 return $rupiah;
             })
@@ -1480,11 +1480,11 @@ class DataCompileController extends Controller
                 return  "Test REVIEW" ;
             })
             ->addColumn("anggaran", function($prp) {
-                
+
                 return  "TEST ANGGARAN" ;
             })
             ->addColumn("po_target", function($prp) {
-                
+
                 $data = $prp->status;
                 switch($data){
                     case 1:
@@ -1511,11 +1511,11 @@ class DataCompileController extends Controller
                     case 99 :
                         return "<h5><span class='badge badge-dark'>".$prp->po_target."</span></h5>";
                         break;
-                    
+
                     }
             })
             ->addColumn('etadate', function ($prp) {
-                
+
                 $podate = $prp->eta_po_date;
                 if($podate){
                 $qty = strtotime($podate);
@@ -1568,7 +1568,7 @@ class DataCompileController extends Controller
                  }
 
 
-                
+
             })
 
             ->addColumn('action', function ($prp) use ($url) {
@@ -1583,8 +1583,8 @@ class DataCompileController extends Controller
                         $btn = "<div class='d-inline-flex align-items-center'><a href='$routesdetail' ><h5><span class='badge bg-primary text-light'>Detail Data</span></h5></a></div>";
                         return $btn;
                         break;
-                
-                    
+
+
                     case (99):
                         $btn = '<div class="row"><a xid(0)" id="' . $prp->id . '" class="btn btnaksi btn-warning aksi btn-sm ml-2 btn-renew">Renew</a>';
                         return $btn;
@@ -1605,7 +1605,7 @@ class DataCompileController extends Controller
             ->addColumn('cnpropdetail', function ($prp) {
                 $no = $prp->prospect_no;
                 $theroutes = route('admin.cnprospecteditdata', ['consumablesProspect' => $prp->id]);
-                
+
 
                 $data = "<a href=$theroutes onclick=''><h5><span class='badge prpno bg-info text-light'>$no</span></h5></a>";
                 /*$data.="<a class='nav-link dropdown-toggle' href='#' id='alertsDropdown'role='button'
@@ -1615,9 +1615,9 @@ class DataCompileController extends Controller
                 <span class='badge badge-danger badge-counter' id='remarksCount'>$remarksCount</span>
             </a>";*/
                 //$data.="</br>$prp->prospect_source";
-                
-                
-                
+
+
+
                 return $data;
             })
 

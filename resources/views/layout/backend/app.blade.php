@@ -13,12 +13,12 @@
     <title>ISBIS | {{ $title ?? 'Dashboard' }}</title>
 
     <style>
-    
+
 
     .fixed-card {
   /* Set a fixed height for the card container on smaller screens */
    /* Adjust this value as needed */
- 
+
   /* Add overflow-y property to hide vertical scrollbar on smaller screens */
   overflow: hidden;
 
@@ -72,10 +72,10 @@
 
 
 
-        
+
     </style>
     <!-- Custom fonts for this template-->
-   
+
     <link href="{{ asset('template/backend/sb-admin-2') }}/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
     href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
@@ -121,7 +121,7 @@
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
                         <span>Copyright &copy; PT. INDOSOPHA SAKTI 2024</span>
-                        
+
                     </div>
                 </div>
             </footer>
@@ -177,15 +177,16 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('template/backend/sb-admin-2') }}/js/sb-admin-2.min.js"></script>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Page level plugins -->
-    <script src="{{ asset('template/backend/sb-admin-2') }}/vendor/chart.js/Chart.min.js"></script>
+    <script src="{{ asset('template/backend/sb-admin-2/vendor/chart.js/Chart.min.js') }}"></script>
+
 
     <!-- Page level custom scripts -->
-    <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/chart-area-demo.js"></script>
-    <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/chart-pie-demo.js"></script>
+    {{-- <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/chart-area-demo.js"></script>
+    <script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/chart-pie-demo.js"></script> --}}
     <script type="text/javascript">
         $.ajaxSetup({
           headers: {

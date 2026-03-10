@@ -15,54 +15,54 @@ $(function () {
   }
 
   // Click "+" from mission list
-  $(document).on('click', '.js-open-schedule', function () {
-    const mission = {
-      id: $(this).data('mission-id'),
-      code: $(this).data('mission-code'),
-      hospital: $(this).data('hospital'),
-      pic: $(this).data('pic'),
-    };
+//   $(document).on('click', '.js-open-schedule', function () {
+//     const mission = {
+//       id: $(this).data('mission-id'),
+//       code: $(this).data('mission-code'),
+//       hospital: $(this).data('hospital'),
+//       pic: $(this).data('pic'),
+//     };
 
-    // default = today cell (optional), here use weekStart Monday + 08:00
-    const firstDate = "{{ $weekStart->toDateString() }}";
-    openModalWith(mission, firstDate, '08:00');
-  });
+//     // default = today cell (optional), here use weekStart Monday + 08:00
+//     const firstDate = "{{ $weekStart->toDateString() }}";
+//     openModalWith(mission, firstDate, '08:00');
+//   });
 
-  // Click schedule grid cell (empty or filled)
-  $(document).on('click', '.js-schedule-cell', function () {
-    const date = $(this).data('date');
-    const time = $(this).data('time');
+//   // Click schedule grid cell (empty or filled)
+//   $(document).on('click', '.js-schedule-cell', function () {
+//     const date = $(this).data('date');
+//     const time = $(this).data('time');
 
-    // If you want: only allow schedule by selecting mission first
-    // We'll show dropdown picker using SweetAlert
-    const missions = @json($missionsToScheduleJs);
+//     // If you want: only allow schedule by selecting mission first
+//     // We'll show dropdown picker using SweetAlert
+//
 
-    if (!missions.length) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'No mission with PIC',
-        text: 'Assign PIC first before scheduling.'
-      });
-      return;
-    }
+//     if (!missions.length) {
+//       Swal.fire({
+//         icon: 'warning',
+//         title: 'No mission with PIC',
+//         text: 'Assign PIC first before scheduling.'
+//       });
+//       return;
+//     }
 
-    let optionsHtml = missions.map(m => `<option value="${m.id}">${m.code} - ${m.hospital} (PIC: ${m.pic})</option>`).join('');
+//     let optionsHtml = missions.map(m => `<option value="${m.id}">${m.code} - ${m.hospital} (PIC: ${m.pic})</option>`).join('');
 
-    Swal.fire({
-      title: 'Select Mission',
-      html: `<select id="sw_mission_id" class="swal2-input" style="width:100%">${optionsHtml}</select>`,
-      showCancelButton: true,
-      confirmButtonText: 'Next',
-    }).then((r) => {
-      if (!r.isConfirmed) return;
+//     Swal.fire({
+//       title: 'Select Mission',
+//       html: `<select id="sw_mission_id" class="swal2-input" style="width:100%">${optionsHtml}</select>`,
+//       showCancelButton: true,
+//       confirmButtonText: 'Next',
+//     }).then((r) => {
+//       if (!r.isConfirmed) return;
 
-      const selectedId = $('#sw_mission_id').val();
-      const mission = missions.find(x => String(x.id) === String(selectedId));
-      if (!mission) return;
+//       const selectedId = $('#sw_mission_id').val();
+//       const mission = missions.find(x => String(x.id) === String(selectedId));
+//       if (!mission) return;
 
-      openModalWith(mission, date, time);
-    });
-  });
+//       openModalWith(mission, date, time);
+//     });
+//   });
 
   // Save schedule
   $('#btnSaveSchedule').on('click', function () {
@@ -208,4 +208,141 @@ $(function () {
         });
     });
     });
+</script>
+
+<script>
+$(function () {
+
+  $(document).on('click', '.js-run-detail', function () {
+    const runId = $(this).data('run-id');
+    const runCode = $(this).data('run-code') || '-';
+
+    $('#runTasksTitle').html('Loading tasks for <b>'+ runCode +'</b> ...');
+    $('#runTasksWrap').html('<div class="text-center text-muted py-4">Loading...</div>');
+
+    $.get("{{ url('/missions/mission-run') }}/" + runId + "/tasks", function (html) {
+      $('#runTasksTitle').html('Mission: <b>'+ runCode +'</b>');
+      $('#runTasksWrap').html(html);
+    }).fail(function (xhr) {
+      console.error(xhr.responseText);
+      $('#runTasksTitle').html('Click <b>Detail</b> from the mission to show data...');
+      $('#runTasksWrap').html('<div class="text-center text-danger py-4">Failed to load tasks. Check server log.</div>');
+    });
+  });
+
+});
+</script>
+
+<script>
+$(function () {
+
+  // open schedule modal
+  $(document).on('click', '.btn-schedule-mission', function () {
+    const runId = $(this).data('run-id');
+    const runCode = $(this).data('run-code') || ('RUN-' + runId);
+
+    $('#sr_run_id').val(runId);
+    $('#sr_run_code').text(runCode);
+
+    // default date = today
+    const today = new Date().toISOString().slice(0,10);
+    $('#sr_date').val(today);
+
+    $('#scheduleRunModal').modal('show');
+  });
+
+  // save schedule
+  $('#btnSaveRunSchedule').on('click', function () {
+    const runId = $('#sr_run_id').val();
+    const date  = $('#sr_date').val();
+    const time  = $('#sr_time').val();
+    const dur   = $('#sr_duration').val();
+
+    if (!runId || !date || !time || !dur) {
+      Swal.fire({ icon:'warning', title:'Incomplete', text:'Please complete schedule fields.' });
+      return;
+    }
+
+    Swal.fire({
+      title: 'Confirm Schedule?',
+      html: `Date: <b>${date}</b><br>Time: <b>${time}</b><br>Duration: <b>${dur}</b> minutes`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Save',
+      cancelButtonText: 'Cancel'
+    }).then((res) => {
+      if (!res.isConfirmed) return;
+
+      $.ajax({
+        url: "{{ route('missionrun.schedule') }}",
+        method: "POST",
+        data: {
+          _token: "{{ csrf_token() }}",
+          run_id: runId,
+          schedule_date: date,
+          schedule_time: time,
+          duration_minutes: dur,
+        },
+        success: function (r) {
+          Swal.fire({ icon:'success', title:'Scheduled', text: r.message || 'OK', timer: 1200, showConfirmButton:false });
+          $('#scheduleRunModal').modal('hide');
+          setTimeout(() => location.reload(), 800);
+        },
+        error: function (xhr) {
+          let msg = 'Failed. Check server log.';
+          try {
+            const j = JSON.parse(xhr.responseText);
+            if (j.message) msg = j.message;
+          } catch(e) {}
+          Swal.fire({ icon:'error', title:'Error', text: msg });
+        }
+      });
+    });
+  });
+
+});
+</script>
+
+<script>
+$(function () {
+
+  $(document).on('click', '.btn-start-run', function () {
+    const runId = $(this).data('run-id');
+    const runCode = $(this).data('run-code') || ('RUN-' + runId);
+
+    Swal.fire({
+      title: 'Start Mission?',
+      html: `Mission: <b>${runCode}</b><br>This will set status to <b>On Going</b>.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Start',
+      cancelButtonText: 'Cancel'
+    }).then((res) => {
+      if (!res.isConfirmed) return;
+
+      $.ajax({
+        url: "{{ url('/missions/runs') }}/" + runId + "/start",
+        method: "POST",
+        data: { _token: "{{ csrf_token() }}" },
+        success: function (r) {
+          Swal.fire({ icon:'success', title:'Started', timer: 900, showConfirmButton:false });
+          if (r.redirect) {
+            setTimeout(() => window.location.href = r.redirect, 650);
+          } else {
+            setTimeout(() => location.reload(), 650);
+          }
+        },
+        error: function (xhr) {
+          let msg = 'Failed. Check server log.';
+          try {
+            const j = JSON.parse(xhr.responseText);
+            if (j.message) msg = j.message;
+          } catch(e){}
+          Swal.fire({ icon:'error', title:'Error', text: msg });
+        }
+      });
+    });
+  });
+
+});
 </script>
