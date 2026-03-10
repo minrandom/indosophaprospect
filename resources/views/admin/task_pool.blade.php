@@ -73,7 +73,7 @@
           <i class="fas fa-plus mr-1"></i> Create Mission
         </button> --}}
 
-        <button type="button" class="btn btn-primary btn-sm d-none" id="btnOpenAddToMissionRunModal">
+        <button type="button" class="btn btn-success btn-sm d-none" id="btnOpenAddToMissionRunModal">
           <i class="fas fa-arrow-right mr-1"></i> Plan Visit
         </button>
 
