@@ -181,6 +181,7 @@ Route::post('/missions/run/{run}/request-tasks', [MissionRunController::class, '
 Route::post('/missions/run/{run}/add-requested', [MissionRunController::class, 'addRequestedToMission'])
         ->name('missionrun.addRequestedToMission');
 
+
 Route::get('/user2',[UserController::class,'index2'])->name('user2');
 Route::post('/remarks', [prospectRemarksController::class,'store'])->name('remarks.store')->middleware(['auth', 'role:admin,bu,fs']);
 Route::get('/remarksdata', [prospectRemarksController::class,'index'])->name('remarks.data')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);

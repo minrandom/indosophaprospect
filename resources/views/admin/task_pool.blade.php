@@ -62,19 +62,19 @@
         {{-- ACTION BUTTONS --}}
       <div class="mt-3 d-flex flex-wrap" style="gap:10px;">
         <button type="button" class="btn btn-success btn-sm" id="btnShowChecklist">
-          <i class="fas fa-tasks mr-1"></i> Add to Mission
+          <i class="fas fa-tasks mr-1"></i> Setup Visit
         </button>
 
         <button type="button" class="btn btn-secondary btn-sm d-none" id="btnHideChecklist">
           <i class="fas fa-eye-slash mr-1"></i> Hide Checklist
         </button>
 
-        <button type="button" class="btn btn-warning btn-sm" id="btnOpenCreateMissionRunModal">
+        {{-- <button type="button" class="btn btn-warning btn-sm" id="btnOpenCreateMissionRunModal">
           <i class="fas fa-plus mr-1"></i> Create Mission
-        </button>
+        </button> --}}
 
         <button type="button" class="btn btn-primary btn-sm d-none" id="btnOpenAddToMissionRunModal">
-          <i class="fas fa-arrow-right mr-1"></i> Confirm Add
+          <i class="fas fa-arrow-right mr-1"></i> Plan Visit
         </button>
 
         <a href="{{ route('missions.pool') }}" type="button" class="btn btn-info btn-sm" >
