@@ -86,6 +86,35 @@ $(function () {
     toggleChecklist(false);
   });
 
+  $('#btnHideTaskList').on('click', function () {
+     $('#taskAccordionSection').addClass('d-none');
+     $('#btnHideTaskList').addClass('d-none');
+     $('#btnShowTaskList').removeClass('d-none');
+     $('#calendarSection').removeClass('col-lg-5').addClass('col-lg-12');
+  });
+
+  $('#btnShowTaskList').on('click', function () {
+     $('#taskAccordionSection').removeClass('d-none');
+     $('#btnHideTaskList').removeClass('d-none');
+     $('#btnShowTaskList').addClass('d-none');
+    $('#calendarSection').removeClass('col-lg-12').addClass('col-lg-5');
+  });
+
+    $('#btnHideCalendar').on('click', function () {
+        $('#calendarSection').addClass('d-none');
+        $('#btnHideCalendar').addClass('d-none');
+        $('#btnShowCalendar').removeClass('d-none');
+        $('#taskAccordionSection').removeClass('col-lg-7').addClass('col-lg-12');
+    });
+
+    $('#btnShowCalendar').on('click', function () {
+      $('#calendarSection').removeClass('d-none');
+      $('#btnHideCalendar').removeClass('d-none');
+      $('#btnShowCalendar').addClass('d-none');
+      $('#taskAccordionSection').removeClass('col-lg-12').addClass('col-lg-7');
+      });
+
+
   // Enforce SAME hospital only
   $(document).on('change', '.js-task-check', function () {
     const { hospitals } = getSelectedTasks();
