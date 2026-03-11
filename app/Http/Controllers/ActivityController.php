@@ -11,8 +11,6 @@ class ActivityController extends Controller
 {
     public function index()
     {
-
-
         $activities = Activity::where('user_id', Auth::id())->get();
         $provinces = Province::all();
         return view('admin.scheduling', compact('activities','provinces'));
@@ -26,7 +24,7 @@ class ActivityController extends Controller
             'purpose' => 'required|string',
             'hospital_id' => 'required|exists:hospitals,id',
             'departement_id' => 'required|exists:departments,id',
-            'results' => 'required|exists:results,id',
+            'results' => 'sometimes|exists:results,id',
 
         ]);
 

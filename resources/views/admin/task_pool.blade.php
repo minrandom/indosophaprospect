@@ -78,7 +78,7 @@
         </button>
 
         <a href="{{ route('missions.pool') }}" type="button" class="btn btn-info btn-sm" >
-          <i class="fas fa-calendar-check mr-1"></i> Mission List
+          <i class="fas fa-calendar-check mr-1"></i> Schedule View
         </a>
 
 
@@ -91,63 +91,134 @@
     </div>
   </div>
 
-  {{-- CARDS BY task_reference --}}
-  <div class="row">
-    @forelse($grouped as $ref => $items)
-      <div class="col-12 col-lg-6 mb-4">
-        <div class="card shadow border-0 h-100" style="border-radius:1.25rem;">
-          <div class="card-body">
+  {{-- TASK POOL ACCORDION --}}
 
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <div class="h6 font-weight-bold text-uppercase mb-0">
-                {{ strtoupper($ref) }}
-              </div>
-              <span class="badge badge-primary">{{ $items->count() }} task</span>
+  <div class="accordion" id="taskPoolAccordion">
+
+  @php $i = 0; @endphp
+
+  @forelse($grouped as $hospitalId => $items)
+    @php
+      $i++;
+      $hospital = $items->first()->hospital ?? null;
+      $headerId = "heading{$i}";
+      $collapseId = "collapse{$i}";
+
+      $hospitalTitle = $hospital
+          ? strtoupper($hospital->name).' - '.strtoupper($hospital->city ?? '')
+          : 'UNKNOWN / NO HOSPITAL';
+
+      $superUrgentCount = $items->where('priority_level', 'Super Urgent')->count();
+      $urgentCount = $items->where('priority_level', 'Urgent')->count();
+      $pentingCount = $items->where('priority_level', 'Penting')->count();
+    @endphp
+
+    <div class="card shadow mb-2" style="border-radius: 1rem;">
+      <div class="card-header" id="{{ $headerId }}" style="border-radius: 1rem;">
+        <button class="btn btn-link text-left w-100 d-flex justify-content-between align-items-center"
+                type="button"
+                data-toggle="collapse"
+                data-target="#{{ $collapseId }}"
+                aria-expanded="{{ $i === 1 ? 'true' : 'false' }}"
+                aria-controls="{{ $collapseId }}">
+
+          <div>
+            <div class="font-weight-bold text-uppercase">
+              {{ $hospitalTitle }}
             </div>
+            <div class="mt-1">
+              <span class="badge badge-primary">{{ $items->count() }} Tasks</span>
 
-            <div class="table-responsive">
-              <table class="table table-sm mb-0">
-                <thead class="thead-light text-uppercase">
-                  <tr>
-                    <th style="width:34px;" class="js-col-check d-none"></th>
-                    <th>Code</th>
-                    <th>Hospital</th>
-                    <th>Dept</th>
-                    <th>Deadline</th>
-                    <th>Purpose</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @foreach($items as $t)
-                    <tr>
-                      <td class="js-col-check d-none align-middle text-center">
-                        <input type="checkbox"
-                               class="js-task-check"
-                               value="{{ $t->id }}"
-                               data-hospital-id="{{ $t->hospital_id }}">
-                      </td>
-                      <td class="align-middle font-weight-bold">{{ $t->code }}</td>
-                      <td class="align-middle">{{ $t->hospital?->name ?? '-' }}</td>
-                      <td class="align-middle">{{ $t->department ?? '-' }}</td>
-                      <td class="align-middle">
-                        {{ $t->deadline ? \Carbon\Carbon::parse($t->deadline)->format('d-M-y') : '-' }}
-                      </td>
-                      <td class="align-middle">{{ $t->task_purpose ?? '-' }}</td>
-                    </tr>
-                  @endforeach
-                </tbody>
-              </table>
+              @if($superUrgentCount > 0)
+                <span class="badge badge-danger">{{ $superUrgentCount }} Super Urgent</span>
+              @endif
+
+              @if($urgentCount > 0)
+                <span class="badge badge-warning">{{ $urgentCount }} Urgent</span>
+              @endif
+
+              @if($pentingCount > 0)
+                <span class="badge badge-info">{{ $pentingCount }} Penting</span>
+              @endif
             </div>
-
           </div>
+
+          <span class="text-muted small">
+            Click to expand
+          </span>
+        </button>
+      </div>
+
+      <div id="{{ $collapseId }}"
+           class="collapse {{ $i === 1 ? 'show' : '' }}"
+           aria-labelledby="{{ $headerId }}"
+           data-parent="#taskPoolAccordion">
+
+        <div class="card-body">
+
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered mb-0">
+              <thead class="thead-light text-uppercase">
+                <tr>
+                  <th style="width:34px;" class="js-col-check d-none"></th>
+                  <th>Dept</th>
+                  <th>Task Ref</th>
+                  <th>Purpose</th>
+                  <th>Expected Outcome</th>
+                  <th>Deadline</th>
+                  <th>Priority</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($items as $t)
+                  <tr>
+                    <td class="js-col-check d-none align-middle text-center">
+                      <input type="checkbox"
+                             class="js-task-check"
+                             value="{{ $t->id }}"
+                             data-hospital-id="{{ $t->hospital_id }}">
+                    </td>
+
+
+                    <td class="align-middle">{{ $t->department ?? '-' }}</td>
+                    <td class="align-middle text-uppercase">{{ $t->task_reference ?? '-' }}</td>
+                     <td class="align-middle">{{ $t->task_purpose ?? '-' }}</td>
+                     <td class="align-middle">{{ $t->expected_outcome ?? '-' }}</td>
+                    <td class="align-middle">
+                      {{ $t->deadline ? \Carbon\Carbon::parse($t->deadline)->format('d-M-y') : '-' }}
+                    </td>
+
+                    <td class="align-middle">
+                      @php
+                        $priority = $t->priority_level ?? '-';
+                      @endphp
+
+                      @if($priority === 'Super Urgent')
+                        <span class="badge badge-danger">{{ $priority }}</span>
+                      @elseif($priority === 'Urgent')
+                        <span class="badge badge-warning">{{ $priority }}</span>
+                      @elseif($priority === 'Penting')
+                        <span class="badge badge-info">{{ $priority }}</span>
+                      @else
+                        <span class="badge badge-secondary">{{ $priority }}</span>
+                      @endif
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </div>
-    @empty
-      <div class="col-12">
-        <div class="alert alert-info">No tasks in pool.</div>
-      </div>
-    @endforelse
-  </div>
+    </div>
+
+  @empty
+    <div class="alert alert-info">No tasks in pool.</div>
+  @endforelse
+
+</div>
+
 
 </div>
 

@@ -71,7 +71,7 @@ $(document).ready(function() {
                 header: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'month'
+                    right: 'month,agendaWeek',
                 },
                 defaultView: 'month',
                 events: @json($activities->map(function($a) {

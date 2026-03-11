@@ -58,9 +58,28 @@ $(function () {
     return { ids, hospitals: Array.from(hospitals) };
   }
 
+
   // --- Checklist buttons
   $('#btnShowChecklist').on('click', function () {
-    toggleChecklist(true);
+
+    const $hosp = $('#hospital_id');
+    const selectedHospitalId = window.selectedHospitalId || '';
+    if(selectedHospitalId) {
+      // if hospital filter already selected, load missions immediately
+
+        toggleChecklist(true);
+      }else {
+        // if no hospital filter selected, show warning and force select first hospital to avoid confusion
+        Swal.fire({
+          icon: 'warning',
+          title: 'Select Hospital First',
+          text: 'Please select a hospital filter before setting up visit checklist.'
+        });
+      }
+      return;
+     // if no hospital filter selected, force select first hospital to avoid confusion
+
+    // toggleChecklist(true);
   });
 
   $('#btnHideChecklist').on('click', function () {

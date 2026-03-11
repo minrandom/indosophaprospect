@@ -129,9 +129,58 @@ class MissionController extends Controller
 
             $missions = $missions->orderByDesc('created_at')->get();
 
-        // group by task_reference (installbase, prospect, mapping, custom, etc.)
-        $grouped = $missions->groupBy('task_reference');
+            $priorityRank = function ($level) {
+                $level = strtolower(trim($level ?? ''));
 
+                return match ($level) {
+                    'super urgent' => 1,
+                    'urgent' => 2,
+                    'penting' => 3,
+                    default => 99,
+                };
+            };
+        // group by task_reference (installbase, prospect, mapping, custom, etc.)
+        $grouped = $missions->groupBy(function ($t) {
+            return $t->hospital_id ?? 0;
+        })->sort(function ($a, $b) {
+            $aSuper = $a->where('priority_level', 'Super Urgent')->count();
+            $bSuper = $b->where('priority_level', 'Super Urgent')->count();
+
+            if ($aSuper !== $bSuper) {
+                return $bSuper <=> $aSuper; // higher super urgent first
+            }
+
+            $aUrgent = $a->where('priority_level', 'Urgent')->count();
+            $bUrgent = $b->where('priority_level', 'Urgent')->count();
+
+            if ($aUrgent !== $bUrgent) {
+                return $bUrgent <=> $aUrgent; // higher urgent first
+            }
+
+            $aPenting = $a->where('priority_level', 'Penting')->count();
+            $bPenting = $b->where('priority_level', 'Penting')->count();
+
+            if ($aPenting !== $bPenting) {
+                return $bPenting <=> $aPenting; // higher penting first
+            }
+
+            // optional final tiebreaker: more tasks first
+            return $b->count() <=> $a->count();
+        })->map(function ($items) use ($priorityRank) {
+            return $items->sort(function ($a, $b) use ($priorityRank) {
+                $pa = $priorityRank($a->priority_level);
+                $pb = $priorityRank($b->priority_level);
+
+                if ($pa !== $pb) {
+                    return $pa <=> $pb; // smaller rank first
+                }
+
+                $da = $a->deadline ? strtotime($a->deadline) : PHP_INT_MAX;
+                $db = $b->deadline ? strtotime($b->deadline) : PHP_INT_MAX;
+
+                return $da <=> $db; // nearest deadline first
+            })->values();
+        });
         // PIC options (AM/NSM will pick later)
         $pics = User::orderBy('name')->get(['id','name']);
 
