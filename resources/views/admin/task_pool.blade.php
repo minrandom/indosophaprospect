@@ -181,6 +181,12 @@
                                     data-hospital-id="{{ $hospitalId }}">
                                 <i class="fas fa-arrow-right mr-1"></i> Plan Visit
                             </button>
+                        </br>
+                            <button type="button"
+                                    class="btn btn-secondary btn-sm d-none btn-hide-visit"
+                                    data-hospital-id="{{ $hospitalId }}">
+                                <i class="fas fa-eye-slash mr-1"></i> Hide Checklist
+                            </button>
 
                             </div>
 

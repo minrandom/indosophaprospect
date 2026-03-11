@@ -32,59 +32,6 @@ $(function () {
   }
 
 
-  let checklistMode = false;
-
-  function toggleChecklist(show) {
-    checklistMode = show;
-    $('.js-col-check').toggleClass('d-none', !show);
-    $('#btnShowChecklist').toggleClass('d-none', show);
-    $('#btnHideChecklist').toggleClass('d-none', !show);
-    $('#btnOpenAddToMissionRunModal').toggleClass('d-none', !show);
-
-    if (!show) {
-      $('.js-task-check').prop('checked', false);
-    }
-  }
-
-  function getSelectedTasks() {
-    const ids = [];
-    const hospitals = new Set();
-
-    $('.js-task-check:checked').each(function () {
-      ids.push($(this).val());
-      hospitals.add(String($(this).data('hospital-id') || '0'));
-    });
-
-    return { ids, hospitals: Array.from(hospitals) };
-  }
-
-
-  // --- Checklist buttons
-  $('#btnShowChecklist').on('click', function () {
-
-    const $hosp = $('#hospital_id');
-    const selectedHospitalId = window.selectedHospitalId || '';
-    if(selectedHospitalId) {
-      // if hospital filter already selected, load missions immediately
-
-        toggleChecklist(true);
-      }else {
-        // if no hospital filter selected, show warning and force select first hospital to avoid confusion
-        Swal.fire({
-          icon: 'warning',
-          title: 'Select Hospital First',
-          text: 'Please select a hospital filter before setting up visit checklist.'
-        });
-      }
-      return;
-     // if no hospital filter selected, force select first hospital to avoid confusion
-
-    // toggleChecklist(true);
-  });
-
-  $('#btnHideChecklist').on('click', function () {
-    toggleChecklist(false);
-  });
 
   $('#btnHideTaskList').on('click', function () {
      $('#taskAccordionSection').addClass('d-none');
@@ -131,67 +78,8 @@ $(function () {
     });
   });
 
-  // --- Open Create Mission modal
-  $('#btnOpenCreateMissionRunModal').on('click', function () {
-    // if filtered hospital exists, prefill
 
-    if (window.selectedHospitalId) {
-      $('#cmr_hospital_id').val(window.selectedHospitalId);
-      //make it readonly by disabling select2 and select element
 
-      $('#cmr_hospital_id').prop('disabled', true);
-      $('#cmr_hospital_id').prop('readonly', true);
-    }
-    $('#createMissionRunModal').modal('show');
-  });
-
-  // Create mission run
-  $('#btnCreateMissionRun').on('click', function () {
-    const hospitalId = $('#cmr_hospital_id').val();
-    const deadline = $('#cmr_deadline').val();
-    const purpose = $('#cmr_purpose').val();
-    const picUserId = $('#cmr_pic_user_id').val();
-
-    if (!hospitalId) {
-      Swal.fire({ icon:'warning', title:'Hospital required', text:'Please select hospital.' });
-      return;
-    }
-    if (!deadline) {
-      Swal.fire({ icon:'warning', title:'Deadline required', text:'Please select mission deadline.' });
-      return;
-    }
-
-    Swal.fire({
-      title: 'Create Mission?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Create',
-      cancelButtonText: 'Cancel'
-    }).then((res) => {
-      if (!res.isConfirmed) return;
-
-      $.ajax({
-        url: window.createMissionRunUrl,
-        method: 'POST',
-        data: {
-          _token: window.csrfToken,
-          hospital_id: hospitalId,
-          deadline_mission: deadline,
-          task_purpose: purpose,
-          person_in_charge: picUserId
-        },
-        success: function (r) {
-          Swal.fire({ icon:'success', title:'Created', text: r.message || 'Mission created', timer: 1200, showConfirmButton:false });
-          $('#createMissionRunModal').modal('hide');
-          setTimeout(() => location.reload(), 700);
-        },
-        error: function (xhr) {
-          console.error(xhr.responseText);
-          Swal.fire({ icon:'error', title:'Failed', text:'Check server log.' });
-        }
-      });
-    });
-  });
 
   // --- Open Add-to-mission modal
   $('#btnOpenAddToMissionRunModal').on('click', function () {
@@ -220,56 +108,6 @@ $(function () {
     });
   });
 
-  // Confirm add tasks to mission run
-  $('#btnConfirmAddToMissionRun').on('click', function () {
-    const { ids, hospitals } = getSelectedTasks();
-    const missionRunId = $('#mission_run_id').val();
-
-    if (!missionRunId) {
-      Swal.fire({ icon:'warning', title:'Select mission', text:'Please choose mission first.' });
-      return;
-    }
-    if (!ids.length) {
-      Swal.fire({ icon:'warning', title:'No selected task', text:'Please check tasks again.' });
-      return;
-    }
-
-    Swal.fire({
-      title: 'Add tasks to mission?',
-      html: `Selected: <b>${ids.length}</b> task(s)`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, Add',
-      cancelButtonText: 'Cancel'
-    }).then((res) => {
-      if (!res.isConfirmed) return;
-
-      $.ajax({
-        url: window.bulkAddToMissionRunUrl,
-        method: 'POST',
-        data: {
-          _token: window.csrfToken,
-          mission_run_id: missionRunId,
-          task_ids: ids,
-          hospital_id: hospitals[0], // for safety validation server-side
-        },
-        success: function (r) {
-          Swal.fire({ icon:'success', title:'Done', text: r.message || 'Added', timer: 1200, showConfirmButton:false });
-          $('#addToMissionRunModal').modal('hide');
-          setTimeout(() => location.reload(), 700);
-        },
-        error: function (xhr) {
-          console.error(xhr.responseText);
-          let msg = 'Failed. Check server log.';
-          try {
-            const json = JSON.parse(xhr.responseText);
-            if (json.message) msg = json.message;
-          } catch(e) {}
-          Swal.fire({ icon:'error', title:'Error', text: msg });
-        }
-      });
-    });
-  });
 
   $('#btnClearFilter').on('click', function () {
 
@@ -282,4 +120,73 @@ $(function () {
 });
 
 });
+</script>
+
+
+<script>
+
+let requestMode = false;
+let activeHospital = null;
+
+$('.btn-setup-visit').on('click', function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const hospitalId = $(this).data('hospital-id');
+  const $header = $(this).closest('.card-header');
+  const $card = $(this).closest('.card');
+  const $collapse = $card.find('.collapse').first();
+
+  requestMode = true;
+  activeHospital = hospitalId;
+
+  // open current accordion
+  $collapse.collapse('show');
+
+  // hide all check columns first
+  $('.js-col-check').addClass('d-none');
+  $('.js-task-check').prop('checked', false);
+
+  // show only this hospital checkboxes
+  $('.js-task-check').each(function () {
+    const rowHospital = $(this).data('hospital-id');
+
+    if (String(rowHospital) === String(hospitalId)) {
+      $(this).closest('td').removeClass('d-none');
+    } else {
+      $(this).closest('td').addClass('d-none');
+    }
+  });
+
+  // reset all accordion buttons first
+  $('.btn-plan-visit').addClass('d-none');
+  $('.btn-hide-visit').addClass('d-none');
+  $('.btn-setup-visit').removeClass('d-none');
+
+
+  $card.find('.js-col-check').removeClass('d-none');
+  // show only current header buttons
+  $header.find('.btn-setup-visit').addClass('d-none');
+  $header.find('.btn-plan-visit').removeClass('d-none');
+  $header.find('.btn-hide-visit').removeClass('d-none');
+});
+
+$('.btn-hide-visit').on('click', function () {
+  const $header = $(this).closest('.card-header');
+    const $card = $(this).closest('.card');
+
+
+  requestMode = false;
+  activeHospital = null;
+
+  $card.find('.js-task-check').prop('checked', false);
+  $card.find('.js-col-check').addClass('d-none');
+
+  // only reset current header
+  $header.find('.btn-plan-visit').addClass('d-none');
+  $header.find('.btn-hide-visit').addClass('d-none');
+  $header.find('.btn-setup-visit').removeClass('d-none');
+});
+
+
 </script>
