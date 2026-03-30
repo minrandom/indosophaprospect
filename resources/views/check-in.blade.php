@@ -34,12 +34,13 @@
     <!-- Check-in Card -->
     <div class="card-body d-flex flex-column align-items-center" style="min-height: 100vh;">
         <div id="map" style="width: 100%; height: 300px;"></div>
+        <input type="hidden" name="mission_run_id" value="{{ $missionRunId ?? '' }}">
 
         <div id="video-container" class="mt-4 d-flex flex-column align-items-center">
             <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
             <video id="video" width="320" height="240" autoplay playsinline></video>
-
             <button id="click-photo" class="btn btn-primary mt-2"><i class="fas fa-camera"></i> Check IN</button>
+
         </div>
         <button id="toggle-camera" class="btn btn-primary"><i class='fas fa-street-view'></i> Start Checkin</button>
     </div>
@@ -56,6 +57,7 @@
     let latLng = {}; // To store latitude and longitude
     let image_data_url; // To store captured photo
     let checkInAt;
+    let mission_run_id = document.querySelector('input[name="mission_run_id"]').value;
 
     document.addEventListener('DOMContentLoaded', function () {
         initMapAndLocation();
@@ -214,6 +216,7 @@
                 photo_data: image_data_url, // Captured photo
                 latitude: latLng.latitude,
                 longitude: latLng.longitude,
+                mission_run_id: mission_run_id, // Pass the mission run ID
             },
             success: function (response) {
                 Swal.fire({

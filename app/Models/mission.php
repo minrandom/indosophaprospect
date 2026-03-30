@@ -83,6 +83,7 @@ class mission extends Model
             'finance' => 'FIN',
             'technical' => 'TEC',
             'business_unit' => 'BUN',
+            'sales_admin'=>'SAD',
         ];
 
         $ref = $map[$taskReference] ?? 'CTM';

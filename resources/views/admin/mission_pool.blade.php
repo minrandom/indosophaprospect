@@ -1,5 +1,5 @@
 @extends('layout.backend.app',[
-  'title' => 'Mission Pool',
+  'title' => 'Schedule',
   'pageTitle' => '',
 ])
 
@@ -13,8 +13,7 @@
         <div class="col-12 col-lg-6 d-flex align-items-center mb-3 mb-lg-0">
           <div style="width:10px; height:56px; background:#ffffff; margin-right:14px;"></div>
           <div class="text-white font-weight-bold" style="letter-spacing:1px; font-size:26px;">
-            Mission Pool
-          </div>
+            Schedule          </div>
         </div>
 
         <div class="col-12 col-lg-6 text-lg-right text-white">
@@ -69,7 +68,7 @@
                      style="width:64px;height:64px;background:#132A72;">
                   <i class="fas fa-list"></i>
                 </div>
-                <div class="small mt-1">Mission List</div>
+                <div class="small mt-1">Visit List</div>
               </div>
             </a>
 
@@ -96,14 +95,14 @@
     <div class="card-body text-white">
 
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="h5 mb-0">Mission List</div>
+        <div class="h5 mb-0">Visit List</div>
       </div>
 
       <div class="table-responsive">
         <table class="table table-sm mb-0" style="color:#fff;">
           <thead style="background:#132A72;">
             <tr class="text-uppercase small">
-              <th>Mission</th>
+
               <th>Hospital</th>
               <th>Asigned Person</th>
               <th>Asigned By</th>
@@ -118,9 +117,9 @@
 
             @forelse($runs as $run)
               <tr>
-                <td class="font-weight-bold">
+                {{-- <td class="font-weight-bold">
                   {{ $run->code ?? ('RUN-'.$run->id) }}
-                </td>
+                </td> --}}
 
                 <td>
                   {{ $run->hospital?->name ?? '-' }}
@@ -203,7 +202,7 @@
                     <a href="{{ route('missions.runs.show', $run->id) }}"
                     class="btn btn-sm btn-success"
                     style="border-radius:5px;">
-                    Go To Mission
+                    Go Visiting
                     </a>
                     @elseif($run->tasks_count == 0)
                     <a href="{{  route('missions.taskPool')  }}" class="badge badge-secondary">No Task</a>
@@ -234,7 +233,7 @@
 
 
 {{-- TASK LIST PANEL --}}
-  <div class="col-12 mb-4">
+  <div class="col-12 mb-4" id="missionTasksPanel" style="display:none;">
 <div class="card shadow border-0 mb-4" style="border-radius:1.25rem; height:420px;">
   <div class="card-body ">
 
@@ -258,60 +257,28 @@
 </div>
 
   {{-- SCHEDULE GRID --}}
-  {{-- <div class="card shadow border-0 mb-4" style="border-radius: 1.25rem; background:#4E73DF;">
+   <div class="card shadow border-0 mb-4" style="border-radius: 1.25rem; background:#4E73DF;">
     <div class="card-body text-white">
 
       <div class="h5 mb-3">Schedule</div>
+        @include('modal.reuseable._weekly_calendar', [
+                'calendarModalId' => 'scheduleCalendarModal',
+                'calendarTitle' => 'Schedule Weekly Calendar',
 
-      <div class="table-responsive" style="overflow:auto;">
-        <table class="table table-bordered mb-0" style="min-width:1100px; color:#000; background:#E9EDFF;">
-          <thead>
-            <tr style="background:#4E73DF; color:#fff;">
-              <th style="width:110px;">Time</th>
-              @foreach($days as $d)
-                <th class="text-center">
-                  <div class="small">{{ $d['label_date'] }}</div>
-                  <div class="font-weight-bold">{{ $d['label_day'] }}</div>
-                </th>
-              @endforeach
-            </tr>
-          </thead>
-          <tbody>
-            @foreach($times as $time)
-              <tr>
-                <th style="background:#DCE4FF;" class="text-center">{{ $time }}</th>
+                'calendarStart' => $calendar['calendarStart'],
+                'calendarHours' => $calendar['calendarHours'],
+                'calendarVisits' => $calendar['calendarVisits'],
+                'calendarId' => 'missionPoolCalendar'
 
-                @foreach($days as $d)
-                  @php $cellList = $grid[$time][$d['date']] ?? []; @endphp
+            ])
 
-                  <td class="js-schedule-cell"
-                      data-date="{{ $d['date'] }}"
-                      data-time="{{ $time }}"
-                      style="height:52px; cursor:pointer; background:#EFF2FF;">
-                    @if(!empty($cellList))
-                    @foreach($cellList as $cell)
-                        <div class="p-1 mb-1" style="border-radius:8px; background:#DCE4FF;">
-                        <div class="small font-weight-bold">{{ $cell['hospital'] }}</div>
-                        <div class="small">{{ $cell['code'] }}</div>
-                        <div class="small text-muted">PIC: {{ $cell['pic'] }}</div>
-                        </div>
-                    @endforeach
-                    @endif
-                  </td>
-                @endforeach
-
-              </tr>
-            @endforeach
-          </tbody>
-        </table>
-      </div>
+    </div>
 
       {{-- <div class="mt-2 text-white-50 small">
         * Click any empty cell to schedule (PIC required).
       </div> --}}
 
-    {{-- </div>
-  </div> --}}
+    {{-- </div>--}}
 
 </div>
 

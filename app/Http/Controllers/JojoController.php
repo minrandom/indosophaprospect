@@ -26,13 +26,33 @@ class JojoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('check-in');
+        $missionRunId = $request->get('mission_run_id');
+
+
+        return view('check-in', compact('missionRunId'));
     }
 
-    public function indx(){
-        return view('check-out');
+    public function indx(Request $request)
+    {
+        $missionRunId = $request->get('mission_run_id');
+        $usid = Auth::user()->id;
+
+        $hariini = Attendance::where('user_id', $usid)
+            ->whereDate("created_at", today())
+            ->doesntHave('out')
+            ->first();
+
+        if (isset($hariini)) {
+            $hariini->created_at = $hariini->created_at->addHours(7);
+            $urlphoto = str_replace("https://drive.google.com/uc?id=", "https://drive.google.com/thumbnail?id=", $hariini->photo_data);
+            $urlphotoshow = str_replace("&export=media", "", $urlphoto);
+
+            return view('check-out', compact('hariini', 'urlphotoshow', 'missionRunId'));
+        }
+
+        return redirect()->route('check-in', ['mission_run_id' => $missionRunId]);
     }
 
     public function kehadiran(){
@@ -82,7 +102,7 @@ class JojoController extends Controller
 
     public function testkirim()
     {
- 
+
     }
 
 
@@ -104,7 +124,7 @@ class JojoController extends Controller
 
         $n[0]=$rev->first_offer_date?10000000:0;
         $n[6]=$rev->last_offer_date?10:0;
-        
+
 
 
         if($rev->anggaran_status=="Belum Ada" || $rev->anggaran_status =="Usulan"){
@@ -127,31 +147,36 @@ class JojoController extends Controller
         if($rev->purchasing_status=="Belum Tahu"||$rev->purchasing_status=="Menolak"){
             $n[4]=0;
         }else{$n[4]=1000;}
-        
+
         if($rev->direksi_status=="Belum Tahu"||$rev->direksi_status=="Menolak"){
             $n[5]=0;
         }else{$n[5]=100;}
-        
+
         if($rev->buy_status=="Done"){
             $n[7]=5;
         }else{$n[7]=0;}
 
         $sum=array_sum($n);
-        
 
-         
-            
+
+
+
 
 
         //var_dump($diff);
-        
-        
+
+
      }
 
 
      public function store(Request $request)
     {
+        // dd($request->all());
+        $run = \App\Models\MissionRun::find($request->input('mission_run_id'));
+        // dd($run);
+
         $validated = $request->validate([
+            // 'mission_run_id' => 'required|exists:missions,id',
             'place_name' => 'required|string',
             'address' => 'required|string',
             'check_in_loc' => 'required|string',
@@ -172,9 +197,9 @@ class JojoController extends Controller
 
             $photoPaths=public_path($photoPath);
             //echo $photoPath;
-        
+
             //file_put_contents('test.jpg', $data);
-            
+
             Storage::disk('google')->put($photoFilename, $data);
             //file_put_contents($photoPaths,$data);
             $photoUrl = Storage::disk('google')->url($photoFilename);
@@ -191,6 +216,19 @@ class JojoController extends Controller
 
             $attendance->save();
 
+
+
+
+                 if ($run) {
+                    $run->check_in_id = $attendance->id;
+                    $run->status = 3; // on progress
+                    $run->status_mission = 3; // if you still use this too
+                    $run->save();
+                }
+
+
+
+
             return response()->json(['success' => true, 'message' => 'Check-in saved successfully.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Error saving check-in: ' . $e->getMessage()], 500);
@@ -199,7 +237,11 @@ class JojoController extends Controller
 
     public function outstore(Request $request)
     {
+
+      $run = \App\Models\MissionRun::find($request->input('mission_run_id'));
+
         $validated = $request->validate([
+            // 'mission_run_id' => 'required|exists:missions,id',
             'checkinid' => 'required|exists:attendances,id', // Ensure the checkin_id exists in the database
             'place_name' => 'required|string',
             'address' => 'required|string',
@@ -236,6 +278,19 @@ class JojoController extends Controller
             ]);
 
             $attendance->save();
+
+            // // CONNECT TO MISSION RUN
+            // if ($request->filled('mission_run_id')) {
+            //     $run = \App\Models\MissionRun::find($request->input('mission_run_id'));
+
+                if ($run) {
+                    $run->check_out_id = $attendance->id;
+                    // $run->status = 5; // done
+                    // $run->status_mission = 5; // if still used
+                    $run->save();
+                }
+            // }
+
 
             return response()->json(['success' => true, 'message' => 'Check-Out saved successfully.']);
         } catch (\Exception $e) {
@@ -287,21 +342,21 @@ class JojoController extends Controller
     public function fixtemperature(){
       // Get all prospects with their associated reviews and temperatures
     $prospects = Prospect::with('review', 'temperature')->get();
-    
+
     // Iterate through each prospect
     foreach ($prospects as $prospect) {
         // Get the review and temperature
         $review = $prospect->review;
         $temperature = $prospect->temperature;
-        
+
         $etapodate = Carbon::parse($prospect->eta_po_date);
         $now= Carbon::now();
         $diff =$etapodate->diffInDays($now,false);
         var_dump($diff);
-    
+
         //var_dump($usercek);
-        
-        
+
+
         // Determine the new temperature name and code based on conditions
         if($diff>0){var_dump("PAST");}
 
@@ -315,7 +370,7 @@ class JojoController extends Controller
             if ($review->chance == 1) {
                 $tempename = 'SUCCESS';
                 $tempecode = '5';
-            } else 
+            } else
             {
                 if ($review->chance == 0) {
                     $tempename = 'DROP';
@@ -327,7 +382,7 @@ class JojoController extends Controller
                         $tempecode = '4';
                     } else
                     {
-                        
+
                             if (in_array($review->anggaran_status, ['Belum Ada', 'Usulan','Belum Tahu']) || $review->chance == 0.2) {
                                 $tempename = 'LEAD';
                                 $tempecode = '1';
@@ -338,7 +393,7 @@ class JojoController extends Controller
                                     $tempename = 'FUNNEL';
                                     $tempecode = '3';
                                 }
-                                
+
                                 else{
 
                                     if ($review->chance >= 0.4 && $review->chance < 0.8 && isset($review->first_offer_date)) {
@@ -348,8 +403,8 @@ class JojoController extends Controller
                                     else
                                     {
                                         $tempename = 'Prospect';
-                                        $tempecode = '2'; 
-                                    }                
+                                        $tempecode = '2';
+                                    }
 
                                 }
                             }
@@ -358,10 +413,10 @@ class JojoController extends Controller
                     }
                 }
             }
-        
+
         $datacekk =$review->chance >= 0.6 && Carbon::parse($prospect->eta_po_date)->addDays(150)->isPast()&&$review->anggaran_status=="Ada Sesuai" &&(isset($review->user_status) || isset($review->direksi_status) || isset($review->purchasing_status)) ;
 
-       
+
 
 
         // Update the temperature in the database
@@ -369,48 +424,48 @@ class JojoController extends Controller
         $temperature->tempCodeName = $tempecode;
         $temperature->save();
         var_dump($temperature->tempCodeName);
-      
+
     }
 
-    
 
-    
+
+
 
     //return redirect('/home');
     }
 
 public function temperupdate($id,Request $request){
     //dd($request->update);
-$update = $request->update; 
+$update = $request->update;
     if(isset($update)){
     $prospect = Prospect::with('review', 'temperature')->where('id',$id)->first();
 
 
-     
+
         // Get the review and temperature
         $review = $prospect->review;
-   
+
 
         $temperature = $prospect->temperature;
-        
+
         $etapodate = Carbon::parse($prospect->eta_po_date);
         $now= Carbon::now();
         $diff =$etapodate->diffInDays($now,false);
         var_dump($diff);
-    
+
         //var_dump($usercek);
-        
-        
+
+
         // Determine the new temperature name and code based on conditions
         if($diff>0){var_dump("PAST");}
 
 
-        
+
 
             if ($review->chance == 1) {
                 $tempename = 'SUCCESS';
                 $tempecode = '5';
-            } else 
+            } else
             {
                 if ($review->chance == 0) {
                     $tempename = 'DROP';
@@ -437,7 +492,7 @@ $update = $request->update;
                                     $tempename = 'FUNNEL';
                                     $tempecode = '3';
                                 }
-                                
+
                                 else{
 
                                     if ($review->chance >= 0.4 && $review->chance < 0.8 && isset($review->first_offer_date)) {
@@ -447,8 +502,8 @@ $update = $request->update;
                                     else
                                     {
                                         $tempename = 'Prospect';
-                                        $tempecode = '2'; 
-                                    }                
+                                        $tempecode = '2';
+                                    }
 
                                 }
                             }
@@ -470,7 +525,7 @@ $update = $request->update;
 }
 
     public function prospectsequence(){
-        
+
     }
 
     public function destroy(jojo $jojo)

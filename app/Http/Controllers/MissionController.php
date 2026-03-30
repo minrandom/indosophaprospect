@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\MissionHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Services\VisitCalendarService;
 
 class MissionController extends Controller
 {
@@ -93,6 +94,11 @@ class MissionController extends Controller
 
     public function taskPool(Request $request)
     {
+
+        $visitCalendarService = new VisitCalendarService();
+        $calendar = $visitCalendarService->build($request);
+        //dd($calendar);
+
         $provinceId = (int) $request->get('province_id', 0);
         $hospitalId = (int) $request->get('hospital_id', 0);
 
@@ -185,7 +191,7 @@ class MissionController extends Controller
         $pics = User::orderBy('name')->get(['id','name']);
 
         return view('admin.task_pool', compact(
-            'grouped','provinces','hospitals','pics','provinceId','hospitalId'
+            'grouped','provinces','hospitals','pics','provinceId','hospitalId','calendar'
         ));
     }
 
@@ -266,52 +272,7 @@ class MissionController extends Controller
 
 
 
-    public function pendingMission($hospitalId)
-    {
-        $hospital = Hospital::findOrFail($hospitalId);
 
-        // Dummy Data (simulate automation result)
-        $missions = [
-            [
-                'equipment_id' => 'IB000552',
-                'issue' => 'Warranty Expired',
-                'priority' => 'High',
-                'deadline' => '2025-02-01'
-            ],
-            [
-                'equipment_id' => 'IB000583',
-                'issue' => 'Department Missing',
-                'priority' => 'Medium',
-                'deadline' => '2025-02-10'
-            ],
-            [
-                'equipment_id' => 'IB000622',
-                'issue' => 'No Contract Coverage',
-                'priority' => 'High',
-                'deadline' => '2025-01-28'
-            ],
-            [
-                'equipment_id' => 'IB000711',
-                'issue' => 'Last Service > 12 Months',
-                'priority' => 'Medium',
-                'deadline' => '2025-02-05'
-            ],
-            [
-                'equipment_id' => 'IB000801',
-                'issue' => 'Condition Not Updated',
-                'priority' => 'Low',
-                'deadline' => '2025-02-15'
-            ],
-            [
-                'equipment_id' => 'IB000899',
-                'issue' => 'Contract Ending Soon',
-                'priority' => 'High',
-                'deadline' => '2025-01-30'
-            ],
-        ];
-
-    return view('admin.hospitalpendingmission', compact('hospital','missions'));
-    }
 
 
     public function missionPool(Request $request)
@@ -379,4 +340,69 @@ class MissionController extends Controller
 
 
     }
+
+    public function picOptions($hospitalId)
+    {
+        $hospital = Hospital::with('province')->findOrFail($hospitalId);
+        $province = $hospital->province;
+
+        if (!$province) {
+            return response()->json([
+                'message' => 'Province not found for this hospital.',
+                'data' => [],
+            ]);
+        }
+
+        $fs = User::with('employee:id,area')
+            ->where('role', 'FS')
+            ->whereHas('employee', function ($q) use ($province) {
+                $q->where('area', $province->prov_order_no);
+            })
+            ->get(['id','name','role']);
+
+        $amFsx = User::with('employee:id,area')
+            ->whereIn('role', ['AM', 'FSX'])
+            ->whereHas('employee', function ($q) use ($province) {
+                $q->where('area', $province->iss_area_code);
+            })
+            ->get(['id','name','role']);
+
+        $nsm = User::with('employee:id,area')
+            ->where('role', 'NSM')
+            ->whereHas('employee', function ($q) use ($province) {
+                $q->where('area', $province->wilayah);
+            })
+            ->get(['id','name','role']);
+
+        $users = $fs->concat($amFsx)->concat($nsm)
+            ->sortBy([
+                fn($a, $b) => strcmp($a->role, $b->role),
+                fn($a, $b) => strcmp($a->name, $b->name),
+            ])
+            ->values();
+
+        $data = $users->map(function ($u) {
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'role' => $u->role,
+                'label' => $u->name . ' - ' . $u->role,
+            ];
+        });
+
+        return response()->json([
+            'message' => 'OK',
+            'data' => $data,
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
 }

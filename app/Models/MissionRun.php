@@ -28,6 +28,15 @@ class MissionRun extends Model
         return $this->belongsTo(User::class, 'person_in_charge');
     }
 
+    public function checkIn()
+    {
+        return $this->belongsTo(Attendance::class, 'check_in_id');
+    }
+
+    public function checkOut()
+    {
+        return $this->belongsTo(AttendanceOut::class, 'check_out_id');
+    }
 
     public function tasks()
     {
@@ -39,6 +48,6 @@ class MissionRun extends Model
         // example: MISISS-03-26-1234
         $mmYY = now()->format('m-y');
         $rand = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
-        return "MISISS-{$mmYY}-{$rand}";
+        return "VISIT-{$mmYY}-{$rand}";
     }
 }

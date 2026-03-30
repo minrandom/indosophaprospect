@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\VisitCalendarService;
 use App\Models\MissionRun;
 use App\Models\mission;
 use App\Models\Hospital;
@@ -128,48 +129,6 @@ class MissionRunController extends Controller
         ]);
     }
 
-    public function scheduleMissionRun(Request $request)
-    {
-    $validated = $request->validate([
-        'run_id' => ['required','integer','exists:mission_runs,id'],
-        'schedule_date' => ['required','date'],
-        'schedule_time' => ['required','date_format:H:i'],
-        'duration_minutes' => ['required','integer','in:60,120,180,240,300,360,420,480'],
-    ]);
-
-    $run = MissionRun::findOrFail($validated['run_id']);
-
-    // PIC required rule (you said PIC is required)
-    if (empty($run->person_in_charge)) {
-        return response()->json([
-        'message' => 'PIC is required before scheduling this mission.'
-        ], 422);
-    }
-
-    $run->schedule_date = $validated['schedule_date'];
-    $run->schedule_time = $validated['schedule_time'] . ':00';
-    $run->schedule_duration_minutes = $validated['duration_minutes'];
-    $run->status_mission = 2; // scheduled
-    $run->status = 2; // scheduled
-    $run->save();
-
-    // OPTIONAL (recommended): move all tasks inside run to scheduled too
-    // so "Start mission" can depend on tasks status easily
-    mission::where('mission_run_id', $run->id)
-        ->whereIn('status_mission', [1]) // in mission pool
-        ->update([
-        'pic_user_id' => $run->person_in_charge, // assign PIC from run header if not set on task
-        'status_mission' => 2,
-        'schedule_date' => $run->schedule_date,
-        'schedule_time' => $run->schedule_time,
-        'schedule_duration_minutes' => $run->schedule_duration_minutes,
-        ]);
-
-    return response()->json([
-        'message' => 'Mission scheduled.',
-    ]);
-    }
-
 
 
     public function start(Request $request, MissionRun $run)
@@ -201,6 +160,7 @@ class MissionRunController extends Controller
 
     public function show(Request $request, MissionRun $run)
     {
+
         // left side: tasks already in mission (status 1) grouped by task_reference
         $inMission = mission::with(['hospital:id,name,city'])
             ->where('mission_run_id', $run->id)
@@ -258,6 +218,48 @@ class MissionRunController extends Controller
         ]);
     }
 
+    public function scheduleMissionRun(Request $request)
+    {
+    $validated = $request->validate([
+        'run_id' => ['required','integer','exists:mission_runs,id'],
+        'schedule_date' => ['required','date'],
+        'schedule_time' => ['required','date_format:H:i'],
+        'duration_minutes' => ['required','integer','in:60,120,180,240,300,360,420,480'],
+    ]);
+
+    $run = MissionRun::findOrFail($validated['run_id']);
+
+    // PIC required rule (you said PIC is required)
+    if (empty($run->person_in_charge)) {
+        return response()->json([
+        'message' => 'PIC is required before scheduling this mission.'
+        ], 422);
+    }
+
+    $run->schedule_date = $validated['schedule_date'];
+    $run->schedule_time = $validated['schedule_time'] . ':00';
+    $run->schedule_duration_minutes = $validated['duration_minutes'];
+    $run->status_mission = 2; // scheduled
+    $run->status = 2; // scheduled
+    $run->save();
+
+    // OPTIONAL (recommended): move all tasks inside run to scheduled too
+    // so "Start mission" can depend on tasks status easily
+    mission::where('mission_run_id', $run->id)
+        ->whereIn('status_mission', [1]) // in mission pool
+        ->update([
+        'pic_user_id' => $run->person_in_charge, // assign PIC from run header if not set on task
+        'status_mission' => 2,
+        'schedule_date' => $run->schedule_date,
+        'schedule_time' => $run->schedule_time,
+        'schedule_duration_minutes' => $run->schedule_duration_minutes,
+        ]);
+
+    return response()->json([
+        'message' => 'Mission scheduled.',
+    ]);
+    }
+
     public function addRequestedToMission(Request $request, MissionRun $run)
     {
         // role guard sederhana (sesuaikan field role kamu)
@@ -284,6 +286,92 @@ class MissionRunController extends Controller
             'count' => $count ?? 0,
         ]);
     }
+
+    public function planVisit(Request $request)
+    {
+        $role = strtolower(auth()->user()->role ?? '');
+
+        $rules = [
+            'hospital_id' => ['required', 'integer'],
+            'task_ids' => ['required', 'array', 'min:1'],
+            'task_ids.*' => ['integer'],
+            'schedule_date' => ['required', 'date'],
+            'schedule_time' => ['required', 'date_format:H:i'],
+            'schedule_duration_minutes' => ['required', 'integer', 'in:60,120,180,240,300,360,420,480'],
+        ];
+
+        if ($role !== 'fs') {
+            $rules['pic_user_id'] = ['required', 'integer'];
+        }
+
+        $request->validate($rules);
+
+        $tasks = mission::whereIn('id', $request->task_ids)->get();
+
+        if ($tasks->isEmpty()) {
+            return response()->json(['message' => 'No selected tasks found.'], 422);
+        }
+
+        // all selected tasks must be same hospital
+        $uniqueHospitals = $tasks->pluck('hospital_id')->unique()->values();
+        if ($uniqueHospitals->count() !== 1) {
+            return response()->json(['message' => 'Selected tasks must be from the same hospital.'], 422);
+        }
+
+        if ((int)$uniqueHospitals->first() !== (int)$request->hospital_id) {
+            return response()->json(['message' => 'Selected tasks hospital mismatch.'], 422);
+        }
+
+        // only task pool tasks
+        if ($tasks->contains(fn($t) => (int)$t->status_mission !== 0)) {
+            return response()->json(['message' => 'Some selected tasks are not in task pool (status 0).'], 422);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $run = new MissionRun();
+            $run->code = MissionRun::makeCode(); // make helper below
+            $run->hospital_id = $request->hospital_id;
+            $run->creator_id = auth()->id();
+
+            // schedule / deadline use same value for now
+            $run->schedule_date = $request->schedule_date;
+            $run->schedule_time = $request->schedule_time;
+            $run->deadline_mission = $request->schedule_date;
+
+            $run->status = 2; // mission pool / visit created
+            $run->status_mission = 2; // if you still use this field too
+            $run->person_in_charge = $role === 'fs' ? auth()->id() : $request->pic_user_id;
+            $run->schedule_duration_minutes = $request->schedule_duration_minutes;
+            $run->save();
+
+            mission::whereIn('id', $tasks->pluck('id'))
+                ->update([
+                    'mission_run_id' => $run->id,
+                    'status_mission' => 2,
+                    'schedule_date' => $request->schedule_date,
+                    'schedule_time' => $request->schedule_time,
+                    'schedule_duration_minutes' => $request->schedule_duration_minutes,
+                    'updated_at' => now(),
+                ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Visit created and tasks added.',
+                'run_id' => $run->id,
+                'code' => $run->code,
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to create visit.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
 
 }

@@ -41,7 +41,7 @@
     <!-- Top Map: Exact Current Location -->
     <div class="card-body d-flex flex-column align-items-center" >
         <div id="map-current"></div> <!-- Current location map -->
-
+        <input type="hidden" name="mission_run_id" value="{{ $missionRunId ?? '' }}">
         <div id="video-container" class="mt-4 d-flex flex-column align-items-center">
             <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
             <video id="video" width="320" height="240" autoplay playsinline></video>
@@ -77,6 +77,7 @@
     let canvas = document.querySelector("#canvas");
     let image_data_url;
     let latLng = {}; // Store the user's current location
+    let mission_run_id = document.querySelector('input[name="mission_run_id"]').value;
 
     document.addEventListener('DOMContentLoaded', function () {
         // Initialize both maps
@@ -284,6 +285,7 @@
                     photo_data: photoData,
                     latitude: latLng.latitude,
                     longitude: latLng.longitude,
+                    mission_run_id: mission_run_id
                 },
                 success: function (response) {
                     console.log('Data saved successfully:', response);

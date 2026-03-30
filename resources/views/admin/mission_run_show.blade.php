@@ -10,19 +10,42 @@
   <div class="card shadow mb-4 border-0" style="border-radius: 1.5rem;">
     <div class="card-body py-4" style="background:#4E73DF; border-radius: 1.5rem;">
       <div class="row align-items-center">
-        <div class="col-12 col-lg-6 d-flex align-items-center mb-3 mb-lg-0">
+        <div class="col-12 col-lg-4 d-flex align-items-center mb-3 mb-lg-0">
           <div style="width:10px; height:56px; background:#ffffff; margin-right:14px;"></div>
-          <div class="text-white font-weight-bold" style="letter-spacing:1px; font-size:26px;">
-            Mission
+          <div class="text-white font-weight-bold" style="letter-spacing:1px; font-size:20px;">
+            Visit Detail
           </div>
         </div>
 
-        <div class="col-12 col-lg-6 text-lg-right text-white">
-          <div class="small text-white-50">Mission Code</div>
-          <div class="font-weight-bold">{{ $run->code ?? ('RUN-'.$run->id) }}</div>
-          <div class="small text-white-50 mt-1">
-            Hospital: <b>{{ $run->hospital?->name ?? '-' }}</b>
-            @if($run->hospital?->city) | {{ $run->hospital->city }} @endif
+        <div class="col-12 col-lg-4 d-flex align-items-center mb-3 mb-lg-0">
+
+          <div class="btn btn-success font-weight-bold" style="font-size:14px;">
+            Submit
+          </div>
+          <div class="mx-2" style="width:1px; height:36px; background:#ffffff;"></div>
+
+          @if(!$run->check_in_id)
+            <a href="{{ route('check-in', ['mission_run_id' => $run->id]) }}"
+            class="btn btn-sm btn-success">
+                Check-In Location
+            </a>
+        @elseif($run->check_in_id && !$run->check_out_id)
+            <a href="{{ route('check-out', ['mission_run_id' => $run->id]) }}"
+            class="btn btn-sm btn-warning">
+                Check-Out
+            </a>
+        @else
+            <span class="badge badge-success">Check-in Check-out Done</span>
+        @endif
+
+        </div>
+
+        <div class="col-12 col-lg-4 text-lg-right text-white">
+          {{-- <div class="small text-white-50">Visit Code</div>
+          <div class="font-weight-bold">{{ $run->code ?? ('RUN-'.$run->id) }}</div> --}}
+          <div class="text-light mt-1">
+           <b>{{ $run->hospital?->name ?? '-' }}</b>
+            @if($run->hospital?->city) </br> {{ $run->hospital->city }} @endif
           </div>
         </div>
       </div>
@@ -38,7 +61,7 @@
         <div class="card-body text-white">
 
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="h5 mb-0">Mission Tasks</div>
+            <div class="h5 mb-0">Visit Tasks</div>
             <div class="small text-white-50">
               Status Run:
               @if($run->status_mission===3)<b>ON-GOING</b>
@@ -57,11 +80,12 @@
               </div>
 
               <div class="table-responsive">
-                <table class="table table-sm mb-0" style="color:#fff;">
+                <table class="table table-bordered table-sm mb-0" style="color:#fff;">
                   <thead style="background:#132A72;">
                     <tr class="text-uppercase small">
-                      <th>Task Code</th>
+                      <th>Dept</th>
                       <th>Purpose</th>
+                      <th>Expected Outcome</th>
                       <th>Urgency</th>
                       <th>State</th>
                       <th class="text-center">Action</th>
@@ -70,13 +94,35 @@
                   <tbody>
                     @foreach($items as $t)
                       <tr>
-                        <td>{{ $t->code }}</td>
+                        <td>{{ $t->department }}</td>
                         <td>{{ $t->task_purpose ?? '-' }}</td>
-                        <td>{{ $t->priority_level ?? '-' }}</td>
-                        <td>
-                          {{-- task progress inside mission page later --}}
-                          <span class="badge badge-secondary">NOT STARTED</span>
+                        <td>{{ $t->expected_outcome ?? '-' }}</td>
+                        <td>@if($t->priority_level == "Super Urgent")
+                                    <span class="badge badge-danger">{{ $t->priority_level }}</span>
+                            @elseif($t->priority_level == "Urgent")
+                                    <span class="badge badge-warning">{{ $t->priority_level }}</span>
+                            @elseif($t->priority_level == "Penting")
+                                    <span class="badge badge-warning">{{ $t->priority_level }}</span>
+                            @endif
                         </td>
+
+                          {{-- task progress inside mission page later --}}
+                            <td>
+                                @if($t->status_mission == 1)
+                                    <span class="badge badge-secondary">NOT STARTED</span>
+                                @elseif($t->status_mission == 2)
+                                    <span class="badge badge-info">SCHEDULED</span>
+                                @elseif($t->status_mission == 3)
+                                    <span class="badge badge-warning">ON GOING</span>
+                                @elseif($t->status_mission == 4)
+                                    <span class="badge badge-danger">CANCELED</span>
+                                @elseif($t->status_mission == 5)
+                                    <span class="badge badge-success">DONE</span>
+                                @else
+                                    <span class="badge badge-light">{{ $t->status_mission }}</span>
+                                @endif
+                            </td>
+
                         <td class="text-center">
                           <a href="javascript:void(0)" class="btn btn-sm btn-light" style="border-radius:10px;">
                             Start
@@ -89,7 +135,7 @@
               </div>
             </div>
           @empty
-            <div class="text-white-50">No tasks in this mission.</div>
+            <div class="text-white-50">No tasks in this Hospital.</div>
           @endforelse
 
         </div>
@@ -156,9 +202,8 @@
                     <td class="small text-uppercase">{{ $t->task_reference }}</td>
                     <td class="small">{{ $t->task_purpose ?? '-' }}</td>
 
-                    @if($t->status_mission == 30){
+                    @if($t->status_mission == 30)
                         <td class="small" style="color:#FFC107;">Requested</td>
-                    }
                     @else
                     <td class="small">Avail</td>
                     @endif
@@ -179,13 +224,18 @@
             No task in task pool for this hospital.
         </div>
         @endforelse
-         @if(in_array(optional(auth()->user())->role, ['admin','am','nsm']))
-            <button type="button"
-                    id="btnAddToMission"
-                    class="btn btn-sm btn-success font-weight-bold">
-            Add To Mission
-            </button>
-        @endif
+            @php
+                $role = strtolower(optional(auth()->user())->role ?? '');
+            @endphp
+
+            @if(in_array($role, ['admin','am','nsm']))
+                <button type="button"
+                        id="btnAddToMission"
+                        class="btn btn-sm btn-success font-weight-bold">
+                    Add New Task
+                </button>
+            @endif
+
 
 
     </div>

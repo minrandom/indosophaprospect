@@ -8,11 +8,17 @@ use App\Models\MissionHistory;
 use App\Models\MissionRun;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Services\VisitCalendarService;
 
 class MissionPoolController extends Controller
 {
     public function index(Request $request)
-    { $weekStart = $request->get('week_start')
+    {
+        $visitCalendarService = new VisitCalendarService();
+        $calendar = $visitCalendarService->build($request);
+        //dd($calendar);
+
+        $weekStart = $request->get('week_start')
             ? Carbon::parse($request->week_start)->startOfWeek(Carbon::MONDAY)
             : now()->startOfWeek(Carbon::MONDAY);
 
@@ -69,19 +75,20 @@ class MissionPoolController extends Controller
             ];
         }
 
-    $hospitalCount = Mission::whereIn('status_mission', [1,2])->whereNotNull('hospital_id')->distinct('hospital_id')->count('hospital_id');
-    $missionCount  = Mission::whereIn('status_mission', [1,2])->count();
+        $hospitalCount = Mission::whereIn('status_mission', [1,2])->whereNotNull('hospital_id')->distinct('hospital_id')->count('hospital_id');
+        $missionCount  = Mission::whereIn('status_mission', [1,2])->count();
 
-    return view('admin.mission_pool', compact(
-        'weekStart',
-        'weekEnd',
-        'days',
-        // 'times',
-        'grid',
-        'runs',
-        'hospitalCount',
-        'missionCount'
-    ));
+        return view('admin.mission_pool', compact(
+            'weekStart',
+            'weekEnd',
+            'days',
+            // 'times',
+            'grid',
+            'runs',
+            'hospitalCount',
+            'missionCount',
+            'calendar'
+        ));
     }
 
     private function logMissionChange(int $missionId, string $action, array $changes = [], ?string $note = null): void
@@ -129,7 +136,9 @@ class MissionPoolController extends Controller
         return response()->json(['message' => 'Scheduled successfully.']);
     }
 
-        public function start(Mission $mission)
+
+
+    public function start(Mission $mission)
     {
         // must be scheduled (2) before start
         if ((int)$mission->status_mission !== 2) {
@@ -151,6 +160,8 @@ class MissionPoolController extends Controller
 
         return response()->json(['message' => 'Mission started.']);
     }
+
+
 
     public function detail(Mission $mission)
     {

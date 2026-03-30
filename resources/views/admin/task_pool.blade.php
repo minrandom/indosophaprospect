@@ -91,6 +91,13 @@
         <button type="button" class="btn btn-secondary btn-sm" id="btnHideCalendar">
             <i class="fas fa-eye-slash mr-1"></i> Hide Calendar
         </button>
+
+        {{-- <button type="button"
+                class="btn btn-sm btn-info"
+                data-toggle="modal"
+                data-target="#scheduleCalendarModal">
+        Open Schedule Calendar
+        </button> --}}
         <button type="button" class="btn btn-success btn-sm d-none" id="btnShowCalendar">
             <i class="fas fa-eye mr-1"></i> Show Calendar
         </button>
@@ -178,7 +185,8 @@
 
                             <button type="button"
                                     class="btn btn-success btn-sm d-none btn-plan-visit"
-                                    data-hospital-id="{{ $hospitalId }}">
+                                    data-hospital-id="{{ $hospitalId }}"
+                                    data-hospital-name="{{ $hospital ? $hospital->name.' - '.$hospital->city : 'Unknown Hospital' }}">
                                 <i class="fas fa-arrow-right mr-1"></i> Plan Visit
                             </button>
                         </br>
@@ -204,13 +212,13 @@
                         <thead class="thead-light text-uppercase">
                             <tr>
                             <th style="width:34px;" class="js-col-check d-none"></th>
-                            <th>Code</th>
-                            <th>Task Ref</th>
                             <th>Dept</th>
-                            <th>Deadline</th>
+                            <th>Task Ref</th>
                             <th>Purpose</th>
+                            <th>Expected Outcome</th>
+                            <th>Deadline</th>
                             <th>Priority</th>
-                            </tr>
+                                        </tr>
                         </thead>
                         <tbody>
                             @foreach($items as $t)
@@ -221,13 +229,13 @@
                                         value="{{ $t->id }}"
                                         data-hospital-id="{{ $t->hospital_id }}">
                                 </td>
-                                <td class="align-middle font-weight-bold">{{ $t->code }}</td>
-                                <td class="align-middle text-uppercase">{{ $t->task_reference ?? '-' }}</td>
                                 <td class="align-middle">{{ $t->department ?? '-' }}</td>
+                                <td class="align-middle text-uppercase">{{ $t->task_reference ?? '-' }}</td>
+                                <td class="align-middle">{{ $t->task_purpose ?? '-' }}</td>
+                                <td class="align-middle">{{ $t->expected_outcome ?? '-' }}</td>
                                 <td class="align-middle">
                                 {{ $t->deadline ? \Carbon\Carbon::parse($t->deadline)->format('d-M-y') : '-' }}
                                 </td>
-                                <td class="align-middle">{{ $t->task_purpose ?? '-' }}</td>
                                 <td class="align-middle">
                                 @if($t->priority_level === 'Super Urgent')
                                     <span class="badge badge-danger">Super Urgent</span>
@@ -257,14 +265,26 @@
         </div>
     </div>
 
+
+
+
+
+
     {{-- RIGHT: CALENDAR --}}
     <div class="col-12 col-lg-5 mb-4" id="calendarSection">
         <div class="card shadow border-0" style="border-radius:1.25rem; background:#4E73DF;">
         <div class="card-body text-white">
             <div class="h5 mb-3">Calendar</div>
+            @include('modal.reuseable._weekly_calendar', [
+                'calendarModalId' => 'scheduleCalendarModal',
+                'calendarTitle' => 'Schedule Weekly Calendar',
 
-            {{-- Put your calendar/schedule blade here --}}
-            {{-- @include('admin.partials._mission_calendar') --}}
+                'calendarStart' => $calendar['calendarStart'],
+                'calendarHours' => $calendar['calendarHours'],
+                'calendarVisits' => $calendar['calendarVisits'],
+                'calendarId' => 'missionPoolCalendar'
+
+            ])
         </div>
         </div>
     </div>
@@ -274,102 +294,20 @@
 
 </div>
 
-{{-- MODAL: CREATE MISSION RUN --}}
-<div class="modal fade" id="createMissionRunModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content" style="border-radius:1rem;">
-      <div class="modal-header">
-        <h5 class="modal-title">Create Mission</h5>
-        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-      </div>
-
-      <div class="modal-body">
-        <div class="alert alert-warning small mb-3">
-          Mission hanya untuk <b>1 hospital</b>. Pastikan filter hospital sudah dipilih.
-        </div>
-
-        <div class="row">
-          <div class="col-md-6 mb-2">
-            <label class="small text-uppercase">Hospital</label>
-            <select class="form-control" id="cmr_hospital_id">
-              <option value="">Select hospital</option>
-              @foreach($hospitals as $h)
-                <option value="{{ $h->id }}">{{ $h->name }} - {{ $h->city }}</option>
-              @endforeach
-            </select>
-            <small class="text-muted">Auto akan set ke hospital dari filter kalau ada.</small>
-          </div>
-
-          <div class="col-md-6 mb-2">
-            <label class="small text-uppercase">Deadline Mission</label>
-            <input type="date" class="form-control" id="cmr_deadline">
-          </div>
-
-          <div class="col-md-6 mb-2">
-            <label class="small text-uppercase">Task and Scheduling Purpose</label>
-            <input type="text" class="form-control" id="cmr_purpose" placeholder="ex: Weekly mission run">
-          </div>
-
-          <div class="col-md-6 mb-2">
-            <label class="small text-uppercase">Person In Charge (PIC)</label>
-            <select class="form-control" id="cmr_pic_user_id">
-              <option value="">(optional, can assign later)</option>
-              @foreach($pics ?? [] as $u)
-                <option value="{{ $u->id }}">{{ $u->name }}</option>
-              @endforeach
-            </select>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button class="btn btn-primary" id="btnCreateMissionRun">Create</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-{{-- MODAL: ADD TASKS TO MISSION RUN --}}
-<div class="modal fade" id="addToMissionRunModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content" style="border-radius:1rem;">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Tasks to Mission</h5>
-        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-      </div>
-
-      <div class="modal-body">
-        <div class="mb-2 small text-muted">
-          Selected tasks: <b id="am_count">0</b>
-        </div>
-
-        <div class="alert alert-info small">
-          Task yang bisa ditambahkan harus dari <b>hospital yang sama</b>.
-        </div>
-
-        <label class="small text-uppercase">Choose Mission (Same Hospital)</label>
-
-        <select id="mission_run_id" name="mission_run_id" class="form-control form-control-sm" required>
-        <option value="">Select Mission</option>
-        </select>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button class="btn btn-success" id="btnConfirmAddToMissionRun">Add Now</button>
-      </div>
-    </div>
-  </div>
-</div>
+@include('modal._plan_visit_modal')
 
 @endsection
 
 @push('js')
 <script src="{{ asset('template/backend/sb-admin-2/vendor/sweetalert/sweetalert.all.js') }}"></script>
 
+
+
+
 <script>
+
+
+
   window.csrfToken = @json(csrf_token());
 
   // dependent dropdown: only provinces/hospitals that exist in task pool
@@ -381,6 +319,7 @@
 window.taskPoolHospitalsUrl = @json(route('missions.taskPoolHospitalsByProvince', ['provinceId' => '__ID__']));
 
   window.missionRunsByHospitalUrl = @json(route('missionruns.byHospital', ['hospitalId' =>$hospitalId]));
+  window.planVisitPicUrl = @json(route('missionRuns.picOptions', ['hospital' => '__HOSPITAL__']));
 
 window.selectedHospitalId = @json($hospitalId ?? '');
   // default from filter
@@ -389,4 +328,8 @@ window.selectedHospitalId = @json($hospitalId ?? '');
 
 @include('modal.modalJS._task_pool_js')
 @include('modal.modalJS._taskpool_filter_js')
+{{--
+@include('modal.reuseable.reuseJS._weekly_calendar_js') --}}
+
+{{-- @include('admin.calendar.calendarJS._calendar_js') --}}
 @endpush

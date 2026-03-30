@@ -185,7 +185,7 @@ $(function () {
     var ref = ($(this).data('taskref') || '').toString();
 
     Swal.fire({
-        title: 'Start Mission?',
+        title: 'Start Visit?',
         text: 'Mission: ' + (code || ''),
         icon: 'question',
         showCancelButton: true,
@@ -203,7 +203,7 @@ $(function () {
             window.location.href = "{{ url('/missions') }}/" + id + "/report";
         },
         error: function(xhr){
-            Swal.fire({ icon:'error', title:'Failed', text:'Cannot start mission.' });
+            Swal.fire({ icon:'error', title:'Failed', text:'Cannot start visit.' });
         }
         });
     });

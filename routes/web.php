@@ -132,8 +132,8 @@ Route::post('/admin/missions/bulk-to-mission', [MissionController::class, 'bulkT
     ->name('missions.bulkToMission')
     ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
-Route::get('/mission-pool', [MissionPoolController::class, 'index'])->name('missions.pool')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
-Route::post('/mission-pool/schedule', [MissionPoolController::class, 'saveSchedule'])->name('missions.pool.schedule')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/visit-list', [MissionPoolController::class, 'index'])->name('missions.pool')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::post('/visit-list/schedule', [MissionPoolController::class, 'saveSchedule'])->name('missions.pool.schedule')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
 
 Route::post('/missions/{mission}/report', [MissionReportController::class, 'submit'])
@@ -162,6 +162,11 @@ Route::post('/missions/mission-run/schedule', [MissionRunController::class, 'sch
   Route::get('/missions/mission-run/{id}/tasks', [MissionRunController::class, 'tasks'])
   ->name('missionRun.tasks')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
+
+Route::get('/mission-runs/pic-options/{hospital}', [MissionController::class, 'picOptions'])
+    ->name('missionRuns.picOptions')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+
 Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs'])->group(function () {
 
   // Start mission_run -> set status_run=3, then redirect to mission page
@@ -177,9 +182,12 @@ Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am
 
 // routes/web.php
 Route::post('/missions/run/{run}/request-tasks', [MissionRunController::class, 'requestTasks'])
-  ->name('missionrun.requestTasks');
+  ->name('missionrun.requestTasks')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::post('/missions/run/{run}/add-requested', [MissionRunController::class, 'addRequestedToMission'])
-        ->name('missionrun.addRequestedToMission');
+        ->name('missionrun.addRequestedToMission')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+Route::post('/mission-runs/plan-visit', [MissionRunController::class, 'planVisit'])
+    ->name('missionRuns.planVisit')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
 
 Route::get('/user2',[UserController::class,'index2'])->name('user2');

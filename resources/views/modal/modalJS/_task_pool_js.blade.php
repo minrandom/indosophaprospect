@@ -190,3 +190,183 @@ $('.btn-hide-visit').on('click', function () {
 
 
 </script>
+
+
+<script>
+$(function () {
+
+
+  function getSelectedTaskIdsByHospital(hospitalId, $card) {
+    return $card.find('.js-task-check:checked').map(function () {
+      return $(this).val();
+    }).get();
+  }
+
+  $('.btn-plan-visit').on('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const hospitalId = $(this).data('hospital-id');
+    const hospitalName = $(this).data('hospital-name');
+    const $card = $(this).closest('.card');
+
+    const ids = getSelectedTaskIdsByHospital(hospitalId, $card);
+
+    if (!ids.length) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No selected task',
+        text: 'Please check at least 1 task before planning visit.'
+      });
+      return;
+    }
+
+    $('#pv_hospital_id').val(hospitalId);
+    $('#pv_task_ids').val(ids.join(','));
+    $('#pv_hospital_name').text(hospitalName || '-');
+    $('#pv_task_count').text(ids.length);
+
+        loadPicOptions(hospitalId);
+
+
+    $('#planVisitModal').modal('show');
+  });
+
+  $('#btnSubmitPlanVisit').on('click', function () {
+
+
+    const hospitalId = $('#pv_hospital_id').val();
+    const taskIds = ($('#pv_task_ids').val() || '').split(',').filter(Boolean);
+    const scheduledAt = $('#pv_scheduled_at').val();
+    const scheduleTime = $('#pv_schedule_time').val();
+    const scheduleDuration = $('#pv_schedule_duration').val();
+    const picUserId = $('#pv_pic_user_id').length ? $('#pv_pic_user_id').val() : null;
+
+    if (!scheduledAt) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Schedule required',
+        text: 'Please select a scheduled date.'
+      });
+      return;
+    }
+
+    if (!scheduleTime) {
+        Swal.fire({
+        icon: 'warning',
+        title: 'Schedule time required',
+        text: 'Please select schedule time.'
+        });
+        return;
+    }
+    if (!scheduleDuration) {
+        Swal.fire({
+        icon: 'warning',
+        title: 'Duration required',
+        text: 'Please select duration.'
+        });
+        return;
+    }
+
+    if (!window.isFs) {
+        if (!picUserId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'PIC required',
+                text: 'Please select PIC.'
+            });
+            return;
+        }
+    }
+
+    Swal.fire({
+      title: 'Create Visit?',
+      html: `Selected tasks: <b>${taskIds.length}</b>
+      Date: <b>${scheduledAt}</b><br>
+      Time: <b>${scheduleTime}</b>`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Create',
+      cancelButtonText: 'Cancel'
+    }).then((res) => {
+      if (!res.isConfirmed) return;
+
+      $.ajax({
+        url: "{{ route('missionRuns.planVisit') }}",
+        method: "POST",
+        data: {
+          _token: "{{ csrf_token() }}",
+          hospital_id: hospitalId,
+          task_ids: taskIds,
+          schedule_date: scheduledAt,
+          schedule_time: scheduleTime,
+          schedule_duration_minutes: scheduleDuration,
+          pic_user_id: picUserId
+        },
+        success: function (r) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Visit Created',
+            text: r.message || 'Visit created successfully.',
+            timer: 1200,
+            showConfirmButton: false
+          });
+
+          $('#planVisitModal').modal('hide');
+          setTimeout(() => location.reload(), 700);
+        },
+        error: function (xhr) {
+          console.error(xhr.responseText);
+          let msg = 'Failed. Check server log.';
+          try {
+            const json = JSON.parse(xhr.responseText);
+            if (json.message) msg = json.message;
+          } catch(e) {}
+          Swal.fire({ icon:'error', title:'Error', text: msg });
+        }
+      });
+    });
+  });
+
+});
+
+
+function loadPicOptions(hospitalId) {
+  const $pic = $('#pv_pic_user_id');
+
+  if (!$pic.length) return; // FS modal may not have PIC select
+
+  $pic.empty().append('<option value="">Loading PIC...</option>');
+
+  $.ajax({
+    url: window.planVisitPicUrl.replace('__HOSPITAL__', hospitalId),
+    method: 'GET',
+    dataType: 'json',
+    success: function (res) {
+      const rows = Array.isArray(res) ? res : (res.data || []);
+
+      $pic.empty().append('<option value="">Select PIC</option>');
+
+      rows.forEach(function (u) {
+        $pic.append(
+          $('<option>', {
+            value: u.id,
+            text: u.label
+          })
+        );
+      });
+
+      if (!rows.length) {
+        $pic.append('<option value="">No PIC found</option>');
+      }
+    },
+    error: function (xhr) {
+      console.error(xhr.responseText);
+      $pic.empty().append('<option value="">Failed load PIC</option>');
+    }
+  });
+}
+
+
+
+</script>

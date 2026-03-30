@@ -31,13 +31,13 @@
 
 
     <div class="col-4 col-md-4 col-lg-3 mb-4">
-        <a href="{{ route('missions.taskPool')}}"
+        <a href="{{ route('missions.pool')}}"
         class="text-white text-decoration-none d-block">
 
             <div class="card bg-primary text-white shadow h-100 box-card">
                 <div class="card-body d-flex justify-content-center align-items-center text-center">
                     <div class="card-title-box">
-                        Task List
+                        Task and Schedule
                     </div>
                 </div>
             </div>

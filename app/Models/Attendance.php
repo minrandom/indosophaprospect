@@ -34,5 +34,8 @@ class Attendance extends Model
     public function out(){
         return $this->hasOne(AttendanceOut::class,'checkin_id');
     }
+    public function visit(){
+        return $this->hasOne(Attendance::class,'check_in_id');
+    }
 
 }
