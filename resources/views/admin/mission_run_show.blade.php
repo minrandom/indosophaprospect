@@ -24,10 +24,10 @@
           </div>
           <div class="mx-2" style="width:1px; height:36px; background:#ffffff;"></div>
 
-          @if(!$run->check_in_id)
+        @if(!$run->check_in_id)
             <a href="{{ route('check-in', ['mission_run_id' => $run->id]) }}"
             class="btn btn-sm btn-success">
-                Check-In Location
+                Check-In
             </a>
         @elseif($run->check_in_id && !$run->check_out_id)
             <a href="{{ route('check-out', ['mission_run_id' => $run->id]) }}"
@@ -36,6 +36,29 @@
             </a>
         @else
             <span class="badge badge-success">Check-in Check-out Done</span>
+        @endif
+
+
+        @if($run->checkIn || $run->checkOut)
+        <div class="border rounded p-2 bg-light" style="min-width:260px;">
+            @if($run->checkIn)
+            <div class="small">
+                <span class="font-weight-bold text-success">IN:</span>
+                {{ optional($run->checkIn->created_at)->format('d-M H:i') }}
+                <br>
+                <span class="text-muted">{{ $run->checkIn->check_in_loc ?? '-' }}</span>
+            </div>
+            @endif
+
+            @if($run->checkOut)
+            <div class="small mt-2">
+                <span class="font-weight-bold text-warning">OUT:</span>
+                {{ optional($run->checkOut->created_at)->format('d-M H:i') }}
+                <br>
+                <span class="text-muted">{{ $run->checkOut->check_out_loc ?? '-' }}</span>
+            </div>
+            @endif
+        </div>
         @endif
 
         </div>

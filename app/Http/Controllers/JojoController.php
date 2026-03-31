@@ -216,9 +216,6 @@ class JojoController extends Controller
 
             $attendance->save();
 
-
-
-
                  if ($run) {
                     $run->check_in_id = $attendance->id;
                     $run->status = 3; // on progress

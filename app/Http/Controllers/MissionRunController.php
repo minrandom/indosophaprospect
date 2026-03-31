@@ -160,6 +160,18 @@ class MissionRunController extends Controller
 
     public function show(Request $request, MissionRun $run)
     {
+        $run->load(['checkIn', 'checkOut']);
+
+        $checkInPhotoShow = "NO PHOTO";
+        if ($run->checkIn && $run->checkIn->photo_data) {
+            $urlphoto = str_replace(
+                "https://drive.google.com/uc?id=",
+                "https://drive.google.com/thumbnail?id=",
+                $run->checkIn->photo_data
+            );
+
+            $checkInPhotoShow = str_replace("&export=media", "", $urlphoto);
+        }
 
         // left side: tasks already in mission (status 1) grouped by task_reference
         $inMission = mission::with(['hospital:id,name,city'])
@@ -176,7 +188,7 @@ class MissionRunController extends Controller
             ->get()
             ->groupBy('task_reference');
 
-        return view('admin.mission_run_show', compact('run', 'inMission', 'taskPool'));
+        return view('admin.mission_run_show', compact('run', 'inMission', 'taskPool', 'checkInPhotoShow'));
     }
 
     public function requestTasks(Request $request, MissionRun $run)

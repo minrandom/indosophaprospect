@@ -60,7 +60,7 @@
     <div class="card-body">
         <h5 class="card-title">Check-in Terakhir</h5>
         <p class="card-text">{{ $hariini->created_at }}</p>
-        <p class="card-text">{{ $hariini->address }}</p>
+        <p class="card-text">{{ $hariini->check_in_loc }}</p>
         <input type='hidden' id='checkinId' value='{{ $hariini->id }}'>
         <div id="map-last"></div> <!-- Last check-in location map -->
     </div>
@@ -288,15 +288,19 @@
                     mission_run_id: mission_run_id
                 },
                 success: function (response) {
-                    console.log('Data saved successfully:', response);
-                    Swal.fire({
+                                    Swal.fire({
                         icon: 'success',
-                        title: 'Check-Out Successful',
-                        text: 'Your Check-Out has been saved.',
-                        confirmButtonText: 'OK',
-                    }).then(() => {
-                        window.location.reload();
+                        title: 'Success',
+                        text: response.message,
+                        timer: 1200,
+                        showConfirmButton: false
                     });
+
+
+                        setTimeout(() => {
+                            window.location.href = '/missions/runs/' + mission_run_id;
+                        }, 1200);
+
                 },
                 error: function (error) {
                     console.error('Error saving Check-Out data:', error);

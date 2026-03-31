@@ -206,13 +206,15 @@
             },
         });
 
+        var simpleplace = latLng.place_name.split(',')[0]; // Get the first part of the place name
+
         $.ajax({
             url: '{{ route("check-in.store") }}',
             method: 'POST',
             data: {
                 place_name: latLng.place_name, // Place name fetched from Nominatim
                 address: latLng.address, // Address fetched from Nominatim
-                check_in_loc: latLng.place_name, // Check-in location
+                check_in_loc: simpleplace, // Check-in location
                 photo_data: image_data_url, // Captured photo
                 latitude: latLng.latitude,
                 longitude: latLng.longitude,
@@ -221,12 +223,17 @@
             success: function (response) {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Check-In Successful',
-                    text: 'Your check-in has been saved.',
-                    confirmButtonText: 'OK',
-                }).then(() => {
-                    window.location.reload();
+                    title: 'Success',
+                    text: response.message,
+                    timer: 1200,
+                    showConfirmButton: false
                 });
+
+
+                    setTimeout(() => {
+                        window.location.href = '/missions/runs/' + mission_run_id;
+                    }, 1200);
+
             },
             error: function (error) {
                 Swal.fire({
