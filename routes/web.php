@@ -128,6 +128,12 @@ Route::get('/missions/task-pool', [MissionController::class, 'taskPool'])
 Route::get('/missions/task-pool/hospitals/{provinceId}', [MissionController::class, 'taskPoolHospitalsByProvince'])
         ->name('missions.taskPoolHospitalsByProvince')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
+Route::post('missions/custom-task/store', [MissionController::class, 'storeCustomTask'])
+    ->name('missions.customTask.store')
+    ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+
+
 Route::post('/admin/missions/bulk-to-mission', [MissionController::class, 'bulkToMission'])
     ->name('missions.bulkToMission')
     ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
@@ -177,10 +183,43 @@ Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am
   Route::get('/runs/{run}', [MissionRunController::class, 'show'])
     ->name('runs.show');
 
+  Route::get('task/{task}/start', [MissionRunController::class, 'taskStart'])
+    ->name('task.start');
+  Route::get('task/{task}/prospect', [MissionRunController::class, 'showProspectTask'])
+    ->name('task.prospect');
+  Route::get('task/{task}/installbase', [MissionRunController::class, 'showInstallbaseTask'])
+    ->name('task.installbase');
+  Route::post('task/{task}/installbase/update', [MissionRunController::class, 'updateInstallbaseTask'])
+    ->name('task.installbase.update');
+  Route::post('/task/custom/submit', [MissionRunController::class, 'submitCustomTask'])
+    ->name('task.custom.submit');
+
+  Route::get('task/{task}/preview', [MissionRunController::class, 'previewByTask'])
+    ->name('task.preview');
+
+  Route::post('/run/{run}/submit-visit', [MissionRunController::class, 'submitVisit'])
+    ->name('runs.submitVisit');
+
+    Route::post('/run/{run}/validate-visit', [MissionRunController::class, 'validateVisit'])
+      ->name('runs.validateVisit');
+
+    Route::post('/task/{task}/validate-task', [MissionRunController::class, 'validateTask'])
+      ->name('task.validateTask');
+
+
+
+
+
+
+
+
+  Route::get('task/{task}/finance', [MissionRunController::class, 'showFinanceTask'])
+    ->name('task.finance');
+  Route::get('task/{task}/mapping', [MissionRunController::class, 'showMappingTask'])
+    ->name('task.mapping');
 
 });
 
-// routes/web.php
 Route::post('/missions/run/{run}/request-tasks', [MissionRunController::class, 'requestTasks'])
   ->name('missionrun.requestTasks')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::post('/missions/run/{run}/add-requested', [MissionRunController::class, 'addRequestedToMission'])
@@ -188,6 +227,7 @@ Route::post('/missions/run/{run}/add-requested', [MissionRunController::class, '
 
 Route::post('/mission-runs/plan-visit', [MissionRunController::class, 'planVisit'])
     ->name('missionRuns.planVisit')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
 
 
 Route::get('/user2',[UserController::class,'index2'])->name('user2');

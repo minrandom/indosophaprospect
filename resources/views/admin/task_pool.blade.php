@@ -5,6 +5,13 @@
 
 @section('content')
 <div class="container-fluid">
+@include('layout.component.nav.navigation_button_task')
+
+ <input type="hidden" required="" id="creatorid" name="creatorid" class="form-control" value="{{Auth::user()->id}}">
+<input type="hidden" required="" id="theroles" name="theroles" class="form-control" value="{{Auth::user()->role}}">
+<input type="hidden" required="" id="thepost" name="thepost" class="form-control" value="{{Auth::user()->employee->position}}">
+<input readonly type="" required="" id="thecreators" name="thecreators" value="{{ Auth::user()->name }}" class="form-control">
+
 
  <div class="card shadow mb-4 border-0" style="border-radius: 1.5rem;">
     <div class="card-body py-4" style="background:#4E73DF; border-radius: 1.5rem;">
@@ -61,9 +68,9 @@
 
         {{-- ACTION BUTTONS --}}
       <div class="mt-3 d-flex flex-wrap" style="gap:10px;">
-        <button type="button" class="btn btn-success btn-sm" id="btnShowChecklist">
+        {{-- <button type="button" class="btn btn-success btn-sm" id="btnShowChecklist">
           <i class="fas fa-tasks mr-1"></i> Setup Visit
-        </button>
+        </button> --}}
 
         <button type="button" class="btn btn-secondary btn-sm d-none" id="btnHideChecklist">
           <i class="fas fa-eye-slash mr-1"></i> Hide Checklist
@@ -100,6 +107,10 @@
         </button> --}}
         <button type="button" class="btn btn-success btn-sm d-none" id="btnShowCalendar">
             <i class="fas fa-eye mr-1"></i> Show Calendar
+        </button>
+
+        <button type="button" class="btn btn-light btn-sm" data-toggle="modal" data-target="#createCustomTaskModal">
+            <i class="fas fa-plus mr-1"></i> Create Custom Task
         </button>
 
 
@@ -295,13 +306,14 @@
 </div>
 
 @include('modal._plan_visit_modal')
+@include('modal._create_custom_task_modal')
 
 @endsection
 
 @push('js')
+
 <script src="{{ asset('template/backend/sb-admin-2/vendor/sweetalert/sweetalert.all.js') }}"></script>
-
-
+<script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
 
 
 <script>
@@ -325,6 +337,89 @@ window.selectedHospitalId = @json($hospitalId ?? '');
   // default from filter
     console.log('Selected hospital ID from filter:', window.selectedHospitalId);
 </script>
+
+<script type="text/javascript">
+    var provinceSelect = $("#ct_province_id");
+    var hospitalSelect = $("#ct_hospital_id");
+    var departmentSelect = $("#ct_department");
+
+    $(function() {
+    $.ajax({
+     url: "{{ route('admin.prospectcreate') }}",
+     method: "GET",
+     success:function(response){
+
+         var userrole = $("#theroles").val()
+                var userpost = $("#thepost").val()
+
+    populateSelectFromDatalist('ct_province_id', response.province,"Pilih Provinsi");
+    function fetchHospitals2(provinceId) {
+                  // Make an AJAX call to retrieve hospitals based on provinceId
+                  if(userrole!="project"){
+                  $.ajax({
+                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
+                    method: "GET",
+                    success: function(response) {
+
+                        populateSelectFromDatalist('ct_hospital_id', response.hosopt,"Pilih Rumah Sakit");
+                        console.log('Hospitals fetched for province ID ' + provinceId + ':', response.hosopt);
+                    }
+                  });}
+                  else {
+                    $.ajax({
+                    url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
+                    method: "GET",
+                    success: function (response) {
+                            var filteredHospitals = response.hosopt.filter(function(hospital) {
+                                // Replace 'desired_owner' with the actual owner value you want to filter by
+                                return hospital.owned_by === 'TNI / POLRI';
+                            });
+
+                            // Use the filtered hospitals list to populate the select element
+                            populateSelectFromDatalist('ct_hospital_id', filteredHospitals, "Pilih Rumah Sakit");
+
+                    }
+                  });
+                  }
+                }
+
+                provinceSelect.on("change", function () {
+                  var selectedProvinceId = $(this).val();
+                  fetchHospitals2(selectedProvinceId);
+                });
+
+
+                populateSelectFromDatalist('ct_department', response.dept,"Pilih Departemen");
+
+            }
+        });
+    });
+
+</script>
+
+
+<script>
+$(function () {
+    $(document).on('submit', '.js-confirm-create-custom-task', function (e) {
+        e.preventDefault();
+        const form = this;
+
+        Swal.fire({
+            title: 'Create Custom Task?',
+            text: 'This custom task will be added to task pool.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Create',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+
 
 @include('modal.modalJS._task_pool_js')
 @include('modal.modalJS._taskpool_filter_js')

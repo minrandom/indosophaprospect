@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Services\VisitCalendarService;
 use App\Models\MissionRun;
 use App\Models\mission;
 use App\Models\Hospital;
+use App\Models\installbase;
+use App\Models\InstallbaseUpdateLog;
+use App\Models\MissionHistory;
+use App\Models\MissionValidationList;
+use App\Models\Prospect;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -160,6 +166,7 @@ class MissionRunController extends Controller
 
     public function show(Request $request, MissionRun $run)
     {
+         $validationMode = (int) $request->get('validation_mode', 0);
         $run->load(['checkIn', 'checkOut']);
 
         $checkInPhotoShow = "NO PHOTO";
@@ -176,7 +183,7 @@ class MissionRunController extends Controller
         // left side: tasks already in mission (status 1) grouped by task_reference
         $inMission = mission::with(['hospital:id,name,city'])
             ->where('mission_run_id', $run->id)
-            ->whereIn('status_mission', [1,2,3,4,5])
+            ->whereIn('status_mission', [1,2,3,4,5,6,7])
             ->get()
             ->groupBy('task_reference');
 
@@ -188,7 +195,15 @@ class MissionRunController extends Controller
             ->get()
             ->groupBy('task_reference');
 
-        return view('admin.mission_run_show', compact('run', 'inMission', 'taskPool', 'checkInPhotoShow'));
+        $allVisitTasks = mission::where('mission_run_id', $run->id)->get();
+        $totalTaskCount = $allVisitTasks->count();
+        $validatedTaskCount = $allVisitTasks->where('status_mission', 7)->count();
+
+
+
+
+
+        return view('admin.mission_run_show', compact('run', 'inMission', 'taskPool', 'checkInPhotoShow', 'totalTaskCount', 'validatedTaskCount', 'validationMode'));
     }
 
     public function requestTasks(Request $request, MissionRun $run)
@@ -230,7 +245,7 @@ class MissionRunController extends Controller
         ]);
     }
 
-    public function scheduleMissionRun(Request $request)
+    public function scheduleMissionRun(Request $request) // not use to any
     {
     $validated = $request->validate([
         'run_id' => ['required','integer','exists:mission_runs,id'],
@@ -383,6 +398,541 @@ class MissionRunController extends Controller
             ], 500);
         }
     }
+
+    public function taskStart(mission $task)
+    {
+        //task start logic for visit detail
+        // optional: mark task as on progress when opened
+        // if ((int)$task->status_mission < 3) {
+        //     $task->status_mission = 3;
+        //     $task->updated_by = auth()->id();
+        //     $task->save();
+        // }
+
+        switch (strtolower($task->task_reference ?? '')) {
+            case 'prospect':
+                return redirect()->route('missions.task.prospect', $task->id);
+
+            case 'installbase':
+                return redirect()->route('missions.task.installbase', $task->id);
+
+            case 'salesadmin':
+            case 'finance':
+                return redirect()->route('missions.task.finance', $task->id);
+
+            case 'mapping':
+                return redirect()->route('missions.task.mapping', $task->id);
+
+            case 'custom':
+                return redirect()->back()->with([
+                    'open_custom_task_modal' => true,
+                    'custom_task_id' => $task->id,
+                ]);
+
+            default:
+                return redirect()->back()->with('error', 'Task reference page not prepared yet.');
+        }
+    }
+
+
+    public function previewByTask(mission $task)
+    {
+        $validation = MissionValidationList::where('mission_id', $task->id)
+            ->where('status', 0)
+            ->latest()
+            ->firstOrFail();
+
+        $payload = json_decode($validation->payload_form, true) ?? [];
+
+        switch (strtolower($validation->task_ref)) {
+            case 'installbase':
+                $installbase = \App\Models\Installbase::with([
+                    'hospital.province',
+                    'product.brand',
+                    'product.category',
+                ])->find($validation->code_ref);
+                return view('admin.validation_preview_installbase', compact('task', 'validation', 'payload', 'installbase'));
+
+            case 'prospect':
+                return view('admin.validation_preview_prospect', compact('task', 'validation', 'payload'));
+
+            case 'mapping':
+                return view('admin.validation_preview_mapping', compact('task', 'validation', 'payload'));
+
+            case 'finance':
+            case 'salesadmin':
+                return view('admin.validation_preview_finance', compact('task', 'validation', 'payload'));
+
+            default:
+                return view('admin.validation_preview_generic', compact('task', 'validation', 'payload'));
+        }
+    }
+
+
+
+    // public function approve(MissionValidationList $validation)
+    // {
+    //     if ((int)$validation->status === 1) {
+    //         return redirect()->back()->with('error', 'This validation item is already processed.');
+    //     }
+
+    //     DB::beginTransaction();
+
+    //     try {
+    //         $task = mission::findOrFail($validation->mission_id);
+    //         $payload = json_decode($validation->payload_form, true) ?? [];
+
+    //         switch (strtolower($validation->task_ref)) {
+    //             case 'installbase':
+    //                 $this->installbaseDataUpdate($validation, $task, $payload);
+    //                 break;
+
+    //             case 'prospect':
+    //                 $this->prospectDataUpdate($validation, $task, $payload);
+    //                 break;
+
+    //             case 'mapping':
+    //                 $this->mappingDataUpdate($validation, $task, $payload);
+    //                 break;
+
+    //             case 'finance':
+    //             case 'salesadmin':
+    //                 $this->financeDataUpdate($validation, $task, $payload);
+    //                 break;
+    //         }
+
+
+
+    //         // mark validation done
+    //         $validation->validate_by = auth()->id();
+    //         $validation->validate_at = now();
+    //         $validation->status = 1;
+    //         $validation->save();
+
+    //         // mark mission/task done
+    //         $task->status_mission = 7;
+    //         $task->updated_by = auth()->id();
+    //         if (!empty($payload['report_result'])) {
+    //             $task->report_result = $payload['report_result'];
+    //         }
+    //         $task->save();
+
+    //         // optional: mission history
+    //         // MissionHistory::create([...])
+
+    //         DB::commit();
+
+    //         return redirect()->back()->with('success', 'Validation approved and data updated successfully.');
+    //     } catch (\Throwable $e) {
+    //         DB::rollBack();
+
+    //         return redirect()->back()->with('error', 'Failed to approve validation: ' . $e->getMessage());
+    //     }
+    // }
+
+
+    public function showProspectTask(mission $task)
+    {
+        //task complete logic for prospect in visit detail
+        $prospect = null;
+        if($task->code_ref){
+            $prospect = Prospect::where('id', $task->code_ref)->first();
+        }
+        return view('admin.mission_task_prospect', compact('task', 'prospect'));
+    }
+
+    public function updateProspectTask(Request $request, mission $task)
+    {
+
+    }
+
+    public function prospectDataUpdate($validation, $task, array $payload): void
+    {
+
+    }
+
+
+
+    public function showInstallbaseTask(mission $task)
+    {
+        //task complete logic for installbase in visit detail
+        $installbase = null;
+        if($task->code_ref){
+            $installbase = installbase::with(['hospital.province','product'])->where('id', $task->code_ref)->first();
+
+            $department = Department::where('id', $installbase->department_id)->first();
+        }
+        return view('admin.mission_task_installbase', compact('task', 'installbase', 'department'));
+
+    }
+
+
+
+
+    private function installbaseDataUpdate($validation, $task, array $payload): void
+    {
+        $installbase = installbase::findOrFail($validation->code_ref);
+
+        $fields = [
+            'department',
+            'pic_to_recall',
+            'department_phone',
+            'serial_number',
+            'installation_date',
+            'installbase_status',
+            'end_of_warranty',
+        ];
+
+        $taskUpdateNo = 'IBUPD-' . now()->format('ymdHis') . '-' . $task->id;
+        $changed = false;
+
+        foreach ($fields as $field) {
+            $oldValue = $installbase->$field ?? null;
+            $newValue = $payload[$field] ?? null;
+
+            if (in_array($field, ['installation_date', 'end_of_warranty'])) {
+                $oldValueCompare = $oldValue ? Carbon::parse($oldValue)->format('Y-m-d') : null;
+                $newValueCompare = $newValue ? Carbon::parse($newValue)->format('Y-m-d') : null;
+            } else {
+                $oldValueCompare = is_null($oldValue) ? null : trim((string) $oldValue);
+                $newValueCompare = is_null($newValue) ? null : trim((string) $newValue);
+            }
+
+            if ($oldValueCompare !== $newValueCompare) {
+                $changed = true;
+
+                InstallbaseUpdateLog::create([
+                    'installbase_id' => $installbase->id,
+                    'mission_id' => $task->id,
+                    'task_update_no' => $taskUpdateNo,
+                    'field_column' => $field,
+                    'value_before' => $oldValue,
+                    'new_value' => $newValue,
+                    'updated_by' => auth()->id(),
+                ]);
+
+                $installbase->$field = $newValue;
+            }
+        }
+
+        if ($changed) {
+            $installbase->save();
+        }
+    }
+
+    public function updateInstallbaseTask(Request $request, mission $task)
+    {
+
+         $request->validate([
+            'department' => 'nullable|string',
+            'pic_to_recall' => 'nullable|string',
+            'department_phone' => 'nullable|string',
+            'serial_number' => 'nullable|string',
+            'installation_date' => 'nullable|date',
+            'installbase_status' => 'nullable|string',
+            'end_of_warranty' => 'nullable|date',
+            'report_result' => 'nullable|string',
+        ]);
+
+
+        DB::beginTransaction();
+
+        try {
+
+        $payload = [
+            'department' => $request->input('department'),
+            'pic_to_recall' => $request->input('pic_to_recall'),
+            'department_phone' => $request->input('department_phone'),
+            'serial_number' => $request->input('serial_number'),
+            'installation_date' => $request->input('installation_date'),
+            'installbase_status' => $request->input('installbase_status'),
+            'end_of_warranty' => $request->input('end_of_warranty'),
+            'report_result' => $request->input('report_result'),
+            'submitted_by' => auth()->id(),
+            'submitted_at' => now()->toDateTimeString(),
+        ];
+
+        MissionValidationList::create([
+            'mission_id' => $task->id,
+            'task_ref' => $task->task_reference,
+            'code_ref' => $task->code_ref,
+            'payload_form' => json_encode($payload),
+            'status' => 0,
+        ]);
+
+        $task->status_mission = 6; //waiting validation
+        $task->report_result = $request->input('report_result');
+        $task->updated_by = auth()->id();
+        $task->save();
+
+        DB::commit();
+        return redirect()
+                ->route('missions.runs.show', $task->mission_run_id)
+                ->with('success', 'Installbase update submitted for validation.');
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Failed to Submit : ' . $e->getMessage());
+        }
+    }
+
+
+
+    public function showFinanceTask(mission $task)
+    {
+        //task complete logic for finance in visit detail
+        return view('admin.mission_task_finance', compact('task'));
+    }
+
+    public function updateFinanceTask(Request $request, mission $task)
+    {
+
+    }
+    public function financeDataUpdate($validation, $task, array $payload): void
+    {
+
+    }
+
+    public function showMappingTask(mission $task)
+    {
+        //task complete logic for mapping in visit detail
+        return view('admin.mission_task_mapping', compact('task'));
+    }
+
+    public function updateMappingTask(Request $request, mission $task)
+    {
+
+    }
+    public function mappingDataUpdate($validation, $task, array $payload): void
+    {
+
+    }
+
+
+    public function submitVisit(MissionRun $run)
+    {
+
+        $run->status= 6;
+        $run->status_mission= 6;
+        $run->save();
+
+        return redirect()
+                ->route('missions.pool')
+                ->with('success', 'Visit submitted for validation.');
+    }
+
+    public function validateTask(mission $task)
+    {
+
+        $validation = MissionValidationList::where('mission_id', $task->id)
+        ->where('status', 0)
+        ->latest()
+        ->firstOrFail();
+        $run = MissionRun::findOrFail($task->mission_run_id);
+
+         if ((int)$run->status !== 6) {
+            return redirect()->back()->with('error', 'Visit must be submitted before task validation.');
+        }
+
+        if ((int)$validation->status !== 0) {
+            return redirect()->back()->with('error', 'This task validation has already been processed.');
+        }
+
+        $validation->status = 1;
+        $validation->validate_by = auth()->id();
+        $validation->validate_at = now();
+        $validation->save();
+
+        $task->status_mission = 7;
+        $task->updated_by = auth()->id();
+        $task->save();
+
+        return redirect()->back()->with('success', 'Task validated successfully.');
+    }
+
+    public function validateVisit(MissionRun $run)
+    {
+        // dd('masuk validateVisit', $run->id);
+        DB::beginTransaction();
+
+        try {
+            $tasks = mission::where('mission_run_id', $run->id)->get();
+            // dd('tasks loaded', $tasks->count(), $tasks->pluck('id'));
+            if ($tasks->count() < 1) {
+                return redirect()->back()->with('error', 'No task found in this visit.');
+            }
+
+            foreach ($tasks as $task) {
+
+                // CASE 1: task already validated -> finalize normally
+                if ((int)$task->status_mission === 7) {
+
+                    $validation = MissionValidationList::where('mission_id', $task->id)
+                        ->where('status', 1)
+                        ->latest()
+                        ->first();
+
+                    if ($validation) {
+                        $payload = json_decode($validation->payload_form, true) ?? [];
+
+                        switch (strtolower($validation->task_ref)) {
+                            case 'installbase':
+                                $this->installbaseDataUpdate($validation, $task, $payload);
+                                break;
+
+                            case 'prospect':
+                                $this->prospectDataUpdate($validation, $task, $payload);
+                                break;
+
+                            case 'mapping':
+                                $this->mappingDataUpdate($validation, $task, $payload);
+                                break;
+
+                            case 'finance':
+                            case 'salesadmin':
+                                $this->financeDataUpdate($validation, $task, $payload);
+                                break;
+
+                            case 'custom':
+                                $this->customTaskFinalize($validation, $task, $payload);
+                                break;
+                        }
+
+                        $validation->status = 2; // finalized/applied
+                        $validation->save();
+                    }
+
+                    $before = $task->status_mission;
+
+                    $task->status_mission = 5;
+                    $task->updated_by = auth()->id();
+                    $task->save();
+
+                    $this->logMissionChange(
+                        $task->id,
+                        'visit_validated_done',
+                        [
+                            'status_mission' => ['from' => $before, 'to' => 5],
+                        ],
+                        'Task finalized through visit validation.'
+                    );
+
+                    continue;
+                }
+
+                // CASE 2: task not validated -> mark missed and create new follow-up task
+                $before = $task->status_mission;
+
+                $task->status_mission = -1; // using your requested status for miss
+                $task->updated_by = auth()->id();
+                $task->save();
+
+                $newTask = $this->createMissingTaskFromMission($task);
+
+                $this->logMissionChange(
+                    $task->id,
+                    'visit_validated_missed',
+                    [
+                        'status_mission' => ['from' => $before, 'to' => -1],
+                    ],
+                    'Task not validated during visit validation. Follow-up task created: ' . $newTask->code
+                );
+            }
+
+            $run->status = 5;
+            $run->status_mission = 5;
+            $run->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('missions.pool')
+                ->with('success', 'Visit validated successfully. Validated tasks were completed, and unvalidated tasks were returned as new follow-up tasks.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to validate visit: ' . $e->getMessage());
+        }
+    }
+
+
+    private function createMissingTaskFromMission(mission $task): mission
+    {
+        $newTask = new mission();
+
+        $code=mission::makeCode($task->task_reference);
+        $newTask->code = $code;
+        $newTask->hospital_id = $task->hospital_id;
+        $newTask->department = $task->department;
+        $newTask->code_ref = $task->code_ref;
+        $newTask->task_reference = $task->task_reference;
+        $newTask->task_creator_id = auth()->id();
+        $newTask->generate_task_via = 'missing_task';
+        $newTask->deadline = now()->addDays(14)->toDateString();
+        $newTask->priority_level = $task->priority_level;
+        $newTask->expected_outcome = $task->expected_outcome;
+        $newTask->status_mission = 0;
+        $newTask->updated_by = auth()->id();
+
+        // optional copied fields if you want
+        $newTask->task_purpose = $task->task_purpose;
+        $newTask->user_to_meet = $task->user_to_meet;
+        $newTask->pic_user_id = null; // back to pool, no PIC
+        $newTask->mission_run_id = null; // very important, detach from old visit
+
+        $newTask->save();
+
+        return $newTask;
+    }
+
+     private function logMissionChange($missionId, string $action, array $changes = [], ?string $note = null): void
+    {
+        MissionHistory::create([
+        'mission_id' => $missionId,
+        'actor_user_id' => auth()->id(),
+        'action' => $action,
+        // LONGTEXT must be string, so encode array -> JSON string
+        'changes' => $changes ? json_encode($changes, JSON_UNESCAPED_UNICODE) : null,
+        'note' => $note,
+         ]);
+    }
+
+
+    public function submitCustomTask(Request $request)
+    {
+        $request->validate([
+            'task_id' => ['required', 'integer', 'exists:missions,id'],
+            'generic_report' => ['required', 'string'],
+        ]);
+
+        $task = mission::findOrFail($request->task_id);
+
+        // save into validation list first
+        MissionValidationList::create([
+            'mission_id' => $task->id,
+            'task_ref' => $task->task_reference,
+            'code_ref' => $task->code_ref,
+            'payload_form' => json_encode([
+                'report_result' => $request->generic_report,
+                'submitted_by' => auth()->id(),
+                'submitted_at' => now()->toDateTimeString(),
+            ]),
+            'status' => 0,
+        ]);
+
+        $task->report_result = $request->generic_report;
+        $task->status_mission = 6; // on review
+        $task->updated_by = auth()->id();
+        $task->save();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Custom task submitted for validation.');
+    }
+
 
 
 

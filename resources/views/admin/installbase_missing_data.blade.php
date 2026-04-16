@@ -122,10 +122,14 @@
                          class="btn btn-sm btn-info">
                         Edit
                       </a>
-                      <a href="#"
-                         class="btn btn-sm btn-warning">
-                        Add to Task
-                      </a>
+                      <button type="button"
+                              class="btn btn-sm btn-warning js-show-missing"
+                              data-toggle="modal"
+                              data-target="#missingDetailModal"
+                              data-missing='@json($row->missingCol)'
+                              data-row='@json($payloadRow)'>
+                        add to task
+                      </button>
                     </td>
                   </tr>
                 @endforeach

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Models\mission;
 use App\Models\Hospital;
 use App\Models\Province;
@@ -50,18 +51,18 @@ class MissionController extends Controller
         $code = mission::makeCode('installbase');
 
         // Optional: prevent duplicate open missions for same IB
-        // $exists = mission::query()
-        //     ->where('task_reference', 'installbase')
-        //     ->where('code_ref', (string) $request->installbase_id)
-        //     ->whereIn('status_mission', [0, 1, 2]) // active states
-        //     ->exists();
+        $exists = mission::query()
+            ->where('task_reference', 'installbase')
+            ->where('code_ref', (string) $request->installbase_id)
+            ->whereIn('status_mission', [0, 1, 2,3,6,7]) // active states
+            ->exists();
 
-        // if ($exists) {
-        //     return response()->json([
-        //         'ok' => false,
-        //         'message' => 'Mission already exists for this installbase (still active).',
-        //     ], 409);
-        // }
+        if ($exists) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Task already exists for this installbase (still active).',
+            ], 409);
+        }
 
         $mission = mission::create([
             'code' => $code,
@@ -98,6 +99,10 @@ class MissionController extends Controller
         $visitCalendarService = new VisitCalendarService();
         $calendar = $visitCalendarService->build($request);
         //dd($calendar);
+        $deptoptions = Department::orderBy('name')->get(['id','name']);
+        $hospitaloptions = Hospital::orderBy('name')->get(['id','name']);
+
+
 
         $provinceId = (int) $request->get('province_id', 0);
         $hospitalId = (int) $request->get('hospital_id', 0);
@@ -191,7 +196,7 @@ class MissionController extends Controller
         $pics = User::orderBy('name')->get(['id','name']);
 
         return view('admin.task_pool', compact(
-            'grouped','provinces','hospitals','pics','provinceId','hospitalId','calendar'
+            'grouped','provinces','hospitals','pics','provinceId','hospitalId','calendar','deptoptions','hospitaloptions'
         ));
     }
 
@@ -397,6 +402,35 @@ class MissionController extends Controller
     }
 
 
+    public function storeCustomTask(Request $request)
+    {
+        $request->validate([
+            'hospital_id' => ['required', 'integer'],
+            'department' => ['nullable', 'string'],
+            'user_to_meet' => ['nullable', 'string'],
+            'priority_level' => ['required', 'in:SUPER URGENT,URGENT,PENTING'],
+            'task_purpose' => ['required', 'string'],
+            'expected_outcome' => ['required', 'string'],
+        ]);
+
+        $task = new mission();
+        $task->code = mission::makeCode('custom');
+        $task->hospital_id = $request->hospital_id;
+        $task->department = $request->department;
+        $task->user_to_meet = $request->user_to_meet;
+        $task->task_creator_id = auth()->id();
+        $task->priority_level = $request->priority_level;
+        $task->task_purpose = $request->task_purpose;
+        $task->expected_outcome = $request->expected_outcome;
+        $task->task_reference = 'custom';
+        $task->generate_task_via = 'custom_task';
+        $task->status_mission = 0;
+        $task->updated_by = auth()->id();
+        $task->deadline = now()->addDays(14)->toDateString(); // optional default
+        $task->save();
+
+        return redirect()->back()->with('success', 'Custom task created successfully.');
+    }
 
 
 

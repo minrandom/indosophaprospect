@@ -48,7 +48,7 @@ class MissionPoolController extends Controller
             }
         ])
         // optional filter: hanya run yg masih aktif (sesuaikan field status milik mission_run kamu)
-        // ->whereIn('status', [0,1,2])
+       ->whereIn('status', [0,1,2,3,6,7])
         ->orderByDesc('id')
         ->get();
         // status 2 = scheduled (based on your flow)

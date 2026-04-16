@@ -4,8 +4,11 @@
 ])
 
 @section('content')
+@php
+    $role = strtolower(optional(auth()->user())->role ?? '');
+@endphp
 <div class="container-fluid">
-
+@include('layout.component.nav.navigation_button_task')
   {{-- TOP BAR --}}
   <div class="card shadow mb-4 border-0" style="border-radius: 1.5rem;">
     <div class="card-body py-4" style="background:#4E73DF; border-radius: 1.5rem;">
@@ -15,13 +18,30 @@
           <div class="text-white font-weight-bold" style="letter-spacing:1px; font-size:20px;">
             Visit Detail
           </div>
+
         </div>
 
         <div class="col-12 col-lg-4 d-flex align-items-center mb-3 mb-lg-0">
 
-          <div class="btn btn-success font-weight-bold" style="font-size:14px;">
-            Submit
-          </div>
+          @if(in_array($role, ['fs','am','admin','nsm']) && $run->status == 3)
+                <form method="POST" action="{{ route('missions.runs.submitVisit', $run->id)}}" class="d-inline js-confirm-submit-visit">
+                    @csrf
+                    <button type="submit" class="btn btn-success btn-sm">
+                        Submit Visit
+                    </button>
+                </form>
+
+                {{-- {{ dd($run) }} --}}
+            @elseif(in_array($role, ['admin','am','nsm']) && $run->status == 6)
+                <form method="POST"
+                    action="{{ route('missions.runs.validateVisit', $run->id) }}"
+                    class="d-inline js-confirm-validate-visit">
+                    @csrf
+                    <button type="submit" class="btn btn-success btn-sm">
+                        Finalize Visit
+                    </button>
+                </form>
+            @endif
           <div class="mx-2" style="width:1px; height:36px; background:#ffffff;"></div>
 
         @if(!$run->check_in_id)
@@ -73,7 +93,9 @@
         </div>
       </div>
     </div>
+
   </div>
+
 
   {{-- MAIN CONTENT --}}
   <div class="row">
@@ -85,6 +107,18 @@
 
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="h5 mb-0">Visit Tasks</div>
+
+            @if($validationMode)
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                <div>
+
+                    Task Validated: <b>{{ $validatedTaskCount }}/{{ $totalTaskCount }}</b>
+                </div>
+
+
+            </div>
+        @endif
+
             <div class="small text-white-50">
               Status Run:
               @if($run->status_mission===3)<b>ON-GOING</b>
@@ -92,6 +126,7 @@
               @elseif($run->status_mission===1)<b>IDLE</b>
               @elseif($run->status_mission===4)<b>Canceled</b>
               @elseif($run->status_mission===5)<b>Done</b>
+
               @endif
             </div>
           </div>
@@ -141,15 +176,51 @@
                                     <span class="badge badge-danger">CANCELED</span>
                                 @elseif($t->status_mission == 5)
                                     <span class="badge badge-success">DONE</span>
+                                @elseif($t->status_mission == 6)
+                                    <span class="badge badge-secondary">ON REVIEW</span>
+                                @elseif($t->status_mission == 7)
+                                    <span class="badge badge-success">TASK VALIDATED</span>
                                 @else
                                     <span class="badge badge-light">{{ $t->status_mission }}</span>
                                 @endif
                             </td>
 
                         <td class="text-center">
-                          <a href="javascript:void(0)" class="btn btn-sm btn-light" style="border-radius:10px;">
-                            Start
-                          </a>
+                          @if((int)$t->status_mission === 5)
+                                <button type="button"
+                                        class="btn btn-sm btn-info js-show-task-notes"
+                                        data-task-code="{{ $t->code }}"
+                                        data-task-ref="{{ $t->task_reference }}"
+                                        data-task-notes="{{ e($t->report_result) }}"
+                                        style="border-radius:10px;">
+                                    Completed Notes
+                                </button>
+                             @elseif((int)$t->status_mission === 7)
+                             <span class="badge badge-secondary">Wait to Finalize</span>
+                             @elseif((int)$t->status_mission === 6 && (int)$run->status !== 6)
+                                <span class="badge badge-secondary">WAIT VISIT SUBMIT</span>
+                            @elseif(
+                                (int)$t->status_mission === 6 &&
+                                (int)$run->status === 6 &&
+                                in_array($role, ['admin','nsm','am'])
+                            )
+                                <button type="button"
+                                        class="btn btn-sm btn-warning js-open-validate-modal"
+                                        data-task-id="{{ $t->id }}"
+                                        style="border-radius:10px;">
+                                    Validate
+                                </button>
+
+                            @elseif((int)$t->status_mission === 6)
+                                <span class="badge badge-primary">WAITING VALIDATION</span>
+
+                            @else
+                                <a href="{{ route('missions.task.start', $t->id) }}"
+                                class="btn btn-sm btn-light"
+                                style="border-radius:10px;">
+                                Start
+                                </a>
+                            @endif
                         </td>
                       </tr>
                     @endforeach
@@ -167,7 +238,11 @@
 
     <div class="col-12 col-lg-4 mb-4">
     {{-- RIGHT: TASK POOL (same hospital, status 0) --}}
+
     <div class="card shadow border-0 h-100" style="border-radius: 1.25rem; background:#4E73DF;">
+        <button type="button" class="btn btn-light btn-sm" data-toggle="modal" data-target="#createCustomTaskModal">
+            <i class="fas fa-plus mr-1"></i> Create Custom Task
+        </button>
     <div class="card-body text-white">
 
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -180,16 +255,11 @@
         Request Task
         </button>
 
-
-
         <button type="button"
                 id="btnCancelRequest"
                 class="btn btn-sm btn-secondary font-weight-bold d-none">
             Cancel
         </button>
-
-
-
 
         </div>
         <div class="small text-white-50 mb-3">
@@ -267,10 +337,126 @@
   </div>
 
 </div>
+
+{{-- modal for task validation --}}
+
+<div class="modal fade" id="taskValidationModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content" style="border-radius:1rem;">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Validation</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" id="taskValidationModalBody">
+        <div class="text-center text-muted py-4">Loading...</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- // Modal for showing task notes (for DONE tasks) --}}
+<div class="modal fade" id="taskNotesModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-md" role="document">
+    <div class="modal-content" style="border-radius:1rem;">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Notes</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-2">
+          <div class="small text-muted">Task Code</div>
+          <div class="font-weight-bold" id="tn_task_code">-</div>
+        </div>
+
+        <div class="mb-2">
+          <div class="small text-muted">Task Ref</div>
+          <div class="font-weight-bold text-uppercase" id="tn_task_ref">-</div>
+        </div>
+
+        <div class="mb-2">
+          <div class="small text-muted">Report / Notes</div>
+          <div class="border rounded p-2" id="tn_task_notes" style="min-height:100px;">
+            -
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+@include('modal._report_generic')
+@include('modal._create_custom_task_modal')
+
 @endsection
 
 @push('js')
+
+@include('modal.modalJS._confirm_validation_js')
+@include('modal.modalJS._create_custom_task_js')
+
+
 <script src="{{ asset('template/backend/sb-admin-2/vendor/sweetalert/sweetalert.all.js') }}"></script>
+
+
+<script>
+$(function () {
+    $(document).on('click', '.js-show-task-notes', function () {
+        $('#tn_task_code').text($(this).data('task-code') || '-');
+        $('#tn_task_ref').text($(this).data('task-ref') || '-');
+        $('#tn_task_notes').text($(this).data('task-notes') || '-');
+
+        $('#taskNotesModal').modal('show');
+    });
+});
+</script>
+
+<script>
+$(function () {
+
+    $(document).on('click', '.js-open-validate-modal', function () {
+        const taskId = $(this).data('task-id');
+
+        $('#taskValidationModalBody').html('<div class="text-center text-muted py-4">Loading...</div>');
+        $('#taskValidationModal').modal('show');
+
+        $.get("{{ url('/missions/task') }}/" + taskId + "/preview", function (html) {
+            $('#taskValidationModalBody').html(html);
+        }).fail(function (xhr) {
+            console.error(xhr.responseText);
+            $('#taskValidationModalBody').html('<div class="text-danger text-center py-4">Failed to load validation data.</div>');
+        });
+    });
+
+});
+</script>
+
+
+@if((session('open_custom_task_modal') && session('custom_task_id')) || $errors->has('generic_report'))
+<script>
+$(function () {
+    @if(session('custom_task_id'))
+      $('#customTaskId').val(@json(session('custom_task_id')));
+    @endif
+    $('#genericReportModal').modal('show');
+});
+</script>
+@endif
+
 <script>
 $(function () {
 

@@ -4,8 +4,11 @@
 ])
 
 @section('content')
+@php
+    $role = strtolower(optional(auth()->user())->role ?? '');
+@endphp
 <div class="container-fluid">
-
+@include('layout.component.nav.navigation_button_task')
   {{-- TOP HEADER STRIP --}}
   <div class="card shadow mb-4 border-0" style="border-radius: 1.5rem;">
     <div class="card-body py-4" style="background:#4E73DF; border-radius: 1.5rem;">
@@ -36,6 +39,7 @@
 
       </div>
     </div>
+
   </div>
 
   {{-- MIDDLE ROW --}}
@@ -72,13 +76,7 @@
               </div>
             </a>
 
-            <div class="text-center" style="width:88px;">
-              <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto"
-                   style="width:64px;height:64px;background:#132A72;">
-                <i class="fas fa-check"></i>
-              </div>
-              <div class="small mt-1">Validate</div>
-            </div>
+
           </div>
 
           <div class="mt-4 small text-white-50">
@@ -204,6 +202,12 @@
                     style="border-radius:5px;">
                     Go Visiting
                     </a>
+                    @elseif(in_array($role, ['admin','nsm','am']) && $run->status == 6)
+                        <a href="{{ route('missions.runs.show', ['run' => $run->id, 'validation_mode' => 1]) }}"
+                        class="btn btn-sm btn-success">
+                            Validate Visit
+                        </a>
+
                     @elseif($run->tasks_count == 0)
                     <a href="{{  route('missions.taskPool')  }}" class="badge badge-secondary">No Task</a>
 
@@ -291,6 +295,7 @@
 @push('js')
 
 @include('modal.modalJS._mission_pool_js');
+@include('modal.modalJS._confirm_validation_js')
 <script src="{{ asset('template/backend/sb-admin-2/vendor/sweetalert/sweetalert.all.js') }}"></script>
 <script>
   window.missionPoolScheduleUrl = @json(route('missions.pool.schedule'));

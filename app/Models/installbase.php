@@ -26,4 +26,8 @@ class installbase extends Model
     public function hospital(){
         return $this->belongsTo(Hospital::class);
     }
+    public function updateLogs()
+    {
+        return $this->hasMany(InstallbaseUpdateLog::class);
+    }
 }
