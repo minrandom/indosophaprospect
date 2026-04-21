@@ -31,11 +31,9 @@ class Attendance extends Model
         return $this->belongsTo(User::class,"user_id");
     }
 
-    public function out(){
-        return $this->hasOne(AttendanceOut::class,'checkin_id');
-    }
-    public function visit(){
-        return $this->hasOne(Attendance::class,'check_in_id');
+    public function out()
+    {
+        return $this->hasOne(\App\Models\AttendanceOut::class, 'checkin_id');
     }
 
-}
+  }

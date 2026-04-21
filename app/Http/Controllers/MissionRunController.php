@@ -169,6 +169,11 @@ class MissionRunController extends Controller
          $validationMode = (int) $request->get('validation_mode', 0);
         $run->load(['checkIn', 'checkOut']);
 
+        // dd($run->checkIn, $run->checkOut);
+        $hasCheckIn = !is_null($run->checkIn);
+        $hasCheckOut = !is_null($run->checkOut);
+
+
         $checkInPhotoShow = "NO PHOTO";
         if ($run->checkIn && $run->checkIn->photo_data) {
             $urlphoto = str_replace(
@@ -203,7 +208,8 @@ class MissionRunController extends Controller
 
 
 
-        return view('admin.mission_run_show', compact('run', 'inMission', 'taskPool', 'checkInPhotoShow', 'totalTaskCount', 'validatedTaskCount', 'validationMode'));
+        return view('admin.mission_run_show', compact('run', 'inMission', 'taskPool','hasCheckIn',
+        'hasCheckOut','checkInPhotoShow', 'totalTaskCount', 'validatedTaskCount', 'validationMode'));
     }
 
     public function requestTasks(Request $request, MissionRun $run)

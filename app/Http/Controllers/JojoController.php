@@ -529,4 +529,137 @@ $update = $request->update;
     {
         //
     }
+
+
+    public function attendanceControl()
+    {
+        $cutoffDate = \Carbon\Carbon::create(2026, 4, 15)->startOfDay();
+
+        /*
+        |--------------------------------------------------------------------------
+        | OLD VERSION
+        | Base table: attendances
+        | Rule: before 15 April 2026
+        |--------------------------------------------------------------------------
+        */
+        $oldAttendances = Attendance::with(['out','user'])
+            ->whereDate('created_at', '<', $cutoffDate->toDateString())
+            ->orderByDesc('created_at')
+            ->get();
+
+        $oldRows = $oldAttendances->map(function ($att) {
+            $checkout = $att->out;
+
+            $checkInPhoto = $att->photo_data;
+            $checkOutPhoto = $checkout->photo_data ?? null;
+
+
+            $checkInPhotoShow = $checkInPhoto
+                ? str_replace(
+                    ['https://drive.google.com/uc?id=', '&export=media'],
+                    ['https://drive.google.com/thumbnail?id=', ''],
+                    $checkInPhoto
+                )
+                : asset('img/default-avatar.png');
+
+
+
+            $checkOutPhotoShow = $checkOutPhoto
+                ? str_replace(
+                    ['https://drive.google.com/uc?id=', '&export=media'],
+                    ['https://drive.google.com/thumbnail?id=', ''],
+                    $checkOutPhoto
+                )
+                : asset('img/default-avatar.png');
+
+            return [
+                'user_name' => optional($att->user)->name ?? 'Unknown User',
+                'visit_target' => 'Visit List From NSM/AM before May 2026',
+                'check_in_location' => $att->check_in_loc ?? '-',
+                'check_in_time' => $att->created_at
+                    ? $att->created_at->timezone('Asia/Jakarta')->format('d-M-Y H:i')
+                    : '-',
+                'check_in_photo' => $checkInPhotoShow,
+                'check_out_location' => $checkout->check_out_loc ?? 'Not Checkout',
+                'check_out_time' => $checkout && $checkout->created_at
+                    ? $checkout->created_at->timezone('Asia/Jakarta')->format('d-M-Y H:i')
+                    : '-',
+                'check_out_photo' => $checkOutPhotoShow,
+            ];
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | NEW VERSION
+        | Base table: mission_runs
+        | Rule: on/after 15 May 2026
+        |--------------------------------------------------------------------------
+        */
+        $missionRuns = \App\Models\MissionRun::with([
+                'hospital:id,name',
+                'checkIn',
+                'checkOut',
+            ])
+            ->whereDate('created_at', '>=', $cutoffDate->toDateString())
+            ->orderByDesc('created_at')
+            ->get();
+
+        $newRows = $missionRuns->map(function ($run) {
+            $checkIn = $run->checkIn;
+            $checkOut = $run->checkOut;
+
+            $checkInPhoto = $checkIn->photo_data ?? null;
+            $checkOutPhoto = $checkOut->photo_data ?? null;
+
+
+
+            $checkInPhotoShow = $checkInPhoto
+                ? str_replace(
+                    ['https://drive.google.com/uc?id=', '&export=media'],
+                    ['https://drive.google.com/thumbnail?id=', ''],
+                    $checkInPhoto
+                )
+                : asset('img/default-avatar.png');
+
+            $checkOutPhotoShow = $checkOutPhoto
+                ? str_replace(
+                    ['https://drive.google.com/uc?id=', '&export=media'],
+                    ['https://drive.google.com/thumbnail?id=', ''],
+                    $checkOutPhoto
+                )
+                : asset('img/default-avatar.png');
+            $visitSchedule = '-';
+
+            if ($run->schedule_date || $run->schedule_time) {
+                $date = $run->schedule_date ? \Carbon\Carbon::parse($run->schedule_date)->format('d-M-Y') : '-';
+                $time = $run->schedule_time ? substr($run->schedule_time, 0, 5) : '-';
+                $visitSchedule = $date . ' ' . $time;
+            }
+
+            return [
+                'user_name' => optional($run->picUser)->name ?? 'Unknown User',
+                'visit_id' => $run->code ?? ('VISIT-'.$run->id),
+                'visit_schedule' => $visitSchedule,
+                'hospital_name' => optional($run->hospital)->name ?? '-',
+                'check_in_location' => $checkIn->check_in_loc ?? '-',
+                'check_in_time' => $checkIn && $checkIn->created_at
+                    ? $checkIn->created_at->timezone('Asia/Jakarta')->format('d-M-Y H:i')
+                    : '-',
+                'check_in_photo' => $checkInPhotoShow,
+                'check_out_location' => $checkOut->check_out_loc ?? 'Not Checkout',
+                'check_out_time' => $checkOut && $checkOut->created_at
+                    ? $checkOut->created_at->timezone('Asia/Jakarta')->format('d-M-Y H:i')
+                    : '-',
+                'check_out_photo' => $checkOutPhotoShow,
+            ];
+        });
+
+        return view('attendance_control', compact(
+            'oldRows',
+            'newRows'
+        ));
+    }
+
+
+
 }

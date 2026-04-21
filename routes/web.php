@@ -103,6 +103,12 @@ Route::post('/check-in', 'JojoController@store')->name('check-in.store')->middle
 Route::post('/check-out', 'JojoController@outstore')->name('check-out.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::get('/check-in', 'JojoController@index')->name('check-in')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::get('/check-out', 'JojoController@indx')->name('check-out')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/attendance-control', [JojoController::class, 'attendanceControl'])
+    ->name('attendance.control')
+    ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+
+
+
 
 
 //attendance event

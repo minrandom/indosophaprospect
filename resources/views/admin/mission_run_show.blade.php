@@ -6,6 +6,7 @@
 @section('content')
 @php
     $role = strtolower(optional(auth()->user())->role ?? '');
+    $canSubmitVisit = $hasCheckIn && $hasCheckOut && $run->status == 3;
 @endphp
 <div class="container-fluid">
 @include('layout.component.nav.navigation_button_task')
@@ -24,12 +25,26 @@
         <div class="col-12 col-lg-4 d-flex align-items-center mb-3 mb-lg-0">
 
           @if(in_array($role, ['fs','am','admin','nsm']) && $run->status == 3)
-                <form method="POST" action="{{ route('missions.runs.submitVisit', $run->id)}}" class="d-inline js-confirm-submit-visit">
-                    @csrf
-                    <button type="submit" class="btn btn-success btn-sm">
-                        Submit Visit
-                    </button>
-                </form>
+                @if($canSubmitVisit)
+                    <form method="POST"
+                        action="{{ route('missions.runs.submitVisit', $run->id) }}"
+                        class="d-inline js-confirm-submit-visit">
+                        @csrf
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="fas fa-paper-plane"></i> Submit Visit
+                        </button>
+                    </form>
+                @else
+                    <small class="text-muted d-block mt-1">
+                        @if(!$hasCheckIn && !$hasCheckOut)
+                            Please complete Check-In and Check-Out first.
+                        @elseif(!$hasCheckIn)
+                            Please complete Check-In first.
+                        @elseif(!$hasCheckOut)
+                            Please complete Check-Out first.
+                        @endif
+                    </small>
+                @endif
 
                 {{-- {{ dd($run) }} --}}
             @elseif(in_array($role, ['admin','am','nsm']) && $run->status == 6)
@@ -50,12 +65,13 @@
                 Check-In
             </a>
         @elseif($run->check_in_id && !$run->check_out_id)
+         <span class="badge badge-success">Check-in Done <i class="fas fa-check-circle"></i> </br>Waiting Check-out <i class="fas fa-clock"></i></span>
             <a href="{{ route('check-out', ['mission_run_id' => $run->id]) }}"
             class="btn btn-sm btn-warning">
                 Check-Out
             </a>
         @else
-            <span class="badge badge-success">Check-in Check-out Done</span>
+            <span class="badge badge-success">Check-in Done <i class="fas fa-check-circle"></i> </br>Check-out Done <i class="fas fa-check-circle"></i> </span>
         @endif
 
 

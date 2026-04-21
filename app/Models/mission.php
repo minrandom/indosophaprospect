@@ -67,6 +67,8 @@ class mission extends Model
     return $this->belongsTo(\App\Models\MissionRun::class, 'mission_run_id');
     }
 
+
+
     /*
     |--------------------------------------------------------------------------
     | AUTO GENERATE CODE
