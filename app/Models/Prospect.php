@@ -10,8 +10,12 @@ class Prospect extends Model
     use HasFactory;
     protected $fillable=[
         "user_creator",
+        "entry_type",
         "pic_user_id",
         "prospect_no",
+        "promo_no",
+        "lead_due_date",
+        "auto_drop_at",
         "prospect_source",
         "province_id",
         "hospital_id",
@@ -57,7 +61,7 @@ class Prospect extends Model
     public function rejection(){
         return $this->hasOne(rejectLog::class);;
     }
-    
+
 
     public function mappings(){
         return $this->hasMany(Mapping::class);
@@ -81,8 +85,8 @@ class Prospect extends Model
         return $this->hasMany(Alert::class);
     }
 
-    
 
 
-    
+
+
 }

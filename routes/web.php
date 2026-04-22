@@ -108,9 +108,6 @@ Route::get('/attendance-control', [JojoController::class, 'attendanceControl'])
     ->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
 
-
-
-
 //attendance event
 Route::post('/EventIn', [AttendanceEventInController::class,'store'])->name('EventIn.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::post('/EventOut', [AttendanceEventOutController::class,'outstore'])->name('EventOut.store')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
@@ -320,7 +317,12 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::POST('/draft',[ProspectController::class,'savedraft'])->name('admin.prospect.saveDraft')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/consprospectcreation',[ConsumablesProspectController::class,'creation'])->name('admin.consprospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/prospectcreation',[ProspectController::class,'creation'])->name('admin.prospectcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
-	Route::get('/prospecteventcreation',[ProspectController::class,'eventcreation'])->name('admin.prospecteventcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+	Route::get('/leadcreation',[ProspectController::class,'leadcreation'])->name('admin.leadcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+	Route::POST('/leadstore',[ProspectController::class,'storeLead'])->name('admin.leadstore')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+
+
+
+    Route::get('/prospecteventcreation',[ProspectController::class,'eventcreation'])->name('admin.prospecteventcreation')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/hospital/{provinceId}/hospital',[HospitalController::class,'getHospitalsByProvince'])->name('admin.getHospitalsByProvince')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/hospital/{hospital}/edit',[HospitalController::class,'show'])->name('admin.hospitaldetail')->middleware(['auth', 'role:admin,dba']);
 	Route::PATCH('/hospital/{hospital}',[HospitalController::class,'update'])->name('admin.hospitalupdate')->middleware(['auth', 'role:admin,dba']);

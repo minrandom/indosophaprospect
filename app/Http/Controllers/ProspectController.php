@@ -51,19 +51,27 @@ class ProspectController extends Controller
         $username = Auth::check() ? Auth::user()->name : 'Guest';
 
     return view('admin.prospectcreate', ['username' => $username]);
-     
+
+    }
+
+    public function leadcreation()
+    {
+        $username = Auth::check() ? Auth::user()->name : 'Guest';
+
+    return view('admin.leadcreate', ['username' => $username]);
+
     }
     public function eventcreation()
     {
         $username = Auth::check() ? Auth::user()->name : 'Guest';
 
     return view('admin.prospectcreate_event', ['username' => $username]);
-     
+
     }
     public function creationcheck()
     {
         return view('admin.prospectcreatecheck');
-     
+
     }
 
     /**
@@ -76,22 +84,22 @@ class ProspectController extends Controller
         $employees = Employee::all();
         $employees->load("user");
         $sourceoption = $this->optiondata()->getData();
-        
+
         $piclist = $employees->map(function($employee){
         return[
         'user_id' => $employee ? $employee->user->id : "No User ID",
         'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
         'area' => $employee?$employee->area:"No data "
         ];});
-        
+
         $dept=Department::where('id','>=',"2")->orderBy('alt_name',"asc")->get();
         $today = now();
        $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
-        
+
         $data['province'] = $provincelist;
         //$data['draft']=$draft;
         $data['pic']=$piclist;
-       
+
        // $data['rumahsakit'] = $rumahsakit;
         $data['dept'] = $dept;
         $data['event'] = $event;
@@ -106,7 +114,7 @@ class ProspectController extends Controller
     public function create(Prospect $prospect)
     {
         //
-       
+
         $sourceoption = $this->optiondata()->getData();
         $usid=Auth::user()->id;
         $user=User::with('employee')->where('id',$usid)->first();
@@ -114,13 +122,13 @@ class ProspectController extends Controller
         $filter = prospectFilters::where('filterUser',$usid)->first();
         $a = trim($filter->filterData, "[]");
         $arrayfilter = explode(',', $a);
-    
+
         // Replace occurrences of ""0"" with null
-    
-    
+
+
         // Debug the processed array
    // Remove square brackets
-  
+
 
         $area=$user->employee->area;
         $pos=$user->employee->position;
@@ -132,12 +140,12 @@ class ProspectController extends Controller
          $provincelist=Province::with('area')->where('prov_order_no',$area)->orWhere('iss_area_code',$area)->orderBy(DB::raw('CAST(prov_order_no AS UNSIGNED)'))->get();
         }else if($role==="am"){
         $areaArray = explode(',', $area);
-        $provincelist=Province::with('area')->whereIn('iss_area_code', $areaArray)->orderBy(DB::raw('CAST(prov_order_no AS UNSIGNED)'))->get();}       
-     
-    
+        $provincelist=Province::with('area')->whereIn('iss_area_code', $areaArray)->orderBy(DB::raw('CAST(prov_order_no AS UNSIGNED)'))->get();}
+
+
         $provOrderNos = $provincelist->pluck('prov_order_no')->toArray();
        //dd($provOrderNos);
-        
+
         //$rumahsakit=Hospital::all();
         $dept=Department::where('id','>=',"2")->orderBy('alt_name',"asc")->get();
         $today = now();
@@ -145,12 +153,12 @@ class ProspectController extends Controller
        // $produk=Config::all();
         $bunit=Unit::all();
         $draft= tmpProspectInput::where("user_id",$usid)->first();
-        
+
         if($draft){
         if($draft->hospital_id){$hodraft=Hospital::where("id",$draft->hospital_id)->first(); $data['hodraft']=$hodraft;}
         if($draft->hospital_id){ $catdraft=Category::where("id",$draft->category_id)->first(); $data['catdraft']=$catdraft;}
         if($draft->hospital_id){$configdraft=Config::where("id",$draft->config_id)->first(); $data['configdraft']=$configdraft;}
-       
+
         }
 
         $specialrole = ['admin','direksi','db'];
@@ -166,7 +174,7 @@ class ProspectController extends Controller
             'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
             'area' => $employee?$employee->area:"No data "
             ];
-            }); 
+            });
         }
         else{
             $employees = Employee::where('position',$pos)->get();
@@ -176,13 +184,13 @@ class ProspectController extends Controller
                 'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
                 'area' => $employee?$employee->area:"No data "
                 ];
-                }); 
+                });
         }
         }
         else
         {
           if($role=="am"){
-                       
+
              //dd($provdata)
             $employees = Employee::Where('area',$area)->orWhereIn('area',$provOrderNos)->get();
             $employees->load("user");
@@ -207,10 +215,10 @@ class ProspectController extends Controller
             'area' => $employee?$employee->area:"No data "
             ];
             });
-          } 
+          }
          }
-        
-        
+
+
 
          if($role=="bu"){
             $employees = Employee::all();
@@ -221,7 +229,7 @@ class ProspectController extends Controller
             'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
             'area' => $employee?$employee->area:"No data "
             ];
-            }); 
+            });
          }else {$filterpiclist = $piclist;}
          $data['filterpiclist']=$filterpiclist;
 
@@ -239,7 +247,7 @@ class ProspectController extends Controller
     }
 
     public function savedraft(Request $request){
-   
+
             $data=tmpProspectInput::where("user_id",$request->creatorid)->first();
             if(empty($data)){
                 $n="oke";
@@ -264,7 +272,7 @@ class ProspectController extends Controller
                 'jns_aggr'=>$jenisagg,
                 'eta_po_date'=>$request->etapodatecr8,
             ]);
-            
+
             return response()->json(['success' => true]);
     }
 
@@ -290,7 +298,7 @@ class ProspectController extends Controller
             else{
             if($ss){
             $sourceoption = $ss->name;}}
-            
+
         }
 
         foreach ($options->anggaran->review as $anggaransts) {
@@ -298,7 +306,7 @@ class ProspectController extends Controller
                 $anggaranopt=$anggaransts->name;
             }
         }
-       
+
         foreach ($options->anggaran->Jenis as $anggaranjns) {
             if(isset($request->jenisanggarancr8)){
             if ($anggaranjns->id == $request->jenisanggarancr8) {
@@ -308,7 +316,7 @@ class ProspectController extends Controller
             }
             }else $anggaranjnsopt="Belum Tahu";
         }
-        
+
         $request->validate([
             'qtyinput' => 'required|numeric|min:1',
             // Add other validation rules for your other form fields if needed
@@ -326,14 +334,16 @@ class ProspectController extends Controller
 
         if($sourceoption==="Event"){
         $sourceoption.="".$request->eventname;}
+
+        //set is project or not
             $project=0;
             if($role =='prj'){
                 $project = 1;
             }
 
 
-
         $n=Prospect::create([
+            'entry_type'=>"PROSPECT",
             'user_creator'=>$request->creatorid,
             'prospect_source'=>$sourceoption,
             'province_id'=>$request->cr8province,
@@ -344,7 +354,7 @@ class ProspectController extends Controller
             'is_project'=>$project,
             'submitted_price'=>$config->price_include_ppn,
             'qty'=>$request->qtyinput,
-             'eta_po_date'=>$request->etapodatecr8 
+             'eta_po_date'=>$request->etapodatecr8
         ]);
 
         $idbaru=$data." idnya ".$n->id;
@@ -358,14 +368,14 @@ class ProspectController extends Controller
         ]);
 
 
-        $tempeName="LEAD";
-        $tempeCode=1;
+        $tempeName="PROSPECT";
+        $tempeCode=2;
         prospectTemperature::create([
             'prospect_id'=>$id,
             'tempName'=>$tempeName,
             'tempCodeName'=>$tempeCode
         ]);
-                                      
+
 
 
 
@@ -374,7 +384,111 @@ class ProspectController extends Controller
             ->where("id",$id)
             ->get();
         Alert::generateAlerts($newProspect,"V");
-      
+
+
+        return response()->json($id);
+    }
+    public function storeLead(Request $request)
+    {
+       $data="done";
+       $role = Auth::user()->role;
+        //$hosid=Hospital::where('name',$request->cr8hospital)->first();
+        $config=Config::with('unit','brand')->where('id',$request->cr8product)->first();
+        $ss = Event::where('id',$request->cr8source)->first();
+        $options = $this->optiondata()->getData();
+       //dd($options);
+        foreach ($options->source as $option) {
+            if ($option->id == $request->cr8source) {
+                $sourceoption=$option->name;
+            }
+            else{
+            if($ss){
+            $sourceoption = $ss->name;}}
+
+        }
+
+        foreach ($options->anggaran->review as $anggaransts) {
+            if ($anggaransts->id == $request->anggarancr8) {
+                $anggaranopt=$anggaransts->name;
+            }
+        }
+
+        foreach ($options->anggaran->Jenis as $anggaranjns) {
+            if(isset($request->jenisanggarancr8)){
+            if ($anggaranjns->id == $request->jenisanggarancr8) {
+                $anggaranjnsopt=$anggaranjns->name;
+            }if(10 == $request->jenisanggarancr8){
+                $anggaranjnsopt="MABES AD / AL / AU";
+            }
+            }else $anggaranjnsopt="Belum Tahu";
+        }
+
+        $request->validate([
+            'qtyinput' => 'required|numeric|min:1',
+            // Add other validation rules for your other form fields if needed
+        ]);
+
+        $draft=tmpProspectInput::where("user_id",$request->creatorid)->first();
+            if(empty($draft)){
+                $z="oke";
+            }else
+            {
+                $draft->delete();
+            }
+
+            //dd($role);
+
+        if($sourceoption==="Event"){
+        $sourceoption.="".$request->eventname;}
+
+        //set is project or not
+            $project=0;
+            if($role =='prj'){
+                $project = 1;
+            }
+
+
+        $n=Prospect::create([
+            'entry_type'=>"LEAD",
+            'user_creator'=>$request->creatorid,
+            'prospect_source'=>$sourceoption,
+            'province_id'=>$request->cr8province,
+            'hospital_id'=>$request->cr8hospital,
+            'department_id'=>$request->cr8department,
+            'config_id'=>$request->cr8product,
+            'unit_id'=>$request->cr8bunit,
+            'is_project'=>$project,
+            'submitted_price'=>$config->price_include_ppn,
+            'qty'=>$request->qtyinput,
+
+        ]);
+
+        $idbaru=$data." idnya ".$n->id;
+        $id=$n->id;
+
+       Review::create([
+        'prospect_id'=>$id,
+        'comment'=>$request->cr8infoextra,
+        ]);
+
+
+        $tempeName="LEAD";
+        $tempeCode=1;
+        prospectTemperature::create([
+            'prospect_id'=>$id,
+            'tempName'=>$tempeName,
+            'tempCodeName'=>$tempeCode
+        ]);
+
+
+
+
+
+        $newProspect = Prospect::with("creator","province")
+            ->where("id",$id)
+            ->get();
+        Alert::generateAlerts($newProspect,"V");
+
 
         return response()->json($id);
     }
@@ -388,7 +502,7 @@ class ProspectController extends Controller
     public function show(Prospect $prospect)
     {
         //\
-        $userId = auth()->user()->id;          
+        $userId = auth()->user()->id;
            // Check if the sequence data already exists for the user
         $Sequence = Sequence::where('sequenceUser', $userId)->first();
 
@@ -399,23 +513,23 @@ class ProspectController extends Controller
 
 
         $a = trim($Sequence->sequenceData, "[]"); // Remove square brackets
-        $arraySeq = explode(',', $a); 
+        $arraySeq = explode(',', $a);
 
         // Get the index of the current prospect ID in $arraySeq
          $prospect->load("personInCharge","creator","hospital","review","province","department","unit","config");
         //$picdata=User::with('employee')->where('id',$prospect->pic_user_id);
         //$brand=Brand::where('id',$prospect->config->brand_id);
-        
+
         $currentIndex = array_search($prospect->id, $arraySeq);
 
         // Get the IDs of the previous and next prospects
         $prev = ($currentIndex > 0) ? $arraySeq[$currentIndex - 1] : null;
         $next = ($currentIndex < count($arraySeq) - 1) ? $arraySeq[$currentIndex + 1] : null;
-        
+
         $nextprospect= Prospect::where('id',$next)->first();
         $prevprospect= Prospect::where('id',$prev)->first();
-        
-        
+
+
         $ch=$prospect->review->chance;
         $anggaran=$prospect->review->anggaran_status;
         $podate=$prospect->eta_po_date;
@@ -426,7 +540,7 @@ class ProspectController extends Controller
         //dd($temper);
         $tempName=$temper->tempName;
         $tempCode=$temper->tempCodeName;
-  
+
         //dd($reviewdata);
 
         switch ($tempCode){
@@ -482,10 +596,10 @@ class ProspectController extends Controller
                    [ 'id'=>3,
                     "name" =>   "Promotion Plan By Sales Team",
                      ],
-                 
-                
+
+
                     );
-                    
+
                 $dataoption['naction'] = array(
                    ['id'=>0,
                     "name" => "Mapping/Profiling",],
@@ -500,27 +614,27 @@ class ProspectController extends Controller
                      ],
                    [ 'id'=>4,
                     "name" =>     "Set up Join Visit",
-                     ],   
+                     ],
                    [ 'id'=>5,
                     "name" =>     "Confirm Budget",
-                     ],   
+                     ],
                    [ 'id'=>6,
                     "name" =>     "Organize Demo",
-                     ],   
+                     ],
                    [ 'id'=>7,
                     "name" =>     "Organize Presentation",
-                     ],   
+                     ],
                    [ 'id'=>8,
                     "name" =>     "Provide reference",
-                     ],   
+                     ],
                    [ 'id'=>9,
                     "name" =>     "General Follow Up",
-                     ],   
+                     ],
                    [ 'id'=>10,
                     "name" =>     "Nego",
-                     ],   
-                 
-                
+                     ],
+
+
                     );
 
                 $dataoption['state'] = array(
@@ -537,8 +651,8 @@ class ProspectController extends Controller
                      ],
                    [ 'id'=>4,
                     "name" =>     "SETUJU",
-                     ],   
-                
+                     ],
+
                     );
                 $dataoption['chance'] = array(
                    [ 'id'=>1,
@@ -552,9 +666,9 @@ class ProspectController extends Controller
                      ],
                    [ 'id'=>4,
                     "name" =>     "80%","data"=>0.8
-                     ],   
-                  
-                
+                     ],
+
+
                     );
                 $dataoption['validation'] = array(
                    ['id'=>1,
@@ -568,8 +682,8 @@ class ProspectController extends Controller
                    [ 'id'=>0,
                     "name" =>   "NEW",
                      ],
-                   
-                    
+
+
                     );
                 $dataoption['anggaran']=array(
                     'review'=>[
@@ -618,10 +732,10 @@ class ProspectController extends Controller
         $event=Event::where('awal_input',"<=",$today)->where('akhir_input','>=',$today)->get();
 
             if($role!='prj'){
-                $employees = Employee::where('area', $prospect->province->prov_order_no)->orWhere('area', $prospect->province->wilayah)->orWhere('area', 'LIKE', '%' . $prospect->province->iss_area_code. '%' )->get();  
+                $employees = Employee::where('area', $prospect->province->prov_order_no)->orWhere('area', $prospect->province->wilayah)->orWhere('area', 'LIKE', '%' . $prospect->province->iss_area_code. '%' )->get();
             }else{
                 $employees =Employee::where('position', 'PRJ')->get();
-            }    
+            }
             $employees->load("user");
 
                 $piclist = $employees->map(function($employee){
@@ -640,7 +754,7 @@ class ProspectController extends Controller
                     $configlist=Config::where('unit_id', $prospect->unit->id)
                     ->where('category_id', $prospect->config->category_id)
                     ->get();
-                    
+
                     //dd($prospect->config->category_id);
                     //$peric=$prospect->personInCharge->name;
                     return response()->json([
@@ -652,9 +766,9 @@ class ProspectController extends Controller
                         'hosopt' => $hospitals,
                         'depopt'=>$depopt,
                         'configlist'=>$configlist,
-                        'sourceoption'=>$sourceoption , 
+                        'sourceoption'=>$sourceoption ,
                         'valdate'=>$valdate ,
-                        'bunit'=>$bunit     
+                        'bunit'=>$bunit
                     ]);
     }
 
@@ -669,11 +783,11 @@ class ProspectController extends Controller
        //dd($prospect->province);
         $prospect->load("creator","hospital","review","province","department","unit","config");
         $employees = Employee::where('area', $prospect->province->iss_area_code)->orWhere('area',$wil)->get();
-        
+
         $usid=Auth::user()->id;
         $user=User::with('employee')->where('id',$usid)->first();
         $role=$user->role;
-        
+
         $area=$user->employee->area;
         $pos=$user->employee->position;
         if($area=="HO" ){
@@ -684,7 +798,7 @@ class ProspectController extends Controller
              $provincelist=Province::with('area')->where('prov_order_no',$area)->orWhere('iss_area_code',$area)->get();
             }else if($role==="am"){
             $areaArray = explode(',', $area);
-            $provincelist=Province::with('area')->whereIn('iss_area_code', $areaArray)->get();}       
+            $provincelist=Province::with('area')->whereIn('iss_area_code', $areaArray)->get();}
             $provOrderNos = $provincelist->pluck('prov_order_no')->toArray();
 
 
@@ -704,7 +818,7 @@ class ProspectController extends Controller
             'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
             'area' => $employee?$employee->area:"No data "
             ];
-            }); 
+            });
         }
         else{
             $employees = Employee::where('position',$pos)->get();
@@ -714,13 +828,13 @@ class ProspectController extends Controller
                 'name' => $employee ? $employee->longname : "Tidak ada AM/ FS bertugas di area ini",
                 'area' => $employee?$employee->area:"No data "
                 ];
-                }); 
+                });
         }
         }
         else
         {
           if($role=="am"){
-                       
+
              //dd($provdata)
             $employees = Employee::where('area', 'LIKE', '%' . $area . '%')->orWhereIn('area',$provOrderNos)->get();
             $employees->load("user");
@@ -745,15 +859,15 @@ class ProspectController extends Controller
             'area' => $employee?$employee->area:"No data "
             ];
             });
-          } 
+          }
          }
 
         $prospect->piclist=$piclist;
-     
+
         return response()->json($prospect);
     }
 
-    
+
 
     /**
      * Update the specified resource in storage.
@@ -765,7 +879,7 @@ class ProspectController extends Controller
 
      public function infoupdate($request, $prospect)
     {
-        
+
         $review=Review::where('prospect_id',$request->data);
         $review->update([
             "comment"=>$request->addinfo,
@@ -782,10 +896,10 @@ class ProspectController extends Controller
     {
 
         $newconfig=Config::where('id',$request->productlist)->first();
-        
+
        // dd($request);
         $nilai = ($newconfig->price_include_ppn)*(intval($request->qtyitem));
-        
+
         $prospect->update([
             "config_id"=>$newconfig->id,
             "qty"=>intval($request->qtyitem),
@@ -800,7 +914,7 @@ class ProspectController extends Controller
         $user=Auth::id();
         $review=Review::where('prospect_id',$prospect->id)->first();
         $send=0;
-         
+
         $f1=$review->first_offer_date?$review->first_offer_date:"new";
         $f2=$request->first?$request->first:"new";
         $l1=$review->last_offer_date?$review->last_offer_date:"new";
@@ -813,7 +927,7 @@ class ProspectController extends Controller
         if($f1==$f2){$oke="oke";}else{
                 $review->update([
             'first_offer_date'=>$request->first,
-           
+
              ]);
 
             ReviewLog::create([
@@ -825,8 +939,8 @@ class ProspectController extends Controller
                 'updated_by'=>$user
             ]);
             $send=$send+1;
-        }     
-        
+        }
+
         if($l1==$l2){$oke="oke";}else{
             $review->update([
         //'first_offer_date'=>$request->first,
@@ -844,7 +958,7 @@ class ProspectController extends Controller
             'updated_by'=>$user
         ]);
         $send=$send+1;
-    }     
+    }
         if($d1==$d2){$oke="oke";}else{
             $review->update([
         //'first_offer_date'=>$request->first,
@@ -862,7 +976,7 @@ class ProspectController extends Controller
             'updated_by'=>$user
         ]);
         $send=$send+1;
-    }     
+    }
         if($p1==$p2){$oke="oke";}else{
             $review->update([
         //'first_offer_date'=>$request->first,
@@ -880,14 +994,14 @@ class ProspectController extends Controller
             'updated_by'=>$user
         ]);
         $send=$send+1;
-    }     
+    }
 
         $data1='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Terima Kasih sudah Update Review</h4>
         <h5>Refresh Jika temperature belum terupdate</h5>
         <button onClick="window.location.reload();">Refresh Page</button>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        
+
         <span aria-hidden="true">&times;</span>
     </button>
         </div>';
@@ -901,11 +1015,11 @@ class ProspectController extends Controller
         </div>';
 
         if($send>0){
-        return response()->json(['success' => true,'message' => $data1]); 
+        return response()->json(['success' => true,'message' => $data1]);
         } else
         return "done";
-   
-   
+
+
     }
      public function chcupdate(Request $request, Prospect $prospect)
     {
@@ -929,7 +1043,7 @@ class ProspectController extends Controller
             'updated_by'=>$user
         ]);
         $send=$send+1;
-    }  
+    }
 
     /*
     $review->chance;
@@ -943,16 +1057,16 @@ class ProspectController extends Controller
     $diff =$etapodate->diffInDays($now,false);
     var_dump($diff);
 
-   
+
     $tempename=$temper->tempName;
     $tempecode=$temper->tempCodeName;
-   
+
     // update temperature need to create function so i can just call it
 
     if ($review->chance == 1) {
         $tempename = 'SUCCESS';
         $tempecode = '5';
-    } else 
+    } else
     {
         if ($review->chance == 0) {
             $tempename = 'DROP';
@@ -979,7 +1093,7 @@ class ProspectController extends Controller
                             $tempename = 'FUNNEL';
                             $tempecode = '3';
                         }
-                        
+
                         else{
 
                             if ($review->chance >= 0.4 && $review->chance < 0.8 && isset($review->first_offer_date)) {
@@ -989,8 +1103,8 @@ class ProspectController extends Controller
                             else
                             {
                                 $tempename = 'Prospect';
-                                $tempecode = '2'; 
-                            }                
+                                $tempecode = '2';
+                            }
 
                         }
                     }
@@ -1015,14 +1129,14 @@ class ProspectController extends Controller
     <span aria-hidden="true">&times;</span>
 </button>
     </div>';
-   
+
 
     if($send>0){
-    return response()->json(['success' => true,'message' => $data1]); 
+    return response()->json(['success' => true,'message' => $data1]);
     } else
     return "done";
-    
-    
+
+
     }
 
      public function reviewupdate(Request $request, Prospect $prospect)
@@ -1039,7 +1153,7 @@ class ProspectController extends Controller
         $dir2=$request->direksi_status?$request->direksi_status:"Belum Tahu";$dir1=$review->direksi_status?$review->direksi_status:"Belum Tahu";
         $agr2=$request->anggaran_status?$request->anggaran_status:"Belum Tahu";$agr1=$review->anggaran_status?$review->anggaran_status:"Belum Tahu";
         $jns2=$request->jenis_anggaran?$request->jenis_anggaran:"Belum Tahu";$jns1=$review->jenis_anggaran?$review->jenis_anggaran:"Belum Tahu";
-        
+
         $nac2=$request->next_action?$request->next_action:"Mapping";$nac1=$review->next_action?$review->next_action:"Mapping";
         //dd($prospect->eta_po_date);
         $eta2=$request->etapodate?$request->etapodate:"";$eta1=$review->etapodate?$prospect->eta_po_date:"";
@@ -1063,7 +1177,7 @@ class ProspectController extends Controller
                 'req_status'=>'approve_by_system',
             ]);
             $send=$send+1;
-        }     
+        }
         if($user1==$user2){$oke="oke";}else{
                 $review->update([
                     'user_status'=>$user2,
@@ -1078,7 +1192,7 @@ class ProspectController extends Controller
                 'updated_by'=>$user
             ]);
             $send=$send+1;
-        }     
+        }
 
         if($pur1==$pur2){$oke="oke";}else{
                 $review->update([
@@ -1094,7 +1208,7 @@ class ProspectController extends Controller
                 'updated_by'=>$user
             ]);
             $send=$send+1;
-        } 
+        }
 
         if($dir1==$dir2){$oke="oke";}else{
                 $review->update([
@@ -1110,7 +1224,7 @@ class ProspectController extends Controller
                 'updated_by'=>$user
             ]);
             $send=$send+1;
-        }     
+        }
         if($agr1==$agr2){$oke="oke";}else{
                 $review->update([
                     'anggaran_status'=>$agr2,
@@ -1125,7 +1239,7 @@ class ProspectController extends Controller
                 'updated_by'=>$user
             ]);
             $send=$send+1;
-        }     
+        }
 
         if($jns1==$jns2){$oke="oke";}else{
                 $review->update([
@@ -1141,9 +1255,9 @@ class ProspectController extends Controller
                 'updated_by'=>$user
             ]);
             $send=$send+1;
-        }  
+        }
 
-           
+
         if($nac1==$nac2){$oke="oke";}else{
                 $review->update([
                     'next_action'=>$nac2,
@@ -1158,8 +1272,8 @@ class ProspectController extends Controller
                 'updated_by'=>$user
             ]);
             $send=$send+1;
-        }     
-       
+        }
+
 
         $data1='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Terima Kasih sudah Update Review Prospect</h4>
@@ -1169,28 +1283,28 @@ class ProspectController extends Controller
         <span aria-hidden="true">&times;</span>
     </button>
         </div>';
-       
+
 
         if($send>0){
-        return response()->json(['success' => true,'message' => $data1]); 
+        return response()->json(['success' => true,'message' => $data1]);
         } else
         return "done";
-   
-   
+
+
     }
 
-  
+
      public function infoupdaterequest(Request $request, Prospect $prospect)
     {
         $user=Auth::id();
         $prospect->load("creator","hospital","review","province","department","unit","config");
        $send=0;
-    
+
         $c=trim($prospect->review->comment);$d=trim($request->addinfo);
-  
+
         $pic1=$prospect->pic_user_id;$pic2=$request->personincharge;
         $dpt1=$prospect->department_id;$dpt2=$request->departmentname;
-    
+
 
         if($pic1==$pic2){$oke="oke";}else{
             updatelog::create([
@@ -1235,8 +1349,8 @@ class ProspectController extends Controller
             $send=$send+1;
         }
 
-        
-        
+
+
         $data='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Berhasil Update Data</h4>
           <p>Silahkan Hubungi NSM anda untuk Proses Lebih Lanjut</p>
@@ -1254,8 +1368,8 @@ class ProspectController extends Controller
     </button>
         </div>';
 
-        
-        
+
+
         if($send>0){
           $this->infoupdate($request,$prospect);
           ReviewLog::create([
@@ -1268,7 +1382,7 @@ class ProspectController extends Controller
         ]);
         return response()->json(['success' => true, 'message' => $data]);}
         else{
-            return response()->json(['success' => true,'message' => $data2]); 
+            return response()->json(['success' => true,'message' => $data2]);
         }
     }
 
@@ -1277,17 +1391,17 @@ class ProspectController extends Controller
     {
         $user=Auth::id();
         //dd($request);
-    
+
 
         $prospect->load("creator","hospital","review","province","department","unit","config");
        $cek=0;
-       
+
         $a=$prospect->unit_id; $b=$request->editunit;
 
         $c=$prospect->config_id;$d=$request->productlist;
 
         $e=$prospect->qty;$f=$request->qtyitem;
-        
+
         if($c==$d){$oke="oke";}else{
             updatelog::create([
                 'prospect_id'=>$prospect->id,
@@ -1299,7 +1413,7 @@ class ProspectController extends Controller
                 'approve_date'=>now(),
                 'approve_by'=>$user,
                 'req_status'=>"system_generated"
-                
+
             ]);
             $cek=$cek+1;
         }
@@ -1334,7 +1448,7 @@ class ProspectController extends Controller
             $cek=$cek+1;
         }
 
-                
+
         $data='<div class="alert alert-success" role="alert">
         <h4 class="alert-heading">Update Berhasil</h4>
           <hr>
@@ -1352,7 +1466,7 @@ class ProspectController extends Controller
         </div>';
 
        //return response()->json($data2);
-        
+
         if($cek>0){
             $this->produpdate($request,$prospect);
             ReviewLog::create([
@@ -1365,14 +1479,14 @@ class ProspectController extends Controller
             ]);
         return response()->json(['success' => true, 'message' => $data]);}
         else{
-            return response()->json(['success' => true,'message' => $data2]); 
+            return response()->json(['success' => true,'message' => $data2]);
         }
     }
-        
-        
 
-        
-    
+
+
+
+
 
 
     public function update(Request $request, Prospect $prospect)
@@ -1380,12 +1494,12 @@ class ProspectController extends Controller
         //
         $review=Review::where('prospect_id',$request->data);
         $options = $this->optiondata()->getData();
-       
+
         $config=Config::where('id',$request->productlist)->first();
-        
-       
+
+
        //dd($options);
-      
+
         foreach($options->anggaran->review as $aggr){
             if($aggr->id==$request->anggaranedit){
                 $anggaransts=$aggr->name;
@@ -1409,9 +1523,9 @@ class ProspectController extends Controller
                 if ($option->id == $n) {
                     $sourceoption=$option->name;
                 }
-            }     
+            }
         }
-      
+
         //dd($sourceoption);
         $price=$config->price_include_ppn;
         $bunit=$config->unit_id;
@@ -1453,7 +1567,7 @@ class ProspectController extends Controller
             $id= $request->id;
             $submitdate=$request->submitdate;
             $creator=$request->creator;
-            $validator=$request->validator;         
+            $validator=$request->validator;
             $provcode=$request->provcode;
             $status=$request->validation;
             $personincharge=$request->personincharge;
@@ -1466,7 +1580,7 @@ class ProspectController extends Controller
             case 404:
                 rejectLog::create([
                     "prospect_id"=>$id,
-                    
+
                     "rejected_by"=>$validator,
                     "reason"=>$reason
                 ]);
@@ -1475,7 +1589,7 @@ class ProspectController extends Controller
             break;
 
             case 1:
-                
+
                 $date = Carbon::createFromFormat('Y-m-d', $submitdate);
 
                 // Extract the year, month, and day
@@ -1487,17 +1601,17 @@ class ProspectController extends Controller
                 $codedate = $year . $month . $day;
                 $rand3=rand(100,999);
 
-           
+
                 $prospect_no="ISSP-";
 
                 if($role!="prj"){
                 $prospect_no.=$provcode;
                 }
                 else{
-                    $prospect_no.='88';  
+                    $prospect_no.='88';
                 }
                 $prospect_no.="-".$codedate."-".$rand3;
-                
+
                 if($request->renewshow){
                 $prospect->update([
                     'creator'=>$creator,
@@ -1519,7 +1633,7 @@ class ProspectController extends Controller
             break;
 
         }
-        
+
         $prospect->update([
             'status' => $status
         ]);
@@ -1529,7 +1643,7 @@ class ProspectController extends Controller
         ->update(['status'=>1]);
 
         $data=Prospect::with("creator","province")->where('id',$id)->get();
-       
+
         Alert::generateAlerts($data,"R");
         AlertData::create([
             'type'=>"R",
@@ -1537,13 +1651,13 @@ class ProspectController extends Controller
             'user_id'=>$personincharge
         ]);
 
-        
-        
-        
-        
+
+
+
+
         if($status==404){
             return response()->json(['message' => "Data Berhasil di Reject, Silahkan Input Prospect Baru"]);
-        }else{  
+        }else{
             if($request->renewshow){
                 return response()->json(['message' => 'Berhasil Memperbaru dan Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
             }else{
