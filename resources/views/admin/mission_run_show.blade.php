@@ -35,7 +35,7 @@
                         </button>
                     </form>
                 @else
-                    <small class="text-muted d-block mt-1">
+                    <small class="text text-white d-block mt-1">
                         @if(!$hasCheckIn && !$hasCheckOut)
                             Please complete Check-In and Check-Out first.
                         @elseif(!$hasCheckIn)
@@ -230,12 +230,14 @@
                             @elseif((int)$t->status_mission === 6)
                                 <span class="badge badge-primary">WAITING VALIDATION</span>
 
-                            @else
-                                <a href="{{ route('missions.task.start', $t->id) }}"
-                                class="btn btn-sm btn-light"
-                                style="border-radius:10px;">
-                                Start
-                                </a>
+                            @elseif((int)$t->status_mission < 5 && in_array($role, ['fs','am','admin','nsm']) )
+
+                                    <a href="{{ route('missions.task.start', $t->id) }}"
+                                    class="btn btn-sm btn-light"
+                                    style="border-radius:10px;">
+                                        Start
+                                    </a>
+
                             @endif
                         </td>
                       </tr>
@@ -427,7 +429,7 @@
 
 
 <script src="{{ asset('template/backend/sb-admin-2/vendor/sweetalert/sweetalert.all.js') }}"></script>
-
+<script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
 
 <script>
 $(function () {
@@ -449,6 +451,23 @@ $(function () {
 
         $('#taskValidationModalBody').html('<div class="text-center text-muted py-4">Loading...</div>');
         $('#taskValidationModal').modal('show');
+        $.ajax({
+            url: "{{ route('admin.prospectcreate') }}",
+            method: "GET",
+            success:function(response){
+                var next_actionSelect = $("#next_action");
+                next_actionSelect.empty();
+                console.log('Response from server:', response);
+
+                response.source.naction.forEach(function(next_actionsts) {
+                var option = $("<option>").val(next_actionsts.name).text(next_actionsts.name);
+                next_actionSelect.append(option);
+                });
+                next_actionSelect.prepend($("<option>").val("").text("Select Next Action").prop("selected", true).prop("disabled", true));
+            }
+
+
+        });
 
         $.get("{{ url('/missions/task') }}/" + taskId + "/preview", function (html) {
             $('#taskValidationModalBody').html(html);
@@ -467,8 +486,13 @@ $(function () {
 $(function () {
     @if(session('custom_task_id'))
       $('#customTaskId').val(@json(session('custom_task_id')));
+
     @endif
     $('#genericReportModal').modal('show');
+
+
+
+
 });
 </script>
 @endif

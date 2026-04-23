@@ -173,6 +173,7 @@
                 });
 
                 var provinceSelect = $("#cr8province");
+
                populateSelectFromDatalist('cr8province', response.province,"Pilih Provinsi");
 
                var hosinput=$("#cr8hospital");
@@ -245,13 +246,17 @@
                   var selectedBusinessUnitId = $("#cr8bunit").val();
                   var selectedCategoryId = $("#cr8category").val();
                   var selectformId="cr8product";
+                  var productSelect = $("#cr8product");
+                    productSelect.empty();
 
                   if (selectedBusinessUnitId && selectedCategoryId) {
-                    populateProductSelect(selectedBusinessUnitId, selectedCategoryId,selectformId);
+                    if(selectedCategoryId=="50"){
+                        productSelect.append('<option value="0">General Product </option>');
+                    } else {
+                    populateProductSelect(selectedBusinessUnitId, selectedCategoryId,selectformId);}
                   } else {
 
-                    var productSelect = $("#cr8product");
-                    productSelect.empty();
+
 
                     productSelect.append('<option value="">- Pilih Produk -</option>');
                     var draftconfig=$("<option>").val(response.configdraft.id).text(response.configdraft.name);

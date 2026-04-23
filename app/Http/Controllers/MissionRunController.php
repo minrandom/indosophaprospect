@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
+use function Symfony\Component\String\u;
+
 class MissionRunController extends Controller
 {
    public function store(Request $request)
@@ -383,6 +385,7 @@ class MissionRunController extends Controller
                 ->update([
                     'mission_run_id' => $run->id,
                     'status_mission' => 2,
+                    'pic_user_id' => $run->person_in_charge, // assign PIC from run header
                     'schedule_date' => $request->schedule_date,
                     'schedule_time' => $request->schedule_time,
                     'schedule_duration_minutes' => $request->schedule_duration_minutes,
@@ -417,7 +420,38 @@ class MissionRunController extends Controller
 
         switch (strtolower($task->task_reference ?? '')) {
             case 'prospect':
-                return redirect()->route('missions.task.prospect', $task->id);
+                $prospect = \App\Models\Prospect::with('temperature')->find($task->code_ref);
+
+                if (!$prospect) {
+                    return redirect()->back()->with('error', 'Prospect data not found.');
+                }
+
+                $stage = (int) optional($prospect->temperature)->tempCodeName;
+
+                // Lead / Delayed Lead -> show selector first
+                if (in_array($stage, [1, 7])) {
+                    return redirect()->back()->with([
+                        'open_lead_action_selector' => true,
+                        'task_id' => $task->id,
+                    ]);
+                }
+
+                // Promo -> go to promo update form
+                if ($stage === 6) {
+                    return redirect()->route('missions.task.lead.promo', $task->id);
+                }
+
+                // Prospect / Funnel / Hot Prospect -> go to review prospect form
+                if (in_array($stage, [2, 3, 4])) {
+                    return redirect()->route('missions.task.prospect', $task->id);
+                }
+
+                // Drop / Missed / Success -> block
+                if (in_array($stage, [0, -1, 5])) {
+                    return redirect()->back()->with('error', 'This prospect/lead is already closed.');
+                }
+
+                return redirect()->back()->with('error', 'Prospect stage not recognized.');
 
             case 'installbase':
                 return redirect()->route('missions.task.installbase', $task->id);
@@ -460,7 +494,58 @@ class MissionRunController extends Controller
                 return view('admin.validation_preview_installbase', compact('task', 'validation', 'payload', 'installbase'));
 
             case 'prospect':
-                return view('admin.validation_preview_prospect', compact('task', 'validation', 'payload'));
+                $payload = json_decode($validation->payload_form, true) ?? [];
+
+                if (($payload['action_type'] ?? null) === 'drop') {
+
+                    $prospect = \App\Models\Prospect::with([
+                        'hospital.province',
+                        'department',
+                        'unit',
+                        'config',
+                        'temperature',
+                        'review',
+                    ])->find($validation->code_ref);
+
+                    return view('admin.validation_preview_lead_drop', compact('task', 'validation', 'payload', 'prospect'));
+                }
+
+                if (($payload['action_type'] ?? null) === 'delayed') {
+                    $prospect = \App\Models\Prospect::with([
+                        'hospital.province',
+                        'department',
+                        'unit',
+                        'config',
+                        'temperature',
+                        'review',
+                    ])->find($validation->code_ref);
+
+                    return view('admin.validation_preview_lead_delayed', compact('task', 'validation', 'payload', 'prospect'));
+                }
+
+
+                if (($payload['action_type'] ?? null) === 'promo') {
+                    $prospect = \App\Models\Prospect::with([
+                        'hospital.province',
+                        'department',
+                        'unit',
+                        'config',
+                        'temperature',
+                        'review',
+                    ])->find($validation->code_ref);
+
+                    return view('admin.validation_preview_lead_promo', compact('task', 'validation', 'payload', 'prospect'));
+                }
+
+                $prospect = \App\Models\Prospect::with([
+                    'hospital.province',
+                    'department',
+                    'unit',
+                    'temperature',
+                    'review',
+                ])->find($validation->code_ref);
+
+            return view('admin.validation_preview_prospect', compact('task', 'validation', 'payload', 'prospect'));
 
             case 'mapping':
                 return view('admin.validation_preview_mapping', compact('task', 'validation', 'payload'));
@@ -539,22 +624,180 @@ class MissionRunController extends Controller
 
     public function showProspectTask(mission $task)
     {
-        //task complete logic for prospect in visit detail
-        $prospect = null;
-        if($task->code_ref){
-            $prospect = Prospect::where('id', $task->code_ref)->first();
-        }
-        return view('admin.mission_task_prospect', compact('task', 'prospect'));
+        $prospect = \App\Models\Prospect::with([
+            'hospital.province',
+            'department',
+            'unit',
+            'temperature',
+            'review',
+        ])->findOrFail($task->code_ref);
+
+        // Corrected the method string and the array syntax
+
+    return view('admin.mission_task_prospect', compact('task', 'prospect'));
+
     }
 
     public function updateProspectTask(Request $request, mission $task)
     {
 
+        // $prospect = \App\Models\Prospect::with('review')->findOrFail($task->code_ref);
+
+        $request->validate([
+            'first_offer_date' => ['nullable', 'date'],
+            'demo_date' => ['nullable', 'date'],
+            'presentation_date' => ['nullable', 'date'],
+            'last_offer_date' => ['nullable', 'date'],
+            'user_status' => ['nullable', 'string'],
+            'direksi_status' => ['nullable', 'string'],
+            'purchasing_status' => ['nullable', 'string'],
+            'anggaran_status' => ['nullable', 'string'],
+            'jenis_anggaran' => ['nullable', 'string'],
+            'chance' => ['nullable', 'numeric'],
+            'comment' => ['nullable', 'string'],
+            'next_action' => ['nullable', 'string'],
+            'report_result' => ['required', 'string'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $existing = MissionValidationList::where('mission_id', $task->id)
+                ->where('status', 0)
+                ->exists();
+
+            if ($existing) {
+                return redirect()->back()->withInput()->with('error', 'This task already has pending validation.');
+            }
+
+            $payload = [
+                'first_offer_date' => $request->first_offer_date ?? null,
+                'demo_date' => $request->demo_date ?? null,
+                'presentation_date' => $request->presentation_date ?? null,
+                'last_offer_date' => $request->last_offer_date ?? null,
+                'user_status' => $request->user_status ?? null,
+                'direksi_status' => $request->direksi_status ?? null,
+                'purchasing_status' => $request->purchasing_status ?? null,
+                'anggaran_status' => $request->anggaran_status ?? null,
+                'jenis_anggaran' => $request->jenis_anggaran ?? null,
+                'chance' => $request->chance ?? null,
+                'comment' => $request->comment ?? null,
+                'next_action' => $request->next_action ?? null,
+                'report_result' => $request->report_result ?? null,
+                'submitted_by' => auth()->id(),
+                'submitted_at' => now()->toDateTimeString(),
+            ];
+
+            MissionValidationList::create([
+                'mission_id' => $task->id,
+                'task_ref' => $task->task_reference,
+                'code_ref' => $task->code_ref,
+                'payload_form' => json_encode($payload),
+                'status' => 0,
+            ]);
+
+            $task->report_result = $request->report_result;
+            $task->status_mission = 6; // on review
+            $task->updated_by = auth()->id();
+            $task->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('missions.runs.show', $task->mission_run_id)
+                ->with('success', 'Prospect review submitted for validation.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
     }
 
-    public function prospectDataUpdate($validation, $task, array $payload): void
-    {
 
+
+    private function prospectDataUpdate($validation, $task, array $payload): void
+    {
+        $prospect = \App\Models\Prospect::with('review')->findOrFail($validation->code_ref);
+
+        $review = $prospect->review;
+        if (!$review) {
+            $review = \App\Models\Review::create([
+                'prospect_id' => $prospect->id,
+            ]);
+        }
+
+        $fields = [
+            'first_offer_date',
+            'demo_date',
+            'presentation_date',
+            'last_offer_date',
+            'user_status',
+            'direksi_status',
+            'purchasing_status',
+            'anggaran_status',
+            'jenis_anggaran',
+            'chance',
+            'comment',
+            'next_action',
+        ];
+
+        foreach ($fields as $field) {
+
+            $oldValue = $review->$field ?? "";
+            $newValue = $payload[$field] ?? "";
+
+
+
+            if (in_array($field, [
+            'first_offer_date',
+            'demo_date',
+            'presentation_date',
+            'last_offer_date',
+            ])) {
+                $oldCompare = $oldValue ? \Carbon\Carbon::parse($oldValue)->format('Y-m-d') : "New Data";
+                $newCompare = $newValue ? \Carbon\Carbon::parse($newValue)->format('Y-m-d') : "New Data";
+            } else {
+                $oldCompare = is_null($oldValue) ? "New Data" : trim((string) $oldValue);
+                $newCompare = is_null($newValue) ? "New Data" : trim((string) $newValue);
+            }
+
+
+
+            if ($oldCompare !== $newCompare) {
+
+                \App\Models\ReviewLog::create([
+                    'review_id' => $review->id,
+                    'log_date' => now()->toDateString(),
+                    'col_update' => $field,
+                    'col_before' => $oldValue,
+                    'col_after' => $newValue,
+                    'updated_by' => auth()->id(),
+                ]);
+
+                $review->$field = $newValue;
+            }
+        }
+
+        if (!empty($payload['validator_comment'])) {
+            $oldComment = $review->comment ?? '';
+            $newComment = trim($oldComment . "\n[Validator] " . $payload['validator_comment']);
+
+            if ($oldComment !== $newComment) {
+                \App\Models\ReviewLog::create([
+                    'review_id' => $review->id,
+                    'log_date' => now()->toDateString(),
+                    'col_update' => 'validator_comment',
+                    'col_before' => $oldComment,
+                    'col_after' => $newComment,
+                    'updated_by' => auth()->id(),
+                ]);
+
+                $review->comment = $newComment;
+            }
+        }
+
+
+        $review->save();
     }
 
 
@@ -624,6 +867,32 @@ class MissionRunController extends Controller
         if ($changed) {
             $installbase->save();
         }
+    }
+
+    private function createNextProspectTask($task, array $payload): void
+    {
+        $nextAction = trim((string)($payload['next_action'] ?? ''));
+
+        if ($nextAction === '') {
+            return;
+        }
+
+        $newTask = new mission();
+        $newTask->code = mission::makeCode('prospect');
+        $newTask->hospital_id = $task->hospital_id;
+        $newTask->department = $task->department;
+        $newTask->code_ref = $task->code_ref;
+        $newTask->task_reference = 'prospect';
+        $newTask->task_purpose = $nextAction;
+        $newTask->task_creator_id = auth()->id();
+        $newTask->generate_task_via = 'prospect_review';
+        $newTask->deadline = now()->addWeeks(2)->toDateString();
+        $newTask->priority_level = 'Urgent';
+        $newTask->expected_outcome = $nextAction;
+        $newTask->report_result = null;
+        $newTask->status_mission = 0;
+        $newTask->updated_by = null;
+        $newTask->save();
     }
 
     public function updateInstallbaseTask(Request $request, mission $task)
@@ -731,29 +1000,116 @@ class MissionRunController extends Controller
                 ->with('success', 'Visit submitted for validation.');
     }
 
-    public function validateTask(mission $task)
+    public function validateTask(mission $task, Request $request)
     {
-
-        $validation = MissionValidationList::where('mission_id', $task->id)
-        ->where('status', 0)
-        ->latest()
-        ->firstOrFail();
         $run = MissionRun::findOrFail($task->mission_run_id);
 
-         if ((int)$run->status !== 6) {
+        if ((int)$run->status !== 6) {
             return redirect()->back()->with('error', 'Visit must be submitted before task validation.');
         }
 
-        if ((int)$validation->status !== 0) {
-            return redirect()->back()->with('error', 'This task validation has already been processed.');
+        $validation = MissionValidationList::where('mission_id', $task->id)
+            ->where('status', 0)
+            ->latest()
+            ->firstOrFail();
+
+        $payload = json_decode($validation->payload_form, true) ?? [];
+
+        switch (strtolower($task->task_reference)) {
+
+            case 'prospect':
+                $actionType = $payload['action_type'] ?? null;
+
+                switch ($actionType) {
+                    case 'drop':
+                    case 'delayed':
+                        $request->validate([
+                            'validator_comment' => ['required', 'string'],
+                        ]);
+
+                        $payload['validator_comment'] = $request->validator_comment;
+                        break;
+                    case 'promo':
+                        $request->validate([
+                            'validator_comment' => ['required', 'string'],
+                        ]);
+
+                        $payload['validator_comment'] = $request->validator_comment;
+                        break;
+                    case 'lead_to_prospect':
+
+                        $request->validate([
+                            'validator_comment' => ['required'],
+                        ]);
+
+                        $payload['validator_comment'] = $request->validator_comment;
+
+                        break;
+                    case 'promo_to_prospect':
+                        $request->validate([
+                            'validator_comment' => ['required', 'string'],
+                        ]);
+
+                        $payload['validator_comment'] = $request->validator_comment;
+                        break;
+                    default:
+                        $request->validate([
+                            'validator_comment' => ['required', 'string'],
+                            'next_action' => ['required', 'string'],
+                        ]);
+
+                        $payload['validator_comment'] = $request->validator_comment;
+                        $payload['next_action'] = $request->next_action;
+                        break;
+                }
+
+                break;
+
+
+            case 'installbase':
+
+                $request->validate([
+                    'validator_comment' => ['nullable', 'string'],
+                ]);
+
+                if ($request->filled('validator_comment')) {
+                    $payload['validator_comment'] = $request->validator_comment;
+                }
+
+                break;
+
+
+            case 'mapping':
+            case 'finance':
+            case 'salesadmin':
+            case 'custom':
+
+                $request->validate([
+                    'validator_comment' => ['nullable', 'string'],
+                ]);
+
+                if ($request->filled('validator_comment')) {
+                    $payload['validator_comment'] = $request->validator_comment;
+                }
+
+                break;
+
+
+            default:
+                return redirect()->back()->with('error', 'Task reference not supported for validation.');
         }
 
+        // COMMON PART (applies to all task_ref)
+        $payload['validated_by'] = auth()->id();
+        $payload['validated_at'] = now()->toDateTimeString();
+
+        $validation->payload_form = json_encode($payload);
         $validation->status = 1;
         $validation->validate_by = auth()->id();
         $validation->validate_at = now();
         $validation->save();
 
-        $task->status_mission = 7;
+        $task->status_mission = 7; // wait finalize
         $task->updated_by = auth()->id();
         $task->save();
 
@@ -782,6 +1138,7 @@ class MissionRunController extends Controller
                         ->latest()
                         ->first();
 
+
                     if ($validation) {
                         $payload = json_decode($validation->payload_form, true) ?? [];
 
@@ -791,7 +1148,38 @@ class MissionRunController extends Controller
                                 break;
 
                             case 'prospect':
-                                $this->prospectDataUpdate($validation, $task, $payload);
+                                $actionType = $payload['action_type'] ?? null;
+
+                                switch ($actionType) {
+                                    case 'drop':
+                                        $this->prospectDropUpdate($validation, $task, $payload);
+                                        break;
+
+                                    case 'delayed':
+                                        $this->prospectDelayedUpdate($validation, $task, $payload);
+                                        $this->createDelayedProspectTask($task, $payload);
+                                        break;
+
+                                    case 'lead_to_prospect':
+                                        $this->prospectLeadConvert($validation, $task, $payload);
+                                        $this->createNextProspectTask($task, $payload);
+                                    break;
+
+                                    case 'promo':
+                                        $this->prospectPromoUpdate($validation, $task, $payload);
+                                        $this->createPromoProspectTask($task, $payload);
+                                    break;
+
+                                    case 'promo_to_prospect':
+                                        $this->prospectFinalConvert($validation, $task, $payload);
+                                        $this->createNextProspectTask($task, $payload);
+                                    break;
+
+                                    default:
+                                        $this->prospectDataUpdate($validation, $task, $payload);
+                                        $this->createNextProspectTask($task, $payload);
+                                        break;
+                                }
                                 break;
 
                             case 'mapping':
@@ -859,6 +1247,7 @@ class MissionRunController extends Controller
                 ->route('missions.pool')
                 ->with('success', 'Visit validated successfully. Validated tasks were completed, and unvalidated tasks were returned as new follow-up tasks.');
         } catch (\Throwable $e) {
+            dd($e->getMessage(), $e->getFile(), $e->getLine());
             DB::rollBack();
             return redirect()->back()->with('error', 'Failed to validate visit: ' . $e->getMessage());
         }
@@ -939,6 +1328,660 @@ class MissionRunController extends Controller
             ->with('success', 'Custom task submitted for validation.');
     }
 
+
+    public function leadDropView(mission $task)
+    {
+        $prospect = null;
+       $prospect = \App\Models\Prospect::with([
+        'hospital.province',
+        'department',
+        'unit',
+        'config',
+        'temperature',
+        'review',
+        ])->findOrFail($task->code_ref);
+
+        return view('admin.lead_action_drop', compact('task', 'prospect'));
+    }
+    public function leadDropSubmit(Request $request, mission $task)
+    {
+        $request->validate([
+            'report_result' => ['required', 'string'],
+            'drop_comment' => ['required', 'string'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $existing = MissionValidationList::where('mission_id', $task->id)
+                ->where('status', 0)
+                ->exists();
+
+            if ($existing) {
+                return redirect()->back()->withInput()->with('error', 'This task already has pending validation.');
+            }
+
+            $payload = [
+                'action_type' => 'drop',
+                'drop_comment' => $request->drop_comment,
+                'report_result' => $request->report_result,
+                'submitted_by' => auth()->id(),
+                'submitted_at' => now()->toDateTimeString(),
+            ];
+
+            MissionValidationList::create([
+                'mission_id' => $task->id,
+                'task_ref' => $task->task_reference,
+                'code_ref' => $task->code_ref,
+                'payload_form' => json_encode($payload),
+                'status' => 0,
+            ]);
+
+            $task->report_result = $request->report_result;
+            $task->status_mission = 6; // waiting validation
+            $task->updated_by = auth()->id();
+            $task->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('missions.runs.show', $task->mission_run_id)
+                ->with('success', 'Lead drop request submitted for validation.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    public function leadPromoView(mission $task)
+    {
+         $prospect = \App\Models\Prospect::with([
+            'hospital.province',
+            'department',
+            'unit',
+            'config',
+            'temperature',
+            'review',
+        ])->findOrFail($task->code_ref);
+
+        return view('admin.lead_action_promo', compact('task', 'prospect'));
+    }
+
+    public function leadPromoSubmit(Request $request, mission $task)
+    {
+        $request->validate([
+            'promo_comment' => ['required', 'string'],
+            'report_result' => ['required', 'string'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $existing = MissionValidationList::where('mission_id', $task->id)
+                ->where('status', 0)
+                ->exists();
+
+            if ($existing) {
+                return redirect()->back()->withInput()->with('error', 'This task already has pending validation.');
+            }
+
+            $payload = [
+                'action_type' => 'promo',
+                'promo_comment' => $request->promo_comment,
+                'report_result' => $request->report_result,
+                'submitted_by' => auth()->id(),
+                'submitted_at' => now()->toDateTimeString(),
+            ];
+
+            MissionValidationList::create([
+                'mission_id' => $task->id,
+                'task_ref' => $task->task_reference,
+                'code_ref' => $task->code_ref,
+                'payload_form' => json_encode($payload),
+                'status' => 0,
+            ]);
+
+            $task->report_result = $request->report_result;
+            $task->status_mission = 6;
+            $task->updated_by = auth()->id();
+            $task->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('missions.runs.show', $task->mission_run_id)
+                ->with('success', 'Lead promo request submitted for validation.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+
+    public function leadProspectView(mission $task)
+    {
+        $prospect = \App\Models\Prospect::with([
+            'hospital.province',
+            'department',
+            'unit',
+            'config',
+            'temperature',
+            'review',
+        ])->findOrFail($task->code_ref);
+
+        return view('admin.lead_action_prospect', compact('task', 'prospect'));
+    }
+
+    public function leadToProspectSubmit(Request $request, mission $task)
+    {
+        $request->validate([
+            'anggaran_status' => ['required'],
+            'jenis_anggaran' => ['required'],
+            'chance' => ['required', 'numeric'],
+            'next_action' => ['required'],
+            'report_result' => ['required'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+
+            $payload = [
+                'action_type' => 'lead_to_prospect',
+
+                'first_offer_date' => $request->first_offer_date,
+                'demo_date' => $request->demo_date,
+                'presentation_date' => $request->presentation_date,
+                'last_offer_date' => $request->last_offer_date,
+
+                'user_status' => $request->user_status,
+                'direksi_status' => $request->direksi_status,
+                'purchasing_status' => $request->purchasing_status,
+
+                'anggaran_status' => $request->anggaran_status,
+                'jenis_anggaran' => $request->jenis_anggaran,
+                'chance' => $request->chance,
+
+                'comment' => $request->comment,
+                'next_action' => $request->next_action,
+
+                'report_result' => $request->report_result,
+            ];
+
+            MissionValidationList::create([
+                'mission_id' => $task->id,
+                'task_ref' => $task->task_reference,
+                'code_ref' => $task->code_ref,
+                'payload_form' => json_encode($payload),
+                'status' => 0,
+            ]);
+
+            $task->status_mission = 6;
+            $task->report_result = $request->report_result;
+            $task->save();
+
+            DB::commit();
+
+            return redirect()->route('missions.runs.show', $task->mission_run_id)
+                ->with('success', 'Lead converted to prospect (waiting validation)');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function leadDelayedView(mission $task)
+    {
+        $prospect = null;
+        if ($task->code_ref) {
+            $prospect = \App\Models\Prospect::with('temperature')-> find($task->code_ref);
+             $stage = $this->getProspectStage($prospect);
+        }
+
+
+        return view('admin.lead_action_delayed', compact('task', 'prospect', 'stage'));
+    }
+
+    public function leadDelayedSubmit(Request $request, mission $task)
+    {
+        $request->validate([
+            'delay_comment' => ['required', 'string'],
+            'delay_until' => ['required', 'date'],
+            'report_result' => ['required', 'string'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $existing = MissionValidationList::where('mission_id', $task->id)
+                ->where('status', 0)
+                ->exists();
+
+            if ($existing) {
+                return redirect()->back()->withInput()->with('error', 'This task already has pending validation.');
+            }
+
+            $payload = [
+                'action_type' => 'delayed',
+                'delay_comment' => $request->delay_comment,
+                'delay_until' => $request->delay_until,
+                'report_result' => $request->report_result,
+                'submitted_by' => auth()->id(),
+                'submitted_at' => now()->toDateTimeString(),
+            ];
+
+            MissionValidationList::create([
+                'mission_id' => $task->id,
+                'task_ref' => $task->task_reference,
+                'code_ref' => $task->code_ref,
+                'payload_form' => json_encode($payload),
+                'status' => 0,
+            ]);
+
+            $task->report_result = $request->report_result;
+            $task->status_mission = 6; // waiting validation
+            $task->updated_by = auth()->id();
+            $task->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('missions.runs.show', $task->mission_run_id)
+                ->with('success', 'Delayed lead request submitted for validation.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+
+    private function getProspectStage(?\App\Models\Prospect $prospect): array
+    {
+        $code = optional($prospect->temperature)->tempCodeName;
+        $name = optional($prospect->temperature)->tempName;
+
+        return [
+            'code' => $code,
+            'name' => $name,
+            'is_lead' => (int)$code === 1,
+            'is_promo' => (int)$code === 6,
+            'is_delayed' => (int)$code === 7,
+            'is_prospect' => in_array((int)$code, [2,3,4,5]),
+            'is_drop' => (int)$code === 0,
+            'is_missed' => (int)$code === -1,
+        ];
+    }
+
+    private function prospectDropUpdate($validation, $task, array $payload): void
+    {
+        $prospect = \App\Models\Prospect::with(['review', 'temperature'])->findOrFail($validation->code_ref);
+
+        $review = $prospect->review;
+        if (!$review) {
+            $review = \App\Models\Review::create([
+                'prospect_id' => $prospect->id,
+            ]);
+        }
+
+        // update review comment with drop + validator comment
+        $baseComment = trim((string) ($review->comment ?? ''));
+        $dropComment = '[Drop Reason] ' . ($payload['drop_comment'] ?? '');
+        $validatorComment = !empty($payload['validator_comment'])
+            ? "\n[Validator] " . $payload['validator_comment']
+            : '';
+
+        $newComment = trim($baseComment . "\n" . $dropComment . $validatorComment);
+
+        if ($baseComment !== $newComment) {
+            \App\Models\ReviewLog::create([
+                'review_id' => $review->id,
+                'log_date' => now()->toDateString(),
+                'col_update' => 'comment',
+                'col_before' => $review->comment,
+                'col_after' => $newComment,
+                'updated_by' => auth()->id(),
+            ]);
+
+            $review->comment = $newComment;
+            $review->save();
+        }
+
+        // update temperature to Drop
+        $temperature = $prospect->temperature;
+        if ($temperature) {
+            $temperature->tempName = 'Drop';
+            $temperature->tempCodeName = 0;
+            $temperature->save();
+        }
+    }
+
+
+    private function prospectDelayedUpdate($validation, $task, array $payload): void
+    {
+        $prospect = \App\Models\Prospect::with(['review', 'temperature'])->findOrFail($validation->code_ref);
+
+        $review = $prospect->review;
+        if (!$review) {
+            $review = \App\Models\Review::create([
+                'prospect_id' => $prospect->id,
+            ]);
+        }
+
+        $baseComment = trim((string) ($review->comment ?? ''));
+        $delayComment = '[Delayed Reason] ' . ($payload['delay_comment'] ?? '');
+        $delayUntil = !empty($payload['delay_until'])
+            ? "\n[Delay Until] " . $payload['delay_until']
+            : '';
+        $validatorComment = !empty($payload['validator_comment'])
+            ? "\n[Validator] " . $payload['validator_comment']
+            : '';
+
+        $newComment = trim($baseComment . "\n" . $delayComment . $delayUntil . $validatorComment);
+
+        if ($baseComment !== $newComment) {
+            \App\Models\ReviewLog::create([
+                'review_id' => $review->id,
+                'log_date' => now()->toDateString(),
+                'col_update' => 'comment',
+                'col_before' => $review->comment,
+                'col_after' => $newComment,
+                'updated_by' => auth()->id(),
+            ]);
+
+            $review->comment = $newComment;
+            $review->save();
+        }
+
+        $temperature = $prospect->temperature;
+        if ($temperature) {
+            $temperature->tempName = 'Delayed Lead';
+            $temperature->tempCodeName = 7;
+            $temperature->save();
+        }
+    }
+
+
+    private function createDelayedProspectTask($task, array $payload): void
+    {
+        $delayUntil = $payload['delay_until'] ?? null;
+        $delayComment = trim((string)($payload['delay_comment'] ?? ''));
+
+        if (empty($delayUntil)) {
+            return;
+        }
+
+        $purpose = 'Follow up delayed lead';
+        if ($delayComment !== '') {
+            $purpose .= ' - ' . $delayComment;
+        }
+
+        $newTask = new mission();
+        $newTask->code = mission::makeCode('prospect');
+        $newTask->hospital_id = $task->hospital_id;
+        $newTask->department = $task->department;
+        $newTask->code_ref = $task->code_ref;
+        $newTask->task_reference = 'prospect';
+        $newTask->task_purpose = $purpose;
+        $newTask->task_creator_id = auth()->id();
+        $newTask->generate_task_via = 'delayed_lead';
+        $newTask->deadline = $delayUntil;
+        $newTask->priority_level = $task->priority_level ?? 'Urgent';
+        $newTask->expected_outcome = 'Recheck delayed lead and continue follow up';
+        $newTask->report_result = null;
+        $newTask->status_mission = 0;
+        $newTask->updated_by = null;
+        $newTask->mission_run_id = null;
+        $newTask->pic_user_id = null;
+        $newTask->user_to_meet = $task->user_to_meet;
+        $newTask->save();
+    }
+
+
+    private function prospectPromoUpdate($validation, $task, array $payload): void
+    {
+        $prospect = \App\Models\Prospect::with(['review', 'temperature'])->findOrFail($validation->code_ref);
+
+        $review = $prospect->review;
+        if (!$review) {
+            $review = \App\Models\Review::create([
+                'prospect_id' => $prospect->id,
+            ]);
+        }
+
+        $baseComment = trim((string) ($review->comment ?? ''));
+        $promoComment = '[Promo Reason] ' . ($payload['promo_comment'] ?? '');
+        $validatorComment = !empty($payload['validator_comment'])
+            ? "\n[Validator] " . $payload['validator_comment']
+            : '';
+
+        $newComment = trim($baseComment . "\n" . $promoComment . $validatorComment);
+
+        if ($baseComment !== $newComment) {
+            \App\Models\ReviewLog::create([
+                'review_id' => $review->id,
+                'log_date' => now()->toDateString(),
+                'col_update' => 'comment',
+                'col_before' => $review->comment,
+                'col_after' => $newComment,
+                'updated_by' => auth()->id(),
+            ]);
+
+            $review->comment = $newComment;
+            $review->save();
+        }
+
+        // assign PIC from task PIC
+        $prospect->pic_user_id = $task->pic_user_id;
+
+        // forced promo defaults
+        $prospect->unit_id = 10;      // Need To Follow UP
+          // General
+        $prospect->config_id = 0;     // General Product
+
+        // generate promo number if empty
+        if (empty($prospect->promo_no)) {
+            $rand = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+            $promo_no = $this->generatePromoNo(). '-' . $prospect->province_id . '-' . $prospect->hospital_id . '-' . $rand;
+            $prospect->promo_no = $promo_no;
+        }
+
+        $prospect->save();
+
+        $temperature = $prospect->temperature;
+        if ($temperature) {
+            $temperature->tempName = 'Promo';
+            $temperature->tempCodeName = 6;
+            $temperature->save();
+        }
+    }
+
+    private function createPromoProspectTask($task, array $payload): void
+    {
+        $newTask = new mission();
+        $newTask->code = mission::makeCode('prospect');
+        $newTask->hospital_id = $task->hospital_id;
+        $newTask->department = $task->department;
+        $newTask->code_ref = $task->code_ref;
+        $newTask->task_reference = 'prospect';
+        $newTask->task_purpose = 'Follow up promo prospect';
+        $newTask->task_creator_id = auth()->id();
+        $newTask->generate_task_via = 'promo_validation';
+        $newTask->deadline = now()->addWeeks(2)->toDateString();
+        $newTask->priority_level = $task->priority_level ?? 'Urgent';
+        $newTask->expected_outcome = 'Update promo prospect and prepare escalation to prospect';
+        $newTask->report_result = null;
+        $newTask->status_mission = 0;
+        $newTask->updated_by = null;
+        $newTask->mission_run_id = null;
+        $newTask->pic_user_id = $task->pic_user_id; // same PIC as task
+        $newTask->user_to_meet = $task->user_to_meet;
+        $newTask->save();
+    }
+
+    private function generatePromoNo(): string
+    {
+        $prefix = 'ISSPRM';
+        $year = now()->format('y');
+
+
+        return $prefix . '-' . $year;
+    }
+
+
+    public function promoToProspectView(mission $task)
+    {
+        $prospect = \App\Models\Prospect::with([
+            'hospital.province',
+            'department',
+            'unit',
+            'config',
+            'temperature',
+            'review',
+        ])->findOrFail($task->code_ref);
+
+        return view('admin.promo_to_prospect', compact('task', 'prospect'));
+    }
+
+    public function promoToProspectSubmit(Request $request, mission $task)
+    {
+        $request->validate([
+            'first_offer_date' => ['nullable', 'date'],
+            'demo_date' => ['nullable', 'date'],
+            'presentation_date' => ['nullable', 'date'],
+            'last_offer_date' => ['nullable', 'date'],
+            'user_status' => ['nullable', 'string'],
+            'direksi_status' => ['nullable', 'string'],
+            'purchasing_status' => ['nullable', 'string'],
+            'anggaran_status' => ['required', 'string'],
+            'jenis_anggaran' => ['required', 'string'],
+            'chance' => ['required', 'numeric'],
+            'comment' => ['nullable', 'string'],
+            'next_action' => ['required', 'string'],
+            'report_result' => ['required', 'string'],
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $payload = [
+                'action_type' => 'promo_to_prospect',
+
+                'first_offer_date' => $request->first_offer_date,
+                'demo_date' => $request->demo_date,
+                'presentation_date' => $request->presentation_date,
+                'last_offer_date' => $request->last_offer_date,
+                'user_status' => $request->user_status,
+                'direksi_status' => $request->direksi_status,
+                'purchasing_status' => $request->purchasing_status,
+                'anggaran_status' => $request->anggaran_status,
+                'jenis_anggaran' => $request->jenis_anggaran,
+                'chance' => $request->chance,
+                'comment' => $request->comment,
+                'next_action' => $request->next_action,
+
+                'report_result' => $request->report_result,
+
+                'submitted_by' => auth()->id(),
+                'submitted_at' => now()->toDateTimeString(),
+            ];
+
+            MissionValidationList::create([
+                'mission_id' => $task->id,
+                'task_ref' => $task->task_reference,
+                'code_ref' => $task->code_ref,
+                'payload_form' => json_encode($payload),
+                'status' => 0,
+            ]);
+
+            $task->report_result = $request->report_result;
+            $task->status_mission = 6;
+            $task->updated_by = auth()->id();
+            $task->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('missions.runs.show', $task->mission_run_id)
+                ->with('success', 'Promo converted to prospect request submitted.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    private function prospectFinalConvert($validation, $task, array $payload): void
+    {
+        $prospect = \App\Models\Prospect::with(['review', 'temperature'])
+            ->findOrFail($validation->code_ref);
+
+        // generate prospect number
+        if (empty($prospect->prospect_no)) {
+            $provinceCode = optional(optional($prospect->hospital)->province)->code ?? '00';
+            $prospect->prospect_no = $this->generateProspectNo($provinceCode, auth()->user()->role);
+        }
+
+        $prospect->save();
+
+        // update temperature → Prospect
+        $temperature = $prospect->temperature;
+        if ($temperature) {
+            $temperature->tempName = 'Prospect';
+            $temperature->tempCodeName = 2;
+            $temperature->save();
+        }
+
+        // update review fields (reuse your function)
+        $this->prospectDataUpdate($validation, $task, $payload);
+    }
+
+    private function generateProspectNo($provinceCode = null, $role = null): string
+    {
+        $date = now();
+
+        $codedate = $date->format('ymd');
+
+        // province logic
+        if ($role !== 'prj') {
+            $prov = $provinceCode ?? '00';
+        } else {
+            $prov = '88';
+        }
+
+        // safer unique suffix
+        $rand = str_pad((string) random_int(0, 999), 3, '0', STR_PAD_LEFT);
+
+        return "ISSP-{$prov}-{$codedate}-{$rand}";
+    }
+
+    private function prospectLeadConvert($validation, $task, array $payload): void
+    {
+        $prospect = \App\Models\Prospect::with(['review', 'temperature'])
+            ->findOrFail($validation->code_ref);
+
+        // generate prospect no
+        if (empty($prospect->prospect_no)) {
+
+            $provinceCode = optional(optional($prospect->hospital)->province)->code ?? '00';
+
+            $prospect->prospect_no = $this->generateProspectNo($provinceCode, auth()->user()->role);
+        }
+
+        // assign PIC from task
+        $prospect->pic_user_id = $task->pic_user_id;
+
+        $prospect->save();
+
+        // update stage → Prospect
+        $temperature = $prospect->temperature;
+        if ($temperature) {
+            $temperature->tempName = 'Prospect';
+            $temperature->tempCodeName = 2;
+            $temperature->save();
+        }
+
+        // update review data
+        $this->prospectDataUpdate($validation, $task, $payload);
+    }
 
 
 

@@ -23,6 +23,7 @@ $(function () {
         e.preventDefault();
         const form = this;
 
+
         Swal.fire({
             title: 'Validate Task?',
             text: 'This task will be marked as validated.',
@@ -62,6 +63,56 @@ $(function () {
 
 });
 </script>
+
+
+
+@if(session('open_lead_action_selector') && session('task_id'))
+<script>
+$(function () {
+    const taskId = @json(session('task_id'));
+
+    Swal.fire({
+        title: 'Choose Lead Action',
+        input: 'select',
+        inputOptions: {
+            drop: 'Drop',
+            promo: 'Change to Promo',
+            lead_to_prospect: 'Update into Prospect',
+            delayed: 'Delayed Lead'
+        },
+        inputPlaceholder: 'Select action',
+        showCancelButton: true,
+        confirmButtonText: 'Continue',
+        cancelButtonText: 'Cancel',
+        inputValidator: (value) => {
+            if (!value) {
+                return 'Please choose an action';
+            }
+        }
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        const action = result.value;
+
+        if (action === 'drop') {
+            window.location.href = "{{ url('missions/task') }}/" + taskId + "/lead-action/drop";
+        }
+
+        if (action === 'promo') {
+            window.location.href = "{{ url('missions/task') }}/" + taskId + "/lead-action/promo";
+        }
+
+        if (action === 'lead_to_prospect') {
+            window.location.href = "{{ url('missions/task') }}/" + taskId + "/lead-action/lead_to_prospect";
+        }
+
+        if (action === 'delayed') {
+            window.location.href = "{{ url('missions/task') }}/" + taskId + "/lead-action/delayed";
+        }
+    });
+});
+</script>
+@endif
 
 
 

@@ -433,6 +433,47 @@ class MissionController extends Controller
     }
 
 
+    public function leadDropView(mission $task)
+    {
+        $prospect = null;
+        if ($task->code_ref) {
+            $prospect = \App\Models\Prospect::find($task->code_ref);
+        }
+
+        return view('admin.lead_action_drop', compact('task', 'prospect'));
+    }
+
+    public function leadPromoView(mission $task)
+    {
+        $prospect = null;
+        if ($task->code_ref) {
+            $prospect = \App\Models\Prospect::find($task->code_ref);
+        }
+
+        return view('admin.lead_action_promo', compact('task', 'prospect'));
+    }
+
+    public function leadProspectView(mission $task)
+    {
+        $prospect = null;
+        if ($task->code_ref) {
+            $prospect = \App\Models\Prospect::find($task->code_ref);
+        }
+
+        return view('admin.lead_action_prospect', compact('task', 'prospect'));
+    }
+
+    public function leadDelayedView(mission $task)
+    {
+        $prospect = null;
+        if ($task->code_ref) {
+            $prospect = \App\Models\Prospect::find($task->code_ref);
+        }
+
+        return view('admin.lead_action_delayed', compact('task', 'prospect'));
+    }
+
+
 
 
 

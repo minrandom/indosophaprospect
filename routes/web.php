@@ -190,6 +190,8 @@ Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am
     ->name('task.start');
   Route::get('task/{task}/prospect', [MissionRunController::class, 'showProspectTask'])
     ->name('task.prospect');
+  Route::post('task/{task}/prospect', [MissionRunController::class, 'updateProspectTask'])
+    ->name('task.prospect.update');
   Route::get('task/{task}/installbase', [MissionRunController::class, 'showInstallbaseTask'])
     ->name('task.installbase');
   Route::post('task/{task}/installbase/update', [MissionRunController::class, 'updateInstallbaseTask'])
@@ -209,7 +211,25 @@ Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am
     Route::post('/task/{task}/validate-task', [MissionRunController::class, 'validateTask'])
       ->name('task.validateTask');
 
+    Route::get('/task/{task}/lead-action/drop', [MissionRunController::class, 'leadDropView'])
+        ->name('task.lead.drop');
+    Route::post('/task/{task}/lead-action/drop', [MissionRunController::class, 'leadDropSubmit'])
+        ->name('task.lead.drop.submit');
 
+    Route::get('/task/{task}/lead-action/promo', [MissionRunController::class, 'leadPromoView'])
+        ->name('task.lead.promo');
+    Route::post('/task/{task}/lead-action/promo', [MissionRunController::class, 'leadPromoSubmit'])
+        ->name('task.lead.promo.submit');
+
+    Route::get('/task/{task}/lead-action/lead_to_prospect', [MissionRunController::class, 'leadProspectView'])
+        ->name('task.lead.lead_to_prospect');
+    Route::post('/task/{task}/lead-action/lead_to_prospect', [MissionRunController::class, 'leadProspectSubmit'])
+        ->name('task.lead.lead_to_prospect.submit');
+
+    Route::get('/task/{task}/lead-action/delayed', [MissionRunController::class, 'leadDelayedView'])
+        ->name('task.lead.delayed');
+    Route::post('/task/{task}/lead-action/delayed', [MissionRunController::class, 'leadDelayedSubmit'])
+        ->name('task.lead.delayed.submit');
 
 
 
@@ -220,6 +240,14 @@ Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am
     ->name('task.finance');
   Route::get('task/{task}/mapping', [MissionRunController::class, 'showMappingTask'])
     ->name('task.mapping');
+
+
+  Route::get('/task/{task}/promo-action/prospect', [MissionRunController::class, 'promoToProspectView'])
+    ->name('task.promo.prospect');
+
+  Route::post('/task/{task}/promo-action/prospect', [MissionRunController::class, 'promoToProspectSubmit'])
+    ->name('task.promo.prospect.submit');
+
 
 });
 

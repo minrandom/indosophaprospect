@@ -81,6 +81,7 @@ class mission extends Model
             'custom' => 'CTM',
             'installbase' => 'IBM',
             'prospect' => 'PRP',
+            'lead'=>'LED',
             'mapping' => 'MAP',
             'finance' => 'FIN',
             'technical' => 'TEC',

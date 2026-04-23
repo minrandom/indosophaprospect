@@ -23,6 +23,7 @@ use App\Models\prospectFilters;
 use App\Models\User;
 use App\Models\Brand;
 use App\Models\Employee;
+use App\Models\mission;
 use App\Models\rejectLog;
 use App\Models\updatelog;
 use Illuminate\Http\Request;
@@ -377,6 +378,27 @@ class ProspectController extends Controller
         ]);
 
 
+        $code = mission::makeCode('prospect');
+
+        $mission = mission::create([
+            'code' => $code,
+            'hospital_id' => $request->cr8hospital,
+            'department' => $request->cr8department, // keep empty if empty
+            'pic_user_id' => null,               // set later
+            'user_to_meet' => null,              // optional later
+            'code_ref' => $id,
+            'task_reference' => 'prospect',
+            'task_purpose' => 'Follow up Prospect data to update',
+            'task_creator_id' => auth()->id(),
+            'generate_task_via' => 'lead creation',
+            'deadline' => Carbon::today()->addWeeks(4)->toDateString(),
+            'priority_level' => 'Urgent',
+            'expected_outcome' => "Update Review Prospect",
+            'report_result' => null,
+            'status_mission' => 0, // tasklist
+            'updated_by' => null,
+        ]);
+
 
 
 
@@ -388,6 +410,7 @@ class ProspectController extends Controller
 
         return response()->json($id);
     }
+
     public function storeLead(Request $request)
     {
        $data="done";
@@ -477,11 +500,31 @@ class ProspectController extends Controller
         prospectTemperature::create([
             'prospect_id'=>$id,
             'tempName'=>$tempeName,
-            'tempCodeName'=>$tempeCode
+
+         'tempCodeName'=>$tempeCode
         ]);
 
+        $code = mission::makeCode('lead');
 
 
+        $mission = mission::create([
+            'code' => $code,
+            'hospital_id' => $request->cr8hospital,
+            'department' => $request->cr8department, // keep empty if empty
+            'pic_user_id' => null,               // set later
+            'user_to_meet' => null,              // optional later
+            'code_ref' => $id,
+            'task_reference' => 'prospect',
+            'task_purpose' => 'Follow up lead data to update',
+            'task_creator_id' => auth()->id(),
+            'generate_task_via' => 'lead creation',
+            'deadline' => Carbon::today()->addWeeks(4)->toDateString(),
+            'priority_level' => 'Urgent',
+            'expected_outcome' => "Update Lead data",
+            'report_result' => null,
+            'status_mission' => 0, // tasklist
+            'updated_by' => null,
+        ]);
 
 
         $newProspect = Prospect::with("creator","province")
