@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\Mission;
 use App\Models\MissionHistory;
 use App\Models\MissionRun;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Services\VisitCalendarService;
+
+use function Symfony\Component\String\s;
 
 class MissionPoolController extends Controller
 {
@@ -17,6 +20,11 @@ class MissionPoolController extends Controller
         $visitCalendarService = new VisitCalendarService();
         $calendar = $visitCalendarService->build($request);
         //dd($calendar);
+        $user_id = auth()->user()->id;
+        $role= auth()->user()->role;
+        $area= auth()->user()->employee->area;
+
+
 
         $weekStart = $request->get('week_start')
             ? Carbon::parse($request->week_start)->startOfWeek(Carbon::MONDAY)
@@ -34,30 +42,61 @@ class MissionPoolController extends Controller
             ];
         }
 
-        // Mission list (status 1 & 2) untuk tabel kanan
-         $runs = MissionRun::query()
-        ->with([
-            'hospital:id,name,city',
-            'picUser:id,name',
-            'creator:id,name', // kalau ada
-        ])
-        // task yang sudah ditambahkan ke mission run (status 1 = mission pool)
-        ->withCount([
-            'tasks as tasks_count' => function ($q) {
-                $q->whereIn('status_mission', [1,2,3]);
-            }
-        ])
-        // optional filter: hanya run yg masih aktif (sesuaikan field status milik mission_run kamu)
-       ->whereIn('status', [0,1,2,3,6,7])
-        ->orderByDesc('id')
-        ->get();
-        // status 2 = scheduled (based on your flow)
-        $scheduled = mission::with(['hospital:id,name,city'])
-            ->where('status_mission', 2)
-            ->whereBetween('schedule_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->whereNotNull('schedule_time')
-            ->get();
+        $visit = MissionRun::query()
+                ->with([
+                    'hospital:id,name,city',
+                    'picUser:id,name',
+                    'creator:id,name', // kalau ada
+                ])
+                // task yang sudah ditambahkan ke mission run (status 1 = mission pool)
+                ->withCount([
+                    'tasks as tasks_count' => function ($q) {
+                        $q->whereIn('status_mission', [1,2,3]);
+                    }
+                ])
+                // optional filter: hanya run yg masih aktif (sesuaikan field status milik mission_run kamu)
+                ->whereIn('status', [0,1,2,3,6,7])
+                    ->orderByDesc('id');
 
+
+        $taskschedule = mission::with(['hospital:id,name,city'])
+                    ->where('status_mission', 2)
+                    ->whereBetween('schedule_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+                    ->whereNotNull('schedule_time')
+                    ->get();
+
+
+
+
+        switch ($role) {
+            case 'admin':
+                 // Mission list (status 1 & 2) untuk tabel kanan
+                $runs= $visit->get();
+                $scheduled = $taskschedule;
+                break;
+
+
+            case 'nsm':
+                // no filter
+                break;
+
+            case 'am':
+
+                break;
+
+            case 'fs':
+                    $runs = $visit->where('person_in_charge', $user_id)->get();
+                    $scheduled = $taskschedule->where('pic_user_id', $user_id);
+                break;
+
+            case 'prj':
+
+            default:
+                $runsQuery = MissionRun::where('person_in_charge', $user_id);
+        }
+
+        // status 2 = scheduled (based on your flow)
+        // dd($scheduled);
         // group by date + HH:MM (strip seconds)
         $grid = [];
         foreach ($scheduled as $m) {

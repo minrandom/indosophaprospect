@@ -57,6 +57,9 @@ class mission extends Model
     public function updatedBy(){
         return $this->belongsTo(User::class, 'updated_by');
     }
+    public function departmentRelation(){
+        return $this->belongsTo(Department::class, 'department');
+    }
 
     public function histories()
     {

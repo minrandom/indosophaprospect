@@ -166,9 +166,9 @@
                     </tr>
                   </thead>
                   <tbody>
-                    @foreach($items as $t)
+                    @foreach($items as $t )
                       <tr>
-                        <td>{{ $t->department }}</td>
+                        <td>{{ $t->departmentRelation?->name ?? '-' }}</td>
                         <td>{{ $t->task_purpose ?? '-' }}</td>
                         <td>{{ $t->expected_outcome ?? '-' }}</td>
                         <td>@if($t->priority_level == "Super Urgent")

@@ -23,9 +23,15 @@ class installbase extends Model
     public function product(){
         return $this->belongsTo(Product::class);
     }
+
     public function hospital(){
         return $this->belongsTo(Hospital::class);
     }
+
+    public function department(){
+        return $this->belongsTo(Department::class);
+    }
+
     public function updateLogs()
     {
         return $this->hasMany(InstallbaseUpdateLog::class);

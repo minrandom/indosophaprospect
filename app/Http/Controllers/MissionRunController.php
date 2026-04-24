@@ -188,19 +188,25 @@ class MissionRunController extends Controller
         }
 
         // left side: tasks already in mission (status 1) grouped by task_reference
-        $inMission = mission::with(['hospital:id,name,city'])
+        $inMission = mission::with(['hospital','departmentRelation'])
             ->where('mission_run_id', $run->id)
             ->whereIn('status_mission', [1,2,3,4,5,6,7])
             ->get()
             ->groupBy('task_reference');
 
+
+
+
+
+
         // right side: tasks in task pool (status 0) same hospital
-        $taskPool = mission::with(['hospital:id,name,city'])
+        $taskPool = mission::with(['hospital','department'])
             ->whereNull('mission_run_id')
             ->where('hospital_id', $run->hospital_id)
             ->whereIn('status_mission', [0,30])
-            ->get()
-            ->groupBy('task_reference');
+            ->groupBy('task_reference')->get();
+
+
 
         $allVisitTasks = mission::where('mission_run_id', $run->id)->get();
         $totalTaskCount = $allVisitTasks->count();
@@ -804,13 +810,25 @@ class MissionRunController extends Controller
 
     public function showInstallbaseTask(mission $task)
     {
-        //task complete logic for installbase in visit detail
         $installbase = null;
-        if($task->code_ref){
-            $installbase = installbase::with(['hospital.province','product'])->where('id', $task->code_ref)->first();
+        $department = null;
 
-            $department = Department::where('id', $installbase->department_id)->first();
+        if ($task->code_ref) {
+            $installbase = installbase::with(['hospital.province', 'product'])
+                ->where('id', $task->code_ref)
+                ->first();
+
+            if ($installbase && $installbase->department_id) {
+                $department = Department::find($installbase->department_id);
+            }
         }
+
+        if (!$installbase) {
+            return redirect()
+                ->route('missions.runs.show', $task->mission_run_id)
+                ->with('error', 'Installbase data not found for this task.');
+        }
+
         return view('admin.mission_task_installbase', compact('task', 'installbase', 'department'));
 
     }

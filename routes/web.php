@@ -222,9 +222,9 @@ Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am
         ->name('task.lead.promo.submit');
 
     Route::get('/task/{task}/lead-action/lead_to_prospect', [MissionRunController::class, 'leadProspectView'])
-        ->name('task.lead.lead_to_prospect');
+        ->name('task.lead.prospect');
     Route::post('/task/{task}/lead-action/lead_to_prospect', [MissionRunController::class, 'leadProspectSubmit'])
-        ->name('task.lead.lead_to_prospect.submit');
+        ->name('task.lead.prospect.submit');
 
     Route::get('/task/{task}/lead-action/delayed', [MissionRunController::class, 'leadDelayedView'])
         ->name('task.lead.delayed');
