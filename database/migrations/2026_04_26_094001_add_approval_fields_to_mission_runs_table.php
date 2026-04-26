@@ -18,7 +18,7 @@ class AddApprovalFieldsToMissionRunsTable extends Migration
             // 0 = waiting approval, 1 = approved, -1 = rejected
 
 
-            $table->unsignedBigInteger('approved_by')->nullable()->after('supervisor_id');
+            $table->unsignedBigInteger('approved_by')->nullable()->after('status');
             $table->dateTime('approved_at')->nullable()->after('approved_by');
         });
     }
