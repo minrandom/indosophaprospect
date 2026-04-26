@@ -100,35 +100,59 @@ class MissionController extends Controller
         $calendar = $visitCalendarService->build($request);
         //dd($calendar);
         $deptoptions = Department::orderBy('name')->get(['id','name']);
-        $hospitaloptions = Hospital::orderBy('name')->get(['id','name']);
-
-
+        $hospitaloptions = $this->applyHospitalAreaScope(
+            Hospital::query()->with('province')
+        )->orderBy('name')->get(['id','name','province_id']);
 
         $provinceId = (int) $request->get('province_id', 0);
         $hospitalId = (int) $request->get('hospital_id', 0);
 
         // Filter options
-        $provinces = Province::query()
-        ->whereIn('id', function ($q) {
-            $q->select('h.province_id')
-              ->from('missions as m')
-              ->join('hospitals as h', 'h.id', '=', 'm.hospital_id')
-              ->whereIn('m.status_mission', [0,30])
-              ->whereNotNull('h.province_id')
-              ->distinct();
-        })
-        ->orderBy('name')
-        ->get(['id','name']);
-        $hospitals = Hospital::query()
-            ->when($provinceId, fn($q) => $q->where('province_id', $provinceId))
+        $provinceQuery = Province::query()
+            ->whereIn('id', function ($q) {
+                $q->select('h.province_id')
+                ->from('missions as m')
+                ->join('hospitals as h', 'h.id', '=', 'm.hospital_id')
+                ->whereIn('m.status_mission', [0,30])
+                ->whereNotNull('h.province_id')
+                ->distinct();
+            });
+
+        $user = auth()->user();
+        $role = strtolower($user->role ?? '');
+        $area = optional($user->employee)->area;
+
+        if ($area !== 'HO' && !in_array($role, ['admin', 'bu'])) {
+            if ($role === 'fs') {
+                $provinceQuery->where('prov_order_no', $area);
+            } elseif ($role === 'am') {
+                $provinceQuery->where('iss_area_code', $area);
+            } elseif ($role === 'nsm') {
+                $provinceQuery->where('wilayah', $area);
+            } else {
+                $provinceQuery->whereRaw('1 = 0');
+            }
+        }
+
+        $provinces = $provinceQuery->orderBy('name')->get(['id','name']);
+
+        $hospitalFilterQuery = Hospital::query()
+            ->with('province')
+            ->when($provinceId, fn($q) => $q->where('province_id', $provinceId));
+
+        $hospitalFilterQuery = $this->applyHospitalAreaScope($hospitalFilterQuery);
+
+        $hospitals = $hospitalFilterQuery
             ->orderBy('name')
             ->get(['id','name','province_id']);
 
         // Task pool data (status 0)
         $missions = mission::query()
-            ->with(['hospital:id,name,city,province_id'])
-            ->whereIn('status_mission', [0,30]) // include requested tasks (30) that still in pool
-             ->whereNotNull('hospital_id'); // only missions with hospital (filter out manual/custom tasks without hospital)
+            ->with(['hospital.province', 'departmentRelation'])
+            ->whereIn('status_mission', [0,30])
+            ->whereNotNull('hospital_id');
+
+        $missions = $this->applyTaskAreaScope($missions); // only missions with hospital (filter out manual/custom tasks without hospital)
             if ($hospitalId) {
                 $missions->where('hospital_id', $hospitalId);
             } elseif ($provinceId) {
@@ -138,7 +162,10 @@ class MissionController extends Controller
                 });
             }
 
+
             $missions = $missions->orderByDesc('created_at')->get();
+
+
 
             $priorityRank = function ($level) {
                 $level = strtolower(trim($level ?? ''));
@@ -202,8 +229,8 @@ class MissionController extends Controller
 
     public function taskPoolHospitalsByProvince($provinceId)
     {
-        // Hospitals in that province that exist in TASK POOL (status 0)
-        $hospitals = Hospital::query()
+        $query = Hospital::query()
+            ->with('province')
             ->where('province_id', $provinceId)
             ->whereIn('id', function ($q) {
                 $q->select('hospital_id')
@@ -211,9 +238,13 @@ class MissionController extends Controller
                 ->whereIn('status_mission', [0,30])
                 ->whereNotNull('hospital_id')
                 ->distinct();
-            })
+            });
+
+        $query = $this->applyHospitalAreaScope($query);
+
+        $hospitals = $query
             ->orderBy('name')
-            ->get(['id','name']);
+            ->get(['id','name','province_id']);
 
         return response()->json($hospitals);
     }
@@ -474,6 +505,68 @@ class MissionController extends Controller
     }
 
 
+    private function applyTaskAreaScope($query)
+    {
+        $user = auth()->user();
+        $role = strtolower($user->role ?? '');
+        $area = optional($user->employee)->area;
+
+        // HO can see all
+        if ($area === 'HO' || in_array($role, ['admin', 'bu'])) {
+            return $query;
+        }
+
+        // if no area, show nothing
+        if (!$area) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereHas('hospital.province', function ($q) use ($role, $area) {
+
+            if ($role === 'fs') {
+                $q->where('prov_order_no', $area);
+            }
+
+            elseif ($role === 'am') {
+                $q->where('iss_area_code', $area);
+            }
+
+            elseif ($role === 'nsm') {
+                $q->where('wilayah', $area);
+            }
+
+            else {
+                $q->whereRaw('1 = 0');
+            }
+        });
+    }
+
+    private function applyHospitalAreaScope($query)
+    {
+        $user = auth()->user();
+        $role = strtolower($user->role ?? '');
+        $area = optional($user->employee)->area;
+
+        if ($area === 'HO' || in_array($role, ['admin', 'bu'])) {
+            return $query;
+        }
+
+        if (!$area) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereHas('province', function ($q) use ($role, $area) {
+            if ($role === 'fs') {
+                $q->where('prov_order_no', $area);
+            } elseif ($role === 'am') {
+                $q->where('iss_area_code', $area);
+            } elseif ($role === 'nsm') {
+                $q->where('wilayah', $area);
+            } else {
+                $q->whereRaw('1 = 0');
+            }
+        });
+    }
 
 
 

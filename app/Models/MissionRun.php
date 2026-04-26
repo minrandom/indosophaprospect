@@ -43,6 +43,16 @@ class MissionRun extends Model
         return $this->hasMany(mission::class, 'mission_run_id'); // your "missions" = tasks
     }
 
+
+
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+
+
     public static function makeCode(): string
     {
         // example: MISISS-03-26-1234

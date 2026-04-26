@@ -224,7 +224,8 @@
                             <tr>
                             <th style="width:34px;" class="js-col-check d-none"></th>
                             <th>Dept</th>
-                            <th>Task Ref</th>
+                            <th>Task Source</th>
+                            <th>Task Group</th>
                             <th>Purpose</th>
                             <th>Expected Outcome</th>
                             <th>Deadline</th>
@@ -240,7 +241,8 @@
                                         value="{{ $t->id }}"
                                         data-hospital-id="{{ $t->hospital_id }}">
                                 </td>
-                                <td class="align-middle">{{ $t->department ?? '-' }}</td>
+                                <td class="align-middle">{{ $t->departmentRelation->name ?? '-' }}</td>
+                                <td class="align-middle text-uppercase">{{ $t->task_source_label ?? '-' }}</td>
                                 <td class="align-middle text-uppercase">{{ $t->task_reference ?? '-' }}</td>
                                 <td class="align-middle">{{ $t->task_purpose ?? '-' }}</td>
                                 <td class="align-middle">{{ $t->expected_outcome ?? '-' }}</td>

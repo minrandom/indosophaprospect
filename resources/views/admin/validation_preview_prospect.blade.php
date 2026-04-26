@@ -7,171 +7,164 @@
         return $value;
     };
 
-    $stageName = optional($prospect->latestTemperature)->tempName ?? 'Missing Data';
+    $stageName = optional($prospect->temperature)->tempName ?? 'Missing Data';
     $lastNextAction = optional($prospect->review)->next_action ?? 'Missing Data';
+    $actionType = $payload['action_type'] ?? 'prospect_update';
+
+    $actionLabel = match ($actionType) {
+        'lead_to_prospect' => 'Lead to Prospect',
+        'promo_to_prospect' => 'Promo to Prospect',
+        'drop' => 'Lead / Prospect to Drop',
+        'promo' => 'Lead to Promo',
+        'delayed' => 'Lead to Delayed',
+        default => 'Prospect Update',
+    };
+
+    $oldReview = $prospect->review;
+
+    $compareRows = [
+        'Prospect No' => [
+            'old' => $prospect->prospect_no ?? null,
+            'new' => $prospect->prospect_no ?? null,
+        ],
+        'Current Stage' => [
+            'old' => optional($prospect->temperature)->tempName,
+            'new' => $actionLabel,
+        ],
+        'Business Unit' => [
+            'old' => optional($prospect->unit)->name,
+            'new' => optional($payloadUnit)->name ?? optional($prospect->unit)->name,
+        ],
+
+        'Product / Config' => [
+            'old' => optional($prospect->config)->name ?? optional($prospect->config)->model_type,
+            'new' => optional($payloadConfig)->name
+                ?? optional($payloadConfig)->model_type
+                ?? optional($prospect->config)->name
+                ?? optional($prospect->config)->model_type,
+        ],
+        'ETA PO Date' => [
+            'old' => $prospect->eta_po_date ?? null,
+            'new' => !empty($payload['eta_po_date']) ? $payload['eta_po_date'] : ($prospect->eta_po_date ?? null),
+        ],
+        'First Offer Date' => [
+            'old' => optional($oldReview)->first_offer_date,
+            'new' => !empty($payload['first_offer_date']) ? $payload['first_offer_date'] : optional($oldReview)->first_offer_date,
+        ],
+        'Demo Date' => [
+            'old' => optional($oldReview)->demo_date,
+            'new' => !empty($payload['demo_date']) ? $payload['demo_date'] : optional($oldReview)->demo_date,
+        ],
+        'Presentation Date' => [
+            'old' => optional($oldReview)->presentation_date,
+            'new' => !empty($payload['presentation_date']) ? $payload['presentation_date'] : optional($oldReview)->presentation_date,
+        ],
+        'Last Offer Date' => [
+            'old' => optional($oldReview)->last_offer_date,
+            'new' => !empty($payload['last_offer_date']) ? $payload['last_offer_date'] : optional($oldReview)->last_offer_date,
+        ],
+        'User Status' => [
+            'old' => optional($oldReview)->user_status,
+            'new' => !empty($payload['user_status']) ? $payload['user_status'] : optional($oldReview)->user_status,
+        ],
+        'Direksi Status' => [
+            'old' => optional($oldReview)->direksi_status,
+            'new' => !empty($payload['direksi_status']) ? $payload['direksi_status'] : optional($oldReview)->direksi_status,
+        ],
+        'Purchasing Status' => [
+            'old' => optional($oldReview)->purchasing_status,
+            'new' => !empty($payload['purchasing_status']) ? $payload['purchasing_status'] : optional($oldReview)->purchasing_status,
+        ],
+        'Anggaran Status' => [
+            'old' => optional($oldReview)->anggaran_status,
+            'new' => !empty($payload['anggaran_status']) ? $payload['anggaran_status'] : optional($oldReview)->anggaran_status,
+        ],
+        'Jenis Anggaran' => [
+            'old' => optional($oldReview)->jenis_anggaran,
+            'new' => !empty($payload['jenis_anggaran']) ? $payload['jenis_anggaran'] : optional($oldReview)->jenis_anggaran,
+        ],
+        'Chance' => [
+            'old' => optional($oldReview)->chance,
+            'new' => isset($payload['chance']) && $payload['chance'] !== '' ? $payload['chance'] : optional($oldReview)->chance,
+        ],
+        'Comment' => [
+            'old' => optional($oldReview)->comment,
+            'new' => !empty($payload['comment']) ? $payload['comment'] : optional($oldReview)->comment,
+        ],
+        'Next Action' => [
+            'old' => optional($oldReview)->next_action,
+            'new' => !empty($payload['next_action']) ? $payload['next_action'] : optional($oldReview)->next_action,
+        ],
+        'Report / Notes' => [
+            'old' => '-',
+            'new' => $payload['report_result'] ?? null,
+        ],
+    ];
 @endphp
 
 <div class="mb-3">
     <div><b>Task Code:</b> {{ $task->code }}</div>
     <div><b>Task Ref:</b> {{ strtoupper($task->task_reference) }}</div>
     <div><b>Code Ref:</b> {{ $task->code_ref }}</div>
+    <div><b>Action:</b> {{ $actionLabel }}</div>
 </div>
 
 <form method="POST"
       action="{{ route('missions.task.validateTask', $task->id) }}"
       class="js-confirm-validate-task">
-
     @csrf
 
-<div class="table-responsive">
-    <table class="table table-bordered table-sm">
-        <thead class="thead-light">
-            <tr>
-                <th style="width:35%;">Field</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width:28%;">Field</th>
+                    <th style="width:36%;">Current Data</th>
+                    <th style="width:36%;">Submitted Data</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($compareRows as $label => $row)
+                    @php
+                        $oldVal = $showValue($row['old'] ?? null);
+                        $newVal = $showValue($row['new'] ?? null);
+                        $isChanged = trim((string)$oldVal) !== trim((string)$newVal);
+                    @endphp
 
-            {{-- READ ONLY MASTER INFO --}}
-            <tr>
-                <td>Current Stage</td>
-                <td>{{ $showValue($stageName) }}</td>
-            </tr>
-            <tr>
-                <td>Prospect No</td>
-                <td>{{ $showValue($prospect->prospect_no ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Prospect Source</td>
-                <td>{{ $showValue($prospect->prospect_source ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Added Info</td>
-                <td>{{ $showValue($prospect->added_info ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Province</td>
-                <td>{{ $showValue(optional(optional($prospect->hospital)->province)->name ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Hospital</td>
-                <td>{{ $showValue(optional($prospect->hospital)->name ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Department</td>
-                <td>{{ $showValue(optional($prospect->department)->name ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Business Unit</td>
-                <td>{{ $showValue(optional($prospect->unit)->name ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Product</td>
-                <td>{{ $showValue(optional($prospect->config)->name ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Qty</td>
-                <td>{{ $showValue($prospect->qty ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Submitted Price</td>
-                <td>{{ $showValue($prospect->submitted_price ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>ETA PO Date</td>
-                <td>{{ $showValue($prospect->eta_po_date ?? null) }}</td>
-            </tr>
-
-            {{-- REVIEW PAYLOAD --}}
-            <tr>
-                <td>First Offer Date</td>
-                <td>{{ $showValue($payload['first_offer_date'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Demo Date</td>
-                <td>{{ $showValue($payload['demo_date'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Presentation Date</td>
-                <td>{{ $showValue($payload['presentation_date'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Last Offer Date</td>
-                <td>{{ $showValue($payload['last_offer_date'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>User Status</td>
-                <td>{{ $showValue($payload['user_status'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Direksi Status</td>
-                <td>{{ $showValue($payload['direksi_status'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Purchasing Status</td>
-                <td>{{ $showValue($payload['purchasing_status'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Anggaran Status</td>
-                <td>{{ $showValue($payload['anggaran_status'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Jenis Anggaran</td>
-                <td>{{ $showValue($payload['jenis_anggaran'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Chance</td>
-                <td>{{ $showValue($payload['chance'] ?? null) }}</td>
-            </tr>
-            <tr>
-                <td>Last Action</td>
-                <td>
-                    <span class="badge badge-info">
-                        {{ $showValue($payload['next_action'] ?? null) }}
-                    </span>
-                </td>
-            </tr>
-            <tr>
-                <td>Comment</td>
-                <td>{{ $showValue($payload['comment'] ?? null) }}</td>
-            </tr>
-
-            <tr>
-                <td>Report / Notes</td>
-                <td>{{ $showValue($payload['report_result'] ?? null) }}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<div class="text-right mt-3">
-
-
-        <div class="card border-0 shadow-sm">
-        <div class="card-body">
-
-            <div class="form-group">
-                <label class="small text-muted">Next Action</label>
-                <select name="next_action" id="next_action" class="form-control" required>
-                    <option value="">Select Next Action</option>
-
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="small text-muted">Validator Comment</label>
-                <textarea name="validator_comment" class="form-control" rows="3" required></textarea>
-            </div>
-
-
-
-            <div class="text-right">
-                <button type="submit" class="btn btn-success">
-                    Confirm Validate
-                </button>
-            </div>
-
-        </div>
+                    <tr>
+                        <td class="font-weight-bold">{{ $label }}</td>
+                        <td>{{ $oldVal }}</td>
+                        <td class="{{ $isChanged ? 'font-weight-bold text-primary' : '' }}">
+                            {{ $newVal }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
-    </form>
-</div>
+
+    <div class="form-group mt-3">
+        <label class="small text-uppercase text-muted">Validator Comment</label>
+        <textarea name="validator_comment" class="form-control" rows="3" required></textarea>
+    </div>
+
+    @if(!in_array($actionType, ['drop', 'promo', 'delayed']))
+        <div class="form-group">
+            <label class="small text-uppercase text-muted">Next Action</label>
+            <select name="next_action" class="form-control" required>
+                <option value="">Select Next Action</option>
+                <option value="Follow Up User">Follow Up User</option>
+                <option value="Schedule Demo">Schedule Demo</option>
+                <option value="Schedule Presentation">Schedule Presentation</option>
+                <option value="Submit Offer">Submit Offer</option>
+                <option value="Follow Up Purchasing">Follow Up Purchasing</option>
+                <option value="Follow Up Direksi">Follow Up Direksi</option>
+                <option value="Wait Anggaran Update">Wait Anggaran Update</option>
+            </select>
+        </div>
+    @endif
+
+    <div class="text-right mt-3">
+        <button type="submit" class="btn btn-primary">Validate</button>
+    </div>
+</form>

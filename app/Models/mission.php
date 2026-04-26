@@ -20,6 +20,7 @@ class mission extends Model
         'user_to_meet',
         'code_ref',
         'task_reference',
+        'task_purpose',
         'task_creator_id',
         'generate_task_via',
         'deadline',
@@ -70,6 +71,26 @@ class mission extends Model
     return $this->belongsTo(\App\Models\MissionRun::class, 'mission_run_id');
     }
 
+
+
+    public function getTaskSourceLabelAttribute()
+    {
+        return match ($this->generate_task_via) {
+            'created_by_admin' => 'Created by Admin',
+            'new_lead' => 'New Lead',
+            'promo_from_lead' => 'Promo from Lead',
+            'new_prospect' => 'New Prospect',
+            'prospect_from_lead' => 'Prospect from Lead',
+            'prospect_from_promo' => 'Prospect from Promo',
+            'prospect_review' => 'Prospect Update/Review',
+            'missed_task' => 'Missed Task',
+            'custom_task' => 'Custom Task',
+            'mising_ib_data' => 'Missing Installbase Data',
+            'mapping_task' => 'Mapping Task',
+            'installbase_menu'=> 'Installbase Menu',
+            default => $this->generate_task_via ?? '-',
+        };
+    }
 
 
     /*

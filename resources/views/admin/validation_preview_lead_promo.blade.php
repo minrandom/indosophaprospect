@@ -29,7 +29,7 @@
             <tbody>
                 <tr>
                     <td>Current Stage</td>
-                    <td>{{ $showValue(optional($prospect->latestTemperature)->tempName ?? null) }}</td>
+                    <td>{{ $showValue(optional($prospect->temperature)->tempName ?? null) }}</td>
                 </tr>
                 <tr>
                     <td>Hospital</td>

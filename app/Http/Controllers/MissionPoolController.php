@@ -15,6 +15,40 @@ use function Symfony\Component\String\s;
 
 class MissionPoolController extends Controller
 {
+    private function applyVisitAreaScope($query)
+    {
+        $user = auth()->user();
+        $role = strtolower($user->role ?? '');
+        $area = optional($user->employee)->area;
+
+        if ($area === 'HO' || in_array($role, ['admin', 'bu'])) {
+            return $query;
+        }
+
+        if (!$area) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($role === 'fs') {
+            return $query
+                ->where('person_in_charge', $user->id)
+                ->whereHas('hospital.province', function ($q) use ($area) {
+                    $q->where('prov_order_no', $area);
+                });
+        }
+
+        return $query->whereHas('hospital.province', function ($q) use ($role, $area) {
+            if ($role === 'am') {
+                $q->where('iss_area_code', $area);
+            } elseif ($role === 'nsm') {
+                $q->where('wilayah', $area);
+            } else {
+                $q->whereRaw('1 = 0');
+            }
+        });
+    }
+
+
     public function index(Request $request)
     {
         $visitCalendarService = new VisitCalendarService();
@@ -44,9 +78,12 @@ class MissionPoolController extends Controller
 
         $visit = MissionRun::query()
                 ->with([
-                    'hospital:id,name,city',
+                    'hospital:id,name,city,province_id',
+                    'hospital.province:id,name,prov_order_no,iss_area_code,wilayah',
                     'picUser:id,name',
-                    'creator:id,name', // kalau ada
+                    'creator:id,name',
+                    'checkIn',
+                    'checkOut',
                 ])
                 // task yang sudah ditambahkan ke mission run (status 1 = mission pool)
                 ->withCount([
@@ -59,41 +96,29 @@ class MissionPoolController extends Controller
                     ->orderByDesc('id');
 
 
-        $taskschedule = mission::with(['hospital:id,name,city'])
-                    ->where('status_mission', 2)
-                    ->whereBetween('schedule_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-                    ->whereNotNull('schedule_time')
-                    ->get();
+        $taskscheduleQuery = mission::with(['hospital:id,name,city,province_id', 'hospital.province'])
+            ->where('status_mission', 2)
+            ->whereBetween('schedule_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
+            ->whereNotNull('schedule_time');
+
+        $taskscheduleQuery = $this->applyTaskAreaScope($taskscheduleQuery);
 
 
 
 
-        switch ($role) {
-            case 'admin':
-                 // Mission list (status 1 & 2) untuk tabel kanan
+        $visit = $this->applyVisitAreaScope($visit)
+        ->withCount([
+            'tasks as tasks_count' => function ($q) {
+                $q->whereIn('status_mission', [1,2,3]);
+            }
+        ])
+        ->whereIn('status', [0,1,2,3,6,7])
+        ->orderByDesc('id');
+
                 $runs= $visit->get();
-                $scheduled = $taskschedule;
-                break;
+                $scheduled = $taskscheduleQuery->get();
 
 
-            case 'nsm':
-                // no filter
-                break;
-
-            case 'am':
-
-                break;
-
-            case 'fs':
-                    $runs = $visit->where('person_in_charge', $user_id)->get();
-                    $scheduled = $taskschedule->where('pic_user_id', $user_id);
-                break;
-
-            case 'prj':
-
-            default:
-                $runsQuery = MissionRun::where('person_in_charge', $user_id);
-        }
 
         // status 2 = scheduled (based on your flow)
         // dd($scheduled);
@@ -129,6 +154,41 @@ class MissionPoolController extends Controller
             'calendar'
         ));
     }
+
+    private function applyTaskAreaScope($query)
+    {
+        $user = auth()->user();
+        $role = strtolower($user->role ?? '');
+        $area = optional($user->employee)->area;
+
+        if ($area === 'HO' || in_array($role, ['admin', 'bu'])) {
+            return $query;
+        }
+
+        if (!$area) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($role === 'fs') {
+            return $query
+                ->where('pic_user_id', $user->id)
+                ->whereHas('hospital.province', function ($q) use ($area) {
+                    $q->where('prov_order_no', $area);
+                });
+        }
+
+        return $query->whereHas('hospital.province', function ($q) use ($role, $area) {
+            if ($role === 'am') {
+                $q->where('iss_area_code', $area);
+            } elseif ($role === 'nsm') {
+                $q->where('wilayah', $area);
+            } else {
+                $q->whereRaw('1 = 0');
+            }
+        });
+    }
+
+
 
     private function logMissionChange(int $missionId, string $action, array $changes = [], ?string $note = null): void
     {

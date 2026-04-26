@@ -178,6 +178,9 @@ Route::get('/mission-runs/pic-options/{hospital}', [MissionController::class, 'p
 
 Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs'])->group(function () {
 
+
+Route::post('/run/{run}/approve', [MissionRunController::class, 'approveVisit'])
+    ->name('runs.approve');
   // Start mission_run -> set status_run=3, then redirect to mission page
   Route::post('/runs/{run}/start', [MissionRunController::class, 'start'])
     ->name('runs.start');
@@ -236,17 +239,21 @@ Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am
 
 
 
+
+
   Route::get('task/{task}/finance', [MissionRunController::class, 'showFinanceTask'])
     ->name('task.finance');
   Route::get('task/{task}/mapping', [MissionRunController::class, 'showMappingTask'])
     ->name('task.mapping');
 
 
-  Route::get('/task/{task}/promo-action/prospect', [MissionRunController::class, 'promoToProspectView'])
+  Route::get('/task/{task}/promo-action/prospect', [MissionRunController::class, 'promoProspectView'])
     ->name('task.promo.prospect');
 
-  Route::post('/task/{task}/promo-action/prospect', [MissionRunController::class, 'promoToProspectSubmit'])
+  Route::post('/task/{task}/promo-action/prospect', [MissionRunController::class, 'promoProspectSubmit'])
     ->name('task.promo.prospect.submit');
+
+
 
 
 });

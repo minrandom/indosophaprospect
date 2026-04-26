@@ -471,18 +471,21 @@ class ProspectController extends Controller
             }
 
 
-        $n=Prospect::create([
-            'entry_type'=>"LEAD",
-            'user_creator'=>$request->creatorid,
-            'prospect_source'=>$sourceoption,
-            'province_id'=>$request->cr8province,
-            'hospital_id'=>$request->cr8hospital,
-            'department_id'=>$request->cr8department,
-            'config_id'=>$request->cr8product,
-            'unit_id'=>$request->cr8bunit,
-            'is_project'=>$project,
-            'submitted_price'=>$config->price_include_ppn,
-            'qty'=>$request->qtyinput,
+        DB::beginTransaction();
+
+        try {
+            $n=Prospect::create([
+                'entry_type'=>"LEAD",
+                'user_creator'=>$request->creatorid,
+                'prospect_source'=>$sourceoption,
+                'province_id'=>$request->cr8province,
+                'hospital_id'=>$request->cr8hospital,
+                'department_id'=>$request->cr8department,
+                'config_id'=>$request->cr8product,
+                'unit_id'=>$request->cr8bunit,
+                'is_project'=>$project,
+                'submitted_price'=>$config->price_include_ppn,
+                'qty'=>$request->qtyinput,
 
         ]);
 
@@ -527,11 +530,19 @@ class ProspectController extends Controller
         ]);
 
 
+        $missionId = $mission->id;
+
         $newProspect = Prospect::with("creator","province")
             ->where("id",$id)
             ->get();
         Alert::generateAlerts($newProspect,"V");
 
+        DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Handle the exception, log it, or return an error response
+            return response()->json(['error' => 'Failed to create lead. Please try again.'], 500);
+        }
 
         return response()->json($id);
     }

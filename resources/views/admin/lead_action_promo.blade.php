@@ -18,7 +18,7 @@
             <div class="mb-2"><b>Task Code:</b> {{ $task->code }}</div>
             <div class="mb-2"><b>Task Ref:</b> {{ $task->task_reference }}</div>
             <div class="mb-2"><b>Code Ref:</b> {{ $task->code_ref }}</div>
-            <div class="mb-2"><b>Current Stage:</b> {{ optional($prospect->latestTemperature)->tempName ?? '-' }}</div>
+            <div class="mb-2"><b>Current Stage:</b> {{ optional($prospect->temperature)->tempName ?? '-' }}</div>
             <div class="mb-2"><b>Hospital:</b> {{ optional($prospect->hospital)->name ?? '-' }}</div>
         </div>
     </div>

@@ -72,12 +72,7 @@
           <input type="hidden" id="pv_pic_user_id" value="{{ auth()->id() }}">
           <div class="form-group">
             <label class="small text-uppercase">PIC</label>
-            <select id="pv_pic_user_id" class="form-control">
-              <option value="">Select PIC</option>
-              @foreach($users ?? [] as $u)
-                <option value="{{ $u->id }}">{{ $u->name }}</option>
-              @endforeach
-            </select>
+            <label class="font-weight-bold">{{ auth()->user()->name }}</label>
           </div>
         @endif
 

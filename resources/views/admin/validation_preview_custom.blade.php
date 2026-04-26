@@ -3,6 +3,7 @@
         if (is_null($value) || $value === '') {
             return 'Missing Data';
         }
+
         return $value;
     };
 @endphp
@@ -10,7 +11,7 @@
 <div class="mb-3">
     <div><b>Task Code:</b> {{ $task->code }}</div>
     <div><b>Task Ref:</b> {{ strtoupper($task->task_reference) }}</div>
-    <div><b>Code Ref:</b> {{ $task->code_ref }}</div>
+    <div><b>Code Ref:</b> {{ $task->code_ref ?? '-' }}</div>
 </div>
 
 <form method="POST"
@@ -28,20 +29,16 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>Current Stage</td>
-                    <td>{{ $showValue(optional($prospect->temperature)->tempName ?? null) }}</td>
+                    <td>Task Purpose</td>
+                    <td>{{ $showValue($task->task_purpose ?? null) }}</td>
                 </tr>
                 <tr>
-                    <td>Hospital</td>
-                    <td>{{ $showValue(optional($prospect->hospital)->name ?? null) }}</td>
+                    <td>Expected Outcome</td>
+                    <td>{{ $showValue($task->expected_outcome ?? null) }}</td>
                 </tr>
                 <tr>
-                    <td>Drop Comment</td>
-                    <td>{{ $showValue($payload['drop_comment'] ?? null) }}</td>
-                </tr>
-                <tr>
-                    <td>Report / Notes</td>
-                    <td>{{ $showValue($payload['report_result'] ?? null) }}</td>
+                    <td>Report / Result</td>
+                    <td>{{ $showValue($payload['report_result'] ?? $payload['generic_report'] ?? null) }}</td>
                 </tr>
             </tbody>
         </table>
@@ -49,10 +46,12 @@
 
     <div class="form-group mt-3">
         <label class="small text-uppercase text-muted">Validator Comment</label>
-        <textarea name="validator_comment" class="form-control" rows="3" required></textarea>
+        <textarea name="validator_comment" class="form-control" rows="3"></textarea>
     </div>
 
     <div class="text-right mt-3">
-        <button type="submit" class="btn btn-primary">Validate</button>
+        <button type="submit" class="btn btn-primary">
+            Validate
+        </button>
     </div>
 </form>

@@ -6,6 +6,8 @@
 @section('content')
 @php
     $role = strtolower(optional(auth()->user())->role ?? '');
+    $canApproveVisit = in_array($role, ['admin', 'am', 'nsm']);
+
 @endphp
 <div class="container-fluid">
 @include('layout.component.nav.navigation_button_task')
@@ -103,10 +105,11 @@
 
               <th>Hospital</th>
               <th>Asigned Person</th>
-              <th>Asigned By</th>
+
               <th class="text-center">Total Tasks</th>
               <th>Deadline</th>
               <th>Schedule</th>
+              <th>Check In Status</th>
               <th>Status</th>
               <th class="text-center">Action</th>
             </tr>
@@ -114,6 +117,12 @@
           <tbody>
 
             @forelse($runs as $run)
+            @php
+              $isApproved = (int)$run->is_approve === 1;
+
+                $isPic = (int)$run->person_in_charge === auth()->id();
+
+            @endphp
               <tr>
                 {{-- <td class="font-weight-bold">
                   {{ $run->code ?? ('RUN-'.$run->id) }}
@@ -133,13 +142,13 @@
                     <span class="badge badge-danger">PIC Missing</span>
                   @endif
                 </td>
-                <td>
+                {{-- <td>
                   @if($run->creator?->name)
                     {{ $run->creator->name }}
                   @else
                     <span class="badge badge-danger">Creator Missing</span>
                   @endif
-                </td>
+                </td> --}}
 
                 <td class="text-center">
                   <span class="badge badge-light">
@@ -152,6 +161,22 @@
                 </td>
                 <td>
                   {{ $run->schedule_date ? \Carbon\Carbon::parse($run->schedule_date)->format('d-M-y') : '-' }}
+                </td>
+
+                <td>
+                    @if($run->checkIn && $run->checkOut)
+                        <span class="badge badge-success">Checked Out</span>
+                        <div class="small ">
+                            {{ $run->checkOut->created_at->format('d-M H:i') }}
+                        </div>
+                    @elseif($run->checkIn)
+                        <span class="badge badge-warning">Checked In</span>
+                        <div class="small ">
+                            {{ $run->checkIn->created_at->format('d-M H:i') }}
+                        </div>
+                    @else
+                        <span class="badge badge-secondary">Not Started</span>
+                    @endif
                 </td>
 
                 {{-- // 0=draft, 1=idle, 2=scheduled, 3=on_progress, 4=cancel, 5=done, 6=under_review, -1=missed --}}
@@ -181,21 +206,28 @@
                 <td class="text-center">
                   {{-- nanti kamu isi: detail modal / schedule / start --}}
                   @if((int)$run->status === 2)
-                    <button type="button"
-                          class="btn btn-sm btn-light btn-start-run"
-                          data-run-id="{{ $run->id }}"
-                          style="border-radius:5px;"
-                          data-run-code="{{ $run->code ?? ('RUN-'.$run->id) }}">
-                  <i class="fa fa-play" style="color:#132A72;"> Start</i>
-                  </button>
-                    @elseif((int)$run->status === 1 && $run->tasks_count > 0)
-                    <button type="button"
-                            class="btn btn-sm btn-light btn-schedule-mission"
-                            data-run-id="{{ $run->id }}"
-                            style="border-radius:5px;"
-                            data-run-code="{{ $run->code ?? ('RUN-'.$run->id) }}">
-                    <i class="fa fa-calendar" style="color:#132A72;"> Schedule</i>
-                    </button>
+                       @if(!$isApproved && $canApproveVisit)
+                            <form method="POST"
+                                action="{{ route('missions.runs.approve', $run->id) }}"
+                                class="d-inline js-confirm-approve-visit">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    Approve Visit
+                                </button>
+                            </form>
+                        @elseif(!$isApproved && !$canApproveVisit)
+                        <span class="badge badge-warning">Waiting Approval</span>
+
+
+                        @elseif($isPic)
+                        <button type="button"
+                                class="btn btn-sm btn-light btn-start-run"
+                                data-run-id="{{ $run->id }}"
+                                style="border-radius:5px;"
+                                data-run-code="{{ $run->code ?? ('RUN-'.$run->id) }}">
+                        <i class="fa fa-play" style="color:#132A72;"> Start</i>
+                        </button>
+                        @endif
                     @elseif((int)$run->status === 3)
                     <a href="{{ route('missions.runs.show', $run->id) }}"
                     class="btn btn-sm btn-success"
