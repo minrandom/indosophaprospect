@@ -168,8 +168,6 @@ Route::post('/missions/bulk-add-to-mission', [MissionRunController::class, 'bulk
 Route::post('/missions/mission-run/schedule', [MissionRunController::class, 'scheduleMissionRun'])
   ->name('missionrun.schedule')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
-  Route::get('/missions/mission-run/{id}/tasks', [MissionRunController::class, 'tasks'])
-  ->name('missionRun.tasks')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
 
 Route::get('/mission-runs/pic-options/{hospital}', [MissionController::class, 'picOptions'])
@@ -178,6 +176,12 @@ Route::get('/mission-runs/pic-options/{hospital}', [MissionController::class, 'p
 
 Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs'])->group(function () {
 
+Route::get('/mission-run/{run}/tasks', [MissionRunController::class, 'getRunTasks'])
+    ->name('runs.tasks');
+
+
+Route::get('/task/{task}/reference', [MissionRunController::class, 'getTaskReference'])
+    ->name('task.reference');
 
 Route::post('/run/{run}/approve', [MissionRunController::class, 'approveVisit'])
     ->name('runs.approve');
@@ -305,7 +309,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::PATCH('/promoteupdate/{prospect}',[ProspectController::class,'promodateupdate'])->name('admin.prospect.promoteupdate')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
 	Route::PATCH('/reviewupdate/{prospect}',[ProspectController::class,'reviewupdate'])->name('admin.prospect.reviewupdate')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
 	Route::PATCH('/chcupdate/{prospect}',[ProspectController::class,'chcupdate'])->name('admin.prospect.chcupdate')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
-	Route::get('/prospect/{prospect}/edit',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['auth', 'role:admin,am,nsm,bu,prj']);
+	Route::get('/prospect/{prospect}/edit',[ProspectController::class,'edit'])->name('admin.prospectedit')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 
     Route::get('/hospital-dashboard/{hospital}/pending-mission',[MissionController::class, 'pendingMission'])->name('hospital.pending.mission')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	//Route::get('/province',[ProvinceController::class,'index'])->name('province')->middleware(['can:admin']);

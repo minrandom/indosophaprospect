@@ -121,21 +121,59 @@ class MissionRunController extends Controller
     ]);
   }
 
-  public function tasks($id)
+    public function getRunTasks(MissionRun $run)
     {
-        $run = MissionRun::with([
-            'hospital:id,name,city',
-            'tasks' => function ($q) {
-                $q->with(['hospital:id,name,city'])
-                ->whereIn('status_mission', [1,2,3]) // mission pool tasks
-                ->orderBy('created_at', 'desc');
-            }
-        ])->findOrFail($id);
+        $run->load(['hospital:id,name']);
+
+        $tasks = mission::with(['departmentRelation'])
+            ->where('mission_run_id', $run->id)
+            ->get();
+
+
 
         return view('tabs._mission_run_tasks_table', [
             'run' => $run,
-            'tasks' => $run->tasks,
+            'tasks' => $tasks,
         ]);
+    }
+
+    public function getTaskReference(mission $task)
+    {
+        switch (strtolower($task->task_reference ?? '')) {
+            case 'installbase':
+                $installbase = \App\Models\Installbase::with([
+                    'hospital.province',
+                    'product.brand',
+                    'product.category',
+                ])->find($task->code_ref);
+
+                return view('tabs.reference._installbase', compact('task', 'installbase'));
+
+            case 'prospect':
+                $prospect = \App\Models\Prospect::with([
+                    'hospital.province',
+                    'department',
+                    'unit',
+                    'config',
+                    'review',
+                    'temperature',
+                ])->find($task->code_ref);
+
+                return view('tabs.reference._prospect', compact('task', 'prospect'));
+
+            case 'custom':
+                return view('tabs.reference._custom', compact('task'));
+
+            case 'mapping':
+                return view('tabs.reference._mapping', compact('task'));
+
+            case 'finance':
+            case 'salesadmin':
+                return view('tabs.reference._finance', compact('task'));
+
+            default:
+                return '<div class="text-muted">Reference not prepared yet.</div>';
+        }
     }
 
 
@@ -456,6 +494,23 @@ $taskPool = $taskPoolRaw
                     'updated_at' => now(),
                 ]);
 
+             $prospectIds = $tasks
+                ->where('task_reference', 'prospect')
+                ->pluck('code_ref')
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($prospectIds->isNotEmpty()) {
+                \App\Models\Prospect::whereIn('id', $prospectIds)
+                    ->update([
+                        'pic_user_id' => $run->person_in_charge,
+                        'updated_at' => now(),
+                    ]);
+            }
+
+
+
             DB::commit();
 
             return response()->json([
@@ -709,6 +764,7 @@ $taskPool = $taskPoolRaw
         // $prospect = \App\Models\Prospect::with('review')->findOrFail($task->code_ref);
 
         $request->validate([
+            'eta_po_date' => ['nullable', 'date'],
             'first_offer_date' => ['nullable', 'date'],
             'demo_date' => ['nullable', 'date'],
             'presentation_date' => ['nullable', 'date'],
@@ -724,6 +780,8 @@ $taskPool = $taskPoolRaw
             'report_result' => ['required', 'string'],
         ]);
 
+
+
         DB::beginTransaction();
 
         try {
@@ -736,6 +794,7 @@ $taskPool = $taskPoolRaw
             }
 
             $payload = [
+                'eta_po_date' => $request->eta_po_date ?? null,
                 'first_offer_date' => $request->first_offer_date ?? null,
                 'demo_date' => $request->demo_date ?? null,
                 'presentation_date' => $request->presentation_date ?? null,
@@ -752,6 +811,7 @@ $taskPool = $taskPoolRaw
                 'submitted_by' => auth()->id(),
                 'submitted_at' => now()->toDateTimeString(),
             ];
+
 
             MissionValidationList::create([
                 'mission_id' => $task->id,
@@ -790,6 +850,7 @@ $taskPool = $taskPoolRaw
                 'prospect_id' => $prospect->id,
             ]);
         }
+
 
         $fields = [
             'first_offer_date',
@@ -951,12 +1012,10 @@ $taskPool = $taskPoolRaw
         $nextAction = trim((string)($payload['next_action'] ?? ''));
         $action_type = trim((string)($payload['action_type'] ?? ''));
 
-        if ($nextAction === '') {
-            return;
-        }
 
         $newTask = new mission();
         $newTask->code = mission::makeCode('prospect');
+
         $newTask->hospital_id = $task->hospital_id;
         $newTask->department = $task->department;
         $newTask->code_ref = $task->code_ref;
@@ -1128,7 +1187,7 @@ $taskPool = $taskPoolRaw
                         ]);
 
                         $payload['validator_comment'] = $request->validator_comment;
-
+                        $payload['next_action'] = $request->next_action;
                         break;
                     case 'promo_to_prospect':
                         $request->validate([
@@ -1136,6 +1195,7 @@ $taskPool = $taskPoolRaw
                         ]);
 
                         $payload['validator_comment'] = $request->validator_comment;
+                        $payload['next_action'] = $request->next_action;
                         break;
                     default:
                         $request->validate([
@@ -1246,8 +1306,10 @@ $taskPool = $taskPoolRaw
                                         break;
 
                                     case 'lead_to_prospect':
+
                                         $this->prospectLeadConvert($validation, $task, $payload);
                                         $this->createNextProspectTask($task, $payload);
+
                                     break;
 
                                     case 'promo':
@@ -1261,7 +1323,9 @@ $taskPool = $taskPoolRaw
                                     break;
 
                                     default:
+
                                         $this->prospectDataUpdate($validation, $task, $payload);
+
                                         $this->createNextProspectTask($task, $payload);
                                         break;
                                 }
@@ -1999,6 +2063,7 @@ $taskPool = $taskPoolRaw
             'report_result' => ['required', 'string'],
         ]);
 
+        dd('validated', $request->all());
         DB::beginTransaction();
 
         try {
@@ -2098,16 +2163,16 @@ $taskPool = $taskPoolRaw
     {
         $prospect = \App\Models\Prospect::with(['review', 'temperature'])
             ->findOrFail($validation->code_ref);
-
         // generate prospect no
-        if (empty($prospect->prospect_no)) {
-
-            $provinceCode = optional(optional($prospect->hospital)->province)->code ?? '00';
-
-            $prospect->prospect_no = $this->generateProspectNo($provinceCode, auth()->user()->role);
-        }
 
 
+            $provinceCode = $prospect->province_id ?? '00';
+
+
+
+        $prospect_no =$this->generateProspectNo($provinceCode, auth()->user()->role);
+
+        $prospect->prospect_no = $prospect_no;
         // assign PIC from task
         $prospect->pic_user_id = $task->pic_user_id;
          // update product setup from Lead → Prospect form

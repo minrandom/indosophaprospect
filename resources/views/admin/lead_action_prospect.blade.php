@@ -1,4 +1,4 @@
-@extends('layout.backend.app', ['title' => 'Promo to Prospect'])
+@extends('layout.backend.app', ['title' => 'Lead to Prospect'])
 
 @section('content')
 <div class="container-fluid">
@@ -23,7 +23,7 @@
 
   <div class="card shadow border-0 mb-4" style="border-radius:1rem;">
     <div class="card-body">
-      <h4 class="mb-3"><b><span class="text-dark">Promo - Convert to Prospect</span></b></h4>
+      <h4 class="mb-3"><b><span class="text-dark">Lead - Convert to Prospect</span></b></h4>
 
       <div class="mb-2"><b>Task Code:</b> {{ $task->code }}</div>
       <div class="mb-2"><b>Task Reference:</b> {{ $task->task_reference}}</div>

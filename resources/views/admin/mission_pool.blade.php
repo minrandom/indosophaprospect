@@ -269,26 +269,33 @@
 
 
 {{-- TASK LIST PANEL --}}
-  <div class="col-12 mb-4" id="missionTasksPanel" style="display:none;">
-<div class="card shadow border-0 mb-4" style="border-radius:1.25rem; height:420px;">
-  <div class="card-body ">
+<div class="col-12 mb-4" id="missionTasksPanel" style="display:none;">
+  <div class="card shadow border-0 mb-4" style="border-radius:1.25rem; height:420px;">
+    <div class="card-body d-flex flex-column">
 
-    <div class="d-flex align-items-center justify-content-between mb-3">
-      <div class="h6 font-weight-bold text-uppercase mb-0">
-        Mission Tasks
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="h6 font-weight-bold text-uppercase mb-0">
+          Mission Tasks
+        </div>
+
+        <div class="d-flex align-items-center" style="gap:10px;">
+          <div class="small text-muted" id="runTasksTitle">
+            Click <b>Detail</b> from the mission to show data...
+          </div>
+
+          <button type="button" class="btn btn-sm btn-light" id="btnCloseMissionTasksPanel">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
       </div>
 
-      <div class="small text-muted" id="runTasksTitle">
-        Click <b>Detail</b> from the mission to show data...
+      <div id="runTasksWrap" class="flex-fill overflow-auto text-center text-muted">
+        <div class="py-5">
+          Click <b>Detail</b> on the Mission List to load tasks here.
+        </div>
       </div>
+
     </div>
-
-    <div id="runTasksWrap" class="flex-fill overflow-auto text-center text-muted">
-      <div class="py-5">
-        Click <b>Detail</b> on the Mission List to load tasks here.
-      </div>
-    </div>
-  </div>
   </div>
 </div>
 
@@ -316,6 +323,24 @@
 
     {{-- </div>--}}
 
+</div>
+
+
+<div class="modal fade" id="taskRefModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content" style="border-radius:1rem;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="taskRefModalTitle">Task Reference Detail</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" id="taskRefModalBody">
+        Loading...
+      </div>
+    </div>
+  </div>
 </div>
 
 

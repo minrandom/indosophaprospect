@@ -213,10 +213,15 @@ $(function () {
 <script>
 $(function () {
 
+$(document).on('click', '#btnCloseMissionTasksPanel', function () {
+    $('#missionTasksPanel').slideUp();
+  });
+
   $(document).on('click', '.js-run-detail', function () {
     const runId = $(this).data('run-id');
     const runCode = $(this).data('run-code') || '-';
 
+    $('#missionTasksPanel').slideDown();
     $('#runTasksTitle').html('Loading tasks for <b>'+ runCode +'</b> ...');
     $('#runTasksWrap').html('<div class="text-center text-muted py-4">Loading...</div>');
 
@@ -344,5 +349,26 @@ $(function () {
     });
   });
 
+});
+</script>
+
+
+<script>
+$(function () {
+  $(document).on('click', '.js-mission-ref', function () {
+    const taskId = $(this).data('id');
+
+    $('#taskRefModal').modal('show');
+    $('#taskRefModalTitle').text('Loading Reference...');
+    $('#taskRefModalBody').html('<div class="text-center text-muted py-4">Loading...</div>');
+
+    $.get("{{ route('missions.task.reference', ['task' => '__TASK_ID__']) }}".replace('__TASK_ID__', taskId), function (html) {
+      $('#taskRefModalTitle').text('Task Reference Detail');
+      $('#taskRefModalBody').html(html);
+    }).fail(function (xhr) {
+      console.error(xhr.responseText);
+      $('#taskRefModalBody').html('<div class="text-danger text-center py-4">Failed to load reference.</div>');
+    });
+  });
 });
 </script>

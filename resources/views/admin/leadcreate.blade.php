@@ -328,7 +328,13 @@
         $(this).focus();
         e.preventDefault();
        $(document.activeElement);
-       submitForm("{{ route('admin.leadstore') }}", "Data berhasil dikirim untuk divalidasi");
+       submitForm(
+            "{{ route('admin.leadstore') }}",
+            `Berhasil membuat lead baru.<br>
+            <a href="{{ route('missions.taskPool') }}" class="btn btn-sm btn-primary mt-2">
+                Lihat Task List
+            </a>`
+        );
       });
 
    $('#btn-draft').on('click', function(e) {
