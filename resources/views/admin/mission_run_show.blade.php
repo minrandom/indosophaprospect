@@ -117,7 +117,11 @@
   <div class="row">
 
     {{-- LEFT: IN MISSION (status 1) --}}
+    @if($validationMode)
+    <div class="col-12 col-lg-12 mb-4">
+    @else
     <div class="col-12 col-lg-8 mb-4">
+    @endif
       <div class="card shadow border-0" style="border-radius: 1.25rem; background:#4E73DF;">
         <div class="card-body text-white">
 
@@ -231,13 +235,15 @@
                                 <span class="badge badge-primary">WAITING VALIDATION</span>
 
                             @elseif((int)$t->status_mission < 5 && in_array($role, ['fs','am','admin','nsm']) )
-
+                                @if($validationMode)
+                                    <span class="badge badge-secondary">Cannot Start in Validation Mode</span>
+                                @else
                                     <a href="{{ route('missions.task.start', $t->id) }}"
                                     class="btn btn-sm btn-light"
                                     style="border-radius:10px;">
                                         Start
                                     </a>
-
+                                @endif
                             @endif
                         </td>
                       </tr>
@@ -253,8 +259,11 @@
         </div>
       </div>
     </div>
-
+    @if($validationMode)
+    <div class="col-12 col-lg-4 mb-4" style="display:none;">
+    @else
     <div class="col-12 col-lg-4 mb-4">
+    @endif
     {{-- RIGHT: TASK POOL (same hospital, status 0) --}}
 
     <div class="card shadow border-0 h-100" style="border-radius: 1.25rem; background:#4E73DF;">
