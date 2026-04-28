@@ -40,7 +40,6 @@ class JojoController extends Controller
         $usid = Auth::user()->id;
 
         $hariini = Attendance::where('user_id', $usid)
-            ->whereDate("created_at", today())
             ->doesntHave('out')
             ->first();
 
