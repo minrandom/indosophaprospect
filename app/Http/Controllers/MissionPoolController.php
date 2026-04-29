@@ -96,15 +96,22 @@ class MissionPoolController extends Controller
                     ->orderByDesc('id');
 
 
-        $taskscheduleQuery = mission::with(['hospital:id,name,city,province_id', 'hospital.province'])
-            ->where('status_mission', 2)
-            ->whereBetween('schedule_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
-            ->whereNotNull('schedule_time');
+        $taskscheduleQuery = mission::with([
+        'hospital:id,name,city,province_id',
+        'hospital.province:id,name,prov_order_no,iss_area_code,wilayah',
+        'picUser:id,name',
+        'departmentRelation:id,name',
+        ])
+        ->whereIn('status_mission', [1,2,3,6,7]) // sesuaikan dengan status mission yang ingin ditampilkan
+        ->whereBetween('schedule_date', [
+            $weekStart->toDateString(),
+            $weekEnd->toDateString()
+        ])
+        ->whereNotNull('schedule_time');
 
         $taskscheduleQuery = $this->applyTaskAreaScope($taskscheduleQuery);
 
-
-
+        $scheduled = $taskscheduleQuery->get();
 
         $visit = $this->applyVisitAreaScope($visit)
         ->withCount([
@@ -116,9 +123,6 @@ class MissionPoolController extends Controller
         ->orderByDesc('id');
 
                 $runs= $visit->get();
-                $scheduled = $taskscheduleQuery->get();
-
-
 
         // status 2 = scheduled (based on your flow)
         // dd($scheduled);
@@ -135,7 +139,7 @@ class MissionPoolController extends Controller
                 'hospital' => $m->hospital?->name,
                 'city' => $m->hospital?->city,
                 'pic' => $m->picUser?->name ?? '-',
-                'department' => $m->department,
+                'department' => $m->departmentRelation?->name ?? '-',
             ];
         }
 

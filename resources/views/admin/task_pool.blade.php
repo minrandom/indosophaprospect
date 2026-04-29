@@ -259,6 +259,12 @@
                                 @else
                                     <span class="badge badge-secondary">{{ $t->priority_level ?? '-' }}</span>
                                 @endif
+                                <button class="badge badge-primary js-view-task-detail"
+                                        data-toggle="modal"
+                                        data-target="#taskDetailModal"
+                                        data-task-id="{{ $t->id }}">
+                                    View Detail
+                                </button>
                                 </td>
                             </tr>
                             @endforeach
@@ -309,6 +315,25 @@
 
 @include('modal._plan_visit_modal')
 @include('modal._create_custom_task_modal')
+
+{{-- //task detail modal --}}
+
+<div class="modal fade" id="taskDetailModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content" style="border-radius:1rem;">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Detail</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" id="taskDetailModalBody">
+        <div class="text-center text-muted py-4">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 @endsection
 
@@ -417,6 +442,31 @@ $(function () {
             if (result.isConfirmed) {
                 form.submit();
             }
+        });
+    });
+});
+</script>
+
+
+<script>
+$(function () {
+    const taskDetailUrl = "{{ route('missions.task.detail', ['task' => '__TASK_ID__']) }}";
+
+    $(document).on('click', '.js-view-task-detail', function () {
+        const taskId = $(this).data('task-id');
+        const url = taskDetailUrl.replace('__TASK_ID__', taskId);
+
+        $('#taskDetailModalBody').html(
+            '<div class="text-center text-muted py-4">Loading...</div>'
+        );
+
+        $.get(url, function (html) {
+            $('#taskDetailModalBody').html(html);
+        }).fail(function (xhr) {
+            console.error(xhr.responseText);
+            $('#taskDetailModalBody').html(
+                '<div class="text-center text-danger py-4">Failed to load task detail.</div>'
+            );
         });
     });
 });

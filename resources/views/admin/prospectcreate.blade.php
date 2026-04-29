@@ -10,7 +10,7 @@
             max-width: 300px; /* Set the maximum width of the tooltip */
             width: auto; /* Allow the tooltip to expand horizontally if needed */
         }
-    </style>
+</style>
 
 
 
@@ -20,9 +20,9 @@
 <div class="notify"></div>
 
 <div class="card">
-    
+
         <div class="card-body">
-           
+
         <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -45,10 +45,10 @@
             <input type="hidden" required="" id="thepost" name="thepost" class="form-control" value="{{Auth::user()->employee->position}}">
             <input readonly type="" required="" id="thecreators" name="thecreators" value="{{ Auth::user()->name }}" class="form-control">
           </div>
-          
+
           <div class="form-group">
           <label for="cr8source">Sumber Info</label>
-          
+
           <select id="cr8source" name="cr8source" class="form-control " required="" >
           </select>
           <input type="" placeholder="Input Nama Event Disini" style="display: none;" id="eventname" name="eventname" class="form-control">
@@ -63,13 +63,13 @@
            <div class="form-group">
             <label for="cr8province">Provinsi</label>
              <select id="cr8province" name="cr8province" class="form-control" required=""  >
-            
+
           </select>
         </div>
 
         <div class="form-group">
             <label for="cr8hospital">Rumah Sakit</label>
-             
+
             <select id="cr8hospital" name="cr8hospital" class="form-control" required=""  >
 
             </select>
@@ -107,7 +107,7 @@
             <select type="" required="" id="anggarancr8" name="anggarancr8" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
             </select>
           </div>
-          
+
         <div class="form-group">
             <label for="jenisanggarancr8">Jenis Anggaran</label>
             <select  required="" id="jenisanggarancr8" name="jenisanggarancr8" class="form-control" onmousedown="if(this.options.length>5){this.size=5;}"  onchange="this.size=1";>
@@ -117,7 +117,7 @@
         <div class="form-group">
             <label for="etapodatecr8">Estimasi PO Date</label>
             <input type="date" required="" id="etapodatecr8" name="etapodatecr8" class="form-control" >
-           
+
           </div>
           </br>
           </br>
@@ -135,7 +135,7 @@
 
           </div>
 
-    
+
 </div>
 <div id="productData" data-url="{{ route('product.getProducts') }}"></div>
 <!-- Modal Create -->
@@ -153,16 +153,16 @@
 <script type="text/javascript">
 
 
-                         
+
 
   $(function () {
  var id = $(this).attr("id")
- $('[data-toggle="tooltip"]').tooltip(); 
+ $('[data-toggle="tooltip"]').tooltip();
         $.ajax({
             url: "{{ route('admin.prospectcreate') }}",
             method: "GET",
             success:function(response){
-              
+
               $("#cr8hospital").val("");
                 $("#cr8product").val("");
                 //$("#eventname").val("");
@@ -195,7 +195,7 @@
                populateSelectFromDatalist('cr8province', response.province,"Pilih Provinsi");
 
                var hosinput=$("#cr8hospital");
-                        
+
                 function fetchHospitals2(provinceId) {
                   // Make an AJAX call to retrieve hospitals based on provinceId
                   if(userrole!="project"){
@@ -203,9 +203,9 @@
                     url: "{{ route('admin.getHospitalsByProvince', ['provinceId' => ':provinceId']) }}".replace(':provinceId', provinceId),
                     method: "GET",
                     success: function (response) {
-                   
+
                         populateSelectFromDatalist('cr8hospital', response.hosopt,"Pilih Rumah Sakit");
-                      
+
                     }
                   });}
                   else {
@@ -220,12 +220,12 @@
 
                             // Use the filtered hospitals list to populate the select element
                             populateSelectFromDatalist('cr8hospital', filteredHospitals, "Pilih Rumah Sakit");
-                      
+
                     }
                   });
                   }
                 }
-               
+
                 provinceSelect.on("change", function () {
                   var selectedProvinceId = $(this).val();
                   fetchHospitals2(selectedProvinceId);
@@ -234,11 +234,11 @@
                 var deptSelect = $("#cr8department");
                 populateSelectFromDatalist('cr8department', response.dept,"Pilih Departemen");
 
-             
+
                 var unitSelect = $("#cr8bunit");
                 populateSelectFromDatalist('cr8bunit', response.bunit,"Pilih Business Unit");
                 var catSelect=$("#cr8category");
-                
+
                 function fetchcat(unitId) {
                   // Make an AJAX call to retrieve hospitals based on provinceId
                   $.ajax({
@@ -249,12 +249,12 @@
                     }
                   });
                 }
-             
+
                 unitSelect.on("change", function () {
                   var selectedunitId = $(this).val();
                   fetchcat(selectedunitId);
                 });
-                
+
                 $("#cr8bunit, #cr8category").on("change", function () {
                   var selectedBusinessUnitId = $("#cr8bunit").val();
                   var selectedCategoryId = $("#cr8category").val();
@@ -263,10 +263,10 @@
                   if (selectedBusinessUnitId && selectedCategoryId) {
                     populateProductSelect(selectedBusinessUnitId, selectedCategoryId,selectformId);
                   } else {
-                
+
                     var productSelect = $("#cr8product");
                     productSelect.empty();
-                    
+
                     productSelect.append('<option value="">- Pilih Produk -</option>');
                     var draftconfig=$("<option>").val(response.configdraft.id).text(response.configdraft.name);
                   draftconfig.attr("selected",true);
@@ -284,9 +284,9 @@
                     anggartpSelect.append(optionprj);
                     var optionprj2 = $("<option>").val("11").text("KEMHAN");
                     anggartpSelect.append(optionprj2);
-                  
+
                   }
-             
+
                 anggaranSelect.on("change", function () {
                   var anggarselecte = $(this).val();
                   if (anggarselecte === "0") {
@@ -306,25 +306,25 @@
 
                 // Draft Item Populate
                 if (response.draft) {
-                  
+
                   response.source.source.forEach(function (draftd) {
-                    
+
                     var draftsource=$("<option>").val(draftd.id).text(draftd.name);
                     if(draftd.id === response.draft.source){
                       draftsource.attr("selected",true);
                      eventSelect.prepend(draftsource);
                     }
                   });
-  
+
                   response.province.forEach(function (draftp) {
-                    
+
                     var draftprov=$("<option>").val(draftp.id).text(draftp.name);
                     if(draftp.id === response.draft.province_id){
                       draftprov.attr("selected",true);
                      provinceSelect.prepend(draftprov);
                     }
                   });
-  
+
                   response.dept.forEach(function (draftdpt) {
                   var draftdept=$("<option>").val(draftdpt.id).text(draftdpt.name);
                     if(draftdpt.id === response.draft.department_id){
@@ -332,7 +332,7 @@
                      deptSelect.prepend(draftdept);
                     }
                   });
-  
+
                   response.bunit.forEach(function (draftbu) {
                   var draftbunit=$("<option>").val(draftbu.id).text(draftbu.name);
                     if(draftbu.id === response.draft.unit_id){
@@ -340,7 +340,7 @@
                      unitSelect.prepend(draftbunit);
                     }
                   });
-  
+
                   response.source.anggaran.review.forEach(function (draftangg) {
                   var draftanggaran=$("<option>").val(draftangg.id).text(draftangg.name);
                     if(draftangg.id === response.draft.review_anggaran){
@@ -348,7 +348,7 @@
                      anggaranSelect.prepend(draftanggaran);
                     }
                   });
-  
+
                   response.source.anggaran.Jenis.forEach(function (draftanggj) {
                   var draftanggaranj=$("<option>").val(draftanggj.id).text(draftanggj.name);
                     if(draftanggj.id === response.draft.jns_aggr){
@@ -356,39 +356,39 @@
                      anggartpSelect.prepend(draftanggaranj);
                     }
                   });
-  
+
                 }
-  
+
                 if (response.hodraft) {
                     var drafthos=$("<option>").val(response.hodraft.id).text(response.hodraft.name);
                     drafthos.attr("selected",true);
                     hosinput.append(drafthos).select2({width: '100%'});
                  }
-  
-                
+
+
                 if (response.catdraft) {
                   var draftcat=$("<option>").val(response.catdraft.id).text(response.catdraft.name);
                     draftcat.attr("selected",true);
                     catSelect.append(draftcat).select2({width: '100%'});
                 }
-  
+
                 if(response.configdraft){
                   confSelect=$("#cr8product");
                   var draftconfig=$("<option>").val(response.configdraft.id).text(response.configdraft.name);
                     draftconfig.attr("selected",true);
                     confSelect.append(draftconfig).select2({width: '100%'});
-                  }          
+                  }
 
                   if(response.eta_po_date){
                 $('#etapodatecr8').val(response.draft.eta_po_date);
                   }
-              
+
             }
         })
     });
 
 
-    // Create 
+    // Create
     function submitForm(url, successMessage) {
         var formData = $("#createForm").serialize();
 
@@ -405,18 +405,18 @@
                 behavior: "smooth",
                 block: "start"
                 });
-                
+
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log('AJAX Error:', textStatus, errorThrown);
-                
+
                 flash("danger", "Tolong diisi bagian yang masih kosong!!");
                 document.querySelector(".notify").scrollIntoView({
                 behavior: "smooth",
                 block: "start"
                 });
             }
-            
+
         });
     };
 
@@ -434,7 +434,7 @@
     });
 
     */
-  
+
     $('#btn-store').on('click', function(e) {
         $(this).focus();
         e.preventDefault();
@@ -442,14 +442,14 @@
        submitForm("{{ route('admin.prospect.store') }}", "Data berhasil dikirim untuk divalidasi");
       });
 
-   $('#btn-draft').on('click', function(e) {    
+   $('#btn-draft').on('click', function(e) {
          $(this).focus();
         e.preventDefault();
        $(document.activeElement);
         submitForm("{{ route('admin.prospect.saveDraft') }}", "Data berhasil disimpan sebagai draft");
-        
+
     });
-  
+
 
 
     //delete

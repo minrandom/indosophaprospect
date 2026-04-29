@@ -153,13 +153,16 @@
             <label class="small text-uppercase text-muted">Next Action</label>
             <select name="next_action" class="form-control" required>
                 <option value="">Select Next Action</option>
+                <option value="Mapping User">Mapping User (Siapa yang pilih Alat)</option>
                 <option value="Follow Up User">Follow Up User</option>
                 <option value="Schedule Demo">Schedule Demo</option>
                 <option value="Schedule Presentation">Schedule Presentation</option>
                 <option value="Submit Offer">Submit Offer</option>
                 <option value="Follow Up Purchasing">Follow Up Purchasing</option>
+                <option value="Permisi dengan Dirut">Permisi dengan DirUt</option>
                 <option value="Follow Up Direksi">Follow Up Direksi</option>
-                <option value="Wait Anggaran Update">Wait Anggaran Update</option>
+                <option value="Update Status Anggaran">Update Status Anggaran</option>
+                <option value="Update Po Date">Update Po Date</option>
             </select>
         </div>
     @endif

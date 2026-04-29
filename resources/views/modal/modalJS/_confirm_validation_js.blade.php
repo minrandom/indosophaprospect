@@ -70,16 +70,25 @@ $(function () {
 <script>
 $(function () {
     const taskId = @json(session('task_id'));
+    const hospitalTarget = @json(session('hospital_target'));
+
+    // 🔥 default options
+    let inputOptions = {
+        promo: 'Change to Promo',
+        lead_to_prospect: 'Update into Prospect',
+        delayed: 'Delayed Lead'
+    };
+
+    // 🔥 allow drop only if NOT Key Account / Prioritas
+    if (!['Key Account', 'Prioritas'].includes(hospitalTarget)) {
+        inputOptions.drop = 'Drop';
+    }
+
 
     Swal.fire({
         title: 'Choose Lead Action',
         input: 'select',
-        inputOptions: {
-            drop: 'Drop',
-            promo: 'Change to Promo',
-            lead_to_prospect: 'Update into Prospect',
-            delayed: 'Delayed Lead'
-        },
+        inputOptions: inputOptions,
         inputPlaceholder: 'Select action',
         showCancelButton: true,
         confirmButtonText: 'Continue',
@@ -93,6 +102,12 @@ $(function () {
         if (!result.isConfirmed) return;
 
         const action = result.value;
+
+        if (action === 'drop' && ['Key Account', 'Prioritas'].includes(hospitalTarget)) {
+            Swal.fire('Not Allowed', 'This lead must be converted to Promo first.', 'warning');
+            return;
+        }
+
 
         if (action === 'drop') {
             window.location.href = "{{ url('missions/task') }}/" + taskId + "/lead-action/drop";

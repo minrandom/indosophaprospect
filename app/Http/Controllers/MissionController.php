@@ -569,6 +569,60 @@ class MissionController extends Controller
     }
 
 
+    public function taskDetail(mission $task)
+    {
+        $task->load([
+            'hospital.province',
+            'departmentRelation',
+            'creator',
+            'picUser',
+        ]);
+
+        $reference = null;
+        $view = 'tabs.task_detail._generic';
+
+        switch (strtolower($task->task_reference ?? '')) {
+            case 'installbase':
+                $reference = \App\Models\Installbase::with([
+                    'hospital.province',
+                    'product.brand',
+                    'product.category',
+                ])->find($task->code_ref);
+
+                $view = 'tabs.task_detail._installbase';
+                break;
+
+            case 'prospect':
+                $reference = \App\Models\Prospect::with([
+                    'hospital.province',
+                    'department',
+                    'unit',
+                    'config',
+                    'review',
+                    'temperature',
+                ])->find($task->code_ref);
+
+                $view = 'tabs.task_detail._prospect';
+                break;
+
+            case 'custom':
+                $view = 'tabs.task_detail._custom';
+                break;
+
+            case 'mapping':
+                $view = 'tabs.task_detail._mapping';
+                break;
+
+            case 'finance':
+            case 'salesadmin':
+                $view = 'tabs.task_detail._finance';
+                break;
+        }
+
+        return view($view, compact('task', 'reference'));
+    }
+
+
 
 
 

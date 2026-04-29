@@ -268,6 +268,24 @@
 </div>
 
 
+{{-- // ADD TASK PANEL --}}
+<div id="addTaskPanel" style="display:none;" class="mb-3">
+    <div class="card border">
+        <div class="card-body">
+            <div class="mb-2 font-weight-bold">Select Tasks to Add</div>
+
+            <div id="availableTaskWrap">
+                Loading...
+            </div>
+
+            <button class="btn btn-sm btn-success mt-2 js-submit-add-task">
+                Add Selected
+            </button>
+        </div>
+    </div>
+</div>
+
+
 {{-- TASK LIST PANEL --}}
 <div class="col-12 mb-4" id="missionTasksPanel" style="display:none;">
   <div class="card shadow border-0 mb-4" style="border-radius:1.25rem; height:420px;">
@@ -282,6 +300,7 @@
           <div class="small text-muted" id="runTasksTitle">
             Click <b>Detail</b> from the mission to show data...
           </div>
+
 
           <button type="button" class="btn btn-sm btn-light" id="btnCloseMissionTasksPanel">
             <i class="fa fa-times"></i>
@@ -358,5 +377,65 @@
   window.missionPoolScheduleUrl = @json(route('missions.pool.schedule'));
   window.csrfToken = @json(csrf_token());
 </script>
+
+
+<script>
+    $(function(){
+
+        const availableUrl = "{{ route('missions.run.availableTasks', ['run'=>'__RUN__']) }}";
+        const addUrl = "{{ route('missions.run.addTasks', ['run'=>'__RUN__']) }}";
+
+        let currentRunId = null;
+
+        // open add panel
+        $(document).on('click', '.js-open-add-task', function(){
+            currentRunId = $(this).data('run-id');
+
+            $('#addTaskPanel').slideDown();
+            $('#availableTaskWrap').html('Loading...');
+
+            $.get(availableUrl.replace('__RUN__', currentRunId), function(html){
+                $('#availableTaskWrap').html(html);
+            });
+        });
+
+        // submit add task
+        $(document).on('click', '.js-submit-add-task', function(){
+
+            let selected = [];
+
+            $('.js-task-checkbox:checked').each(function(){
+                selected.push($(this).val());
+            });
+
+            if (!selected.length) {
+                alert('Select at least one task');
+                return;
+            }
+
+            $.post(addUrl.replace('__RUN__', currentRunId), {
+                _token: "{{ csrf_token() }}",
+                task_ids: selected
+            }, function(){
+                location.reload(); // simple first
+            });
+        });
+
+        // remove task
+        $(document).on('click', '.js-remove-task', function(){
+
+            const taskId = $(this).data('task-id');
+
+            if (!confirm('Remove this task from visit?')) return;
+
+            $.post("{{ route('missions.task.removeFromRun', ['task'=>'__TASK__']) }}".replace('__TASK__', taskId), {
+                _token: "{{ csrf_token() }}"
+            }, function(){
+                location.reload();
+            });
+        });
+
+    });
+    </script>
 
 @endpush

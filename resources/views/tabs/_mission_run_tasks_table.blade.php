@@ -11,6 +11,13 @@
   </div>
 </div>
 
+@if($run->status < 6 && in_array(auth()->user()->role, ['am','nsm','admin']))
+<button class="btn btn-sm btn-primary mb-2 js-open-add-task"
+        data-run-id="{{ $run->id }}">
+    + Add Task
+</button>
+@endif
+
 <div class="table-responsive">
   <table class="table table-sm table-bordered mb-0">
     <thead class="thead-light text-uppercase small">
@@ -52,13 +59,22 @@
               <span class="badge badge-secondary">Pending</span>
             @endif
           </td>
+
           <td>
             <button type="button"
                     class="btn btn-sm btn-outline-primary js-mission-ref"
                     data-id="{{ $t->id }}">
               Reference
             </button>
-          </td>
+
+            @if($run->status < 6 && in_array(auth()->user()->role, ['am','nsm','admin']))
+                @if((int)$t->status_mission < 6)
+                    <button class="btn btn-sm btn-danger js-remove-task"
+                            data-task-id="{{ $t->id }}">
+                        Remove
+                    </button>
+                @endif
+            @endif
         </tr>
       @empty
         <tr>

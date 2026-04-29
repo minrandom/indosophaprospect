@@ -23,20 +23,25 @@ class VisitCalendarService
             '16:00','18:00','20:00','22:00',
         ];
 
-        // 👉 ONLY mission_run
-        $visits = MissionRun::with(['hospital:id,name,city'])
+        $visitsQuery = MissionRun::with([
+                'hospital:id,name,city,province_id',
+                'hospital.province:id,name,prov_order_no,iss_area_code,wilayah',
+                'picUser:id,name',
+            ])
             ->whereNotNull('schedule_date')
             ->whereNotNull('schedule_time')
             ->whereBetween('schedule_date', [
                 $calendarStart->toDateString(),
                 $calendarEnd->toDateString(),
-            ])
-            ->get();
+            ]);
+
+        $visitsQuery = $this->applyVisitAreaScope($visitsQuery);
+
+        $visits = $visitsQuery->get();
 
         $calendarVisits = [];
 
         foreach ($visits as $visit) {
-
             $dateKey = Carbon::parse($visit->schedule_date)->toDateString();
             $startTime = substr($visit->schedule_time, 0, 5);
             $duration = (int) ($visit->schedule_duration_minutes ?? 120);
@@ -47,7 +52,6 @@ class VisitCalendarService
             if ($startIndex === false) continue;
 
             for ($i = 0; $i < $blocks; $i++) {
-
                 $slotIndex = $startIndex + $i;
 
                 if (!isset($calendarHours[$slotIndex])) break;
@@ -59,7 +63,7 @@ class VisitCalendarService
                     'code' => $visit->code,
                     'hospital' => $visit->hospital?->name ?? '-',
                     'city' => $visit->hospital?->city ?? '',
-                    'pic' => $visit->person_in_charge,
+                    'pic' => $visit->picUser?->name ?? '-',
                     'status' => $visit->status,
                     'is_start' => $i === 0,
                     'rowspan' => $i === 0 ? $blocks : 0,
@@ -72,5 +76,38 @@ class VisitCalendarService
             'calendarHours' => $calendarHours,
             'calendarVisits' => $calendarVisits,
         ];
+    }
+
+    private function applyVisitAreaScope($query)
+    {
+        $user = auth()->user();
+        $role = strtolower($user->role ?? '');
+        $area = optional($user->employee)->area;
+
+        if ($area === 'HO' || in_array($role, ['admin', 'bu'])) {
+            return $query;
+        }
+
+        if (!$area) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($role === 'fs') {
+            return $query
+                ->where('person_in_charge', $user->id)
+                ->whereHas('hospital.province', function ($q) use ($area) {
+                    $q->where('prov_order_no', $area);
+                });
+        }
+
+        return $query->whereHas('hospital.province', function ($q) use ($role, $area) {
+            if ($role === 'am') {
+                $q->where('iss_area_code', $area);
+            } elseif ($role === 'nsm') {
+                $q->where('wilayah', $area);
+            } else {
+                $q->whereRaw('1 = 0');
+            }
+        });
     }
 }

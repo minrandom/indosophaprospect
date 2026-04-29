@@ -50,7 +50,7 @@
         <div class="row">
         <div class="col-md-4 mb-3">
             <label>Business Unit <span class="text-danger">*</span></label>
-            <select name="unit_id" id="ltp_unit_id" class="form-control" >
+            <select name="unit_id" id="ltp_unit_id" class="form-control" required>
             <option value="">Select Business Unit</option>
 
             </select>
@@ -58,7 +58,7 @@
         <input type="hidden" name="prospect_id" value="{{ $prospect->id }}">
         <div class="col-md-4 mb-3">
             <label>Category <span class="text-danger">*</span></label>
-            <select name="category_id" id="ltp_category_id" class="form-control" >
+            <select name="category_id" id="ltp_category_id" class="form-control" required>
             <option value="">Select Category</option>
 
             </select>
@@ -66,7 +66,7 @@
 
         <div class="col-md-4 mb-3">
             <label>Product / Config <span class="text-danger">*</span></label>
-            <select name="config_id" id="ltp_config_id" class="form-control">
+            <select name="config_id" id="ltp_config_id" class="form-control" required>
             <option value="">Select Product</option>
 
             </select>
@@ -79,6 +79,11 @@
         <div class="h6 text-uppercase mb-3">Review Data</div>
 
         <div class="row">
+             <div class="col-md-6 mb-3">
+                        <label>ETA PO Date<span class="text-danger">*</span></label>
+
+                        <input type="date" name="eta_po_date" id="eta_po_date" class="form-control" required>
+                    </div>
         {{--             <div class="col-md-6 mb-3">
                         <label>First Offer Date</label>
 
@@ -126,15 +131,15 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label>Anggaran Status</label>
-                        <select name="anggaran_status" class="form-control" id="anggaran_status">
+                        <label>Anggaran Status <span class="text-danger">*</span></label>
+                        <select name="anggaran_status" class="form-control" id="anggaran_status" required>
                             <option value="">Select Anggaran Status</option>
                         </select>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label>Jenis Anggaran</label>
-                        <select name="jenis_anggaran" class="form-control" id="jenis_anggaran">
+                        <label>Jenis Anggaran <span class="text-danger">*</span></label>
+                        <select name="jenis_anggaran" class="form-control" id="jenis_anggaran" required>
                             <option value="">Select Jenis Anggaran</option>
                         </select>
                     </div>

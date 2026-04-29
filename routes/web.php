@@ -173,18 +173,29 @@ Route::post('/missions/mission-run/schedule', [MissionRunController::class, 'sch
 Route::get('/mission-runs/pic-options/{hospital}', [MissionController::class, 'picOptions'])
     ->name('missionRuns.picOptions')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 
+Route::get('/missions/run/{run}/available-tasks', [MissionRunController::class, 'getAvailableTasksForRun'])
+    ->name('missions.run.availableTasks');
+
+Route::post('/missions/run/{run}/add-tasks', [MissionRunController::class, 'addTasksToRun'])
+    ->name('missions.run.addTasks');
+
+Route::post('/missions/task/{task}/remove-from-run', [MissionRunController::class, 'removeTaskFromRun'])
+    ->name('missions.task.removeFromRun');
+
 
 Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs'])->group(function () {
 
-Route::get('/mission-run/{run}/tasks', [MissionRunController::class, 'getRunTasks'])
-    ->name('runs.tasks');
+    Route::get('/mission-run/{run}/tasks', [MissionRunController::class, 'getRunTasks'])
+        ->name('runs.tasks');
 
+    Route::get('/task/{task}/detail', [MissionController::class, 'taskDetail'])
+        ->name('task.detail');
 
-Route::get('/task/{task}/reference', [MissionRunController::class, 'getTaskReference'])
-    ->name('task.reference');
+    Route::get('/task/{task}/reference', [MissionRunController::class, 'getTaskReference'])
+        ->name('task.reference');
 
-Route::post('/run/{run}/approve', [MissionRunController::class, 'approveVisit'])
-    ->name('runs.approve');
+    Route::post('/run/{run}/approve', [MissionRunController::class, 'approveVisit'])
+        ->name('runs.approve');
   // Start mission_run -> set status_run=3, then redirect to mission page
   Route::post('/runs/{run}/start', [MissionRunController::class, 'start'])
     ->name('runs.start');

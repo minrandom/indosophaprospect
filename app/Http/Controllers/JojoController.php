@@ -8,7 +8,8 @@ use App\Models\Attendance;
 use App\Models\AttendanceOut;
 use App\Models\attendance_event_in;
 use App\Models\attendance_event_out;
-
+use App\Models\mission;
+use App\Models\MissionRun;
 use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
 use League\Flysystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
@@ -39,9 +40,13 @@ class JojoController extends Controller
         $missionRunId = $request->get('mission_run_id');
         $usid = Auth::user()->id;
 
-        $hariini = Attendance::where('user_id', $usid)
-            ->doesntHave('out')
+        $lastCheckIn = MissionRun::where('id', $missionRunId)
+            ->with('checkIn')
+            ->whereNotNull('check_in_id')
+            ->orderByDesc('created_at')
             ->first();
+
+        $hariini = $lastCheckIn->checkin ;
 
         if (isset($hariini)) {
             $hariini->created_at = $hariini->created_at->addHours(7);

@@ -79,7 +79,12 @@
         <div class="h6 text-uppercase mb-3">Review Data</div>
 
         <div class="row">
-        {{--             <div class="col-md-6 mb-3">
+              <div class="col-md-6 mb-3">
+                        <label>ETA PO Date<span class="text-danger">*</span></label>
+
+                        <input type="date" name="eta_po_date" id="eta_po_date" class="form-control" required>
+                    </div>
+          <div class="col-md-6 mb-3">
                         <label>First Offer Date</label>
 
                         <input type="date" name="first_offer_date" id="first_offer_date" class="form-control"
@@ -102,7 +107,7 @@
                         <label>Last Offer Date</label>
                         <input type="date" name="last_offer_date" id="last_offer_date" class="form-control"
                               >
-                    </div> --}}
+                    </div>
 
                     <div class="col-md-6 mb-3">
                         <label>User Status</label>
@@ -126,15 +131,15 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label>Anggaran Status</label>
+                        <label>Anggaran Status <span class="text-danger">*</span></label>
                         <select name="anggaran_status" class="form-control" id="anggaran_status">
                             <option value="">Select Anggaran Status</option>
                         </select>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label>Jenis Anggaran</label>
-                        <select name="jenis_anggaran" class="form-control" id="jenis_anggaran">
+                        <label>Jenis Anggaran <span class="text-danger">*</span></label>
+                        <select name="jenis_anggaran" class="form-control" id="jenis_anggaran" required>
                             <option value="">Select Jenis Anggaran</option>
                         </select>
                     </div>

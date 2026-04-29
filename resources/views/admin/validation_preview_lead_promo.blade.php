@@ -10,7 +10,8 @@
 <div class="mb-3">
     <div><b>Task Code:</b> {{ $task->code }}</div>
     <div><b>Task Ref:</b> {{ strtoupper($task->task_reference) }}</div>
-    <div><b>Code Ref:</b> {{ $task->code_ref }}</div>
+    <div><b>Action:</b> Lead to Promo</div>
+
 </div>
 
 <form method="POST"
@@ -37,7 +38,7 @@
                 </tr>
                 <tr>
                     <td>Task PIC</td>
-                    <td>{{ $showValue($task->pic_user_id ?? null) }}</td>
+                    <td>{{ $showValue($task->picUser->name ?? null) }}</td>
                 </tr>
                 <tr>
                     <td>Promo Comment</td>

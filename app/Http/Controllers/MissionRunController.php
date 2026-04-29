@@ -137,6 +137,34 @@ class MissionRunController extends Controller
         ]);
     }
 
+    public function addTasksToRun(Request $request, MissionRun $run)
+    {
+        mission::whereIn('id', $request->task_ids)
+            ->update([
+                'mission_run_id' => $run->id,
+                'status_mission' => 2,
+                'pic_user_id' => $run->person_in_charge
+            ]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function removeTaskFromRun(mission $task)
+    {
+        if ((int)$task->status_mission >= 6) {
+            return response()->json(['error' => 'Cannot remove'], 400);
+        }
+
+        $task->update([
+            'mission_run_id' => null,
+            'status_mission' => 0,
+            'schedule_date' => null,
+            'schedule_time' => null,
+        ]);
+
+        return response()->json(['ok' => true]);
+    }
+
     public function getTaskReference(mission $task)
     {
         switch (strtolower($task->task_reference ?? '')) {
@@ -552,6 +580,7 @@ $taskPool = $taskPoolRaw
                     return redirect()->back()->with([
                         'open_lead_action_selector' => true,
                         'task_id' => $task->id,
+                        'hospital_target'=> optional($task->hospital)->target,
                     ]);
                 }
 
@@ -1239,7 +1268,6 @@ $taskPool = $taskPoolRaw
 
                 break;
 
-
             default:
                 return redirect()->back()->with('error', 'Task reference not supported for validation.');
         }
@@ -1260,6 +1288,19 @@ $taskPool = $taskPoolRaw
 
         return redirect()->back()->with('success', 'Task validated successfully.');
     }
+
+
+    public function getAvailableTasksForRun(MissionRun $run)
+    {
+        $tasks = mission::with(['departmentRelation'])
+            ->whereNull('mission_run_id')
+            ->whereIn('status_mission', [0, 1]) // pool only
+            ->where('hospital_id', $run->hospital_id)
+            ->get();
+
+        return view('tabs._available_tasks', compact('tasks', 'run'));
+    }
+
 
     public function validateVisit(MissionRun $run)
     {
@@ -1366,7 +1407,6 @@ $taskPool = $taskPoolRaw
 
                     continue;
                 }
-
                 // CASE 2: task not validated -> mark missed and create new follow-up task
                 $before = $task->status_mission;
 
@@ -1443,7 +1483,6 @@ $taskPool = $taskPoolRaw
         'note' => $note,
          ]);
     }
-
 
     public function submitCustomTask(Request $request)
     {
@@ -1636,30 +1675,26 @@ $taskPool = $taskPoolRaw
             'review',
         ])->findOrFail($task->code_ref);
 
-
-
         return view('admin.lead_action_prospect', compact('task', 'prospect'));
     }
 
     public function leadProspectSubmit(Request $request, mission $task)
     {
-
-
-
         $request->validate([
-            // 'first_offer_date' => ['nullable', 'date'],
-            // 'demo_date' => ['nullable', 'date'],
-            // 'presentation_date' => ['nullable', 'date'],
+            'eta_po_date' => ['required', 'date'],
+          'first_offer_date' => ['nullable', 'date'],
+             'demo_date' => ['nullable', 'date'],
+           'presentation_date' => ['nullable', 'date'],
             'unit_id' => ['required', 'integer'],
 
             'config_id' => ['required', 'integer'],
 
-
+            'eta_po_date' => ['nullable', 'date'],
             'user_status' => ['nullable', 'string'],
             'direksi_status' => ['nullable', 'string'],
             'purchasing_status' => ['nullable', 'string'],
-            'anggaran_status' => ['nullable', 'string'],
-            'jenis_anggaran' => ['nullable', 'string'],
+            'anggaran_status' => ['required', 'string'],
+            'jenis_anggaran' => ['required', 'string'],
             'chance' => ['nullable'],
             'comment' => ['nullable', 'string'],
 
@@ -1835,11 +1870,9 @@ $taskPool = $taskPoolRaw
                 'col_after' => $newComment,
                 'updated_by' => auth()->id(),
             ]);
-
             $review->comment = $newComment;
             $review->save();
         }
-
         // update temperature to Drop
         $temperature = $prospect->temperature;
         if ($temperature) {
@@ -1963,15 +1996,12 @@ $taskPool = $taskPoolRaw
             $review->comment = $newComment;
             $review->save();
         }
-
         // assign PIC from task PIC
         $prospect->pic_user_id = $task->pic_user_id;
-
         // forced promo defaults
         $prospect->unit_id = 10;      // Need To Follow UP
           // General
         $prospect->config_id = 0;     // General Product
-
         // generate promo number if empty
         if (empty($prospect->promo_no)) {
             $rand = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
@@ -2020,8 +2050,6 @@ $taskPool = $taskPoolRaw
 
         return $prefix . '-' . $year;
     }
-
-
 
     public function promoProspectView(mission $task)
     {
@@ -2113,8 +2141,6 @@ $taskPool = $taskPoolRaw
         }
     }
 
-
-
     private function prospectFinalConvert($validation, $task, array $payload): void
     {
         $prospect = \App\Models\Prospect::with(['review', 'temperature'])
@@ -2125,6 +2151,19 @@ $taskPool = $taskPoolRaw
             $provinceCode = optional(optional($prospect->hospital)->province)->code ?? '00';
             $prospect->prospect_no = $this->generateProspectNo($provinceCode, auth()->user()->role);
         }
+
+
+        $prospect->pic_user_id = $task->pic_user_id?? $prospect->pic_user_id;
+        $prospect->unit_id = $payload['unit_id'] ?? $prospect->unit_id;
+        $prospect->config_id = $payload['config_id'] ?? $prospect->config_id;
+        $prospect->eta_po_date = $payload['eta_po_date'] ?? $prospect->eta_po_date;
+        $prospect->user_status = $payload['user_status'] ?? $prospect->user_status;
+        $prospect->direksi_status = $payload['direksi_status'] ?? $prospect->direksi_status;
+        $prospect->purchasing_status = $payload['purchasing_status'] ?? $prospect->purchasing_status;
+        $prospect->anggaran_status = $payload['anggaran_status'] ?? $prospect->anggaran_status;
+        $prospect->jenis_anggaran = $payload['jenis_anggaran'] ?? $prospect->jenis_anggaran;
+        $prospect->chance = $payload['chance'] ?? $prospect->chance;
+        $prospect->save();
 
         $prospect->save();
 
@@ -2164,21 +2203,21 @@ $taskPool = $taskPoolRaw
         $prospect = \App\Models\Prospect::with(['review', 'temperature'])
             ->findOrFail($validation->code_ref);
         // generate prospect no
-
-
             $provinceCode = $prospect->province_id ?? '00';
-
-
 
         $prospect_no =$this->generateProspectNo($provinceCode, auth()->user()->role);
 
         $prospect->prospect_no = $prospect_no;
-        // assign PIC from task
         $prospect->pic_user_id = $task->pic_user_id;
-         // update product setup from Lead → Prospect form
         $prospect->unit_id = $payload['unit_id'] ?? $prospect->unit_id;
         $prospect->config_id = $payload['config_id'] ?? $prospect->config_id;
-
+        $prospect->eta_po_date = $payload['eta_po_date'] ?? $prospect->eta_po_date;
+        $prospect->user_status = $payload['user_status'] ?? $prospect->user_status;
+        $prospect->direksi_status = $payload['direksi_status'] ?? $prospect->direksi_status;
+        $prospect->purchasing_status = $payload['purchasing_status'] ?? $prospect->purchasing_status;
+        $prospect->anggaran_status = $payload['anggaran_status'] ?? $prospect->anggaran_status;
+        $prospect->jenis_anggaran = $payload['jenis_anggaran'] ?? $prospect->jenis_anggaran;
+        $prospect->chance = $payload['chance'] ?? $prospect->chance;
         $prospect->save();
 
         // update stage → Prospect

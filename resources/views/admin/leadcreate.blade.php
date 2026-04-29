@@ -96,11 +96,11 @@
             </select>
         </div>
 
-        <div class="form-group">
+        {{-- <div class="form-group">
             <label for="qtyinput">Quantity</label>
             <input type="number" required="" id="qtyinput" name="qtyinput" min='1' class="form-control" oninput="validateQuantity()">
             <p id="quantityWarning" style="color: red; display: none;">Quantity Minimal angka 1</p>
-        </div>
+        </div> --}}
 
 
       <div class="modal-footer">

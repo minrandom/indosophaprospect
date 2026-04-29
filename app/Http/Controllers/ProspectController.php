@@ -485,7 +485,7 @@ class ProspectController extends Controller
                 'unit_id'=>$request->cr8bunit,
                 'is_project'=>$project,
                 'submitted_price'=>$config->price_include_ppn,
-                'qty'=>$request->qtyinput,
+
 
         ]);
 

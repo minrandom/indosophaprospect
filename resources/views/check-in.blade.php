@@ -200,6 +200,10 @@
     }
 
     function getLocationAndCheckIn() {
+          const params = new URLSearchParams(window.location.search);
+            const mission_run_id = params.get('mission_run_id');
+            const runShowUrl = "{{ route('missions.runs.show', ['run' => '__ID__']) }}";
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -231,7 +235,7 @@
 
 
                     setTimeout(() => {
-                        window.location.href = '/missions/runs/' + mission_run_id;
+                        window.location.href = runShowUrl.replace('__ID__', mission_run_id);
                     }, 1200);
 
             },
