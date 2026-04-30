@@ -49,7 +49,7 @@ class GenerateProspectTasksFromOldData extends Command
                     $startDate . ' 00:00:00',
                     $endDate . ' 23:59:59'
                 ])
-            ->orWhereDate('eta_po_date', '>', $today);
+            ->WhereDate('eta_po_date', '>', $today);
         })
         ->get();
 

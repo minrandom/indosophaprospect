@@ -238,11 +238,15 @@
                                 @if($validationMode)
                                     <span class="badge badge-secondary">Cannot Start in Validation Mode</span>
                                 @else
+                                    @if($run->checkIn)
                                     <a href="{{ route('missions.task.start', $t->id) }}"
                                     class="btn btn-sm btn-light"
                                     style="border-radius:10px;">
                                         Start
                                     </a>
+                                    @else
+                                    <span class="badge badge-secondary">Please Check-in First</span>
+                                    @endif
                                 @endif
                             @endif
                         </td>
