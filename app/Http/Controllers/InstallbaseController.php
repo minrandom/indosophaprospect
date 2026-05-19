@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Department;
 use App\Models\installbase;
 use App\Models\Province;
+use App\Services\GoogleDriveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
@@ -131,7 +132,7 @@ class InstallbaseController extends Controller
 
     }
 
-    public function uploadEquipmentPhoto(Request $request, installbase $installbase)
+    public function uploadEquipmentPhoto(Request $request, installbase $installbase, GoogleDriveService $drive)
     {
         $request->validate([
             'photo_data' => ['required', 'string'],
