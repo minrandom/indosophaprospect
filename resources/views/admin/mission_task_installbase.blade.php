@@ -52,8 +52,9 @@
 
           <div class="col-md-6 mb-3">
             <label class="small text-muted">Department</label>
-            <input type="text" name="department" class="form-control"
-                   value="{{ old('department', $installbase->department) }}">
+            <select name="department" id="department" class="form-control">
+              <option value="">{{ old('department', $installbase->department) }}</option>
+            </select>
           </div>
 
           <div class="col-md-6 mb-3">
@@ -96,25 +97,70 @@
           </div>
 
           <div class="col-md-6 mb-3">
-            <label class="small text-muted">Installation Status</label>
-            <input type="text" name="installbase_status" class="form-control"
-                   value="{{ old('installbase_status', $installbase->installbase_status) }}">
+            <label class="small text-muted">Equipment Status</label>
+            <select name="installstatus" id="installstatus" class="form-control">
+
+            </select>
           </div>
 
           <div class="col-md-6 mb-3">
-            <label class="small text-muted">End Of Warranty</label>
-            <input type="date" name="end_of_warranty" class="form-control"
-                   value="{{ old('end_of_warranty', $installbase->end_of_warranty ? \Carbon\Carbon::parse($installbase->end_of_warranty)->format('Y-m-d') : '') }}">
-          </div>
+              <label class="small text-muted">End Of Warranty</label>
+              <input type="date" name="end_of_warranty" class="form-control"
+              value="{{ old('end_of_warranty', $installbase->end_of_warranty ? \Carbon\Carbon::parse($installbase->end_of_warranty)->format('Y-m-d') : '') }}">
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="small text-muted">Warranty Status</label>
+              <select name="warranty_status" id="warranty_status" class="form-control">
+
+              </select>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-3" style="border-radius:1rem;">
+                <div class="card-body">
+                    <div class="h6 text-uppercase mb-3">Equipment Photo</div>
+
+                    <video id="equipmentCameraPreview"
+                        autoplay
+                        playsinline
+                        style="width:100%; max-width:420px; border-radius:12px; display:none;">
+                    </video>
+
+                    <canvas id="equipmentPhotoCanvas" style="display:none;"></canvas>
+
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-sm btn-primary" id="btnOpenEquipmentCamera">
+                            Open Back Camera
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-success" id="btnCaptureEquipmentPhoto" style="display:none;">
+                            Capture Photo
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-secondary" id="btnCloseEquipmentCamera" style="display:none;">
+                            Close Camera
+                        </button>
+                    </div>
+
+                        <div class="mt-3" id="equipmentPhotoResult">
+                            @if(!empty($installbase->label_photo))
+                                <img src="{{ $installbase->label_photo }}"
+                                    style="max-width:220px; border-radius:10px;"
+                                            alt="Label Photo">
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+        <input type="hidden" name="label_photo" id="label_photo">
+        <input type="hidden" name="ib_id" value="{{ $installbase->id }}">
+        <div class="card-footer bg-white text-right">
+            <a href="{{ url()->previous() }}" class="btn btn-secondary">Back</a>
+            <button type="submit" class="btn btn-primary">Update Installbase</button>
         </div>
-
-      </div>
-
-      <div class="card-footer bg-white text-right">
-        <a href="{{ url()->previous() }}" class="btn btn-secondary">Back</a>
-        <button type="submit" class="btn btn-primary">Update Installbase</button>
-      </div>
-    </div>
+        </div>
 
     <div class="row">
         <div class="col-12 mb-3">
@@ -129,3 +175,158 @@
 
 </div>
 @endsection
+
+
+@push('js')
+<script src="{{ asset('template/backend/sb-admin-2') }}/vendor/jquery/jquery.min.js"></script>
+<script src="{{ asset('template/backend/sb-admin-2') }}/js/demo/functionjojo.js"></script>
+<script src="{{ asset('template/backend/sb-admin-2')}}/vendor/sweetalert/sweetalert.all.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+ var id = $("input[name='ib_id']").val();
+ $('[data-toggle="tooltip"]').tooltip();
+       $.ajax({
+        url: "{{ route('update.installbase', ['installbase' => ':id']) }}".replace(':id', id),
+        method: "GET",
+        success: function(response) {
+            console.log(response);
+            var deptSelect = $("#department");
+            editHosPopulateSelect(deptSelect, response.deptdata,response.installbase.department, {width: '100%'});
+            // if(response.installbase.department){
+            // deptSelect.append(new Option(response.installbase.department, response.installbase.department, true, true));
+            // }
+            console.log(response.equipmentStatus);
+
+            var statusSelect = $("#installstatus");
+            editHosPopulateSelect(statusSelect, response.equipmentStatus, response.installbase.installbase_status, {width: '100%'});
+
+            var warrantySelect = $("#warranty_status");
+            editHosPopulateSelect(warrantySelect, response.warrantyStatus, response.installbase.maintenance_status, {width: '100%'});
+
+
+
+        }
+
+
+
+
+        })
+
+
+
+});
+</script>
+
+<script>
+$(function () {
+    let equipmentStream = null;
+
+    const video = document.getElementById('equipmentCameraPreview');
+    const canvas = document.getElementById('equipmentPhotoCanvas');
+
+    async function openEquipmentCamera() {
+        try {
+            equipmentStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { ideal: "environment" } // back camera
+                },
+                audio: false
+            });
+
+            video.srcObject = equipmentStream;
+
+            $('#equipmentCameraPreview').show();
+            $('#btnCaptureEquipmentPhoto').show();
+            $('#btnCloseEquipmentCamera').show();
+
+        } catch (err) {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Camera Error',
+                text: 'Cannot access back camera. Please allow camera permission.'
+            });
+        }
+    }
+
+    function closeEquipmentCamera() {
+        if (equipmentStream) {
+            equipmentStream.getTracks().forEach(track => track.stop());
+            equipmentStream = null;
+        }
+
+        $('#equipmentCameraPreview').hide();
+        $('#btnCaptureEquipmentPhoto').hide();
+        $('#btnCloseEquipmentCamera').hide();
+    }
+
+    function captureEquipmentPhoto() {
+        if (!video.videoWidth || !video.videoHeight) {
+            Swal.fire('Error', 'Camera is not ready yet.', 'error');
+            return;
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const photoData = canvas.toDataURL('image/png');
+
+        uploadEquipmentPhoto(photoData);
+    }
+
+    function uploadEquipmentPhoto(photoData) {
+        $('#label_photo').val(res.photo_url);
+
+            $('#equipmentPhotoResult').html(`
+                <div class="mb-2">
+                    <img src="${res.photo_url}"
+                        style="max-width:220px;border-radius:10px;">
+                </div>
+
+                <div class="small text-success">
+                    Photo ready to submit.
+                </div>
+            `);
+
+        $.ajax({
+            url: "{{ route('installbase.equipmentPhoto.upload', $installbase->id) }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                photo_data: photoData
+            },
+            success: function (res) {
+                if (!res.success) {
+                    Swal.fire('Failed', res.message || 'Upload failed.', 'error');
+                    return;
+                }
+
+                $('#equipmentPhotoResult').html(`
+                    <img src="${res.photo_url}"
+                         style="max-width:220px; border-radius:10px;"
+                         alt="Equipment Photo">
+                `);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Uploaded',
+                    text: 'Equipment photo uploaded successfully.'
+                });
+
+                closeEquipmentCamera();
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+                Swal.fire('Failed', 'Cannot upload equipment photo.', 'error');
+            }
+        });
+    }
+
+    $('#btnOpenEquipmentCamera').on('click', openEquipmentCamera);
+    $('#btnCaptureEquipmentPhoto').on('click', captureEquipmentPhoto);
+    $('#btnCloseEquipmentCamera').on('click', closeEquipmentCamera);
+});
+</script>

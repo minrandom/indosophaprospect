@@ -119,8 +119,11 @@ Route::view('/AttendanceList','admin.EventAttendance')->name('AttList')->middlew
 //installbase
 Route::get('/Installbase',[InstallbaseController::class,'index'])->name('admin.installbase')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::get('/InstallbaseData',[InstallbaseController::class,'IBData'])->name('data.installbase')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
+Route::get('/Installbase/{installbase}/data',[InstallbaseController::class,'updateData'])->name('update.installbase')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
 Route::get('/InstallbaseUnderReviewData',[InstallbaseController::class,'ShowMissing'])->name('data.ibreview')->middleware(['auth', 'role:admin,am,nsm,bu,prj,fs']);
-
+Route::post('/installbase/{installbase}/equipment-photo', [InstallbaseController::class, 'uploadEquipmentPhoto'])
+    ->name('installbase.equipmentPhoto.upload')
+    ->middleware(['auth']);
 //task generate
 Route::post('/missions/auto/installbase', [MissionController::class, 'autoFromInstallbase'])
     ->name('missions.autoFromInstallbase')

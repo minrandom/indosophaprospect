@@ -28,7 +28,7 @@ return [
 
     //'cloud' => env('FILESYSTEM_CLOUD', 's3'),
     'cloud' => 'google', // Optional: set Google Drive as default cloud storage
-    
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -56,14 +56,21 @@ return [
             'visibility' => 'public',
         ],
 
-        
+
         'google' => [
             'driver' => 'google',
             'clientId' => env('GOOGLE_DRIVE_CLIENT_ID'),
             'clientSecret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
             'refreshToken' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
-            'folder' => env('GOOGLE_DRIVE_FOLDER'),
+             // Optional: default folder for uploads
+            'folders' => [
+                'profile' => env('GOOGLE_DRIVE_FOLDER_PROFILE'),
+                'attendance' => env('GOOGLE_DRIVE_FOLDER_ATTENDANCE'),
+                'label_photo' => env('GOOGLE_DRIVE_FOLDER_LABEL_PHOTO'),
+                'receipt' => env('GOOGLE_DRIVE_FOLDER_RECEIPT'),
+            ],
         ],
+
 
         /*'s3' => [
             'driver' => 's3',

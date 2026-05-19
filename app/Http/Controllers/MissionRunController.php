@@ -997,6 +997,7 @@ $taskPool = $taskPoolRaw
             'installation_date',
             'installbase_status',
             'end_of_warranty',
+            'label_photo',
         ];
 
         $taskUpdateNo = 'IBUPD-' . now()->format('ymdHis') . '-' . $task->id;
@@ -1080,6 +1081,7 @@ $taskPool = $taskPoolRaw
             'installbase_status' => 'nullable|string',
             'end_of_warranty' => 'nullable|date',
             'report_result' => 'nullable|string',
+            'label_photo' => 'nullable|string'
         ]);
 
 
@@ -1096,6 +1098,7 @@ $taskPool = $taskPoolRaw
             'installbase_status' => $request->input('installbase_status'),
             'end_of_warranty' => $request->input('end_of_warranty'),
             'report_result' => $request->input('report_result'),
+            'label_photo' => $request->input('label_photo'),
             'submitted_by' => auth()->id(),
             'submitted_at' => now()->toDateTimeString(),
         ];

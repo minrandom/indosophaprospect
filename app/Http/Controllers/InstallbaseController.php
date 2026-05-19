@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Department;
 use App\Models\installbase;
 use App\Models\Province;
 use Illuminate\Http\Request;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 use DataTables;
+use Illuminate\Support\Facades\Storage;
 
 class InstallbaseController extends Controller
 {
@@ -99,6 +101,80 @@ class InstallbaseController extends Controller
             ->toJson();
     }
 
+    public function updateData($id)
+    { //for reuse in every installbase form
+        $installbase = installbase::find($id);
+
+        $deptdata = Department::all();;
+        $equipmentStatus = [
+        ['id' => 'Fully_Operational', 'name' => 'Fully Operational'],
+        ['id' => 'Standby_Unit', 'name' => 'Standby Unit'],
+        ['id' => 'Under_Repair', 'name' => 'Under Repair'],
+        ['id' => 'Not_Working', 'name' => 'Not Working'],
+        ['id' => 'Decommissioned', 'name' => 'Decommissioned'],
+        ['id' => 'Not_Found', 'name' => 'Not Found'],
+    ];
+
+    $warrantyStatus = [
+        ['id' => 'No_Cover', 'name' => 'No Cover'],
+        ['id' => 'Warranty', 'name' => 'Warranty'],
+        ['id' => 'Full_Cover', 'name' => 'Full Cover'],
+        ['id' => 'Service_Only', 'name' => 'Service Only'],
+        ['id' => 'No_Cover_But_Followed', 'name' => 'No Cover But Followed'],
+    ];
+        return response()->json([
+            'installbase' => $installbase,
+            'deptdata' => $deptdata,
+            'equipmentStatus' => $equipmentStatus,
+            'warrantyStatus' => $warrantyStatus,
+        ]);
+
+    }
+
+    public function uploadEquipmentPhoto(Request $request, installbase $installbase)
+    {
+        $request->validate([
+            'photo_data' => ['required', 'string'],
+        ]);
+
+        try {
+            $photoData = $request->input('photo_data');
+
+            if (!str_contains($photoData, ',')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid photo data.',
+                ], 422);
+            }
+
+            [$type, $data] = explode(';', $photoData);
+            [, $data] = explode(',', $data);
+
+            $data = base64_decode($data);
+
+            $photoFilename = 'label_' . $installbase->id . '_' . uniqid() . '.png';
+
+            $photoUrl = $drive->uploadBase64Image(
+                $request->photo_data,
+                'label_photo',
+                'equipment_label_' . $installbase->id
+            );
+
+            $installbase->label_photo = $photoUrl;
+            $installbase->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Label photo uploaded successfully.',
+                'photo_url' => $photoUrl,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 
 
 

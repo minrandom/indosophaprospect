@@ -446,10 +446,7 @@ class ProspectController extends Controller
             }else $anggaranjnsopt="Belum Tahu";
         }
 
-        $request->validate([
-            'qtyinput' => 'required|numeric|min:1',
-            // Add other validation rules for your other form fields if needed
-        ]);
+
 
         $draft=tmpProspectInput::where("user_id",$request->creatorid)->first();
             if(empty($draft)){

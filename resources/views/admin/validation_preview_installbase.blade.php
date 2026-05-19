@@ -97,13 +97,23 @@
                 <td>{{ $payload['installation_date'] ?? 'Missing Data' }}</td>
             </tr>
             <tr>
-                <td>Installation Status</td>
+                <td>Equipment Status</td>
                 <td>{{ $payload['installbase_status'] ?? 'Missing Data' }}</td>
             </tr>
             <tr>
                 <td>End Of Warranty</td>
                 <td>{{ $payload['end_of_warranty'] ?? 'Missing Data' }}</td>
             </tr>
+            <tr>
+                <td>Warranty Status</td>
+                <td>{{ $payload['warranty_status'] ?? 'Missing Data' }}</td>
+            </tr>
+
+            <tr>
+                <td>Photo</td>
+                <td>{{ $payload['label_photo'] ?? 'Missing Data' }}</td>
+            </tr>
+
             <tr>
                 <td>Report / Notes</td>
                 <td>{{ $payload['report_result'] ?? 'Missing Data' }}</td>

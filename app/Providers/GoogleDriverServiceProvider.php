@@ -22,21 +22,30 @@ class GoogleDriverServiceProvider extends ServiceProvider
             $client->setClientId($config['clientId']);
             $client->setClientSecret($config['clientSecret']);
             $client->refreshToken($config['refreshToken']);
-            
-           
+
             $service = new \Google_Service_Drive($client);
 
             $options = [];
-            if(isset($config['teamDriveId'])) {
+
+            if (isset($config['teamDriveId'])) {
                 $options['teamDriveId'] = $config['teamDriveId'];
             }
 
-            $adapter = new GoogleDriveAdapter($service, $config['folder'], $options);
+            $folder = $config['folder'] ?? null;
+
+            if (!$folder && isset($config['folders']['default'])) {
+                $folder = $config['folders']['default'];
+            }
+
+            if (!$folder) {
+                throw new \Exception('Google Drive folder is not configured.');
+            }
+
+            $adapter = new GoogleDriveAdapter($service, $folder, $options);
 
             return new Filesystem($adapter);
-
         });
-       
+
     }
 
     /**

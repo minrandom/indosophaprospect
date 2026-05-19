@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Prospect;
 use App\Models\prospectTemperature;
 use App\Models\Review;
+use App\Services\GoogleDriveService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -173,7 +174,7 @@ class JojoController extends Controller
      }
 
 
-     public function store(Request $request)
+     public function store(Request $request,GoogleDriveService $drive)
     {
         // dd($request->all());
         $run = \App\Models\MissionRun::find($request->input('mission_run_id'));
@@ -204,9 +205,11 @@ class JojoController extends Controller
 
             //file_put_contents('test.jpg', $data);
 
-            Storage::disk('google')->put($photoFilename, $data);
-            //file_put_contents($photoPaths,$data);
-            $photoUrl = Storage::disk('google')->url($photoFilename);
+           $photoUrl = $drive->uploadBase64Image(
+                $request->photo_data,
+                'attendance',
+                'checkin_' . auth()->id()
+            );
 
             $attendance = new Attendance([
                 'user_id' => Auth::user()->id,
@@ -236,7 +239,7 @@ class JojoController extends Controller
         }
     }
 
-    public function outstore(Request $request)
+    public function outstore(Request $request,GoogleDriveService $drive)
     {
 
       $run = \App\Models\MissionRun::find($request->input('mission_run_id'));
@@ -263,8 +266,11 @@ class JojoController extends Controller
             list(, $data) = explode(',', $data);
             $data = base64_decode($data);
    // Alternatively, save to Google Drive
-            $photoUrl = Storage::disk('google')->put($photoFilename, $data);
-            $photoUrl = Storage::disk('google')->url($photoFilename);
+            $photoUrl = $drive->uploadBase64Image(
+                $request->photo_data,
+                'attendance',
+                'checkout_' . auth()->id()
+            );
 
             // Save Check-Out data
             $attendance = new AttendanceOut([
