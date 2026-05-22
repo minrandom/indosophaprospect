@@ -169,7 +169,7 @@ class MissionRunController extends Controller
     {
         switch (strtolower($task->task_reference ?? '')) {
             case 'installbase':
-                $installbase = \App\Models\Installbase::with([
+                $installbase = \App\Models\installbase::with([
                     'hospital.province',
                     'product.brand',
                     'product.category',
@@ -646,7 +646,7 @@ $taskPool = $taskPoolRaw
 
         switch (strtolower($validation->task_ref)) {
             case 'installbase':
-                $installbase = \App\Models\Installbase::with([
+                $installbase = \App\Models\installbase::with([
                     'hospital.province',
                     'product.brand',
                     'product.category',
