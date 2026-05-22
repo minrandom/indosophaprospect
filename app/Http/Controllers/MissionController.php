@@ -152,7 +152,15 @@ class MissionController extends Controller
             ->whereIn('status_mission', [0,30])
             ->whereNotNull('hospital_id');
 
-        $missions = $this->applyTaskAreaScope($missions); // only missions with hospital (filter out manual/custom tasks without hospital)
+        $missions = $this->applyTaskAreaScope($missions);
+        // only show my task OR unassigned task
+        $missions->where(function ($q) {
+            $q->whereNull('pic_user_id')
+            ->orWhere('pic_user_id', auth()->id());
+        });
+
+
+        // only missions with hospital (filter out manual/custom tasks without hospital)
             if ($hospitalId) {
                 $missions->where('hospital_id', $hospitalId);
             } elseif ($provinceId) {

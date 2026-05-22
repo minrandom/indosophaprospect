@@ -128,6 +128,15 @@
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="h5 mb-0">Visit Tasks</div>
 
+            {{-- CENTER BUTTON --}}
+            <div class="text-center">
+                <a href="#"
+                   class="btn btn-warning btn-sm font-weight-bold shadow-sm">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    Request Reschedule
+                </a>
+            </div>
+
             @if($validationMode)
             <div class="alert alert-info d-flex justify-content-between align-items-center">
                 <div>
