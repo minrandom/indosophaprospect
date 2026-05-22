@@ -591,7 +591,7 @@ class MissionController extends Controller
 
         switch (strtolower($task->task_reference ?? '')) {
             case 'installbase':
-                $reference = \App\Models\Installbase::with([
+                $reference = \App\Models\installbase::with([
                     'hospital.province',
                     'product.brand',
                     'product.category',
