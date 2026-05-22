@@ -17,6 +17,8 @@ class mission extends Model
         'hospital_id',
         'department',
         'pic_user_id',
+
+        'mission_run_id',
         'user_to_meet',
         'code_ref',
         'task_reference',

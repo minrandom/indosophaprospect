@@ -333,10 +333,13 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/cnprospectdetail/{consumablesProspect}',[ConsumablesProspectController::class,'show'])->name('admin.cnprospecteditdata')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/cnprospectshow/{consumablesProspect}',[ConsumablesProspectController::class,'detaildata'])->name('admin.cnprospectdetail')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/prospectvalidation',[ProspectController::class,'validationprospect'])->name('admin.prospectvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+	Route::get('/leadvalidation',[ProspectController::class,'validationlead'])->name('admin.leadvalidationview')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::get('/prospectcheck',[ProspectController::class,'creationcheck'])->name('admin.prospectcheckview')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 	Route::PATCH('/prospectvalidation/{prospect}',[ProspectController::class,'validationupdate'])->name('admin.prospectvalidationupdate')->middleware(['auth', 'role:admin,am,nsm,prj']);
-	Route::get('/prospectvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['auth', 'role:admin,am,nsm,prj']);
-	Route::POST('/prospect/droprequest',[DropRequestController::class,'store'])->name('admin.prospect.dropreq')->middleware(['auth', 'role:admin,am,nsm,prj,fs,bu']);
+	Route::get('/leadvalidation/{prospect}/validation',[ProspectController::class,'validation'])->name('admin.prospectvalidation')->middleware(['auth', 'role:admin,am,nsm,prj']);
+	Route::PATCH('/leadvalidation/{prospect}',[ProspectController::class,'leadvalidationupdate'])->name('admin.leadvalidationupdate')->middleware(['auth', 'role:admin,am,nsm,prj']);
+
+    Route::POST('/prospect/droprequest',[DropRequestController::class,'store'])->name('admin.prospect.dropreq')->middleware(['auth', 'role:admin,am,nsm,prj,fs,bu']);
 	Route::get('/prospect/droprequest',[DropRequestController::class,'index'])->name('admin.prospect.droplist')->middleware(['auth', 'role:admin,am,nsm,prj,bu']);
 	Route::get('/prospect/droprequestdata',[DropRequestController::class,'data'])->name('admin.prospect.droplistdata')->middleware(['auth', 'role:admin,am,nsm,prj,bu']);
 	Route::get('/prospect/droprequestdata/{dropRequest}',[DropRequestController::class,'show'])->name('admin.prospect.dropdata')->middleware(['auth', 'role:admin,nsm,prj,bu']);
@@ -413,6 +416,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('datacon','DataCompileController@ConfigData')->name('data.config');
 	Route::get('createddata','DataCompileController@CreatedData')->name('data.createdcheck');
 	Route::post('data3','DataCompileController@ProspectData')->name('data.prospect');
+	Route::post('datalead','DataCompileController@LeadData')->name('data.lead');
 	Route::post('dataconsum','DataCompileController@ConsumablesProspectData')->name('data.consprospect');
 	Route::post('/get-product-details','DataCompileController@getProductDetail')->name('data.proddetail');
 	Route::get('data/{user}/editrole','UserController@editrole')->name('user.editrole');

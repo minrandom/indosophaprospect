@@ -218,6 +218,11 @@ $(document).on('click', '#btnCloseMissionTasksPanel', function () {
   });
 
   $(document).on('click', '.js-run-detail', function () {
+
+     // RESET ADD TASK PANEL
+    $('#addTaskPanel').hide();
+    $('#availableTaskWrap').html('');
+    currentRunId = null;
     const runId = $(this).data('run-id');
     const runCode = $(this).data('run-code') || '-';
 

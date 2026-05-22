@@ -22,10 +22,10 @@
   <table class="table table-sm table-bordered mb-0">
     <thead class="thead-light text-uppercase small">
       <tr>
-        <th>Task Code</th>
-        <th>Purpose</th>
-        <th>Reference</th>
         <th>Department</th>
+        <th>User to Meet</th>
+        <th>Purpose</th>
+        <th>Source/Group</th>
         <th>Priority</th>
         <th>Deadline</th>
         <th>Status</th>
@@ -36,10 +36,10 @@
     <tbody>
       @forelse($tasks as $t)
         <tr>
-          <td class="font-weight-bold">{{ $t->code }}</td>
-          <td>{{ $t->task_purpose ?? '-' }}</td>
-          <td class="text-uppercase">{{ $t->task_reference ?? '-' }}</td>
           <td>{{ $t->departmentRelation->name ?? '-' }}</td>
+          <td>{{ $t->user_to_meet ?? '-' }}</td>
+          <td>{{ $t->task_purpose ?? '-' }}</td>
+          <td class="text-uppercase">{{ $t->taskSourceLabel }} - <span class="text-info">{{ $t->task_reference ?? '-' }}</span></td>
           <td class="text-uppercase">{{ $t->priority_level ?? '-' }}</td>
           <td>
             {{ !empty($t->deadline)

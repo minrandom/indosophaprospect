@@ -47,6 +47,11 @@ class ProspectController extends Controller
         return view('admin.prospectvalidation');
     }
 
+    public function validationlead()
+    {
+        return view('admin.leadvalidation');
+    }
+
     public function creation()
     {
         $username = Auth::check() ? Auth::user()->name : 'Guest';
@@ -504,30 +509,7 @@ class ProspectController extends Controller
          'tempCodeName'=>$tempeCode
         ]);
 
-        $code = mission::makeCode('lead');
 
-
-        $mission = mission::create([
-            'code' => $code,
-            'hospital_id' => $request->cr8hospital,
-            'department' => $request->cr8department, // keep empty if empty
-            'pic_user_id' => null,               // set later
-            'user_to_meet' => null,              // optional later
-            'code_ref' => $id,
-            'task_reference' => 'prospect',
-            'task_purpose' => 'Follow up lead data to update',
-            'task_creator_id' => auth()->id(),
-            'generate_task_via' => 'lead creation',
-            'deadline' => Carbon::today()->addWeeks(4)->toDateString(),
-            'priority_level' => 'Urgent',
-            'expected_outcome' => "Update Lead data",
-            'report_result' => null,
-            'status_mission' => 0, // tasklist
-            'updated_by' => null,
-        ]);
-
-
-        $missionId = $mission->id;
 
         $newProspect = Prospect::with("creator","province")
             ->where("id",$id)
@@ -917,6 +899,8 @@ class ProspectController extends Controller
 
         return response()->json($prospect);
     }
+
+
 
 
 
@@ -1709,11 +1693,157 @@ class ProspectController extends Controller
         if($status==404){
             return response()->json(['message' => "Data Berhasil di Reject, Silahkan Input Prospect Baru"]);
         }else{
-            if($request->renewshow){
-                return response()->json(['message' => 'Berhasil Memperbaru dan Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
-            }else{
-                return response()->json(['message' => 'Berhasil Validasi Prospect,</br> dengan Nomor Prospect : <b>'.$prospect_no.'</b></br> Silahkan Melanjutkan review di Menu Prospect Review']);
+            $taskPoolUrl = route('missions.taskPool');
+
+                return response()->json(['message' =>  "
+                    Lead baru siap untuk di Follow-UP.<br>
+                    Silahkan Cek task list anda untuk melihat detailnya.<br>
+                    <a href='{$taskPoolUrl}'
+                    class='btn btn-sm btn-primary mt-2'>
+                        Lihat Task List
+                    </a>
+                "]);
+
+        }
+    }
+
+    public function leadvalidationupdate(Request $request, Prospect $prospect)
+    {
+        DB::beginTransaction();
+
+        try {
+            $role = Auth::user()->role;
+            $reason = null;
+            $prospect_no = null;
+
+            if ($request->renewshow) {
+                $submitdate = $request->rnsubmitdate;
+                $creator = $request->rnnewcreator;
+                $validator = $request->rnvalidator;
+                $provcode = $request->rnprovcode;
+                $status = $request->renewdata;
+                $personincharge = $request->rnpersonincharge;
+                $id = $request->rnid;
+
+                if ($request->rnreason) {
+                    $reason = $request->rnreason;
+                }
+            } else {
+                $id = $request->id;
+                $submitdate = $request->submitdate;
+                $creator = $request->creator;
+                $validator = $request->validator;
+                $provcode = $request->provcode;
+                $status = $request->validation;
+                $personincharge = $request->personincharge;
+
+                if ($request->reason) {
+                    $reason = $request->reason;
+                }
             }
+
+            switch ((int)$status) {
+                case 404:
+                    rejectLog::create([
+                        "prospect_id" => $id,
+                        "rejected_by" => $validator,
+                        "reason" => $reason
+                    ]);
+                    break;
+
+                case 1:
+
+                    if ($request->renewshow) {
+                        $prospect->update([
+                            'creator' => $creator,
+                            'validation_time' => Carbon::now(),
+                            'eta_po_date' => Carbon::now()->addDays(90),
+                            'validation_by' => $validator,
+                            // 'prospect_no' => $prospect_no,
+                            'pic_user_id' => $personincharge
+                        ]);
+                    } else {
+                        $prospect->update([
+                            'validation_time' => Carbon::now(),
+                            'validation_by' => $validator,
+                            // 'prospect_no' => $prospect_no,
+                            'pic_user_id' => $personincharge
+                        ]);
+                    }
+                    break;
+            }
+
+            $prospect->update([
+                'status' => $status
+            ]);
+
+            $code = mission::makeCode('lead');
+
+            $mission = mission::create([
+                'code' => $code,
+                'hospital_id' => $prospect->hospital_id,
+                'department' => $prospect->department_id,
+                'pic_user_id' => $personincharge,
+                'user_to_meet' => $request->user,
+                'code_ref' => $id,
+                'task_reference' => 'prospect',
+                'task_purpose' => 'Follow up lead data to update',
+                'task_creator_id' => auth()->id(),
+                'generate_task_via' => 'new_lead',
+                'deadline' => Carbon::today()->addWeeks(4)->toDateString(),
+                'priority_level' => 'Urgent',
+                'expected_outcome' => "Update Lead data to Promo/ Prospect",
+                'report_result' => null,
+                'status_mission' => 0,
+                'updated_by' => $validator,
+            ]);
+
+            $missionId = $mission->id;
+
+            AlertData::with('user')
+                ->where('prospect_id', $id)
+                ->whereIn('type', ['V', 'V3', 'V7', 'V14'])
+                ->where('status', 0)
+                ->update(['status' => 1]);
+
+            $data = Prospect::with("creator", "province")
+                ->where('id', $id)
+                ->get();
+
+            Alert::generateAlerts($data, "R");
+
+            AlertData::create([
+                'type' => "R",
+                'prospect_id' => $id,
+                'user_id' => $personincharge
+            ]);
+
+            DB::commit();
+
+            if ((int)$status === 404) {
+                return response()->json([
+                    'message' => "Data Berhasil di Reject, Silahkan Input LEAD Baru"
+                ]);
+            }
+
+            $taskPoolUrl = route('missions.taskPool');
+            return response()->json([
+                'message' => "
+                    Lead baru siap untuk di Follow-UP.<br>
+                    Silahkan Cek task list anda untuk melihat detailnya.<br>
+                    <a href='{$taskPoolUrl}'
+                    class='btn btn-sm btn-primary mt-2'>
+                        Lihat Task List
+                    </a>
+                "]);
+
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Gagal validasi prospect: ' . $e->getMessage()
+            ], 500);
         }
     }
 

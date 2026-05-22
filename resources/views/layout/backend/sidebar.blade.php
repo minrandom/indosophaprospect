@@ -199,8 +199,19 @@
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
                 @elsecan('prj')
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
-
                 @endcan
+
+
+                @can('admin')
+                <a class="collapse-item" href="{{ route('admin.leadvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Lead</span></a>
+               @elsecan('am')
+                <a class="collapse-item" href="{{ route('admin.leadvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Lead</span></a>
+                @elsecan('nsm')
+                <a class="collapse-item" href="{{ route('admin.leadvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Lead</span></a>
+                @elsecan('prj')
+                <a class="collapse-item" href="{{ route('admin.leadvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Lead</span></a>
+                @endcan
+
                 <hr></hr>
                 @can('admin')
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-briefcase"></i><span> Prospect Review</span></a>

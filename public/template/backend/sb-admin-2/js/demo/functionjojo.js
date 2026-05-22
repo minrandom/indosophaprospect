@@ -81,7 +81,7 @@ function filter(){
 
   var temper=[
 
-    {id:1,name:"LEAD"},
+    // {id:1,name:"LEAD"},
     {id:2,name:"PROSPECT"},
     {id:3,name:"FUNNEL"},
     {id:4,name:"HOT PROSPECT"},

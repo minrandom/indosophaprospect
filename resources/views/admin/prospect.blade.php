@@ -24,7 +24,7 @@
       <button class="btn btn-primary btn-sm ml-2q" type="button" id="downloadDataButton">
         Download data
         </button>-->
-        
+
         <button class="btn btn-primary btn-sm ml-2q" type="button" id="dlexcel">Download to Excel </button>
         <form id="filterForm">
         @include('dropdownfilter._filter_review_admin')
@@ -35,7 +35,7 @@
 
 <div class="card-body ">
   <div class="notify"></div>
-  
+
   <div class="table-responsive ml-2 mr-2 drag table-hover">
     <table class="table table-bordered data-table ">
       <thead>
@@ -54,7 +54,7 @@
           <th>Anggaran</th>
           <th>Eta PO Date</th>
           <th>Temperature</th>
-          
+
 
           <th>Table Action</th>
 
@@ -220,13 +220,13 @@
     $.busyLoadSetup({
     animation: "slide",
     background: "rgba(0, 114, 255, 0.86)",
-    
-    }); 
+
+    });
     var filteropt = filter();
-/*  
+/*
     $.ajaxSetup({
       beforeSend: function() {
-        
+
       },
       complete: function() {
         $.busyLoadFull("hide");
@@ -238,9 +238,9 @@
       url: "{{ route('admin.prospectcreate') }}",
       method: "GET",
       success: function(response) {
-   
+
         var tempselect = $("#tempefilter");
-       
+
 
 
         var provfilter = $("#provincefilter");
@@ -250,13 +250,13 @@
         return filterData.map(value => {
           // Remove surrounding quotes, if any
           value = value.replace(/"/g, '');
-          
+
           if (value === "null") {
             return null;
           } else if (!isNaN(value)) {
             return +value; // Convert to number if it is numeric
           } else {
-            return value;} // Return 
+            return value;} // Return
         });
       }
       let filterArr = processFilterData(response.filter);
@@ -282,11 +282,11 @@
         provAll=$("<option>").val(0).text("Show All").attr('selected', true);
         provfilter.prepend(provAll);
       }
-      
+
 
         var keteranganpic = "Pilih Provinsi untuk Memunculkan PIC"
         var picfilter = $("#picfilter");
-       
+
         if(filterArr[3] >0){
         populatePicFilter(filterArr[2],filterArr[3]);
         var picall = $("<option>").val(0).text("Show All");
@@ -296,7 +296,7 @@
           var picall = $("<option>").val(0).text("Show All").attr('selected', true);
           picfilter.prepend(picall);
         }
-        
+
 
         function populatePicFilter(provinceId,picId) {
             picfilter.empty();
@@ -304,7 +304,7 @@
             placeholder: keteranganpic,
             width: '100%' // Adjust the width to fit the container
             });
-     
+
             var selectedProvince = response.province.find(function(province) {
                 return province.id == provinceId;
             });
@@ -315,7 +315,7 @@
                     // Assuming pic has properties representing the area it belongs to (e.g., pic.area)
                     return pic.area == selectedProvince.wilayah || pic.area == selectedProvince.iss_area_code || pic.area == selectedProvince.prov_order_no;
                 });
-    
+
                 console.log(picId);
                 if(picId >0){
                   filteredPics.forEach(function(pic) {
@@ -361,9 +361,9 @@
         unitSelect.prepend(buAll);
       }
 
-      
-   
-    
+
+
+
 
 
         function fetchcat(unitId,catId) {
@@ -382,12 +382,12 @@
                 catAll=$("<option>").val(0).text("Show All");
               catfilter.prepend(catAll);
               }
-     
+
             }
           });
         }
-       
-     
+
+
         fetchcat(filterArr[4],filterArr[5])
 
         unitSelect.on("change", function() {
@@ -454,14 +454,14 @@
             sasaran.prepend(provAll);
 
             var filterkirim = [0,0,0,0,0,0,0,0];
-      
+
 
             updateData(jsonData, filterkirim);
 
 
 
 
-           }); 
+           });
 
 
       }
@@ -486,7 +486,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       status: 1,
       url: "prospect"
     },
-    
+
     //async: false, // Make the call synchronous to ensure data is fetched before DataTable initialization
     success: function(response) {
       jsonData = response.data; // Store the fetched data in the variable
@@ -494,10 +494,10 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       var cek = $('#tempefilter').val();
       if (cek == '') {
         cek = '0';
-      }     
+      }
 
       catfilterdata=$('#catfilter').val();
-      
+
 
       console.log($('#picfilter').val());
       var filterkirim = [$('#sumberinfofilter').val(), cek, $('#provincefilter').val(), $('#picfilter').val(), $('#BUfilter').val(),catfilterdata,$('#etafilter').val()];
@@ -520,16 +520,16 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
    ids = dataLine.map(function(item) {
         return item.id;
     });
-    
+
     //console.log(jsonData);
   }
 
 
- 
+
 
   //console.log(jsonData);
   function updateData(jsonData, params) {
-    
+
    // console.log(jsonData);
    console.log(params);
     var filteredData = jsonData; // Make a copy of the original data
@@ -544,9 +544,9 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         //console.log(params[i]);
         //console.log(i);
       }
-    
+
     }
-   
+
     console.log(x);
 
 
@@ -554,7 +554,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
       for (var i = 0; i < params.length; i++) {
         if (params[i] && params[i] != 0) {
           filteredData = filteredData.filter(function(item) {
-    
+
             //console.log("item"+item.pic_user_id);
             //console.log("params"+params[i]);
             //console.log(item.pic_user_id == params[i]);
@@ -672,12 +672,12 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     });
 
     storeFilterData(params);
-  // 
+  //
     console.log(dataprospect);
     initialProspectTable(dataprospect);
-    
 
-  
+
+
   };
 
 
@@ -685,7 +685,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
 
 
-  
+
     $('#dlexcel').on('click', async function() {
         // Show the loading screen
         $.busyLoadFull("show", { text: "Please wait..." });
@@ -706,7 +706,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         }
     });
 
-  
+
 
 
   // Handle the case when the filter dropdown is cleared
@@ -749,11 +749,11 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     if (selectedValue != 0) {
       selectedValue = selectedText
     }
-   
+
     //if (provValue != 0) {
    //   provValue = provText
    // }
-   
+
     //console.log(jsonData)
     // selectedValue=$(this).text();
 
@@ -768,8 +768,8 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
 //function to download to excel
  async function downloadExcel(data) {
-  
-   
+
+
 
     // Convert data to worksheet
     var worksheet = XLSX.utils.json_to_sheet(data);
@@ -831,7 +831,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
   function initialProspectTable(dataprospect) {
     //console.log(dataprospect);
     if (dataprospect && dataprospect.length > 0) {
-      
+
       var existingTable = $('.data-table').DataTable();
       if (existingTable) {
         existingTable.destroy(); // Destroy the existing DataTable
@@ -854,11 +854,11 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
 
         dom: 'filprtip', // Include buttons in the DataTable layout
-        
+
         order:[],
-        
+
         /*buttons: [
-        
+
         {
             extend: 'excel',
             text: 'Dowload Excel Format Web',
@@ -868,8 +868,8 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
                 }
             }
         },
-        
-       
+
+
     ], */
         // data : dataprospect,
 
@@ -984,7 +984,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
             // Trigger DataTables Buttons export functionality
             table.buttons().trigger();
           });
-          
+
         }
 
       });
@@ -1014,8 +1014,8 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
     $('#prospectid').val(id);
     populateSelectFromDatalist('cr8type',datarem.tiperem,'Pilih Tipe Remarks');
     populateSelectFromDatalist('cr8colupdate',datarem.column,'Pilih Kolom yang diUpdate');
-    
-    
+
+
 
 
 
@@ -1041,7 +1041,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
         var filterkirim = [$('#sumberinfofilter').val(), cek, $('#provincefilter').val(), $('#picfilter').val(), $('#BUfilter').val(),$('#catfilter').val(),$('#etafilter').val(),$('#tempefilter').val(),$('#sasaran').val()];
       //var infoFilter = ;
       //console.log(filterkirim);
-    
+
       updateData(jsonData, filterkirim);
       DataLine(jsonData);
 
@@ -1090,22 +1090,22 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
   })
 
   function submitRequest(successMessage) {
-    
+
     var form = $('#requestDropSuccessForm');
-    
+
     // Serialize the form data
     var formData = form.serialize();
-    
+
     // Get the updateTo value from the form
     var updateTo = form.find('#updateTo').val();
 
 
     if(updateTo== "DROP"){
       var url = "{{ route('admin.prospect.dropreq') }}";
-  
+
     }else {
       var url ="{{ route('admin.prospect.successreq') }}";
-     
+
     }
         $.ajax({
             url: url,
@@ -1120,18 +1120,18 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
                 behavior: "smooth",
                 block: "start"
                 });
-                
+
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log('AJAX Error:', textStatus, errorThrown);
-                
+
                 flash("Danger", "Tolong diisi bagian yang masih kosong!!");
                 document.querySelector(".notify").scrollIntoView({
                 behavior: "smooth",
                 block: "start"
                 });
             }
-            
+
         });
     };
 
@@ -1143,7 +1143,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
        submitRequest("Request Update sudah dikirim, Silahkan Hubungi NSM dan Kabari Bussiness Unit yang bersangkutan.");
        $("#dropsuccess-modal").modal("hide");
     });
-  
+
 
 
   $('body').on("click", ".btn-cr8", function() {
@@ -1267,7 +1267,7 @@ minSize: "150px",fontSize: "2rem",textColor: "white", background: "rgba(0, 114, 
 
 
 
-  // Create 
+  // Create
 
   $("#createForm").on("submit", function(e) {
     e.preventDefault()

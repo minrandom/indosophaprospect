@@ -33,10 +33,17 @@
         <tr><th>Department</th><td>{{ $reference->department->name ?? '-' }}</td></tr>
         <tr><th>Business Unit</th><td>{{ $reference->unit->name ?? '-' }}</td></tr>
         <tr><th>Product</th><td>{{ $reference->config->name ?? $reference->config->model_type ?? '-' }}</td></tr>
+
+
+        @if($reference->temperature->tempCodeName != 1)
         <tr><th>Qty</th><td>{{ $reference->qty ?? '-' }}</td></tr>
         <tr><th>ETA PO Date</th><td>{{ $reference->eta_po_date ? \Carbon\Carbon::parse($reference->eta_po_date)->format('d-M-y') : '-' }}</td></tr>
         <tr><th>Chance</th><td>{{ $reference->review->chance ?? '-' }}</td></tr>
-        <tr><th>Next Action</th><td>{{ $reference->review->next_action ?? '-' }}</td></tr>
+        @endif
+
+        <tr><th>Next Action</th><td><span class="text-warning">{{ $reference->review->next_action ?? 'Follow Up Lead To Update Into Prospect/Promo' }}</span></td></tr>
+
+
         <tr><th>Comment</th><td>{{ $reference->review->comment ?? '-' }}</td></tr>
     </table>
 @endif

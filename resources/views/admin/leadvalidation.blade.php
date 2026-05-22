@@ -1,6 +1,6 @@
 @extends('layout.backend.app',[
-'title' => 'Approval Prospect',
-'pageTitle' =>'Approval Prospect',
+'title' => 'LEAD ACCEPTANCE ',
+'pageTitle' =>'Lead Acceptance',
 ])
 
 @push('css')
@@ -27,13 +27,13 @@
         <div class="col-4">
           <div class="col col-lg-8">
             <div class="form-group">
-              <label for="sumberinfofilter">Sumber Prospect :</label>
+              <label for="sumberinfofilter">Sumber Lead :</label>
               <select id="sumberinfofilter" name="sumberinfofilter" class="form-control dropdown" required="">
 
               </select>
             </div>
           </div>
-          <div class="col col-lg-8">
+          {{-- <div class="col col-lg-8">
             <div class="form-group">
               <label for="tempefilter">Temperature :</label>
               <select id="tempefilter" name="tempefilter" class="form-control dropdown" required="">
@@ -43,7 +43,7 @@
                 <option value="4">Drop</option>
               </select>
             </div>
-          </div>
+          </div> --}}
         </div>
 
         <div class="col-4">
@@ -94,7 +94,7 @@
       <table class="table table-bordered data-table">
         <thead>
           <tr>
-            <th>No</th>
+           <th>No</th>
             <th>Creator/ Submit Date</th>
 
 
@@ -102,15 +102,7 @@
             <th>Sumber Info</th>
             <th>PIC</th>
             <th>Rumah Sakit/ Departemen</th>
-
-
-            <th>Produk yang ditawarkan</th>
-            <th>Harga + PPn(IDR)</th>
-            <th>Qty</th>
-            <th>Anggaran</th>
-
-
-            <th>Eta PO Date</th>
+            <th>Produk </th>
             <th>Status</th>
 
 
@@ -139,7 +131,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="validasi-modalLabel">Validasi Prospect</h5>
+        <h5 class="modal-title" id="validasi-modalLabel">Accept Lead</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -179,33 +171,23 @@
             <label for="product">Produk</label>
             <input readonly type="" required="" id="product" name="product" class="form-control">
           </div>
-          <div class="form-group">
-            <label for="etapodate">ETA PO DATE</label>
-            <input readonly type="" required="" id="etapodate" name="etapodate" class="form-control">
-          </div>
+
 
 
 
           <div class="form-group">
-            <label for="quan">Quantity</label>
-            <input readonly type="" required="false" id="quan" name="quan" class="form-control">
-          </div>
-
-
-
-          <div class="form-group">
-            <label for="validation">Prospect Approval Status</label>
+            <label for="validation">Lead Acceptance Status</label>
 
             <select required="" name="validation" id="validation" class="form-control">
-              <option value="0">-APPROVE / REJECT-</option>
-              <option value="1">APPROVE</option>
-              <!--<option value="99">EXPIRED</option> -->
+              <option value="0">-ACCEPT / REJECT-</option>
+              <option value="1">ACCEPT</option>
+
               <option value="404">REJECT</option>
-              <!--<option value="0">NEW</option> -->
+
             </select>
           </div>
 
-
+          <div id="infoinput" style="display: none;" class="label label-warning"><b>Silahkan Input PIC</b></div>
           <div class="form-group" style="display: none;" id="PIC">
             <label for="personincharge">PIC</label>
             <select required="" id="personincharge" name="personincharge" class="form-control">
@@ -213,7 +195,13 @@
             </select>
           </div>
 
-          <div id="infoinput" style="display: none;" class="label label-warning"><b>Silahkan Input PIC</b></div>
+
+        <div id="infoinput2" style="display: none;" class="label label-warning"><b>Silahkan Input User Untuk Follow Up Lead</b></div>
+          <div class="form-group" style="display: none;" id="User">
+            <label for="user">User to Meet</label>
+            <input type="text" name="user" id="user" class="form-control" value="" placeholder="Prof.dr. Iss,SpMmpg, Medical Dept Head, etc">
+          </div>
+
 
 
           </br>
@@ -235,7 +223,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="Renew-modalLabel">Renew Expired Prospect</h5>
+        <h5 class="modal-title" id="Renew-modalLabel">Renew Expired Lead</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -279,25 +267,14 @@
             <label for="rnproduct">Produk</label>
             <input readonly type="" required="" id="rnproduct" name="rnproduct" class="form-control">
           </div>
-          <div class="form-group">
-            <label for="rnetapodate">ETA PO DATE</label>
-            <input readonly type="" required="" id="rnetapodate" name="rnetapodate" class="form-control">
-          </div>
 
 
 
           <div class="form-group">
-            <label for="rnquan">Quantity</label>
-            <input readonly type="" required="false" id="rnquan" name="rnquan" class="form-control">
-          </div>
-
-
-
-          <div class="form-group">
-            <label for="renewdata">Renew Prospect Status</label>
+            <label for="renewdata">Renew Lead Status</label>
 
             <select required="" name="renewdata" id="renewdata" class="form-control">
-              <option value="1">Renew + Approve</option>
+              <option value="1">Renew + Accept</option>
               <option value="404">REJECT</option>
             </select>
           </div>
@@ -309,8 +286,13 @@
 
             </select>
           </div>
-
           <div id="rninfoinput" style="display: none;" class="label label-warning"><b>Silahkan Input PIC</b></div>
+
+
+          <div class="form-group" style="display: none;" id="rnUser">
+            <input type="text" name="rnuser" id="rnuser" class="form-control" value="">
+          </div>
+          <div id="rninfoinput2" style="display: none;" class="label label-warning"><b>Silahkan Input User Untuk Follow Up Lead</b></div>
 
 
           </br>
@@ -433,24 +415,7 @@
 <!-- Modal Edit -->
 
 
-<!-- Destroy Modal -->
-<div class="modal fade" id="destroy-modal" tabindex="-1" role="dialog" aria-labelledby="destroy-modalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="destroy-modalLabel">Yakin Hapus ?</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-danger btn-destroy">Hapus</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Destroy Modal -->
+
 
 @stop
 
@@ -486,7 +451,7 @@
         [5, 10, 20]
       ],
       ajax: {
-        url: "{{ route('data.prospect') }}",
+        url: "{{ route('data.lead') }}",
         type: "POST",
         data: function(d) {
           d.status = 0;
@@ -495,7 +460,8 @@
 
       },
 
-      columns: [{
+      columns: [
+        {
           data: 'DT_RowIndex',
           name: 'rowindex'
         },
@@ -527,25 +493,10 @@
           name: 'namaprod',
           searchable: true
         },
-
-        {
-          data: 'price',
-          name: 'price'
-        },
-        {
-          data: 'qty',
-          name: 'qty'
-        },
         //{data: 'value' , name: 'value'},
         //{data: 'promotion' , name: 'promotion'},
-        {
-          data: 'anggaran',
-          name: 'anggaran'
-        },
-        {
-          data: 'etadate',
-          name: 'etadate'
-        },
+
+
         //{data: 'temperature' , name: 'temperature'},
         {
           data: 'statsname',
@@ -572,10 +523,14 @@
       var selectedOption = $(this).val();
       if (selectedOption === "1") {
         $("#PIC").show();
+        $("#User").show();
         $("#infoinput").show();
+        $("#infoinput2").show();
       } else {
         $("#PIC").hide();
+        $("#User").hide();
         $("#infoinput").hide();
+        $("#infoinput2").hide();
       }
     });
 
@@ -587,6 +542,7 @@
       success: function(response) {
         $("#PIC").hide();
         $("#infoinput").hide();
+        $("#infoinput2").hide();
         $("#validasi-modal").modal("show");
         $("#id").val(response.id);
         $("#provinces").val(response.province.name);
@@ -645,7 +601,7 @@
     e.preventDefault()
 
     // Display alert message to confirm submission
-    if (confirm("Yakin Update Status Prospect ?")) {
+    if (confirm("Yakin Update Lead ?")) {
       // Proceed with form submissionU
 
       submitValid(id);
@@ -678,7 +634,7 @@
       $("#validationForm").append('<input type="hidden" name="reason" value="' + reason + '">');
     }
     $.ajax({
-      url: "{{ route('admin.prospectvalidationupdate', ['prospect' => ':id']) }}".replace(':id', id),
+      url: "{{ route('admin.leadvalidationupdate', ['prospect' => ':id']) }}".replace(':id', id),
       method: "PATCH",
       data: $("#validationForm").serialize(),
       success: function(response) {
@@ -912,10 +868,14 @@
       var selectedOption = $(this).val();
       if (selectedOption === "1") {
         $("#rnPIC").show();
+        $("#rnUser").show();
         $("#rninfoinput").show();
+        $("#rninfoinput2").show();
       } else {
         $("#rnPIC").hide();
+        $("#rnUser").hide();
         $("#rninfoinput").hide();
+        $("#rninfoinput2").hide();
       }
     });
 
@@ -926,7 +886,9 @@
       method: "GET",
       success: function(response) {
         $("#rnPIC").hide();
+        $("#rnUser").hide();
         $("#rninfoinput").hide();
+        $("#rninfoinput2").hide();
         $("#renew-modal").modal("show");
         $("#rnid").val(response.id);
         $("#id").val(response.id);
@@ -985,7 +947,7 @@
     e.preventDefault()
 
     // Display alert message to confirm submission
-    if (confirm("Yakin Update Status Prospect ?")) {
+    if (confirm("Yakin Update Status Lead ?")) {
       // Proceed with form submissionU
 
       submitRn(id);
@@ -1020,7 +982,7 @@
     }
     $("#renewForm").append('<input type="hidden" name="renewshow" value="1">');
     $.ajax({
-      url: "{{ route('admin.prospectvalidationupdate', ['prospect' => ':id']) }}".replace(':id', id),
+      url: "{{ route('admin.leadvalidationupdate', ['prospect' => ':id']) }}".replace(':id', id),
       method: "PATCH",
       data: $("#renewForm").serialize(),
       success: function(response) {
