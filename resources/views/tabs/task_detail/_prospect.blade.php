@@ -41,7 +41,13 @@
         <tr><th>Chance</th><td>{{ $reference->review->chance ?? '-' }}</td></tr>
         @endif
 
-        <tr><th>Next Action</th><td><span class="text-warning">{{ $reference->review->next_action ?? 'Follow Up Lead To Update Into Prospect/Promo' }}</span></td></tr>
+        <tr><th>Checklist Next Action</th> <td>  1. Follow up User - Meet Dr X <br>
+                                                2. Follow up Purchasing - Meet IPSRS <br>
+                                                3. Follow up Finance untuk "Anggaran" - Meet Finance Team
+                                            </td></tr>
+
+
+
 
 
         <tr><th>Comment</th><td>{{ $reference->review->comment ?? '-' }}</td></tr>

@@ -61,11 +61,12 @@
           </td>
 
           <td>
-            <button type="button"
-                    class="btn btn-sm btn-outline-primary js-mission-ref"
-                    data-id="{{ $t->id }}">
-              Reference
-            </button>
+            <button class="badge badge-primary js-view-task-detail"
+                                        data-toggle="modal"
+                                        data-target="#taskDetailModal"
+                                        data-task-id="{{ $t->id }}">
+                                    View Detail
+                </button>
 
             @if($run->status < 6 && in_array(auth()->user()->role, ['am','nsm','admin']))
                 @if((int)$t->status_mission < 6)

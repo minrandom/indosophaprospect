@@ -2236,5 +2236,168 @@ $taskPool = $taskPoolRaw
     }
 
 
+    public function rescheduleVisit(Request $request, MissionRun $run)
+    {
+        $request->validate([
+            'schedule_date' => ['required', 'date'],
+            'schedule_time' => ['required'],
+            'schedule_duration_minutes' => ['required', 'integer', 'min:30'],
+            'swap_with_run_id' => ['nullable', 'integer'],
+        ]);
+
+        if (in_array((int)$run->status, [5, 6])) {
+            return response()->json([
+                'message' => 'Visit cannot be rescheduled because it is already waiting validation or finished.'
+            ], 422);
+        }
+
+        $oldSchedule = [
+            'schedule_date' => $run->schedule_date,
+            'schedule_time' => $run->schedule_time,
+            'schedule_duration_minutes' => $run->schedule_duration_minutes,
+        ];
+
+        $newStart = \Carbon\Carbon::parse($request->schedule_date . ' ' . $request->schedule_time);
+        $newEnd = $newStart->copy()->addMinutes((int)$request->schedule_duration_minutes);
+
+        $run->load('hospital.province');
+
+        $provinceId = $run->hospital->province_id ?? null;
+        $picUserId = $run->person_in_charge;
+        $hospitalId = $run->hospital_id;
+
+        $clashes = MissionRun::with(['hospital.province', 'picUser:id,name'])
+            ->where('id', '!=', $run->id)
+            ->whereDate('schedule_date', $request->schedule_date)
+            ->whereNotNull('schedule_time')
+            ->whereIn('status', [0,1,2,3,6,7])
+            ->where('person_in_charge', $picUserId)
+            ->get()
+            ->filter(function ($other) use ($newStart, $newEnd) {
+                $otherStart = \Carbon\Carbon::parse($other->schedule_date . ' ' . $other->schedule_time);
+                $otherEnd = $otherStart->copy()->addMinutes((int)($other->schedule_duration_minutes ?? 120));
+
+                return $newStart->lt($otherEnd) && $newEnd->gt($otherStart);
+            });
+
+        if ($clashes->isNotEmpty()) {
+
+            $blockingClashes = $clashes->filter(function ($c) {
+                return in_array((int)$c->status, [5, 6]);
+            });
+
+            if ($blockingClashes->isNotEmpty()) {
+                return response()->json([
+                    'message' => 'Cannot reschedule. Clash with submitted / finished visit.'
+                ], 422);
+            }
+
+            // If user has NOT confirmed swap yet
+            if (!$request->filled('swap_with_run_id')) {
+                $swapCandidate = $clashes->first();
+
+                return response()->json([
+                    'can_swap' => true,
+                    'swap_with_run_id' => $swapCandidate->id,
+                    'message' => 'Schedule clashes with visit: <b>' . ($swapCandidate->code ?? '-') . '</b>'
+                ], 409);
+            }
+
+            // If user already confirmed swap,
+            // make sure requested swap target is inside clash list
+            $isValidSwap = $clashes->contains(function ($c) use ($request) {
+                return (int)$c->id === (int)$request->swap_with_run_id;
+            });
+
+            if (!$isValidSwap) {
+                return response()->json([
+                    'message' => 'Invalid swap target.'
+                ], 422);
+            }
+        }
+
+        \DB::beginTransaction();
+
+        try {
+            $swapRun = null;
+
+            if ($request->filled('swap_with_run_id')) {
+                $swapRun = MissionRun::findOrFail($request->swap_with_run_id);
+
+                if (in_array((int)$swapRun->status, [5, 6])) {
+                    return response()->json([
+                        'message' => 'Swap target is no longer waiting approval.'
+                    ], 422);
+                }
+
+                $swapOldSchedule = [
+                    'schedule_date' => $swapRun->schedule_date,
+                    'schedule_time' => $swapRun->schedule_time,
+                    'schedule_duration_minutes' => $swapRun->schedule_duration_minutes,
+                ];
+
+                // current run gets requested schedule
+                $run->schedule_date = $request->schedule_date;
+                $run->schedule_time = $request->schedule_time;
+                $run->schedule_duration_minutes = $request->schedule_duration_minutes;
+                $run->save();
+
+                // swap target gets old schedule from current run
+                $swapRun->schedule_date = $oldSchedule['schedule_date'];
+                $swapRun->schedule_time = $oldSchedule['schedule_time'];
+                $swapRun->schedule_duration_minutes = $oldSchedule['schedule_duration_minutes'];
+                $swapRun->save();
+
+                mission::where('mission_run_id', $run->id)->update([
+                    'schedule_date' => $run->schedule_date,
+                    'schedule_time' => $run->schedule_time,
+                    'schedule_duration_minutes' => $run->schedule_duration_minutes,
+                    'updated_by' => auth()->id(),
+                    'updated_at' => now(),
+                ]);
+
+                mission::where('mission_run_id', $swapRun->id)->update([
+                    'schedule_date' => $swapRun->schedule_date,
+                    'schedule_time' => $swapRun->schedule_time,
+                    'schedule_duration_minutes' => $swapRun->schedule_duration_minutes,
+                    'updated_by' => auth()->id(),
+                    'updated_at' => now(),
+                ]);
+
+                \DB::commit();
+
+                return response()->json([
+                    'message' => 'Visit schedule swapped successfully.'
+                ]);
+            }
+
+            $run->schedule_date = $request->schedule_date;
+            $run->schedule_time = $request->schedule_time;
+            $run->schedule_duration_minutes = $request->schedule_duration_minutes;
+            $run->save();
+
+            mission::where('mission_run_id', $run->id)->update([
+                'schedule_date' => $request->schedule_date,
+                'schedule_time' => $request->schedule_time,
+                'schedule_duration_minutes' => $request->schedule_duration_minutes,
+                'updated_by' => auth()->id(),
+                'updated_at' => now(),
+            ]);
+
+            \DB::commit();
+
+            return response()->json([
+                'message' => 'Visit rescheduled successfully.'
+            ]);
+
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+
+            return response()->json([
+                'message' => 'Failed to reschedule: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 }

@@ -191,6 +191,10 @@ Route::prefix('missions')->name('missions.')->middleware(['auth', 'role:admin,am
     Route::get('/mission-run/{run}/tasks', [MissionRunController::class, 'getRunTasks'])
         ->name('runs.tasks');
 
+
+    Route::post('/run/{run}/reschedule', [MissionRunController::class, 'rescheduleVisit'])
+    ->name('runs.reschedule');
+
     Route::get('/task/{task}/detail', [MissionController::class, 'taskDetail'])
         ->name('task.detail');
 

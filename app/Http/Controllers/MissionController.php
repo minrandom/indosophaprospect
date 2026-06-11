@@ -516,36 +516,116 @@ class MissionController extends Controller
     private function applyTaskAreaScope($query)
     {
         $user = auth()->user();
+
         $role = strtolower($user->role ?? '');
         $area = optional($user->employee)->area;
 
-        // HO can see all
-        if ($area === 'HO' || in_array($role, ['admin', 'bu'])) {
+        // HO / ADMIN / BU => see all
+        if (
+            $area === 'HO' ||
+            in_array($role, ['admin', 'bu'])
+        ) {
             return $query;
         }
 
-        // if no area, show nothing
+        // no area => no data
         if (!$area) {
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereHas('hospital.province', function ($q) use ($role, $area) {
+        return $query->where(function ($main) use ($role, $area, $user) {
 
-            if ($role === 'fs') {
-                $q->where('prov_order_no', $area);
-            }
+            /*
+            |--------------------------------------------------------------------------
+            | OFFICE / EVENT TASK
+            |--------------------------------------------------------------------------
+            | province_id = 9999
+            | hospital_id = 9999
+            | department  = 9999
+            |
+            | Always visible for all operational roles
+            |--------------------------------------------------------------------------
+            */
+            $main->where('hospital_id', 9999);
 
-            elseif ($role === 'am') {
-                $q->where('iss_area_code', $area);
-            }
+            /*
+            |--------------------------------------------------------------------------
+            | NORMAL HOSPITAL AREA FILTER
+            |--------------------------------------------------------------------------
+            */
+            $main->orWhere(function ($q) use ($role, $area, $user) {
 
-            elseif ($role === 'nsm') {
-                $q->where('wilayah', $area);
-            }
+                switch ($role) {
 
-            else {
-                $q->whereRaw('1 = 0');
-            }
+                    /*
+                    |--------------------------------------------------------------------------
+                    | FIELD SERVICE
+                    |--------------------------------------------------------------------------
+                    | match province.prov_order_no
+                    |--------------------------------------------------------------------------
+                    */
+                    case 'fs':
+
+                        $q->whereHas('hospital.province', function ($p) use ($area) {
+                            $p->where('prov_order_no', $area);
+                        });
+
+                    break;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | AREA MANAGER
+                    |--------------------------------------------------------------------------
+                    | match province.iss_area_code
+                    |--------------------------------------------------------------------------
+                    */
+                    case 'am':
+
+                        $q->whereHas('hospital.province', function ($p) use ($area) {
+                            $p->where('iss_area_code', $area);
+                        });
+
+                    break;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | NSM
+                    |--------------------------------------------------------------------------
+                    | match province.wilayah
+                    |--------------------------------------------------------------------------
+                    */
+                    case 'nsm':
+
+                        $q->whereHas('hospital.province', function ($p) use ($area) {
+                            $p->where('wilayah', $area);
+                        });
+
+                    break;
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | PROJECT / OTHER ROLE
+                    |--------------------------------------------------------------------------
+                    */
+                    case 'prj':
+
+                        $q->where(function ($prj) use ($user) {
+
+                            $prj->where('pic_user_id', $user->id)
+                                ->orWhereNull('pic_user_id');
+
+                        });
+
+                    break;
+
+                    default:
+
+                        $q->whereRaw('1 = 0');
+
+                    break;
+                }
+            });
+
         });
     }
 

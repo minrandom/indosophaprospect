@@ -1,14 +1,67 @@
-<div class="mb-3">
-    <div><b>Task Code:</b> {{ $task->code ?? '-' }}</div>
-    <div><b>Source - Group:</b> {{ strtoupper($task->task_source_label) ?? ($task->generate_task_via ?? '-') }} - <span class="text-info">{{ strtoupper($task->task_reference) ?? '-' }}</span></div>
+<table class="table table-sm mb-3">
+    <tbody>
 
-    <div><b>Hospital:</b> {{ $task->hospital->name ?? '-' }}</div>
-    <div><b>Department:</b> {{ $task->departmentRelation->name ?? '-' }}</div>
-    <div><b>PIC:</b> {{ $task->picUser->name ?? '-' }}</div>
-    <div><b>User to meet:</b> <span class="text-warning">{{ $task->user_to_meet ?? '-' }}</span></div>
-    <div><b>Purpose:</b> {{ $task->task_purpose ?? '-' }}</div>
-    <div><b>Expected Outcome:</b> {{ $task->expected_outcome ?? '-' }}</div>
-    <div><b>Deadline:</b> {{ $task->deadline ? \Carbon\Carbon::parse($task->deadline)->format('d-M-y') : '-' }}</div>
-</div>
+        <tr>
+            <td width="220"><b>Task Code</b></td>
+            <td>{{ $task->code ?? '-' }}</td>
+        </tr>
 
+        <tr>
+            <td><b>Source - Group</b></td>
+            <td>
+                {{ strtoupper($task->task_source_label ?? '-') }}
+                -
+                <span class="text-info">
+                    {{ strtoupper($task->task_reference ?? '-') }}
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td><b>Hospital</b></td>
+            <td>{{ $task->hospital->name ?? '-' }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Department</b></td>
+            <td>{{ $task->departmentRelation->name ?? '-' }}</td>
+        </tr>
+
+        <tr>
+            <td><b>PIC</b></td>
+            <td>{{ $task->picUser->name ?? '-' }}</td>
+        </tr>
+
+        <tr>
+            <td><b>User to Meet</b></td>
+            <td>
+                <span class="text-warning">
+                    {{ $task->user_to_meet ?? '-' }}
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <td><b>Purpose</b></td>
+            <td>{{ $task->task_purpose ?? '-' }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Expected Outcome</b></td>
+            <td>{{ $task->expected_outcome ?? '-' }}</td>
+        </tr>
+
+        <tr>
+            <td><b>Deadline</b></td>
+            <td>
+                {{ $task->deadline
+                    ? \Carbon\Carbon::parse($task->deadline)->format('d-M-y')
+                    : '-' }}
+            </td>
+        </tr>
+
+
+
+    </tbody>
+</table>
 <hr>

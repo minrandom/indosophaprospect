@@ -215,6 +215,16 @@
                                     Approve Visit
                                 </button>
                             </form>
+
+                        <button type="button"
+                                    class="btn btn-sm btn-warning js-run-reschedule"
+                                    data-run-id="{{ $run->id }}"
+                                    style="border-radius:5px;"
+                                    data-run-code="{{ $run->code ?? ('RUN-'.$run->id) }}">
+                            <i class="fa fa-edit" > reschedule</i>
+                         </button>
+
+
                         @elseif(!$isApproved && !$canApproveVisit)
                         <span class="badge badge-warning">Waiting Approval</span>
 
@@ -234,6 +244,14 @@
                     style="border-radius:5px;">
                     Go Visiting
                     </a>
+
+                    <button type="button"
+                                    class="btn btn-sm btn-warning js-run-reschedule"
+                                    data-run-id="{{ $run->id }}"
+                                    style="border-radius:5px;"
+                                    data-run-code="{{ $run->code ?? ('RUN-'.$run->id) }}">
+                            <i class="fa fa-edit" > reschedule</i>
+                    </button>
                     @elseif(in_array($role, ['admin','nsm','am']) && $run->status == 6)
                         <a href="{{ route('missions.runs.show', ['run' => $run->id, 'validation_mode' => 1]) }}"
                         class="btn btn-sm btn-success">
@@ -293,12 +311,12 @@
 
       <div class="d-flex align-items-center justify-content-between mb-3">
         <div class="h6 font-weight-bold text-uppercase mb-0">
-          Mission Tasks
+          Tasks
         </div>
 
         <div class="d-flex align-items-center" style="gap:10px;">
           <div class="small text-muted" id="runTasksTitle">
-            Click <b>Detail</b> from the mission to show data...
+            Click <b>Detail</b> from the visit to show data...
           </div>
 
 
@@ -310,7 +328,7 @@
 
       <div id="runTasksWrap" class="flex-fill overflow-auto text-center text-muted">
         <div class="py-5">
-          Click <b>Detail</b> on the Mission List to load tasks here.
+          Click <b>Detail</b> on the Visit List to load tasks here.
         </div>
       </div>
 
@@ -362,16 +380,37 @@
   </div>
 </div>
 
+{{-- //task detail modal --}}
+
+<div class="modal fade" id="taskDetailModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content" style="border-radius:1rem;">
+      <div class="modal-header">
+        <h5 class="modal-title">Task Detail</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" id="taskDetailModalBody">
+        <div class="text-center text-muted py-4">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 @include('modal._mission_detail')
 @include('modal._mission_schedul_modal')
+@include('modal.reuseable._reschedule_visit')
 @endsection
 
 @push('js')
 
 @include('modal.modalJS._mission_pool_js');
 @include('modal.modalJS._confirm_validation_js')
+@include('modal.reuseable.reuseJS._reschedule_visit_js')
 <script src="{{ asset('template/backend/sb-admin-2/vendor/sweetalert/sweetalert.all.js') }}"></script>
 <script>
   window.missionPoolScheduleUrl = @json(route('missions.pool.schedule'));
@@ -437,5 +476,30 @@
 
     });
     </script>
+
+
+<script>
+$(function () {
+    const taskDetailUrl = "{{ route('missions.task.detail', ['task' => '__TASK_ID__']) }}";
+
+    $(document).on('click', '.js-view-task-detail', function () {
+        const taskId = $(this).data('task-id');
+        const url = taskDetailUrl.replace('__TASK_ID__', taskId);
+
+        $('#taskDetailModalBody').html(
+            '<div class="text-center text-muted py-4">Loading...</div>'
+        );
+
+        $.get(url, function (html) {
+            $('#taskDetailModalBody').html(html);
+        }).fail(function (xhr) {
+            console.error(xhr.responseText);
+            $('#taskDetailModalBody').html(
+                '<div class="text-center text-danger py-4">Failed to load task detail.</div>'
+            );
+        });
+    });
+});
+</script>
 
 @endpush
