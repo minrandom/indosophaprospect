@@ -366,6 +366,7 @@ Route::group(['namespace' => 'Admin','middleware' => 'auth','prefix' => 'admin']
 	Route::get('/cpdetailtvalidation/{consumablesProspect}',[ConsumablesProspectController::class,'validationproddetail'])->name('admin.cpvalidationdetail')->middleware(['auth', 'role:admin,am,nsm']);
 
 	Route::get('/prospect',[ProspectController::class,'index'])->name('admin.prospect.index')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
+	Route::get('/lead',[ProspectController::class,'index2'])->name('admin.lead.index')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);
 
 	Route::POST('/consprospect',[ConsumablesProspectController::class,'store'])->name('admin.consprospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj,prj']);
 	Route::POST('/prospect',[ProspectController::class,'store'])->name('admin.prospect.store')->middleware(['auth', 'role:admin,fs,am,nsm,bu,prj']);

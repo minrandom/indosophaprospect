@@ -42,6 +42,11 @@ class ProspectController extends Controller
         return view('admin.prospect');
     }
 
+    public function index2()
+    {
+        return view('admin.lead');
+    }
+
     public function validationprospect()
     {
         return view('admin.prospectvalidation');

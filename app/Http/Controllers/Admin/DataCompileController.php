@@ -1427,19 +1427,7 @@ class DataCompileController extends Controller
                     break;
             }
         }
-        //->whereHas('config', function ($query) {
-        //  $query->wherePivot('main', 1);
-        // })
 
-
-       /* $test = Prospect::with("creator", "hospital", "review", "province", "department", "unit", "config", "rejection", "remarks", "temperature")
-        ->join('prospect_temperatures', 'prospect_temperatures.prospect_id', '=', 'prospects.id')
-        ->where("status", $status)->whereIn('tempCodeName',[1,2,3,4,5])
-        ->orderByRaw("FIELD(prospect_temperatures.tempCodeName, 4, 1,-1, 2, 3, 5,0)")
-        ->orderBy('status', 'ASC')
-        ->orderBy("prospects.id", 'DESC');
-        */
-        //dd($test->toSql());
 
 
 
@@ -1552,38 +1540,6 @@ class DataCompileController extends Controller
                 return $colUpdate;
             })
 
-            /*
-
-
-            ->addColumn('temperaturedata', function ($prp) {
-                $ch = $prp->review->chance;
-                $chs = number_format($ch * 100, 0);
-                $anggaran = $prp->anggaran_status;
-                $podate = $prp->eta_po_date;
-                $qty = strtotime($podate);
-                $now = strtotime(now());
-
-                $diffsec = $qty - $now;
-                $diff = floor($diffsec / 86400);
-                if ($ch == 0) {
-                    return "DROP";
-                } else {
-                    if ($anggaran == "BELUM ADA" || $anggaran == "USULAN" || $ch==0.2) {
-                        return "EARLY STAGE";
-                    } else {
-                        if ($ch < 0.5 && $ch > 0.2) {
-                            return "FUNNEL";
-                        } else {
-                            if ($diff < 150 && $ch > 0.6) {
-                                return "HOT PROSPECT";
-                            } else {
-                                return "PROSPECT";
-                            }
-                        }
-                    }
-                };
-            })
-            */
             ->addColumn('temperid',function($prp){
                 return $prp->temperature->tempCodeName;
             })
