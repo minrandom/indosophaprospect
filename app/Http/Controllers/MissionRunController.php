@@ -710,67 +710,6 @@ $taskPool = $taskPoolRaw
 
 
 
-    // public function approve(MissionValidationList $validation)
-    // {
-    //     if ((int)$validation->status === 1) {
-    //         return redirect()->back()->with('error', 'This validation item is already processed.');
-    //     }
-
-    //     DB::beginTransaction();
-
-    //     try {
-    //         $task = mission::findOrFail($validation->mission_id);
-    //         $payload = json_decode($validation->payload_form, true) ?? [];
-
-    //         switch (strtolower($validation->task_ref)) {
-    //             case 'installbase':
-    //                 $this->installbaseDataUpdate($validation, $task, $payload);
-    //                 break;
-
-    //             case 'prospect':
-    //                 $this->prospectDataUpdate($validation, $task, $payload);
-    //                 break;
-
-    //             case 'mapping':
-    //                 $this->mappingDataUpdate($validation, $task, $payload);
-    //                 break;
-
-    //             case 'finance':
-    //             case 'salesadmin':
-    //                 $this->financeDataUpdate($validation, $task, $payload);
-    //                 break;
-    //         }
-
-
-
-    //         // mark validation done
-    //         $validation->validate_by = auth()->id();
-    //         $validation->validate_at = now();
-    //         $validation->status = 1;
-    //         $validation->save();
-
-    //         // mark mission/task done
-    //         $task->status_mission = 7;
-    //         $task->updated_by = auth()->id();
-    //         if (!empty($payload['report_result'])) {
-    //             $task->report_result = $payload['report_result'];
-    //         }
-    //         $task->save();
-
-    //         // optional: mission history
-    //         // MissionHistory::create([...])
-
-    //         DB::commit();
-
-    //         return redirect()->back()->with('success', 'Validation approved and data updated successfully.');
-    //     } catch (\Throwable $e) {
-    //         DB::rollBack();
-
-    //         return redirect()->back()->with('error', 'Failed to approve validation: ' . $e->getMessage());
-    //     }
-    // }
-
-
     public function showProspectTask(mission $task)
     {
         $prospect = \App\Models\Prospect::with([
@@ -2215,12 +2154,12 @@ $taskPool = $taskPoolRaw
         $prospect->unit_id = $payload['unit_id'] ?? $prospect->unit_id;
         $prospect->config_id = $payload['config_id'] ?? $prospect->config_id;
         $prospect->eta_po_date = $payload['eta_po_date'] ?? $prospect->eta_po_date;
-        $prospect->user_status = $payload['user_status'] ?? $prospect->user_status;
-        $prospect->direksi_status = $payload['direksi_status'] ?? $prospect->direksi_status;
-        $prospect->purchasing_status = $payload['purchasing_status'] ?? $prospect->purchasing_status;
-        $prospect->anggaran_status = $payload['anggaran_status'] ?? $prospect->anggaran_status;
-        $prospect->jenis_anggaran = $payload['jenis_anggaran'] ?? $prospect->jenis_anggaran;
-        $prospect->chance = $payload['chance'] ?? $prospect->chance;
+        $prospect->review->user_status = $payload['user_status'] ?? $prospect->user_status;
+        $prospect->review->direksi_status = $payload['direksi_status'] ?? $prospect->direksi_status;
+        $prospect->review->purchasing_status = $payload['purchasing_status'] ?? $prospect->purchasing_status;
+        $prospect->review->anggaran_status = $payload['anggaran_status'] ?? $prospect->anggaran_status;
+        $prospect->review->jenis_anggaran = $payload['jenis_anggaran'] ?? $prospect->jenis_anggaran;
+        $prospect->review->chance = $payload['chance'] ?? $prospect->chance;
         $prospect->save();
 
         // update stage → Prospect

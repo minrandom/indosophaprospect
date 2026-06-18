@@ -174,7 +174,7 @@
   <div class="notify" id="thealert"></div>
   <div class="row">
 
-    <!-- 
+    <!--
     <div class="col-xl-10 col-md-6 mb-4">
         <div class="alert alert-light">
     <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn-updatereview">
@@ -366,15 +366,7 @@
 
           </div>
           @endcan
-          @can('am')
-          <div class="col-sm-12">
-
-            <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tanggal</a>
-
-
-          </div>
-          @endcan
-          @can('nsm')
+          @can('bu')
           <div class="col-sm-12">
 
             <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatepromosi">Update Tanggal</a>
@@ -399,7 +391,7 @@
       <div class="card shadow mb-4">
         <div class="card-header py-3">
           <h6 class="m-0 font-weight-bold text-primary">Review</h6>
-        </div>
+        </div>p
         <div class="card-body">
           <div class="col-sm-12">
             <label for="userstatus" class="col-sm-3 col-form-label font-weight-bold">User Status :</label>
@@ -429,7 +421,7 @@
           <div class="col-sm-12">
             <label for="Chance" class="col-sm-3 col-form-label font-weight-bold">Chance :</label>
             <label for="Chance" style="color:black" class="col-sm-6 col-form-label font-weight-bold"> {{ number_format($prospect->review->chance * 100, 0)}}%</label>
-            
+
           <div class="success-button">
           <h5><a href='javascript:void(0)' id='{{$prospect->id}}' datacode='{{$prospect->prospect_no}}' class='badge tmpe bg-success text-light  btn-finish'>Set Success</a></h5>
           </div>
@@ -442,7 +434,7 @@
 
           </div>
 
-          
+
 
 
           <div class="col-sm-12">
@@ -451,15 +443,15 @@
           </div>
 
 
-      
 
-          
+
+
 
 
           @can('admin')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
-          
+
           @endcan
           @can('am')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
@@ -468,7 +460,7 @@
           @can('nsm')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatechance">Update Chance</a>
-          
+
           @endcan
           @can('prj')
           <a href="javascript:void(0)" id="{{$prospect->id}}" class="btn btn-primary btn-sm ml-2 btn-updatereview">Update Review</a>
@@ -776,15 +768,15 @@
     $(".success-button").hide();
 
     var chanceValue = {{ $prospect->review->chance }};
-    
+
     if(chanceValue<0.3){
       $(".drop-button").show();
-    }else 
+    }else
     if(chanceValue>0.7){
       $(".success-button").show();
     }
 
-    
+
     console.log(chanceValue);
     // Retrieve the alert message from local storage
     var alertMessage = localStorage.getItem("alertMessage");
@@ -884,7 +876,7 @@
         success: function(response) {
           $("#edit-modal").modal("hide");
           localStorage.setItem("alertMessage", response.message);
-          
+
           $('html, body').animate({
             scrollTop: 0
           }, 'slow');
@@ -923,7 +915,7 @@
               success: function(data) {
                 //catSelect.empty();
                 populateSelectFromDatalist('editcategory', data.catopt, "Pilih Kategori Produk");
-                
+
               }
             });
           }
@@ -978,7 +970,7 @@
         method: "PATCH",
         data: $(this).serialize(),
         success: function(response) {
-     
+
           $("#produk-modal").modal("hide");
           localStorage.setItem("alertMessage", response.message);
           $('html, body').animate({
@@ -1274,7 +1266,7 @@
 
             }
           } else {
-              
+
             if (((['Ada Neutral', 'Ada Saingan'].includes(anggarancek) || etapodatecek > oneightyDaysFromTodayFormatted) )&&(['Belum Tahu','Menolak'].includes(userstats)) && (['Belum Tahu','Menolak'].includes(direksistats)) && (['Belum Tahu','Menolak'].includes(purchasingstats))) {
               if (selectedChance > 0.6) {
                 alert("Warning: Chance Tidak Bisa Lebih dari 60% Saat Estimasi Po Date Lebih Dari 6 Bulan atau anggaran bukan 'Ada Sesuai'");
@@ -1322,7 +1314,7 @@
 
 
 
-          
+
         }
       });
     });
@@ -1370,7 +1362,7 @@
     });
 
 
-    
+
 
 
 
@@ -1419,22 +1411,22 @@
   })
 
   function submitRequest(successMessage) {
-    
+
     var form = $('#requestDropSuccessForm');
-    
+
     // Serialize the form data
     var formData = form.serialize();
-    
+
     // Get the updateTo value from the form
     var updateTo = form.find('#updateTo').val();
 
 
     if(updateTo== "DROP"){
       var url = "{{ route('admin.prospect.dropreq') }}";
-  
+
     }else {
       var url ="{{ route('admin.prospect.successreq') }}";
-     
+
     }
         $.ajax({
             url: url,
@@ -1449,18 +1441,18 @@
                 behavior: "smooth",
                 block: "start"
                 });
-                
+
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log('AJAX Error:', textStatus, errorThrown);
-                
+
                 flash("Danger", "Tolong diisi bagian yang masih kosong!!");
                 document.querySelector(".notify").scrollIntoView({
                 behavior: "smooth",
                 block: "start"
                 });
             }
-            
+
         });
     };
 
@@ -1478,6 +1470,6 @@
 
 
 
-  
+
 </script>
 @endpush

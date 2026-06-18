@@ -321,8 +321,8 @@ $(function () {
     const runCode = $(this).data('run-code') || ('RUN-' + runId);
 
     Swal.fire({
-      title: 'Start Mission?',
-      html: `Mission: <b>${runCode}</b><br>This will set status to <b>On Going</b>.`,
+      title: 'Start Visit?',
+      html: `Visit: <b>${runCode}</b><br>This will set status to <b>On Going</b>.`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, Start',
