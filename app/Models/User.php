@@ -53,7 +53,7 @@ class User extends Authenticatable
     public function updateapprove(){
         return $this->hasMany(updatelog::class,"approved_by");
     }
-    public function attendance(){
+    public function attendances(){
         return $this->hasMany(Attendance::class,"user_id");
     }
 

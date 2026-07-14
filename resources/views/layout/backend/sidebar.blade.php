@@ -22,13 +22,13 @@
     </li>
     @endcan
     -->
-   
+
     <li class="nav-item">
         <a class="nav-link" href="{{ route('user') }}">
             <i class="fas fa-fw fa-user"></i>
             <span>Welcome Dashboard</span></a>
     </li>
-   
+
 
     <!-- Divider -->
     <hr class="sidebar-divider">
@@ -46,8 +46,8 @@
                 <a class="collapse-item" href="{{ route('admin.user.index') }}">
             <i class="fas fa-fw fa-user"></i>
             <span>User List</span></a>
-             
-     
+
+
             </div>
         </div>
 
@@ -57,18 +57,18 @@
                 <a class="collapse-item" href="{{ route('admin.hospital') }}">
             <i class="fas fa-fw fa-hospital"></i>
             <span>Hospital List</span></a>
-             
+
         <a class="collapse-item" href="{{ route('admin.hospitalcreate') }}">
             <i class="fas fa fa-plus-square"></i>
             <span>Create Hospital</span></a>
             </div>
-        
+
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Setup Config Menu</h6>
                 <a class="collapse-item" href="{{ route('admin.config') }}">
             <i class="fas fa-fw fa-cogs"></i>
             <span>Config List</span></a>
-             
+
         <a class="collapse-item" href="{{ route('admin.configcreate') }}">
             <i class="fas fa fa-plus-square"></i>
             <span>Create Config</span></a>
@@ -78,7 +78,7 @@
                 <a class="collapse-item" href="{{ route('admin.config') }}">
             <i class="fas fa-fw fa-cogs"></i>
             <span>Event List</span></a>
-             
+
         <a class="collapse-item" href="{{ route('admin.configcreate') }}">
             <i class="fas fa fa-plus-square"></i>
             <span>Create Event</span></a>
@@ -98,13 +98,30 @@
                 <a class="collapse-item" href="{{ route('schedule') }}">
             <i class="fas fa-fw fa-calendar"></i>
             <span>Jadwal Kegiatan</span></a>
-          
-       
-          
-                
+
         <a class="collapse-item" href="{{ route('kehadiran') }}">
             <i class="fas fa fa-address-card"></i>
             <span>Kehadiran</span></a>
+
+            @can('admin')
+            <a class="collapse-item" href="{{ route('attendance.control') }}">
+            <i class="fas fa fa-calendar-check"></i>
+            <span>List Kehadiran</span></a>
+            @elsecan('prj')
+            <a class="collapse-item" href="{{ route('attendance.control') }}">
+            <i class="fas fa fa-calendar-check"></i>
+            <span>List Kehadiran</span></a>
+            @elsecan('am')
+            <a class="collapse-item" href="{{ route('attendance.control') }}">
+            <i class="fas fa fa-calendar-check"></i>
+            <span>List Kehadiran</span></a>
+            @elsecan('nsm')
+            <a class="collapse-item" href="{{ route('attendance.control') }}">
+            <i class="fas fa fa-calendar-check"></i>
+            <span>List Kehadiran</span></a>
+            @endcan
+
+
             </div>
         </div>
     </li>
@@ -124,8 +141,8 @@
             <a class="collapse-item" href="#">
             <i class="fas fa fa-calendar-plus"></i>
             <span style="color:orange">Event Report(UnderDev)</span></a>
-             
-            @can('admin')    
+
+            @can('admin')
             <a class="collapse-item" href="{{ route('AttList') }}">
             <i class="fas fa fa-address-card"></i>
             <span>List Kehadiran Event </span></a>
@@ -146,11 +163,11 @@
         </a>
         <div id="collapsenewentry" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-              
+
                 <a class="collapse-item" href="{{ route('admin.prospectcreation') }}">
             <i class="fas fa-fw fa-file"></i>
-            <span>New Prospect</span></a>  
-                          
+            <span>New Prospect</span></a>
+
         <a class="collapse-item" href="#">
             <i class="fas fa fa-calendar-plus"></i>
             <span style="color:orange">Event Report(UnderDev)</span></a>
@@ -170,7 +187,7 @@
             </div>
         </div>
     </li>
-    
+
     <!-- Divider -->
     <hr class="sidebar-divider">
 
@@ -187,7 +204,7 @@
                 <a class="collapse-item" href="{{ route('admin.prospecteventcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create Event Prospect</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospectcheckview') }}"><i class="fas fa-fw fa-tasks"></i><span> Prospect Check</span></a>
                 <hr></hr>
-               @can('admin') 
+               @can('admin')
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
                @elsecan('am')
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
@@ -195,17 +212,17 @@
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
                 @elsecan('prj')
                 <a class="collapse-item" href="{{ route('admin.prospectvalidationview') }}"><i class="fas fa-fw fa-tasks"></i><span>Approval Prospect</span></a>
-       
+
                 @endcan
                 <hr></hr>
-                @can('admin') 
+                @can('admin')
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-briefcase"></i><span> Prospect Review</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospect.droplist') }}"><i class="fas fa-fw fa-handshake-slash"></i><span> Prospect Drop Data</span></a>
                 <a class="collapse-item" href="{{ route('admin.prospect.successlist') }}"><i class="fas fa-fw fa-thumbs-up"></i><span>Prospect Success Data</span></a>
                 <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a>
                 @elsecan('fs')
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>My Prospect</span></a>
-            
+
                 @elsecan('am')
                  <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Area Prospect Review</span></a>
                  <a class="collapse-item" href="{{ route('admin.prospect.droplist') }}"><i class="fas fa-fw fa-handshake-slash"></i><span> Prospect Drop Data</span></a>
@@ -220,35 +237,35 @@
                 <a class="collapse-item" href="{{ route('admin.prospect.successlist') }}"><i class="fas fa-fw fa-thumbs-up"></i><span>Prospect Success Data</span></a>
                 @elsecan('prj')
                 <a class="collapse-item" href="{{ route('admin.prospect.index') }}"><i class="fas fa-fw fa-tasks"></i><span>Project Prospect Review</span></a>
-                
+
                 <!-- <a class="collapse-item" href="{{ route('pchart') }}"><i class="fas fa-fw fa-tasks"></i><span>Prospect Chart</span></a> -->
                 @endcan
             </div>
-            
-            <!--Validation Submenu-->
-          
 
-                
-           
-                
+            <!--Validation Submenu-->
+
+
+
+
+
             <!-- review submenu-->
-   
-           
+
+
                 @can('admin')
                 <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Consumables Prospect :</h6>
                 <a class="collapse-item" href="{{ route('admin.consprospectcreation') }}"><i class="fas fa-fw fa-file-alt"></i><span> Create Consumables</span></a>
-               
 
-                
+
+
             </div>
                 @endcan
 
-            
+
         </div>
 
 
-        
+
     </li>
 
 
@@ -263,7 +280,7 @@
                 <a class="nav-link" href="">
                     <i class="fas fa-fw fa-archive"></i>
                     <span>Market Data and Query (Under Development)</span></a>
-                
+
         </li>
         <li class="nav-item">
                 <a class="nav-link" href="">
@@ -272,7 +289,7 @@
         </li>
 
     </li>
-    
+
     <hr class="sidebar-divider">
 
     <li class="nav-item">
@@ -288,15 +305,15 @@
                 </div>
         </div>
 
-        
 
 
-        
+
+
     </li>
 
     <!--
     @can('admin')
-   
+
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
             aria-expanded="true" aria-controls="collapseTwo">
@@ -312,7 +329,7 @@
         </div>
     </li>
     @endcan
-    
+
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
             aria-expanded="true" aria-controls="collapseUtilities">
@@ -350,7 +367,7 @@
         Installbase Management
     </div>
 
-    <!-- 
+    <!--
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
             aria-expanded="true" aria-controls="collapsePages">
