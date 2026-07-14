@@ -679,7 +679,7 @@ $update = $request->update;
                 'check_in_time' => $att->created_at
                     ? $att->created_at
                         ->copy()
-
+                        ->timezone('Asia/Jakarta')
                         ->format('d-M-Y H:i')
                     : '-',
 
@@ -691,7 +691,7 @@ $update = $request->update;
                 'check_out_time' => $checkout && $checkout->created_at
                     ? $checkout->created_at
                         ->copy()
-
+                        ->timezone('Asia/Jakarta')
                         ->format('d-M-Y H:i')
                     : '-',
 
