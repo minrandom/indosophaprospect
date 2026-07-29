@@ -356,3 +356,9 @@ Route::get('/home', function () {
 
 //Route::get('/geoloc', 'GeolocationController@index');
 //Route::post('/location', 'GeolocationController@getLocation')->name('location');
+
+
+//hospital dashboard new
+Route::get('/hospital-dashboard-preview', function () {
+    return view('hospital-dashboard.show');
+})->name('hospital-dashboard.preview');

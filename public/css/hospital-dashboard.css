@@ -1,0 +1,225 @@
+.hospital-dashboard {
+    --dashboard-radius: 0.75rem;
+}
+
+.hospital-header,
+.dashboard-filter-card,
+.dashboard-section-card,
+.dashboard-kpi-card {
+    border-radius: var(--dashboard-radius);
+}
+
+.dashboard-kpi-card {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.dashboard-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 5px;
+    background: var(--kpi-color);
+}
+
+.dashboard-kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1.25rem rgba(58, 59, 69, 0.15) !important;
+}
+
+.dashboard-kpi-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+
+    width: 46px;
+    height: 46px;
+
+    border-radius: 0.75rem;
+
+    color: var(--kpi-color);
+    background: var(--kpi-bg);
+
+    font-size: 1.2rem;
+}
+
+.dashboard-kpi-link {
+    color: var(--kpi-color);
+}
+
+.kpi-prospect {
+    --kpi-color: #4e73df;
+    --kpi-bg: rgba(78, 115, 223, 0.1);
+}
+
+.kpi-installbase {
+    --kpi-color: #1cc88a;
+    --kpi-bg: rgba(28, 200, 138, 0.1);
+}
+
+.kpi-sdm {
+    --kpi-color: #36b9cc;
+    --kpi-bg: rgba(54, 185, 204, 0.1);
+}
+
+.kpi-validation {
+    --kpi-color: #f6c23e;
+    --kpi-bg: rgba(246, 194, 62, 0.15);
+}
+
+.dashboard-section-card .card-header {
+    border-bottom: 1px solid #eaecf4;
+}
+
+.summary-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    padding: 0.75rem 0;
+
+    border-bottom: 1px solid #f0f1f5;
+}
+
+.summary-list-item:last-child {
+    border-bottom: 0;
+}
+
+.summary-name {
+    color: #5a5c69;
+    font-size: 0.88rem;
+}
+
+.summary-value {
+    color: #2e3a59;
+    font-weight: 700;
+}
+
+.summary-progress {
+    flex: 1;
+    min-width: 80px;
+    margin: 0 0.75rem;
+}
+
+.summary-progress .progress {
+    height: 7px;
+    border-radius: 10px;
+}
+
+.mapping-item {
+    padding: 0.875rem;
+    margin-bottom: 0.75rem;
+
+    border: 1px solid #eaecf4;
+    border-radius: 0.625rem;
+}
+
+.mapping-item:last-child {
+    margin-bottom: 0;
+}
+
+.mapping-title {
+    color: #2e3a59;
+    font-weight: 700;
+}
+
+.mapping-meta {
+    color: #858796;
+    font-size: 0.78rem;
+}
+
+.mapping-status {
+    display: inline-block;
+    padding: 0.3rem 0.55rem;
+
+    border-radius: 20px;
+
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.mapping-status-current {
+    color: #1cc88a;
+    background: rgba(28, 200, 138, 0.1);
+}
+
+.mapping-status-outdated {
+    color: #e74a3b;
+    background: rgba(231, 74, 59, 0.1);
+}
+
+.survey-status-box {
+    padding: 1rem;
+
+    border-radius: 0.625rem;
+    background: #f8f9fc;
+}
+
+.dashboard-empty-state {
+    padding: 1.5rem 0.75rem;
+
+    color: #858796;
+    text-align: center;
+}
+
+.dashboard-empty-state i {
+    display: block;
+    margin-bottom: 0.625rem;
+
+    font-size: 2rem;
+    opacity: 0.5;
+}
+
+.dashboard-loading {
+    pointer-events: none;
+    opacity: 0.55;
+}
+
+@media (max-width: 767.98px) {
+    .dashboard-kpi-icon {
+        width: 40px;
+        height: 40px;
+
+        font-size: 1rem;
+    }
+
+    .summary-progress {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .dashboard-kpi-icon {
+        display: none;
+    }
+
+    .dashboard-kpi-card .card-body {
+        padding: 0.9rem;
+    }
+
+    .dashboard-kpi-card .h3 {
+        font-size: 1.25rem;
+    }
+
+    .dashboard-kpi-link {
+        display: none;
+    }
+}
+
+.hospital-search-button {
+    margin-top: 32px;
+}
+
+@media (max-width: 767.98px) {
+    .hospital-search-button {
+        margin-top: 0;
+    }
+}
