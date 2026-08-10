@@ -320,11 +320,11 @@ Route::get('/scheduledata','ScheduleController@index')->name('schedule.index');
 Route::PATCH('/scheduleupdate/{schedule}','ScheduleController@update')->name('events.update');
 Route::POST('/schedulestore','ScheduleController@store')->name('events.store');
 
-Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'fs'],function(){
-	Route::get('/',[UserController::class,'index'])->name('userr');
-	//Route::get('/profile',[ProfileController::class,'index'])->name('profile');
-	//Route::patch('/profile/update/{user}',[ProfileController::class,'update'])->name('profile.update');
-});
+// Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'fs'],function(){
+// 	Route::get('/',[UserController::class,'index'])->name('userr');
+// 	//Route::get('/profile',[ProfileController::class,'index'])->name('profile');
+// 	//Route::patch('/profile/update/{user}',[ProfileController::class,'update'])->name('profile.update');
+// });
 
 Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'user'],function(){
 	Route::get('/',[UserController::class,'index2'])->name('user');
