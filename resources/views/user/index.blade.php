@@ -7,6 +7,6 @@
   <h1 class="display-4">Hello, {{ Auth::user()->name }}</h1>
   <p class="lead">Selamat Datang di ISBIS APPS</p>
   <hr class="my-4">
-  <p>Anda login sebagai {{ uppercase(Auth::user()->role) }}.</p>
+  <p>Anda login sebagai {{ Auth::user()->role }}.</p>
 </div>
 @endsection
