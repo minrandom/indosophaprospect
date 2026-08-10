@@ -321,13 +321,13 @@ Route::PATCH('/scheduleupdate/{schedule}','ScheduleController@update')->name('ev
 Route::POST('/schedulestore','ScheduleController@store')->name('events.store');
 
 Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'fs'],function(){
-	Route::get('/',[UserController::class,'index'])->name('user');
+	Route::get('/',[UserController::class,'index'])->name('userr');
 	//Route::get('/profile',[ProfileController::class,'index'])->name('profile');
 	//Route::patch('/profile/update/{user}',[ProfileController::class,'update'])->name('profile.update');
 });
 
 Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'user'],function(){
-	Route::get('/',[UserController::class,'index2'])->name('user.index');
+	Route::get('/',[UserController::class,'index2'])->name('user');
 	Route::get('/profile',[ProfileController::class,'index'])->name('profile');
 	Route::patch('/profile/update/{user}',[ProfileController::class,'update'])->name('profile.update');
 });
