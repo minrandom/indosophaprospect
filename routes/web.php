@@ -327,7 +327,7 @@ Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'fs'],fu
 });
 
 Route::group(['namespace' => 'User','middleware' => 'auth' ,'prefix' => 'user'],function(){
-	Route::get('/',[UserController::class,'index2'])->name('user2');
+	Route::get('/',[UserController::class,'index2'])->name('user.index');
 	Route::get('/profile',[ProfileController::class,'index'])->name('profile');
 	Route::patch('/profile/update/{user}',[ProfileController::class,'update'])->name('profile.update');
 });
